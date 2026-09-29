@@ -11,13 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:translation_poc_app/app/router.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
 import 'package:translation_poc_app/features/about/presentation/about_screen.dart';
-import 'package:translation_poc_app/features/home/presentation/home_screen.dart';
-import 'package:translation_poc_app/features/models/presentation/language_models_screen.dart';
 import 'package:translation_poc_app/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:translation_poc_app/features/permission/presentation/permission_screen.dart';
-import 'package:translation_poc_app/features/settings/presentation/settings_screen.dart';
 import 'package:translation_poc_app/l10n/app_localizations.dart';
 
 const _outDir = 'build/screenshots';
@@ -58,6 +56,19 @@ Widget _wrap(Widget child, {ThemeMode mode = ThemeMode.light}) => MaterialApp(
   supportedLocales: AppLocalizations.supportedLocales,
   home: child,
 );
+
+/// 실제 라우터(하단 탭 포함)로 [location] 화면을 연다.
+Widget _route(String location, {ThemeMode mode = ThemeMode.light}) =>
+    MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: mode,
+      locale: const Locale('ko'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: createRouter(initialLocation: location),
+    );
 
 Future<void> _shoot(WidgetTester tester, String name) async {
   await tester.pumpAndSettle(const Duration(milliseconds: 100));
@@ -107,30 +118,37 @@ void main() {
     await tester.tap(find.text('설정 열기').first);
     await _shoot(tester, '03_permission');
 
-    await _setSize(tester, const Size(412, 1180));
-    await tester.pumpWidget(_wrap(const HomeScreen()));
+    await _setSize(tester, const Size(412, 1100));
+    await tester.pumpWidget(_route(AppRoutes.home));
     await _shoot(tester, '04_home');
 
     await tester.tap(find.text('번역 시작'));
     await _shoot(tester, '05_home_running');
 
-    await tester.pumpWidget(_wrap(const HomeScreen(), mode: ThemeMode.dark));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(_route(AppRoutes.home, mode: ThemeMode.dark));
     await _shoot(tester, '06_home_dark');
 
-    await _setSize(tester, const Size(412, 1900));
-    await tester.pumpWidget(_wrap(const SettingsScreen()));
+    await _setSize(tester, const Size(412, 1500));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(_route(AppRoutes.settings));
     await _shoot(tester, '07_settings');
 
-    await _setSize(tester, const Size(412, 1400));
-    await tester.pumpWidget(_wrap(const LanguageModelsScreen()));
-    await _shoot(tester, '08_language_models');
+    await _setSize(tester, const Size(412, 1300));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(_route(AppRoutes.languages));
+    await _shoot(tester, '08_languages');
     // 가짜 다운로드 타이머 정리
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 10));
 
     await _setSize(tester, _phone);
+    await tester.pumpWidget(_route(AppRoutes.targetLanguage));
+    await _shoot(tester, '09_target_language');
+
+    await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(_wrap(const AboutScreen()));
-    await _shoot(tester, '09_about');
+    await _shoot(tester, '10_about');
 
     debugDisableShadows = true;
   });
