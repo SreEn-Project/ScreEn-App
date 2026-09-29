@@ -5,13 +5,17 @@ import 'package:translation_poc_app/app/app.dart';
 import 'package:translation_poc_app/features/home/presentation/home_screen.dart';
 import 'package:translation_poc_app/features/permission/presentation/permission_screen.dart';
 
+import 'fakes.dart';
+
 void main() {
   testWidgets('첫 실행: 온보딩 → 권한 안내 → 홈', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.75;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pumpWidget(
+      ProviderScope(overrides: fakeNativeOverrides(), child: const App()),
+    );
     await tester.pumpAndSettle();
 
     // 온보딩: 건너뛰기 → 언어 선택 페이지 → 시작하기

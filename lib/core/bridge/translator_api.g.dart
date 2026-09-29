@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show immutable, protected, visibleForTesting;
 
 Object? _extractReplyValueOrThrow(
-  List<Object?>? replyList,
-  String channelName, {
-  required bool isNullValid,
+    List<Object?>? replyList,
+    String channelName, {
+    required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -46,9 +46,8 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed.every(
-          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
-        );
+        a.indexed
+            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -97,17 +96,35 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
+
 /// 번역 엔진 (NA-11). AI 엔진은 3단계.
-enum EngineType { mlKit, gemini, firebaseAi }
+enum EngineType {
+  mlKit,
+  gemini,
+  firebaseAi;
+}
 
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
-enum CaptureMode { fullScreen, dragRegion, fixedRegion }
+enum CaptureMode {
+  fullScreen,
+  dragRegion,
+  fixedRegion;
+}
 
 /// 결과 표시 방식 (FL-07). 1단계는 list만 동작.
-enum DisplayMode { list, overlay }
+enum DisplayMode {
+  list,
+  overlay;
+}
 
-/// 포그라운드 서비스 상태 (NA-02).
-enum ServiceState { stopped, starting, running }
+/// 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
+/// error = 시작 실패 (동의 후 서비스 시작 실패 등). 다시 시작하면 벗어난다.
+enum ServiceState {
+  stopped,
+  starting,
+  running,
+  error;
+}
 
 /// DataStore에 저장되는 설정 (NA-16).
 class AppSettings {
@@ -141,8 +158,7 @@ class AppSettings {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static AppSettings decode(Object result) {
     result as List<Object?>;
@@ -164,11 +180,7 @@ class AppSettings {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(targetLanguage, other.targetLanguage) &&
-        _deepEquals(engine, other.engine) &&
-        _deepEquals(captureMode, other.captureMode) &&
-        _deepEquals(displayMode, other.displayMode) &&
-        _deepEquals(onboardingCompleted, other.onboardingCompleted);
+    return _deepEquals(targetLanguage, other.targetLanguage) && _deepEquals(engine, other.engine) && _deepEquals(captureMode, other.captureMode) && _deepEquals(displayMode, other.displayMode) && _deepEquals(onboardingCompleted, other.onboardingCompleted);
   }
 
   @override
@@ -182,24 +194,30 @@ class AppSettings {
 }
 
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
-sealed class TranslatorEvent {}
+sealed class TranslatorEvent {
+}
 
 class ServiceStateChanged extends TranslatorEvent {
-  ServiceStateChanged({required this.state});
+  ServiceStateChanged({
+    required this.state,
+  });
 
   ServiceState state;
 
   List<Object?> _toList() {
-    return <Object?>[state];
+    return <Object?>[
+      state,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static ServiceStateChanged decode(Object result) {
     result as List<Object?>;
-    return ServiceStateChanged(state: result[0]! as ServiceState);
+    return ServiceStateChanged(
+      state: result[0]! as ServiceState,
+    );
   }
 
   @override
@@ -225,21 +243,26 @@ class ServiceStateChanged extends TranslatorEvent {
 }
 
 class SettingsChanged extends TranslatorEvent {
-  SettingsChanged({required this.settings});
+  SettingsChanged({
+    required this.settings,
+  });
 
   AppSettings settings;
 
   List<Object?> _toList() {
-    return <Object?>[settings];
+    return <Object?>[
+      settings,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static SettingsChanged decode(Object result) {
     result as List<Object?>;
-    return SettingsChanged(settings: result[0]! as AppSettings);
+    return SettingsChanged(
+      settings: result[0]! as AppSettings,
+    );
   }
 
   @override
@@ -264,6 +287,7 @@ class SettingsChanged extends TranslatorEvent {
   }
 }
 
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -271,25 +295,25 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is EngineType) {
+    }    else if (value is EngineType) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    } else if (value is CaptureMode) {
+    }    else if (value is CaptureMode) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    } else if (value is DisplayMode) {
+    }    else if (value is DisplayMode) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    } else if (value is ServiceState) {
+    }    else if (value is ServiceState) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
-    } else if (value is AppSettings) {
+    }    else if (value is AppSettings) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is ServiceStateChanged) {
+    }    else if (value is ServiceStateChanged) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is SettingsChanged) {
+    }    else if (value is SettingsChanged) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
     } else {
@@ -324,30 +348,27 @@ class _PigeonCodec extends StandardMessageCodec {
   }
 }
 
-const StandardMethodCodec pigeonMethodCodec = StandardMethodCodec(
-  _PigeonCodec(),
-);
+const StandardMethodCodec pigeonMethodCodec = StandardMethodCodec(_PigeonCodec());
 
 class SettingsHostApi {
   /// Constructor for [SettingsHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   SettingsHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
+
   Future<AppSettings> getSettings() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.getSettings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.getSettings$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -357,111 +378,102 @@ class SettingsHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as AppSettings;
   }
 
   Future<void> setTargetLanguage(String languageCode) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setTargetLanguage$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setTargetLanguage$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[languageCode],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[languageCode]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<void> setEngine(EngineType engine) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setEngine$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setEngine$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[engine],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[engine]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<void> setCaptureMode(CaptureMode mode) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setCaptureMode$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setCaptureMode$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[mode],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[mode]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<void> setDisplayMode(DisplayMode mode) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setDisplayMode$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setDisplayMode$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[mode],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[mode]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   Future<void> setOnboardingCompleted(bool completed) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setOnboardingCompleted$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setOnboardingCompleted$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[completed],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[completed]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -470,21 +482,20 @@ class ServiceHostApi {
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   ServiceHostApi({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
+
   Future<ServiceState> getServiceState() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.ServiceHostApi.getServiceState$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.ServiceHostApi.getServiceState$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -494,11 +505,51 @@ class ServiceHostApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as ServiceState;
+  }
+
+  /// 화면 캡처 동의를 받고 번역 서비스를 시작한다 (NA-02, NA-04).
+  /// 결과는 이벤트(ServiceStateChanged)로 온다: starting → running, 거부하면 stopped.
+  Future<void> startService() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.ServiceHostApi.startService$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// 번역 서비스를 멈춘다. 알림의 "중지"와 같다.
+  Future<void> stopService() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.translation_poc_app.ServiceHostApi.stopService$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }
 
@@ -508,15 +559,14 @@ class ServiceHostApi {
 /// not be called multiple times for the same `instanceName`. To deliver
 /// events to multiple listeners, call this method once and listen to the
 /// returned broadcast stream multiple times instead.
-Stream<TranslatorEvent> events({String instanceName = ''}) {
+Stream<TranslatorEvent> events( {String instanceName = ''}) {
   if (instanceName.isNotEmpty) {
     instanceName = '.$instanceName';
   }
-  final EventChannel eventsChannel = EventChannel(
-    'dev.flutter.pigeon.translation_poc_app.TranslatorEventApi.events$instanceName',
-    pigeonMethodCodec,
-  );
+  final EventChannel eventsChannel =
+      EventChannel('dev.flutter.pigeon.translation_poc_app.TranslatorEventApi.events$instanceName', pigeonMethodCodec);
   return eventsChannel.receiveBroadcastStream().map((dynamic event) {
     return event as TranslatorEvent;
   });
 }
+    

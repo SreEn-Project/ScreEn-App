@@ -156,6 +156,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeStatusOn => 'Running';
 
   @override
+  String get homeStarting => 'Waiting for consent';
+
+  @override
+  String get homeStatusStarting => 'Waiting';
+
+  @override
+  String get homeStatusError => 'Error';
+
+  @override
+  String get homeServiceStartingHint =>
+      'Tap \"Start now\" on the screen capture prompt';
+
+  @override
+  String get homeServiceErrorHint => 'Couldn\'t start. Please try again';
+
+  @override
   String get homeSourceAuto => 'Auto-detect';
 
   @override

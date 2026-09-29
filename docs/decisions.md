@@ -63,5 +63,14 @@ Scaffold · TextField · Icon처럼 모양이 드러나지 않는 기반 위젯�
 홈에서 캡처 모드 타일을 빼고 대상 언어 · 언어 모델 타일과 엔진 줄을 넣는다. 하단 탭 홈 · 언어 · 설정을 두고, 대상 언어 · 모델 관리는 언어 탭, 설정 탭은 엔진 · 캡처 기본값 · 표시.
 Notion FL-03 화면 정의(구성 요소 "현재 캡처 모드")와 달라져 Notion 페이지에 변경 메모를 남겼다.
 
+## D-017 · 2026-09-29 · 서비스 시작 흐름 (NA-02 · NA-03 · NA-04 일부)
+Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤에만** 시작할 수 있어 NA-02 · NA-03과 NA-04의 동의 부분을 함께 만든다.
+- 흐름: Flutter `startService()` → 투명 `CaptureConsentActivity`(상태 STARTING) → 동의 창 → 허용: `TranslatorService` 시작(startForeground → getMediaProjection, RUNNING) / 거부: STOPPED.
+- 동의 창은 Android 14+에서 기본이 "앱 하나 공유"라 `MediaProjectionConfig.createConfigForDefaultDisplay()`로 전체 화면을 요청.
+- 동의 Activity를 따로 둔 이유: 앱 화면 · 알림 · 빠른 설정 타일(NA-25) 어디서 시작해도 같은 경로. FlutterActivity와 분리.
+- 토큰은 한 번만 쓸 수 있어 `START_NOT_STICKY`. 시스템이 공유를 끄면(MediaProjection.Callback.onStop) 서비스도 멈춘다.
+- 상태에 ERROR 추가 (FL-03 명세의 "오류"). 다시 시작하면 벗어난다.
+- 알림: 채널 IMPORTANCE_LOW(조용히), 누르면 앱 열기, "중지" 동작. 네이티브 문구는 `res/values(-ko)/strings.xml`, 색은 `res/values/colors.xml`(design 토큰과 같게).
+
 ## D-009 · 2026-09-29 · 아이콘 패키지
 Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가. Flutter 기본 `Icons`에는 Rounded + 선(outline) 조합이 없음.

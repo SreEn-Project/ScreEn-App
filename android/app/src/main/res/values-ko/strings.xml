@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_name">번역 서비스</string>
+    <string name="notification_channel_description">화면 번역이 켜져 있는 동안 표시돼요</string>
+    <string name="notification_title">화면 번역이 켜져 있어요</string>
+    <string name="notification_text">다른 앱에서 떠 있는 버튼을 눌러 번역하세요</string>
+    <string name="notification_action_stop">중지</string>
+</resources>

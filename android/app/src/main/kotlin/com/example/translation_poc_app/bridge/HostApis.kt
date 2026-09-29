@@ -1,6 +1,10 @@
 package com.example.translation_poc_app.bridge
 
+import android.content.Context
 import com.example.translation_poc_app.data.settings.SettingsRepository
+import com.example.translation_poc_app.service.CaptureConsentActivity
+import com.example.translation_poc_app.service.RunState
+import com.example.translation_poc_app.service.TranslatorService
 import com.example.translation_poc_app.service.TranslatorServiceState
 
 /** Flutter → 네이티브 설정 호출 (NA-01, NA-16). */
@@ -20,7 +24,16 @@ class SettingsHostApiImpl(private val repository: SettingsRepository) : Settings
         repository.setOnboardingCompleted(completed)
 }
 
-/** 서비스 상태 조회 (NA-01). 시작 · 중지는 NA-02에서 추가. */
-class ServiceHostApiImpl : ServiceHostApi {
+/** 서비스 상태 조회 · 시작 · 중지 (NA-01, NA-02). */
+class ServiceHostApiImpl(private val context: Context) : ServiceHostApi {
     override fun getServiceState(): ServiceState = TranslatorServiceState.state.value.toPigeon()
+
+    override fun startService() {
+        if (TranslatorServiceState.state.value == RunState.RUNNING) return
+        CaptureConsentActivity.launch(context)
+    }
+
+    override fun stopService() {
+        TranslatorService.stop(context)
+    }
 }

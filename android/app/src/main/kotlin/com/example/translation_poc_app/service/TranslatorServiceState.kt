@@ -4,10 +4,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-enum class RunState { STOPPED, STARTING, RUNNING }
+/** STARTING = 화면 캡처 동의 대기 중. ERROR = 시작 실패. */
+enum class RunState { STOPPED, STARTING, RUNNING, ERROR }
 
 /**
- * 포그라운드 서비스 상태 (NA-02에서 갱신).
+ * 포그라운드 서비스 상태. [TranslatorService] · [CaptureConsentActivity]가 갱신한다.
  * 서비스와 브리지가 같은 프로세스에서 이 값을 공유한다. Flutter 엔진이 없어도 동작한다.
  */
 object TranslatorServiceState {

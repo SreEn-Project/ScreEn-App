@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -9,19 +10,19 @@ import '../../../core/l10n/labels.dart';
 import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../language/domain/supported_language.dart';
+import 'service_view_model.dart';
 
 /// 홈 (S-03, FL-03).
 /// 캡처 범위는 플로팅 버튼 메뉴에서 고르므로 홈에는 두지 않고, 언어 · 모델 설정을 둔다 (D-016).
-/// UI 퍼블리싱 단계: 값은 화면 안에서만 바뀐다. 서비스 · 설정 연결은 FL-03 · FL-04 · FL-05에서.
-class HomeScreen extends StatefulWidget {
+/// 시작/중지는 네이티브 서비스와 연결됨(FL-03). 언어 · 모델 값은 아직 자리 표시 (FL-04 · FL-05에서 연결).
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  bool _running = false;
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   String _targetLanguage = 'ko';
   final EngineType _engine = EngineType.mlKit;
 
@@ -43,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final locale = Localizations.localeOf(context);
     final targetName = SupportedLanguage.byCode(_targetLanguage)
         .displayName(locale);
+    final service =
+        ref.watch(serviceViewModelProvider).value ?? ServiceState.stopped;
+    final running = service == ServiceState.running;
 
     return AppPage(
       withBottomNav: true,
@@ -50,20 +54,26 @@ class _HomeScreenState extends State<HomeScreen> {
         const _Header(),
         const SizedBox(height: 24),
         _StatusCard(
-          running: _running,
+          state: service,
           targetLanguage: targetName,
           engine: l10n.engineName(_engine),
         ),
         const SizedBox(height: 20),
         AppButton(
-          label: _running ? l10n.homeStop : l10n.homeStart,
+          label: switch (service) {
+            ServiceState.running => l10n.homeStop,
+            ServiceState.starting => l10n.homeStarting,
+            ServiceState.stopped || ServiceState.error => l10n.homeStart,
+          },
           height: AppTokens.largeButtonHeight + 4,
           leading: StatusDot(
-            active: _running,
+            active: running,
             inactiveColor: Theme.of(context).colorScheme.onPrimary
                 .withValues(alpha: 0.5),
           ),
-          onPressed: () => setState(() => _running = !_running),
+          onPressed: service == ServiceState.starting
+              ? null
+              : () => ref.read(serviceViewModelProvider.notifier).toggle(),
         ),
         const SizedBox(height: 12),
         Text(
@@ -161,12 +171,12 @@ class _Header extends StatelessWidget {
 /// 그라데이션 상태 카드: 서비스 상태 + 언어 방향 + 엔진.
 class _StatusCard extends StatelessWidget {
   const _StatusCard({
-    required this.running,
+    required this.state,
     required this.targetLanguage,
     required this.engine,
   });
 
-  final bool running;
+  final ServiceState state;
   final String targetLanguage;
   final String engine;
 
@@ -183,8 +193,13 @@ class _StatusCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppStatusPill(
-            label: running ? l10n.homeStatusOn : l10n.homeStatusOff,
-            active: running,
+            label: switch (state) {
+              ServiceState.running => l10n.homeStatusOn,
+              ServiceState.starting => l10n.homeStatusStarting,
+              ServiceState.error => l10n.homeStatusError,
+              ServiceState.stopped => l10n.homeStatusOff,
+            },
+            active: state == ServiceState.running,
           ),
           const SizedBox(height: 20),
           Row(
@@ -215,10 +230,12 @@ class _StatusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            running ? l10n.homeServiceRunningHint : l10n.homeServiceHint,
-            style: theme.textTheme.bodySmall,
-          ),
+          Text(switch (state) {
+            ServiceState.running => l10n.homeServiceRunningHint,
+            ServiceState.starting => l10n.homeServiceStartingHint,
+            ServiceState.error => l10n.homeServiceErrorHint,
+            ServiceState.stopped => l10n.homeServiceHint,
+          }, style: theme.textTheme.bodySmall),
           const SizedBox(height: 16),
           Row(
             children: [

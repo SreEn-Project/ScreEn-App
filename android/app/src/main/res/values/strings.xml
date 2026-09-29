@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 네이티브(서비스 · 알림 · 오버레이) 문구. 기본은 영어, 한국어는 values-ko. -->
+<resources>
+    <string name="notification_channel_name">Translation service</string>
+    <string name="notification_channel_description">Shown while screen translation is on</string>
+    <string name="notification_title">Screen translation is on</string>
+    <string name="notification_text">Tap the floating button in any app to translate</string>
+    <string name="notification_action_stop">Stop</string>
+</resources>

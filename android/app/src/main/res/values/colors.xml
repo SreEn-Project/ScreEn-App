@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 네이티브 쪽 디자인 토큰. 값은 docs/design.md · lib/app/theme/app_colors.dart와 같게 유지한다. -->
+<resources>
+    <color name="brand_primary">#044B39</color>
+    <color name="brand_on_primary">#FFFFFF</color>
+    <color name="brand_primary_container">#C8EFC1</color>
+    <color name="brand_background">#F6F8F5</color>
+    <color name="brand_surface">#FFFFFF</color>
+</resources>

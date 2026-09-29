@@ -236,11 +236,15 @@ enum class DisplayMode(val raw: Int) {
   }
 }
 
-/** 포그라운드 서비스 상태 (NA-02). */
+/**
+ * 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
+ * error = 시작 실패 (동의 후 서비스 시작 실패 등). 다시 시작하면 벗어난다.
+ */
 enum class ServiceState(val raw: Int) {
   STOPPED(0),
   STARTING(1),
-  RUNNING(2);
+  RUNNING(2),
+  ERROR(3);
 
   companion object {
     fun ofRaw(raw: Int): ServiceState? {
@@ -607,6 +611,13 @@ interface SettingsHostApi {
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface ServiceHostApi {
   fun getServiceState(): ServiceState
+  /**
+   * 화면 캡처 동의를 받고 번역 서비스를 시작한다 (NA-02, NA-04).
+   * 결과는 이벤트(ServiceStateChanged)로 온다: starting → running, 거부하면 stopped.
+   */
+  fun startService()
+  /** 번역 서비스를 멈춘다. 알림의 "중지"와 같다. */
+  fun stopService()
 
   companion object {
     /** The codec used by ServiceHostApi. */
@@ -623,6 +634,38 @@ interface ServiceHostApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.getServiceState())
+            } catch (exception: Throwable) {
+              TranslatorApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.ServiceHostApi.startService$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.startService()
+              listOf(null)
+            } catch (exception: Throwable) {
+              TranslatorApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.ServiceHostApi.stopService$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.stopService()
+              listOf(null)
             } catch (exception: Throwable) {
               TranslatorApiPigeonUtils.wrapError(exception)
             }
