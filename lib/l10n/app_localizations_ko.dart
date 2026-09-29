@@ -106,6 +106,9 @@ class AppLocalizationsKo extends AppLocalizations {
       '번역 서비스가 켜져 있는 동안 알림으로 알려 주고, 거기서 바로 끌 수 있어요.';
 
   @override
+  String get permissionAllow => '허용하기';
+
+  @override
   String get permissionContinue => '계속하기';
 
   @override
@@ -164,6 +167,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get homeServiceErrorHint => '시작하지 못했어요. 다시 눌러 주세요';
+
+  @override
+  String get homePermissionsNeeded => '권한을 허용해야 시작할 수 있어요';
 
   @override
   String get homeSourceAuto => '자동 감지';
