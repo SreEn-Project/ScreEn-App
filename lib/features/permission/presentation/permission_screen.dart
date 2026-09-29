@@ -3,10 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../app/router.dart';
-import '../../../app/theme/app_tokens.dart';
-import '../../../core/widgets/accent_title.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/icon_badge.dart';
+import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 
 /// 권한 안내 (S-02, FL-02).
@@ -30,82 +27,55 @@ class _PermissionScreenState extends State<PermissionScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  AppTokens.pagePadding,
-                  56,
-                  AppTokens.pagePadding,
-                  24,
-                ),
-                children: [
-                  AccentTitle(
-                    text: l10n.permissionTitle,
-                    highlight: l10n.permissionHighlight,
-                    style: theme.textTheme.headlineLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n.permissionBody,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  _PermissionCard(
-                    icon: Symbols.layers_rounded,
-                    title: l10n.permissionOverlayTitle,
-                    body: l10n.permissionOverlayBody,
-                    allowed: _overlayAllowed,
-                    onOpenSettings: () =>
-                        setState(() => _overlayAllowed = true),
-                  ),
-                  const SizedBox(height: 16),
-                  _PermissionCard(
-                    icon: Symbols.notifications_rounded,
-                    title: l10n.permissionNotificationTitle,
-                    body: l10n.permissionNotificationBody,
-                    allowed: _notificationAllowed,
-                    onOpenSettings: () =>
-                        setState(() => _notificationAllowed = true),
-                  ),
-                ],
-              ),
+    return AppPage(
+      bottom: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (!_allAllowed) ...[
+            Text(
+              l10n.permissionPending,
+              style: theme.textTheme.bodySmall,
+              textAlign: TextAlign.center,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppTokens.pagePadding,
-                8,
-                AppTokens.pagePadding,
-                24,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!_allAllowed) ...[
-                    Text(
-                      l10n.permissionPending,
-                      style: theme.textTheme.bodySmall,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  FilledButton(
-                    onPressed: _allAllowed
-                        ? () => context.go(AppRoutes.home)
-                        : null,
-                    child: Text(l10n.permissionContinue),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 12),
           ],
-        ),
+          AppButton(
+            label: l10n.permissionContinue,
+            onPressed: _allAllowed ? () => context.go(AppRoutes.home) : null,
+          ),
+        ],
       ),
+      children: [
+        const SizedBox(height: 40),
+        AccentTitle(
+          text: l10n.permissionTitle,
+          highlight: l10n.permissionHighlight,
+          style: theme.textTheme.headlineLarge,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l10n.permissionBody,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 32),
+        _PermissionCard(
+          icon: Symbols.layers_rounded,
+          title: l10n.permissionOverlayTitle,
+          body: l10n.permissionOverlayBody,
+          allowed: _overlayAllowed,
+          onOpenSettings: () => setState(() => _overlayAllowed = true),
+        ),
+        const SizedBox(height: 16),
+        _PermissionCard(
+          icon: Symbols.notifications_rounded,
+          title: l10n.permissionNotificationTitle,
+          body: l10n.permissionNotificationBody,
+          allowed: _notificationAllowed,
+          onOpenSettings: () => setState(() => _notificationAllowed = true),
+        ),
+      ],
     );
   }
 }
@@ -131,7 +101,6 @@ class _PermissionCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppCard(
-      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -140,7 +109,10 @@ class _PermissionCard extends StatelessWidget {
               IconBadge(icon: icon, size: 44),
               const SizedBox(width: 12),
               Expanded(child: Text(title, style: theme.textTheme.titleMedium)),
-              _StatusPill(allowed: allowed),
+              AppStatusPill(
+                label: allowed ? l10n.commonAllowed : l10n.commonNotAllowed,
+                active: allowed,
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -149,61 +121,15 @@ class _PermissionCard extends StatelessWidget {
             const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerRight,
-              child: OutlinedButton.icon(
+              child: AppButton.secondary(
+                label: l10n.commonOpenSettings,
+                trailingIcon: Symbols.open_in_new_rounded,
+                expand: false,
+                height: 44,
                 onPressed: onOpenSettings,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 44),
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                ),
-                icon: const Icon(Symbols.open_in_new_rounded, size: 18),
-                label: Text(l10n.commonOpenSettings),
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.allowed});
-
-  final bool allowed;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final colors = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: ShapeDecoration(
-        shape: const StadiumBorder(),
-        color: allowed ? colors.primaryContainer : colors.surfaceContainerHigh,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: allowed ? context.tokens.accent : colors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            allowed ? l10n.commonAllowed : l10n.commonNotAllowed,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: allowed
-                  ? colors.onPrimaryContainer
-                  : colors.onSurfaceVariant,
-            ),
-          ),
         ],
       ),
     );

@@ -4,9 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../app/router.dart';
 import '../../../app/theme/app_tokens.dart';
-import '../../../core/widgets/accent_title.dart';
-import '../../../core/widgets/icon_badge.dart';
-import '../../../core/widgets/white_pill_button.dart';
+import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../language/presentation/language_list.dart';
 
@@ -67,9 +65,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ? null
                     : Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: TextButton(
+                        child: AppButton.text(
                           onPressed: _skipToLanguage,
-                          child: Text(l10n.commonSkip),
+                          label: l10n.commonSkip,
                         ),
                       ),
               ),
@@ -116,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   _PageDots(count: _pageCount, current: _page),
                   const SizedBox(height: 20),
-                  WhitePillButton(
+                  AppButton.secondary(
                     label: _isLanguagePage
                         ? l10n.onboardingStart
                         : l10n.commonNext,
