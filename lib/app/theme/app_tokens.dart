@@ -11,6 +11,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     required this.accent,
     required this.heroGradient,
     required this.cardShadow,
+    required this.glowShadow,
   });
 
   /// 화면 배경 (카드보다 한 단계 어두운 회녹색).
@@ -22,14 +23,21 @@ class AppTokens extends ThemeExtension<AppTokens> {
   /// 홈 상단 상태 카드 전용.
   final Gradient heroGradient;
 
-  /// 카드 · 흰 버튼의 옅고 넓은 그림자.
+  /// 카드 · 흰 버튼 · 탭바의 옅고 넓은 그림자 (primary로 물듦).
   final List<BoxShadow> cardShadow;
+
+  /// primary 버튼 아래 번지는 빛.
+  final List<BoxShadow> glowShadow;
 
   static const double radiusCard = 24;
   static const double radiusSheet = 28;
-  static const double radiusInput = 16;
+  static const double radiusInput = 18;
   static const double pagePadding = 20;
   static const double largeButtonHeight = 56;
+  static const double headerHeight = 56;
+
+  /// 하단 탭바 높이 + 아래 여백. 스크롤 화면 아래쪽에 이만큼 비워 둔다.
+  static const double bottomNavSpace = 104;
 
   static const light = AppTokens(
     background: AppColors.lightBackground,
@@ -44,6 +52,14 @@ class AppTokens extends ThemeExtension<AppTokens> {
         color: AppColors.lightShadow,
         offset: Offset(0, 8),
         blurRadius: 24,
+      ),
+    ],
+    glowShadow: [
+      BoxShadow(
+        color: AppColors.lightGlow,
+        offset: Offset(0, 10),
+        blurRadius: 24,
+        spreadRadius: -4,
       ),
     ],
   );
@@ -63,6 +79,14 @@ class AppTokens extends ThemeExtension<AppTokens> {
         blurRadius: 24,
       ),
     ],
+    glowShadow: [
+      BoxShadow(
+        color: AppColors.darkGlow,
+        offset: Offset(0, 10),
+        blurRadius: 24,
+        spreadRadius: -4,
+      ),
+    ],
   );
 
   @override
@@ -71,12 +95,14 @@ class AppTokens extends ThemeExtension<AppTokens> {
     Color? accent,
     Gradient? heroGradient,
     List<BoxShadow>? cardShadow,
+    List<BoxShadow>? glowShadow,
   }) {
     return AppTokens(
       background: background ?? this.background,
       accent: accent ?? this.accent,
       heroGradient: heroGradient ?? this.heroGradient,
       cardShadow: cardShadow ?? this.cardShadow,
+      glowShadow: glowShadow ?? this.glowShadow,
     );
   }
 
@@ -88,6 +114,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accent: Color.lerp(accent, other.accent, t)!,
       heroGradient: Gradient.lerp(heroGradient, other.heroGradient, t)!,
       cardShadow: BoxShadow.lerpList(cardShadow, other.cardShadow, t)!,
+      glowShadow: BoxShadow.lerpList(glowShadow, other.glowShadow, t)!,
     );
   }
 }

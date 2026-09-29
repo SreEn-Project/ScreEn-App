@@ -20,8 +20,12 @@ abstract final class AppColors {
     Color(0xFF2A4A1F),
   ];
 
-  static const lightShadow = Color(0x0F000000); // 검정 6%
-  static const darkShadow = Color(0x3D000000); // 검정 24%
+  // 그림자는 primary로 물들인다 (D-015). 라이트: primary 10%, 다크: 검정 32%.
+  static const lightShadow = Color(0x1A044B39);
+  static const darkShadow = Color(0x52000000);
+  // primary 버튼 아래 번지는 빛. 라이트: primary 32%, 다크: primary(다크) 20%.
+  static const lightGlow = Color(0x52044B39);
+  static const darkGlow = Color(0x33C8EFC1);
 
   static const light = ColorScheme(
     brightness: Brightness.light,

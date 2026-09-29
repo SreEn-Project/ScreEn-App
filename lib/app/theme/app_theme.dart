@@ -4,7 +4,8 @@ import 'app_colors.dart';
 import 'app_tokens.dart';
 
 /// 흰 톤 + 연한 초록 포인트 테마 (docs/design.md).
-/// 카드 그림자는 Material elevation 대신 `AppCard`가 토큰 그림자로 그린다.
+/// 화면은 `lib/core/ui/` 자체 컴포넌트로 그린다 (D-015). 여기 Material 컴포넌트 테마는
+/// 라이선스 화면 · 대화상자처럼 Flutter 기본 위젯이 뜨는 곳을 팔레트에 맞추는 용도다.
 abstract final class AppTheme {
   static ThemeData get light => _build(AppColors.light, AppTokens.light);
   static ThemeData get dark => _build(AppColors.dark, AppTokens.dark);
@@ -27,6 +28,10 @@ abstract final class AppTheme {
       colorScheme: colors,
       scaffoldBackgroundColor: tokens.background,
       extensions: [tokens],
+      // 물결(ripple) 대신 자체 컴포넌트의 눌림 효과(Pressable)를 쓴다.
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: tokens.background,
