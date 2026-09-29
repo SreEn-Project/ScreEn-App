@@ -150,16 +150,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeStop => 'Stop translating';
 
   @override
-  String get homeStatusTargetLanguage => 'Target language';
+  String get homeStatusOff => 'Off';
 
   @override
-  String get homeStatusEngine => 'Engine';
+  String get homeStatusOn => 'Running';
 
   @override
-  String get homeStatusCaptureMode => 'Capture mode';
+  String get homeSourceAuto => 'Auto-detect';
 
   @override
-  String get homeCaptureModes => 'Capture modes';
+  String get homeSectionSetup => 'Translation setup';
+
+  @override
+  String get homeTargetLanguage => 'Target language';
+
+  @override
+  String get homeModels => 'Language models';
+
+  @override
+  String homeModelsReady(int count) {
+    return '$count ready';
+  }
+
+  @override
+  String homeModelsDownloading(int count) {
+    return '$count downloading';
+  }
+
+  @override
+  String get homeEngine => 'Engine';
+
+  @override
+  String get homeAreaHint =>
+      'Long-press the floating button to change the capture area';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navLanguages => 'Languages';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get languagesTitle => 'Languages';
+
+  @override
+  String get languagesSectionTarget => 'Translate into';
+
+  @override
+  String get languagesSectionDownload => 'Downloads';
 
   @override
   String get homeRecent => 'Recent';

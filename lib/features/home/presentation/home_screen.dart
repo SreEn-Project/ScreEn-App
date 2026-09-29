@@ -6,17 +6,13 @@ import '../../../app/router.dart';
 import '../../../app/theme/app_tokens.dart';
 import '../../../core/bridge/bridge_providers.dart';
 import '../../../core/l10n/labels.dart';
-import '../../../core/widgets/accent_title.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/circle_icon_button.dart';
-import '../../../core/widgets/icon_badge.dart';
-import '../../../core/widgets/section_title.dart';
+import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../language/domain/supported_language.dart';
 
 /// 홈 (S-03, FL-03).
-/// UI 퍼블리싱 단계: 시작 버튼 · 캡처 모드는 화면 안에서만 바뀐다.
-/// 서비스 시작/중지는 FL-03, 설정 값은 SettingsRepository와 ViewModel로 연결한다.
+/// 캡처 범위는 플로팅 버튼 메뉴에서 고르므로 홈에는 두지 않고, 언어 · 모델 설정을 둔다 (D-016).
+/// UI 퍼블리싱 단계: 값은 화면 안에서만 바뀐다. 서비스 · 설정 연결은 FL-03 · FL-04 · FL-05에서.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -26,60 +22,103 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _running = false;
-  CaptureMode _captureMode = CaptureMode.fullScreen;
+  String _targetLanguage = 'ko';
   final EngineType _engine = EngineType.mlKit;
-  final String _targetLanguage = 'ko';
+
+  // 언어 모델 화면의 자리 표시 값과 맞춘다 (한국어 · 영어 받음, 일본어 받는 중).
+  static const _modelsReady = 2;
+  static const _modelsDownloading = 1;
+
+  Future<void> _pickLanguage() async {
+    final code = await context.push<String>(
+      AppRoutes.targetLanguage,
+      extra: _targetLanguage,
+    );
+    if (code != null) setState(() => _targetLanguage = code);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context);
+    final targetName = SupportedLanguage.byCode(_targetLanguage)
+        .displayName(locale);
 
-    return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppTokens.pagePadding,
-            16,
-            AppTokens.pagePadding,
-            32,
-          ),
-          children: [
-            const _Header(),
-            const SizedBox(height: 24),
-            _StatusCard(
-              running: _running,
-              targetLanguage: SupportedLanguage.byCode(_targetLanguage)
-                  .displayName(locale),
-              engine: l10n.engineName(_engine),
-              captureMode: l10n.captureModeName(_captureMode),
-            ),
-            const SizedBox(height: 16),
-            _StartButton(
-              running: _running,
-              onPressed: () => setState(() => _running = !_running),
-            ),
-            const SizedBox(height: 32),
-            SectionTitle(l10n.homeCaptureModes),
-            const SizedBox(height: 12),
-            _CaptureModeTiles(
-              selected: _captureMode,
-              onSelected: (mode) => setState(() => _captureMode = mode),
-            ),
-            const SizedBox(height: 32),
-            SectionTitle(
-              l10n.homeRecent,
-              // 기록 화면은 FL-13(4단계).
-              action: TextButton(
-                onPressed: null,
-                child: Text(l10n.homeRecentSeeAll),
-              ),
-            ),
-            const SizedBox(height: 12),
-            const _RecentSection(),
-          ],
+    return AppPage(
+      withBottomNav: true,
+      children: [
+        const _Header(),
+        const SizedBox(height: 24),
+        _StatusCard(
+          running: _running,
+          targetLanguage: targetName,
+          engine: l10n.engineName(_engine),
         ),
-      ),
+        const SizedBox(height: 20),
+        AppButton(
+          label: _running ? l10n.homeStop : l10n.homeStart,
+          height: AppTokens.largeButtonHeight + 4,
+          leading: StatusDot(
+            active: _running,
+            inactiveColor: Theme.of(context).colorScheme.onPrimary
+                .withValues(alpha: 0.5),
+          ),
+          onPressed: () => setState(() => _running = !_running),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l10n.homeAreaHint,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 28),
+        SectionTitle(l10n.homeSectionSetup),
+        const SizedBox(height: 12),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _SetupTile(
+                  icon: Symbols.translate_rounded,
+                  label: l10n.homeTargetLanguage,
+                  value: targetName,
+                  onTap: _pickLanguage,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SetupTile(
+                  icon: Symbols.download_rounded,
+                  label: l10n.homeModels,
+                  value: l10n.homeModelsReady(_modelsReady),
+                  footer: l10n.homeModelsDownloading(_modelsDownloading),
+                  progress: _modelsReady / (_modelsReady + _modelsDownloading),
+                  onTap: () => context.go(AppRoutes.languages),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: AppListTile(
+            icon: engineIcon(_engine),
+            title: l10n.homeEngine,
+            value: l10n.engineName(_engine),
+            onTap: () => context.go(AppRoutes.settings),
+          ),
+        ),
+        const SizedBox(height: 28),
+        SectionTitle(
+          l10n.homeRecent,
+          // 기록 화면은 FL-13(4단계).
+          action: AppButton.text(label: l10n.homeRecentSeeAll, onPressed: null),
+        ),
+        const SizedBox(height: 12),
+        const _RecentSection(),
+      ],
     );
   }
 }
@@ -109,39 +148,33 @@ class _Header extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        CircleIconButton(
+        AppIconButton(
           icon: Symbols.notifications_rounded,
           tooltip: l10n.homeNotifications,
           onPressed: () {},
-        ),
-        const SizedBox(width: 8),
-        CircleIconButton(
-          icon: Symbols.settings_rounded,
-          tooltip: l10n.homeSettings,
-          onPressed: () => context.push(AppRoutes.settings),
         ),
       ],
     );
   }
 }
 
+/// 그라데이션 상태 카드: 서비스 상태 + 언어 방향 + 엔진.
 class _StatusCard extends StatelessWidget {
   const _StatusCard({
     required this.running,
     required this.targetLanguage,
     required this.engine,
-    required this.captureMode,
   });
 
   final bool running;
   final String targetLanguage;
   final String engine;
-  final String captureMode;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return AppCard(
       gradient: context.tokens.heroGradient,
@@ -149,32 +182,53 @@ class _StatusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            running ? l10n.homeServiceRunning : l10n.homeServiceStopped,
-            style: theme.textTheme.titleLarge,
+          AppStatusPill(
+            label: running ? l10n.homeStatusOn : l10n.homeStatusOff,
+            active: running,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  l10n.homeSourceAuto,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Icon(
+                  Symbols.arrow_forward_rounded,
+                  color: colors.primary,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  targetLanguage,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           Text(
             running ? l10n.homeServiceRunningHint : l10n.homeServiceHint,
             style: theme.textTheme.bodySmall,
           ),
-          const SizedBox(height: 20),
-          _StatusRow(
-            icon: Symbols.translate_rounded,
-            label: l10n.homeStatusTargetLanguage,
-            value: targetLanguage,
-          ),
-          const SizedBox(height: 12),
-          _StatusRow(
-            icon: Symbols.memory_rounded,
-            label: l10n.homeStatusEngine,
-            value: engine,
-          ),
-          const SizedBox(height: 12),
-          _StatusRow(
-            icon: Symbols.crop_free_rounded,
-            label: l10n.homeStatusCaptureMode,
-            value: captureMode,
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(Symbols.memory_rounded, size: 16, color: colors.primary),
+              const SizedBox(width: 6),
+              Text(
+                engine,
+                style: theme.textTheme.labelLarge?.copyWith(fontSize: 13),
+              ),
+            ],
           ),
         ],
       ),
@@ -182,109 +236,21 @@ class _StatusCard extends StatelessWidget {
   }
 }
 
-class _StatusRow extends StatelessWidget {
-  const _StatusRow({
+class _SetupTile extends StatelessWidget {
+  const _SetupTile({
     required this.icon,
     required this.label,
     required this.value,
+    required this.onTap,
+    this.footer,
+    this.progress,
   });
 
   final IconData icon;
   final String label;
   final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Row(
-      children: [
-        IconBadge(icon: icon, color: theme.colorScheme.surface),
-        const SizedBox(width: 12),
-        Expanded(child: Text(label, style: theme.textTheme.bodySmall)),
-        Text(value, style: theme.textTheme.titleMedium),
-      ],
-    );
-  }
-}
-
-/// 큰 primary 알약 버튼 + 상태 점 (켜짐: accent, 꺼짐: onPrimary 반투명).
-class _StartButton extends StatelessWidget {
-  const _StartButton({required this.running, required this.onPressed});
-
-  final bool running;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final colors = Theme.of(context).colorScheme;
-
-    return FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(AppTokens.largeButtonHeight + 8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: running
-                  ? context.tokens.accent
-                  : colors.onPrimary.withValues(alpha: 0.5),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(running ? l10n.homeStop : l10n.homeStart),
-        ],
-      ),
-    );
-  }
-}
-
-class _CaptureModeTiles extends StatelessWidget {
-  const _CaptureModeTiles({required this.selected, required this.onSelected});
-
-  final CaptureMode selected;
-  final ValueChanged<CaptureMode> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return Row(
-      children: [
-        for (final mode in CaptureMode.values) ...[
-          if (mode != CaptureMode.values.first) const SizedBox(width: 12),
-          Expanded(
-            child: _CaptureModeTile(
-              icon: captureModeIcon(mode),
-              label: l10n.captureModeName(mode),
-              selected: mode == selected,
-              onTap: () => onSelected(mode),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _CaptureModeTile extends StatelessWidget {
-  const _CaptureModeTile({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
+  final String? footer;
+  final double? progress;
   final VoidCallback onTap;
 
   @override
@@ -293,23 +259,28 @@ class _CaptureModeTile extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-      color: selected ? theme.colorScheme.primaryContainer : null,
+      padding: const EdgeInsets.all(18),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconBadge(
-            icon: icon,
-            size: 44,
-            color: selected ? theme.colorScheme.surface : null,
-          ),
-          const SizedBox(height: 12),
+          IconBadge(icon: icon, size: 40),
+          const SizedBox(height: 14),
+          Text(label, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 2),
           Text(
-            label,
-            style: theme.textTheme.labelLarge,
-            textAlign: TextAlign.center,
+            value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleLarge,
           ),
+          if (progress != null) ...[
+            const SizedBox(height: 12),
+            AppProgressBar(value: progress!, height: 5),
+          ],
+          if (footer != null) ...[
+            const SizedBox(height: 6),
+            Text(footer!, style: theme.textTheme.bodySmall),
+          ],
         ],
       ),
     );
@@ -344,14 +315,14 @@ class _RecentSectionState extends State<_RecentSection> {
           spacing: 8,
           children: [
             for (var i = 0; i < filters.length; i++)
-              ChoiceChip(
-                label: Text(filters[i]),
+              AppChip(
+                label: filters[i],
                 selected: _filter == i,
-                onSelected: (_) => setState(() => _filter = i),
+                onTap: () => setState(() => _filter = i),
               ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         AppCard(
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
           child: Column(

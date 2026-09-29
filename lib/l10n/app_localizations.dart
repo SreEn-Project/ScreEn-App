@@ -362,29 +362,101 @@ abstract class AppLocalizations {
   /// **'Stop translating'**
   String get homeStop;
 
-  /// No description provided for @homeStatusTargetLanguage.
+  /// No description provided for @homeStatusOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get homeStatusOff;
+
+  /// No description provided for @homeStatusOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get homeStatusOn;
+
+  /// No description provided for @homeSourceAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-detect'**
+  String get homeSourceAuto;
+
+  /// No description provided for @homeSectionSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation setup'**
+  String get homeSectionSetup;
+
+  /// No description provided for @homeTargetLanguage.
   ///
   /// In en, this message translates to:
   /// **'Target language'**
-  String get homeStatusTargetLanguage;
+  String get homeTargetLanguage;
 
-  /// No description provided for @homeStatusEngine.
+  /// No description provided for @homeModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Language models'**
+  String get homeModels;
+
+  /// No description provided for @homeModelsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ready'**
+  String homeModelsReady(int count);
+
+  /// No description provided for @homeModelsDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} downloading'**
+  String homeModelsDownloading(int count);
+
+  /// No description provided for @homeEngine.
   ///
   /// In en, this message translates to:
   /// **'Engine'**
-  String get homeStatusEngine;
+  String get homeEngine;
 
-  /// No description provided for @homeStatusCaptureMode.
+  /// No description provided for @homeAreaHint.
   ///
   /// In en, this message translates to:
-  /// **'Capture mode'**
-  String get homeStatusCaptureMode;
+  /// **'Long-press the floating button to change the capture area'**
+  String get homeAreaHint;
 
-  /// No description provided for @homeCaptureModes.
+  /// No description provided for @navHome.
   ///
   /// In en, this message translates to:
-  /// **'Capture modes'**
-  String get homeCaptureModes;
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get navLanguages;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @languagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get languagesTitle;
+
+  /// No description provided for @languagesSectionTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate into'**
+  String get languagesSectionTarget;
+
+  /// No description provided for @languagesSectionDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get languagesSectionDownload;
 
   /// No description provided for @homeRecent.
   ///

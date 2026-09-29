@@ -115,7 +115,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeGreeting => '안녕하세요';
 
   @override
-  String get homeHeadline => '어떤 화면이든 번역해 드려요';
+  String get homeHeadline => '어떤 화면이든\n번역해 드려요';
 
   @override
   String get homeHeadlineHighlight => '번역';
@@ -145,16 +145,56 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeStop => '번역 중지';
 
   @override
-  String get homeStatusTargetLanguage => '대상 언어';
+  String get homeStatusOff => '꺼짐';
 
   @override
-  String get homeStatusEngine => '번역 엔진';
+  String get homeStatusOn => '실행 중';
 
   @override
-  String get homeStatusCaptureMode => '캡처 모드';
+  String get homeSourceAuto => '자동 감지';
 
   @override
-  String get homeCaptureModes => '캡처 모드';
+  String get homeSectionSetup => '번역 설정';
+
+  @override
+  String get homeTargetLanguage => '대상 언어';
+
+  @override
+  String get homeModels => '언어 모델';
+
+  @override
+  String homeModelsReady(int count) {
+    return '$count개 준비됨';
+  }
+
+  @override
+  String homeModelsDownloading(int count) {
+    return '$count개 받는 중';
+  }
+
+  @override
+  String get homeEngine => '번역 엔진';
+
+  @override
+  String get homeAreaHint => '번역 영역은 떠 있는 버튼을 길게 눌러 바꿀 수 있어요';
+
+  @override
+  String get navHome => '홈';
+
+  @override
+  String get navLanguages => '언어';
+
+  @override
+  String get navSettings => '설정';
+
+  @override
+  String get languagesTitle => '언어';
+
+  @override
+  String get languagesSectionTarget => '번역할 언어';
+
+  @override
+  String get languagesSectionDownload => '다운로드';
 
   @override
   String get homeRecent => '최근 기록';
