@@ -1,0 +1,3 @@
+tags:
+  screenshot:
+    skip: "스크린샷 생성용. flutter test --run-skipped -t screenshot test/screenshots 로 실행"
