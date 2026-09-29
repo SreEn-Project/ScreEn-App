@@ -1,19 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../../app/router.dart';
 import '../../../app/theme/app_tokens.dart';
+import '../../../core/bridge/bridge_providers.dart';
+import '../../../core/l10n/labels.dart';
 import '../../../core/widgets/accent_title.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/circle_icon_button.dart';
+import '../../../core/widgets/icon_badge.dart';
+import '../../../core/widgets/section_title.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../language/domain/supported_language.dart';
 
-/// 홈 (S-03) 레이아웃. 상태 값은 자리 표시이며,
-/// 서비스 시작/중지는 FL-03, 언어 · 엔진 · 모드는 FL-04/FL-06/FL-08에서 ViewModel과 연결한다.
-class HomeScreen extends StatelessWidget {
+/// 홈 (S-03, FL-03).
+/// UI 퍼블리싱 단계: 시작 버튼 · 캡처 모드는 화면 안에서만 바뀐다.
+/// 서비스 시작/중지는 FL-03, 설정 값은 SettingsRepository와 ViewModel로 연결한다.
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _running = false;
+  CaptureMode _captureMode = CaptureMode.fullScreen;
+  final EngineType _engine = EngineType.mlKit;
+  final String _targetLanguage = 'ko';
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context);
 
     return Scaffold(
       body: SafeArea(
@@ -28,18 +48,33 @@ class HomeScreen extends StatelessWidget {
             const _Header(),
             const SizedBox(height: 24),
             _StatusCard(
-              targetLanguage: l10n.languageKorean,
-              engine: l10n.engineMlKit,
-              captureMode: l10n.captureModeFull,
+              running: _running,
+              targetLanguage: SupportedLanguage.byCode(_targetLanguage)
+                  .displayName(locale),
+              engine: l10n.engineName(_engine),
+              captureMode: l10n.captureModeName(_captureMode),
             ),
             const SizedBox(height: 16),
-            const _StartButton(running: false, onPressed: null),
+            _StartButton(
+              running: _running,
+              onPressed: () => setState(() => _running = !_running),
+            ),
             const SizedBox(height: 32),
-            _SectionTitle(l10n.homeCaptureModes),
+            SectionTitle(l10n.homeCaptureModes),
             const SizedBox(height: 12),
-            const _CaptureModeTiles(),
+            _CaptureModeTiles(
+              selected: _captureMode,
+              onSelected: (mode) => setState(() => _captureMode = mode),
+            ),
             const SizedBox(height: 32),
-            _SectionTitle(l10n.homeRecent),
+            SectionTitle(
+              l10n.homeRecent,
+              // 기록 화면은 FL-13(4단계).
+              action: TextButton(
+                onPressed: null,
+                child: Text(l10n.homeRecentSeeAll),
+              ),
+            ),
             const SizedBox(height: 12),
             const _RecentSection(),
           ],
@@ -74,52 +109,31 @@ class _Header extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        _CircleIconButton(
+        CircleIconButton(
           icon: Symbols.notifications_rounded,
           tooltip: l10n.homeNotifications,
           onPressed: () {},
+        ),
+        const SizedBox(width: 8),
+        CircleIconButton(
+          icon: Symbols.settings_rounded,
+          tooltip: l10n.homeSettings,
+          onPressed: () => context.push(AppRoutes.settings),
         ),
       ],
     );
   }
 }
 
-/// 흰 원 + 옅은 그림자 아이콘 버튼.
-class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: context.tokens.cardShadow,
-      ),
-      child: IconButton(
-        icon: Icon(icon),
-        tooltip: tooltip,
-        onPressed: onPressed,
-      ),
-    );
-  }
-}
-
 class _StatusCard extends StatelessWidget {
   const _StatusCard({
+    required this.running,
     required this.targetLanguage,
     required this.engine,
     required this.captureMode,
   });
 
+  final bool running;
   final String targetLanguage;
   final String engine;
   final String captureMode;
@@ -135,9 +149,15 @@ class _StatusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.homeServiceStopped, style: theme.textTheme.titleLarge),
+          Text(
+            running ? l10n.homeServiceRunning : l10n.homeServiceStopped,
+            style: theme.textTheme.titleLarge,
+          ),
           const SizedBox(height: 4),
-          Text(l10n.homeServiceHint, style: theme.textTheme.bodySmall),
+          Text(
+            running ? l10n.homeServiceRunningHint : l10n.homeServiceHint,
+            style: theme.textTheme.bodySmall,
+          ),
           const SizedBox(height: 20),
           _StatusRow(
             icon: Symbols.translate_rounded,
@@ -179,35 +199,11 @@ class _StatusRow extends StatelessWidget {
 
     return Row(
       children: [
-        _IconBadge(icon: icon, color: theme.colorScheme.surface),
+        IconBadge(icon: icon, color: theme.colorScheme.surface),
         const SizedBox(width: 12),
         Expanded(child: Text(label, style: theme.textTheme.bodySmall)),
         Text(value, style: theme.textTheme.titleMedium),
       ],
-    );
-  }
-}
-
-/// 원형 배경 위 선 아이콘. 기본 배경은 primaryContainer.
-class _IconBadge extends StatelessWidget {
-  const _IconBadge({required this.icon, this.color, this.size = 36});
-
-  final IconData icon;
-  final Color? color;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color ?? colors.primaryContainer,
-      ),
-      child: Icon(icon, size: size * 0.55, color: colors.onPrimaryContainer),
     );
   }
 }
@@ -243,26 +239,18 @@ class _StartButton extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Text(l10n.homeStart),
+          Text(running ? l10n.homeStop : l10n.homeStart),
         ],
       ),
     );
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.titleLarge);
-  }
-}
-
 class _CaptureModeTiles extends StatelessWidget {
-  const _CaptureModeTiles();
+  const _CaptureModeTiles({required this.selected, required this.onSelected});
+
+  final CaptureMode selected;
+  final ValueChanged<CaptureMode> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -270,27 +258,17 @@ class _CaptureModeTiles extends StatelessWidget {
 
     return Row(
       children: [
-        Expanded(
-          child: _CaptureModeTile(
-            icon: Symbols.fullscreen_rounded,
-            label: l10n.captureModeFull,
-            selected: true,
+        for (final mode in CaptureMode.values) ...[
+          if (mode != CaptureMode.values.first) const SizedBox(width: 12),
+          Expanded(
+            child: _CaptureModeTile(
+              icon: captureModeIcon(mode),
+              label: l10n.captureModeName(mode),
+              selected: mode == selected,
+              onTap: () => onSelected(mode),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _CaptureModeTile(
-            icon: Symbols.crop_rounded,
-            label: l10n.captureModeRegion,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _CaptureModeTile(
-            icon: Symbols.push_pin_rounded,
-            label: l10n.captureModeFixed,
-          ),
-        ),
+        ],
       ],
     );
   }
@@ -300,23 +278,26 @@ class _CaptureModeTile extends StatelessWidget {
   const _CaptureModeTile({
     required this.icon,
     required this.label,
-    this.selected = false,
+    required this.selected,
+    required this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return AppCard(
+      onTap: onTap,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
       color: selected ? theme.colorScheme.primaryContainer : null,
       child: Column(
         children: [
-          _IconBadge(
+          IconBadge(
             icon: icon,
             size: 44,
             color: selected ? theme.colorScheme.surface : null,
@@ -375,7 +356,7 @@ class _RecentSectionState extends State<_RecentSection> {
           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
           child: Column(
             children: [
-              const _IconBadge(icon: Symbols.history_rounded, size: 48),
+              const IconBadge(icon: Symbols.history_rounded, size: 48),
               const SizedBox(height: 12),
               Text(l10n.homeRecentEmpty, style: theme.textTheme.bodySmall),
             ],
