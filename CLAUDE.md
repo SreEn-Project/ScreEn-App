@@ -51,6 +51,7 @@ android/app/src/main/kotlin/.../
 - `flutter analyze` 경고 0, `dart format` 적용.
 - 생성 코드(`*.g.dart`, `*.freezed.dart`, Pigeon 출력)는 직접 수정하지 않는다. `dart run build_runner build -d`, `dart run pigeon --input pigeons/<파일>.dart`로 재생성.
 - 디자인은 [docs/design.md](docs/design.md)의 토큰만 쓴다. 색 하드코딩 금지, `Theme.of(context)`로 가져온다.
+- 화면은 `lib/core/ui/` 자체 컴포넌트로 만든다. Material 버튼 · AppBar · ListTile · Switch · Chip · Slider · Radio를 화면에서 직접 쓰지 않는다. 필요한 모양이 없으면 core/ui에 컴포넌트를 추가하고 design.md "컴포넌트" 표에 적는다.
 - UI 문자열은 ARB(`flutter_localizations`)로 관리, 한국어 · 영어.
 - ViewModel은 `mocktail`로 단위 테스트를 작성한다.
 
