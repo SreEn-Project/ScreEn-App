@@ -54,4 +54,5 @@ fun RunState.toPigeon() = when (this) {
     RunState.STOPPED -> ServiceState.STOPPED
     RunState.STARTING -> ServiceState.STARTING
     RunState.RUNNING -> ServiceState.RUNNING
+    RunState.ERROR -> ServiceState.ERROR
 }

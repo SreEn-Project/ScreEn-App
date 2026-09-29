@@ -19,7 +19,7 @@ class MainActivity : FlutterActivity() {
         val settingsRepository = AppGraph.settingsRepository(this)
 
         SettingsHostApi.setUp(messenger, SettingsHostApiImpl(settingsRepository))
-        ServiceHostApi.setUp(messenger, ServiceHostApiImpl())
+        ServiceHostApi.setUp(messenger, ServiceHostApiImpl(applicationContext))
         eventHandler = TranslatorEventHandler(settingsRepository).also {
             EventsStreamHandler.register(messenger, it)
         }
