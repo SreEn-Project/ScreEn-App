@@ -24,6 +24,12 @@ class PigeonServiceRepository implements ServiceRepository {
   Future<ServiceState> currentState() => _api.getServiceState();
 
   @override
+  Future<void> start() => _api.startService();
+
+  @override
+  Future<void> stop() => _api.stopService();
+
+  @override
   Stream<ServiceState> watchState() => _events
       .where((event) => event is ServiceStateChanged)
       .cast<ServiceStateChanged>()

@@ -151,6 +151,21 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeStatusOn => '실행 중';
 
   @override
+  String get homeStarting => '동의 기다리는 중';
+
+  @override
+  String get homeStatusStarting => '동의 대기';
+
+  @override
+  String get homeStatusError => '오류';
+
+  @override
+  String get homeServiceStartingHint => '화면 녹화 · 전송 동의 창에서 \"시작\"을 눌러 주세요';
+
+  @override
+  String get homeServiceErrorHint => '시작하지 못했어요. 다시 눌러 주세요';
+
+  @override
   String get homeSourceAuto => '자동 감지';
 
   @override

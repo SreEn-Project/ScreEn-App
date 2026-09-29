@@ -10,13 +10,17 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/app/router.dart';
+import 'package:translation_poc_app/core/bridge/translator_api.g.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
 import 'package:translation_poc_app/features/about/presentation/about_screen.dart';
 import 'package:translation_poc_app/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:translation_poc_app/features/permission/presentation/permission_screen.dart';
 import 'package:translation_poc_app/l10n/app_localizations.dart';
+
+import '../fakes.dart';
 
 const _outDir = 'build/screenshots';
 const _phone = Size(412, 915);
@@ -58,17 +62,23 @@ Widget _wrap(Widget child, {ThemeMode mode = ThemeMode.light}) => MaterialApp(
 );
 
 /// 실제 라우터(하단 탭 포함)로 [location] 화면을 연다.
-Widget _route(String location, {ThemeMode mode = ThemeMode.light}) =>
-    MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: mode,
-      locale: const Locale('ko'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      routerConfig: createRouter(initialLocation: location),
-    );
+Widget _route(
+  String location, {
+  ThemeMode mode = ThemeMode.light,
+  ServiceState service = ServiceState.stopped,
+}) => ProviderScope(
+  overrides: fakeNativeOverrides(service: service),
+  child: MaterialApp.router(
+    debugShowCheckedModeBanner: false,
+    theme: AppTheme.light,
+    darkTheme: AppTheme.dark,
+    themeMode: mode,
+    locale: const Locale('ko'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    routerConfig: createRouter(initialLocation: location),
+  ),
+);
 
 Future<void> _shoot(WidgetTester tester, String name) async {
   await tester.pumpAndSettle(const Duration(milliseconds: 100));
@@ -122,7 +132,10 @@ void main() {
     await tester.pumpWidget(_route(AppRoutes.home));
     await _shoot(tester, '04_home');
 
-    await tester.tap(find.text('번역 시작'));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      _route(AppRoutes.home, service: ServiceState.running),
+    );
     await _shoot(tester, '05_home_running');
 
     await tester.pumpWidget(const SizedBox());

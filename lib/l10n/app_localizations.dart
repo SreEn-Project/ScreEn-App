@@ -374,6 +374,36 @@ abstract class AppLocalizations {
   /// **'Running'**
   String get homeStatusOn;
 
+  /// No description provided for @homeStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for consent'**
+  String get homeStarting;
+
+  /// No description provided for @homeStatusStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get homeStatusStarting;
+
+  /// No description provided for @homeStatusError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get homeStatusError;
+
+  /// No description provided for @homeServiceStartingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Start now\" on the screen capture prompt'**
+  String get homeServiceStartingHint;
+
+  /// No description provided for @homeServiceErrorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t start. Please try again'**
+  String get homeServiceErrorHint;
+
   /// No description provided for @homeSourceAuto.
   ///
   /// In en, this message translates to:
