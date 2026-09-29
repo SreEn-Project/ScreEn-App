@@ -15,24 +15,28 @@ abstract final class AppTheme {
       borderRadius: BorderRadius.circular(AppTokens.radiusInput),
       borderSide: BorderSide(color: colors.outline),
     );
-    const buttonText = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+    // 컴포넌트 글자 스타일은 textTheme에서 파생해 글꼴 설정을 물려받게 한다.
+    final textTheme = ThemeData(
+      useMaterial3: true,
+      brightness: colors.brightness,
+    ).textTheme.merge(_textTheme(colors));
+    final buttonText = textTheme.labelLarge!.copyWith(fontSize: 16);
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colors,
       scaffoldBackgroundColor: tokens.background,
       extensions: [tokens],
-      textTheme: _textTheme(colors),
+      textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: tokens.background,
         foregroundColor: colors.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(
+        titleTextStyle: textTheme.titleLarge!.copyWith(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: colors.onSurface,
         ),
       ),
       cardTheme: CardThemeData(
@@ -72,17 +76,19 @@ abstract final class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(shape: pill),
+        style: TextButton.styleFrom(
+          shape: pill,
+          textStyle: textTheme.labelLarge,
+        ),
       ),
       chipTheme: ChipThemeData(
         shape: pill,
         side: BorderSide.none,
         backgroundColor: colors.surface,
         selectedColor: colors.primaryContainer,
-        labelStyle: TextStyle(fontSize: 14, color: colors.onSurface),
-        secondaryLabelStyle: TextStyle(
+        labelStyle: textTheme.bodyMedium!.copyWith(fontSize: 14),
+        secondaryLabelStyle: textTheme.labelLarge!.copyWith(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
           color: colors.onPrimaryContainer,
         ),
         showCheckmark: false,
@@ -141,7 +147,11 @@ abstract final class AppTheme {
       bodyLarge: TextStyle(fontSize: 15, height: 1.5, color: colors.onSurface),
       bodyMedium: TextStyle(fontSize: 15, height: 1.5, color: colors.onSurface),
       bodySmall: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
-      labelLarge: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      labelLarge: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: colors.onSurface,
+      ),
     );
   }
 }

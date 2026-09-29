@@ -104,6 +104,198 @@ abstract class AppLocalizations {
   /// **'Screen Translate'**
   String get appTitle;
 
+  /// No description provided for @commonNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get commonNext;
+
+  /// No description provided for @commonSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get commonSkip;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get commonDone;
+
+  /// No description provided for @commonOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get commonOpenSettings;
+
+  /// No description provided for @commonAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed'**
+  String get commonAllowed;
+
+  /// No description provided for @commonNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get commonNotAllowed;
+
+  /// No description provided for @onboardingStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get onboardingStart;
+
+  /// No description provided for @onboardingIntro1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate what you see'**
+  String get onboardingIntro1Title;
+
+  /// No description provided for @onboardingIntro1Highlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get onboardingIntro1Highlight;
+
+  /// No description provided for @onboardingIntro1Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Games, comics, social feeds — even text you can\'t copy gets captured and translated.'**
+  String get onboardingIntro1Body;
+
+  /// No description provided for @onboardingIntro2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'One button is all it takes'**
+  String get onboardingIntro2Title;
+
+  /// No description provided for @onboardingIntro2Highlight.
+  ///
+  /// In en, this message translates to:
+  /// **'button'**
+  String get onboardingIntro2Highlight;
+
+  /// No description provided for @onboardingIntro2Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the button floating over any app to read and translate the text on screen.'**
+  String get onboardingIntro2Body;
+
+  /// No description provided for @onboardingIntro3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Private, on your device'**
+  String get onboardingIntro3Title;
+
+  /// No description provided for @onboardingIntro3Highlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get onboardingIntro3Highlight;
+
+  /// No description provided for @onboardingIntro3Body.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic translation runs on your device. Screenshots are never saved or sent.'**
+  String get onboardingIntro3Body;
+
+  /// No description provided for @onboardingLanguageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Which language should we translate into?'**
+  String get onboardingLanguageTitle;
+
+  /// No description provided for @onboardingLanguageHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'language'**
+  String get onboardingLanguageHighlight;
+
+  /// No description provided for @onboardingLanguageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this later in Settings.'**
+  String get onboardingLanguageBody;
+
+  /// No description provided for @languageSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search languages'**
+  String get languageSearchHint;
+
+  /// No description provided for @languageOcrUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t read as source'**
+  String get languageOcrUnsupported;
+
+  /// No description provided for @languageEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching language'**
+  String get languageEmpty;
+
+  /// No description provided for @languagePickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Target language'**
+  String get languagePickerTitle;
+
+  /// No description provided for @permissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Just two permissions'**
+  String get permissionTitle;
+
+  /// No description provided for @permissionHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'permissions'**
+  String get permissionHighlight;
+
+  /// No description provided for @permissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed to show the translate button and let you know it\'s running.'**
+  String get permissionBody;
+
+  /// No description provided for @permissionOverlayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Display over other apps'**
+  String get permissionOverlayTitle;
+
+  /// No description provided for @permissionOverlayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows the translate button and results on top of any app.'**
+  String get permissionOverlayBody;
+
+  /// No description provided for @permissionNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get permissionNotificationTitle;
+
+  /// No description provided for @permissionNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets you know while the service is on, and lets you stop it from there.'**
+  String get permissionNotificationBody;
+
+  /// No description provided for @permissionContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get permissionContinue;
+
+  /// No description provided for @permissionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow both to continue'**
+  String get permissionPending;
+
   /// No description provided for @homeGreeting.
   ///
   /// In en, this message translates to:
@@ -128,11 +320,23 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get homeNotifications;
 
+  /// No description provided for @homeSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get homeSettings;
+
   /// No description provided for @homeServiceStopped.
   ///
   /// In en, this message translates to:
   /// **'Translation service is off'**
   String get homeServiceStopped;
+
+  /// No description provided for @homeServiceRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation service is on'**
+  String get homeServiceRunning;
 
   /// No description provided for @homeServiceHint.
   ///
@@ -140,11 +344,23 @@ abstract class AppLocalizations {
   /// **'When started, a translate button floats over other apps'**
   String get homeServiceHint;
 
+  /// No description provided for @homeServiceRunningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the translate button in any app'**
+  String get homeServiceRunningHint;
+
   /// No description provided for @homeStart.
   ///
   /// In en, this message translates to:
   /// **'Start translating'**
   String get homeStart;
+
+  /// No description provided for @homeStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop translating'**
+  String get homeStop;
 
   /// No description provided for @homeStatusTargetLanguage.
   ///
@@ -170,29 +386,17 @@ abstract class AppLocalizations {
   /// **'Capture modes'**
   String get homeCaptureModes;
 
-  /// No description provided for @captureModeFull.
-  ///
-  /// In en, this message translates to:
-  /// **'Full screen'**
-  String get captureModeFull;
-
-  /// No description provided for @captureModeRegion.
-  ///
-  /// In en, this message translates to:
-  /// **'Select area'**
-  String get captureModeRegion;
-
-  /// No description provided for @captureModeFixed.
-  ///
-  /// In en, this message translates to:
-  /// **'Fixed area'**
-  String get captureModeFixed;
-
   /// No description provided for @homeRecent.
   ///
   /// In en, this message translates to:
   /// **'Recent'**
   String get homeRecent;
+
+  /// No description provided for @homeRecentSeeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'See all'**
+  String get homeRecentSeeAll;
 
   /// No description provided for @homeRecentFilterAll.
   ///
@@ -218,17 +422,311 @@ abstract class AppLocalizations {
   /// **'No translations yet'**
   String get homeRecentEmpty;
 
-  /// No description provided for @languageKorean.
+  /// No description provided for @captureModeFull.
   ///
   /// In en, this message translates to:
-  /// **'Korean'**
-  String get languageKorean;
+  /// **'Full screen'**
+  String get captureModeFull;
+
+  /// No description provided for @captureModeRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Select area'**
+  String get captureModeRegion;
+
+  /// No description provided for @captureModeFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed area'**
+  String get captureModeFixed;
 
   /// No description provided for @engineMlKit.
   ///
   /// In en, this message translates to:
-  /// **'On-device (ML Kit)'**
+  /// **'On-device'**
   String get engineMlKit;
+
+  /// No description provided for @engineMlKitDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'ML Kit · offline · free'**
+  String get engineMlKitDetail;
+
+  /// No description provided for @engineGemini.
+  ///
+  /// In en, this message translates to:
+  /// **'My Gemini key'**
+  String get engineGemini;
+
+  /// No description provided for @engineGeminiDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'More natural AI translation · API key needed'**
+  String get engineGeminiDetail;
+
+  /// No description provided for @engineFirebase.
+  ///
+  /// In en, this message translates to:
+  /// **'Google sign-in AI'**
+  String get engineFirebase;
+
+  /// No description provided for @engineFirebaseDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'AI translation with just a sign-in'**
+  String get engineFirebaseDetail;
+
+  /// No description provided for @engineNeedsKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an API key to use this'**
+  String get engineNeedsKey;
+
+  /// No description provided for @engineNeedsLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Requires Google sign-in and age check'**
+  String get engineNeedsLogin;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsSectionTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get settingsSectionTranslation;
+
+  /// No description provided for @settingsTargetLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Target language'**
+  String get settingsTargetLanguage;
+
+  /// No description provided for @settingsLanguageModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Language models'**
+  String get settingsLanguageModels;
+
+  /// No description provided for @settingsLanguageModelsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Language files for on-device translation'**
+  String get settingsLanguageModelsDetail;
+
+  /// No description provided for @settingsSectionEngine.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation engine'**
+  String get settingsSectionEngine;
+
+  /// No description provided for @settingsAiSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'AI translation setup'**
+  String get settingsAiSetup;
+
+  /// No description provided for @settingsAiSetupDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'API key · Google sign-in'**
+  String get settingsAiSetupDetail;
+
+  /// No description provided for @settingsSectionCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture'**
+  String get settingsSectionCapture;
+
+  /// No description provided for @settingsDefaultCaptureMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Default capture mode'**
+  String get settingsDefaultCaptureMode;
+
+  /// No description provided for @settingsResetFixedRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset fixed area'**
+  String get settingsResetFixedRegion;
+
+  /// No description provided for @settingsSectionDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get settingsSectionDisplay;
+
+  /// No description provided for @settingsDisplayMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show results as'**
+  String get settingsDisplayMode;
+
+  /// No description provided for @displayModeList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get displayModeList;
+
+  /// No description provided for @displayModeOverlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Over original'**
+  String get displayModeOverlay;
+
+  /// No description provided for @settingsButtonSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating button size'**
+  String get settingsButtonSize;
+
+  /// No description provided for @settingsButtonOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating button opacity'**
+  String get settingsButtonOpacity;
+
+  /// No description provided for @settingsSectionEtc.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get settingsSectionEtc;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @modelsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Language models'**
+  String get modelsTitle;
+
+  /// No description provided for @modelsHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device languages'**
+  String get modelsHeadline;
+
+  /// No description provided for @modelsHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device'**
+  String get modelsHighlight;
+
+  /// No description provided for @modelsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'About 30MB per language. Once downloaded, translation works offline.'**
+  String get modelsBody;
+
+  /// No description provided for @modelsWifiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Download on Wi-Fi only'**
+  String get modelsWifiOnly;
+
+  /// No description provided for @modelsWifiOnlyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Won\'t use mobile data'**
+  String get modelsWifiOnlyDetail;
+
+  /// No description provided for @modelsInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed'**
+  String get modelsInstalled;
+
+  /// No description provided for @modelsNotInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Not downloaded'**
+  String get modelsNotInstalled;
+
+  /// No description provided for @modelsDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {percent}%'**
+  String modelsDownloading(int percent);
+
+  /// No description provided for @modelsSize.
+  ///
+  /// In en, this message translates to:
+  /// **'About {size}MB'**
+  String modelsSize(int size);
+
+  /// No description provided for @modelsDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get modelsDownload;
+
+  /// No description provided for @modelsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get modelsDelete;
+
+  /// No description provided for @modelsCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get modelsCancel;
+
+  /// No description provided for @modelsSectionInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get modelsSectionInstalled;
+
+  /// No description provided for @modelsSectionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get modelsSectionAvailable;
+
+  /// No description provided for @modelsTargetOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Target only'**
+  String get modelsTargetOnly;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get aboutVersion;
+
+  /// No description provided for @aboutPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get aboutPrivacy;
+
+  /// No description provided for @aboutLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licenses'**
+  String get aboutLicenses;
+
+  /// No description provided for @aboutPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get aboutPending;
 }
 
 class _AppLocalizationsDelegate
