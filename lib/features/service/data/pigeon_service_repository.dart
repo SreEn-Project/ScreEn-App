@@ -15,10 +15,7 @@ ServiceRepository serviceRepository(Ref ref) {
 }
 
 class PigeonServiceRepository implements ServiceRepository {
-  PigeonServiceRepository({
-    required this._api,
-    required this._events,
-  });
+  PigeonServiceRepository({required this._api, required this._events});
 
   final ServiceHostApi _api;
   final Stream<TranslatorEvent> _events;

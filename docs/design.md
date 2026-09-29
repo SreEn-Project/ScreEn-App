@@ -42,7 +42,8 @@ Flutter 앱 화면과 네이티브 오버레이(Compose)가 같은 토큰을 쓴
 | 하단 시트 상단 모서리 | 28dp |
 | 버튼 · 칩 | 알약 (StadiumBorder) |
 | 입력창 | 16dp |
-| 카드 그림자 | y 8, blur 24, 검정 6% (다크: 검정 24%) |
+| 카드 그림자 | y 8, blur 24, primary 10% (다크: 검정 32%) — 초록으로 살짝 물든 그림자 |
+| primary 버튼 빛 | y 10, blur 24, spread −4, primary 32% (다크: #C8EFC1 20%) |
 | 큰 버튼 높이 | 56dp |
 
 ## 글자
@@ -53,13 +54,42 @@ Flutter 앱 화면과 네이티브 오버레이(Compose)가 같은 토큰을 쓴
 - Material Symbols **Rounded**, 선(채움 0) 아이콘. 패키지 `material_symbols_icons`, `Symbols.xxx_rounded`.
 - 아이콘 배경이 필요하면 primaryContainer 원 위에 onPrimaryContainer 아이콘.
 
-## 화면
-### 홈
+## 컴포넌트 (D-015)
+Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두고 화면은 이것만 쓴다 (`import 'core/ui/ui.dart'`).
+화면 코드에서 `AppBar` · `ListTile` · `FilledButton` · `TextButton` · `OutlinedButton` · `Switch` · `Chip` · `Slider` · `Radio`를 쓰지 않는다.
+
+| 컴포넌트 | 모양 |
+|---|---|
+| `Pressable` | 누르면 97% 크기 + 살짝 흐려짐. 물결(ripple) 효과는 테마에서 끔 |
+| `AppPage` · `AppHeader` | 배경 + 가운데 제목 헤더(왼쪽 뒤로가기, 오른쪽 동작 하나) + 스크롤 본문 |
+| `AppBottomNav` | 떠 있는 흰 둥근 탭바 + 그림자, 고른 탭은 primary 아이콘 + 아래 짧은 막대 |
+| `AppButton` | primary: 초록 알약 + 아래로 번지는 빛 / secondary: 흰 알약 + 그림자 / text |
+| `AppIconButton` | 흰 원 + 그림자(기본), primary 원 + 빛(filled), 배경 없음(plain) |
+| `AppCard` · `AppSection` | 24dp 흰 카드 + 초록 그림자 / 작은 회색 섹션 제목 + 카드 |
+| `AppListTile` · `AppDivider` | 아이콘 원 + 제목 + 회색 설명 + 오른쪽 값(primary) · › / 가는 구분선 |
+| `AppSwitch` | 알약 트랙(켜짐 primary) + 흰 손잡이 |
+| `AppSegmented` · `AppChip` | 회색 트랙 안에서 고른 칸만 흰 알약으로 / 선택 시 primary 알약 |
+| `AppSlider` · `AppProgressBar` | 가는 알약 트랙 + 흰 원 손잡이(primary 테두리) |
+| `AppSearchField` | 테두리 없는 흰 알약 + 그림자 |
+| `AppBadge` · `AppStatusPill` · `StatusDot` | 작은 연두 배지 / 점 + 글자 알약 / 켜짐 점(accent) |
+| `IconBadge` · `AccentTitle` | 연한 초록 원 + 선 아이콘 / 한 단어 강조 제목 |
+
+## 화면 구조
+하단 탭 3개: **홈 · 언어 · 설정** (`lib/app/app_shell.dart`). 대상 언어 선택 · 앱 정보는 탭 위로 덮어 연다.
+
+### 홈 (D-016)
+캡처 범위는 떠 있는 버튼 메뉴에서 고르므로 홈에 두지 않는다.
 1. 인사 문구(제목, 한 단어 강조) + 오른쪽 알림 버튼(흰 원)
-2. 그라데이션 상태 카드: 대상 언어 · 번역 엔진 · 캡처 모드
-3. 큰 시작 버튼: primary 알약, 앞에 accent 초록 점 (켜짐 상태 표시)
-4. 캡처 모드 타일 3개 (전체 화면 · 영역 선택 · 고정 영역), 흰 카드 + 아이콘 원
+2. 그라데이션 상태 카드: 상태 알약(꺼짐/실행 중) · "자동 감지 → 대상 언어" · 엔진
+3. 큰 시작 버튼: primary 알약 + 빛, 앞에 상태 점 / 아래 "영역은 버튼을 길게 눌러 바꿈" 안내
+4. 번역 설정: 대상 언어 타일 · 언어 모델 타일(준비 수 + 진행 막대) 나란히, 아래 번역 엔진 줄
 5. 최근 기록: 칩 필터 + 목록 카드
+
+### 언어 탭
+대상 언어 줄 → Wi-Fi에서만 받기 → 받은 언어 · 받을 수 있는 언어 목록(받기 · 삭제 · 진행률)
+
+### 설정 탭
+번역 엔진(라디오) · AI 번역 설정 → 캡처(기본 모드, 고정 영역 초기화) → 표시(결과 방식, 버튼 크기 · 투명도) → 앱 정보
 
 ### 온보딩
 - 큰 제목(한 단어 강조) + 설명 + 하단 "시작하기 →" 흰 알약 버튼(그림자).

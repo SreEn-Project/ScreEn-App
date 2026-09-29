@@ -16,10 +16,7 @@ SettingsRepository settingsRepository(Ref ref) {
 }
 
 class PigeonSettingsRepository implements SettingsRepository {
-  PigeonSettingsRepository({
-    required this._api,
-    required this._events,
-  });
+  PigeonSettingsRepository({required this._api, required this._events});
 
   final SettingsHostApi _api;
   final Stream<TranslatorEvent> _events;

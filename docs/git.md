@@ -32,7 +32,8 @@
 - `develop` · `main`으로의 합치기는 **PR로만** 하고, **merge 전에 사용자에게 알리고 승인을 받는다.**
 - PR 제목은 커밋 규칙과 같은 형식. 본문은 `.github/pull_request_template.md`를 채운다.
 - merge 방식: 작업 브랜치 → `develop`은 **Squash merge**가 기본. 화면별 커밋을 남겨야 하는 `ui/` 묶음은 **Merge commit**. `develop` → `main`은 Merge commit.
-- merge 후 작업 브랜치는 삭제.
+- merge 후 작업 브랜치는 삭제 (GitHub 자동 삭제 켜 둠).
+- GitHub 설정: 기본 브랜치 `develop`, Squash · Merge commit 허용, Rebase merge 끔. 브랜치 보호는 private 무료 요금제라 불가 → `main` · `develop` 직접 push 금지는 규칙으로만 지킨다.
 
 ## 태그 · 버전
 - `main`에 합칠 때 `v<major>.<minor>.<patch>` 태그. 단계 완료 = minor 올림 (1단계 완료 → v0.1.0).

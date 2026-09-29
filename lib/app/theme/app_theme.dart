@@ -4,7 +4,8 @@ import 'app_colors.dart';
 import 'app_tokens.dart';
 
 /// 흰 톤 + 연한 초록 포인트 테마 (docs/design.md).
-/// 카드 그림자는 Material elevation 대신 `AppCard`가 토큰 그림자로 그린다.
+/// 화면은 `lib/core/ui/` 자체 컴포넌트로 그린다 (D-015). 여기 Material 컴포넌트 테마는
+/// 라이선스 화면 · 대화상자처럼 Flutter 기본 위젯이 뜨는 곳을 팔레트에 맞추는 용도다.
 abstract final class AppTheme {
   static ThemeData get light => _build(AppColors.light, AppTokens.light);
   static ThemeData get dark => _build(AppColors.dark, AppTokens.dark);
@@ -15,24 +16,32 @@ abstract final class AppTheme {
       borderRadius: BorderRadius.circular(AppTokens.radiusInput),
       borderSide: BorderSide(color: colors.outline),
     );
-    const buttonText = TextStyle(fontSize: 16, fontWeight: FontWeight.w600);
+    // 컴포넌트 글자 스타일은 textTheme에서 파생해 글꼴 설정을 물려받게 한다.
+    final textTheme = ThemeData(
+      useMaterial3: true,
+      brightness: colors.brightness,
+    ).textTheme.merge(_textTheme(colors));
+    final buttonText = textTheme.labelLarge!.copyWith(fontSize: 16);
 
     return ThemeData(
       useMaterial3: true,
       colorScheme: colors,
       scaffoldBackgroundColor: tokens.background,
       extensions: [tokens],
-      textTheme: _textTheme(colors),
+      // 물결(ripple) 대신 자체 컴포넌트의 눌림 효과(Pressable)를 쓴다.
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: tokens.background,
         foregroundColor: colors.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(
+        titleTextStyle: textTheme.titleLarge!.copyWith(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: colors.onSurface,
         ),
       ),
       cardTheme: CardThemeData(
@@ -72,17 +81,19 @@ abstract final class AppTheme {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(shape: pill),
+        style: TextButton.styleFrom(
+          shape: pill,
+          textStyle: textTheme.labelLarge,
+        ),
       ),
       chipTheme: ChipThemeData(
         shape: pill,
         side: BorderSide.none,
         backgroundColor: colors.surface,
         selectedColor: colors.primaryContainer,
-        labelStyle: TextStyle(fontSize: 14, color: colors.onSurface),
-        secondaryLabelStyle: TextStyle(
+        labelStyle: textTheme.bodyMedium!.copyWith(fontSize: 14),
+        secondaryLabelStyle: textTheme.labelLarge!.copyWith(
           fontSize: 14,
-          fontWeight: FontWeight.w600,
           color: colors.onPrimaryContainer,
         ),
         showCheckmark: false,
@@ -141,7 +152,11 @@ abstract final class AppTheme {
       bodyLarge: TextStyle(fontSize: 15, height: 1.5, color: colors.onSurface),
       bodyMedium: TextStyle(fontSize: 15, height: 1.5, color: colors.onSurface),
       bodySmall: TextStyle(fontSize: 13, color: colors.onSurfaceVariant),
-      labelLarge: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      labelLarge: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: colors.onSurface,
+      ),
     );
   }
 }
