@@ -49,5 +49,9 @@ main / develop + 작업 브랜치(Git Flow 축소판). 작업 브랜치 push는 
 ## D-013 · 2026-09-29 · UI 퍼블리싱 먼저
 사용자 요청으로 1단계 Flutter 화면을 자리 표시 데이터로 먼저 만들고 검증받는다. 브랜치 `ui/stage1-screens` 하나에 화면(기능 ID)별로 커밋하고, 검증 뒤 develop에 merge한다.
 
+## D-014 · 2026-09-29 · 언어 이름은 데이터로
+ML Kit 59개 언어의 한국어 · 영어 · 자기 언어 이름과 원문 인식 가능 여부는 `features/language/domain/supported_language.dart`에 둔다. UI 문구가 아니라 목록 데이터라 ARB에 118줄을 넣지 않음.
+원문 인식 가능 = ML Kit 문자 인식 v2가 읽는 문자(라틴 · 한중일 · 데바나가리). 나머지(아랍 · 키릴 · 태국 등)는 "대상 언어 전용".
+
 ## D-009 · 2026-09-29 · 아이콘 패키지
 Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가. Flutter 기본 `Icons`에는 Rounded + 선(outline) 조합이 없음.
