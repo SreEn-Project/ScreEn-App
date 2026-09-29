@@ -30,6 +30,7 @@ class ServiceHostApiImpl(private val context: Context) : ServiceHostApi {
 
     override fun startService() {
         if (TranslatorServiceState.state.value == RunState.RUNNING) return
+        // STARTING이어도 다시 띄운다: 동의 창을 두고 다른 앱으로 간 경우 되찾는 길.
         CaptureConsentActivity.launch(context)
     }
 

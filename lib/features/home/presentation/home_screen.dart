@@ -92,9 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             inactiveColor: Theme.of(context).colorScheme.onPrimary
                 .withValues(alpha: 0.5),
           ),
-          onPressed:
-              service == ServiceState.starting ||
-                  (permissionsMissing && !running)
+          onPressed: permissionsMissing && !running
               ? null
               : () => ref.read(serviceViewModelProvider.notifier).toggle(),
         ),

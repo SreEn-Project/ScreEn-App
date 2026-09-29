@@ -52,7 +52,7 @@
   "homeStop": "번역 중지",
   "homeStatusOff": "꺼짐",
   "homeStatusOn": "실행 중",
-  "homeStarting": "동의 기다리는 중",
+  "homeStarting": "동의 창 다시 열기",
   "homeStatusStarting": "동의 대기",
   "homeStatusError": "오류",
   "homeServiceStartingHint": "화면 녹화 · 전송 동의 창에서 \"시작\"을 눌러 주세요",

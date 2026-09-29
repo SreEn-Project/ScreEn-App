@@ -53,7 +53,7 @@
   "homeStop": "Stop translating",
   "homeStatusOff": "Off",
   "homeStatusOn": "Running",
-  "homeStarting": "Waiting for consent",
+  "homeStarting": "Reopen consent prompt",
   "homeStatusStarting": "Waiting",
   "homeStatusError": "Error",
   "homeServiceStartingHint": "Tap \"Start now\" on the screen capture prompt",

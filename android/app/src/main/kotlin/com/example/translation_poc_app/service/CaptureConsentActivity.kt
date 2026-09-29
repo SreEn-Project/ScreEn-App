@@ -15,6 +15,8 @@ import android.os.Bundle
  */
 class CaptureConsentActivity : Activity() {
 
+    private var resultHandled = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState != null) return // 회전 등으로 다시 만들어졌으면 결과만 기다린다.
@@ -36,6 +38,7 @@ class CaptureConsentActivity : Activity() {
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode != REQUEST_CAPTURE) return
+        resultHandled = true
 
         if (resultCode == RESULT_OK && data != null) {
             TranslatorService.start(this, resultCode, data)
@@ -46,6 +49,16 @@ class CaptureConsentActivity : Activity() {
         overrideActivityTransitionCompat()
     }
 
+    override fun onDestroy() {
+        // 결과 없이 사라지면(작업 목록에서 지움 등) "동의 대기"에 멈추지 않게 되돌린다.
+        if (!resultHandled && !isChangingConfigurations &&
+            TranslatorServiceState.state.value == RunState.STARTING
+        ) {
+            TranslatorServiceState.update(RunState.STOPPED)
+        }
+        super.onDestroy()
+    }
+
     private fun overrideActivityTransitionCompat() {
         @Suppress("DEPRECATION")
         overridePendingTransition(0, 0)
@@ -54,6 +67,10 @@ class CaptureConsentActivity : Activity() {
     companion object {
         private const val REQUEST_CAPTURE = 1001
 
+        /**
+         * 동의 화면을 띄운다. singleInstance라 이미 기다리는 중이면 그 화면을 앞으로 가져온다
+         * (사용자가 다른 앱으로 갔다가 돌아와 다시 누른 경우 결과가 이어서 전달된다).
+         */
         fun launch(context: Context) {
             val intent = Intent(context, CaptureConsentActivity::class.java)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)

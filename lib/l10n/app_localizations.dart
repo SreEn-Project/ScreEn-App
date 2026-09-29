@@ -383,7 +383,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeStarting.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for consent'**
+  /// **'Reopen consent prompt'**
   String get homeStarting;
 
   /// No description provided for @homeStatusStarting.

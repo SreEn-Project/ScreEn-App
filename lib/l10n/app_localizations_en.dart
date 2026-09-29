@@ -159,7 +159,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeStatusOn => 'Running';
 
   @override
-  String get homeStarting => 'Waiting for consent';
+  String get homeStarting => 'Reopen consent prompt';
 
   @override
   String get homeStatusStarting => 'Waiting';

@@ -154,7 +154,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeStatusOn => '실행 중';
 
   @override
-  String get homeStarting => '동의 기다리는 중';
+  String get homeStarting => '동의 창 다시 열기';
 
   @override
   String get homeStatusStarting => '동의 대기';
