@@ -1,17 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-import '../../../app/theme/app_tokens.dart';
-import '../../../core/widgets/accent_title.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/icon_badge.dart';
-import '../../../core/widgets/section_title.dart';
+import '../../../app/router.dart';
+import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../language/domain/supported_language.dart';
 
-/// 언어 모델 관리 (S-05, FL-05).
+/// 언어 탭: 대상 언어(FL-04) + 언어 모델 관리(S-05, FL-05).
 /// UI 퍼블리싱 단계: 설치 상태 · 진행률은 가짜 값이다. 받기를 누르면 진행률이 흉내로 올라간다.
 /// 실제 다운로드 · 삭제 · 진행률 이벤트는 NA-12와 함께 연결한다.
 class LanguageModelsScreen extends StatefulWidget {
@@ -24,6 +22,7 @@ class LanguageModelsScreen extends StatefulWidget {
 class _LanguageModelsScreenState extends State<LanguageModelsScreen> {
   static const _modelSizeMb = 30;
 
+  String _targetLanguage = 'ko';
   bool _wifiOnly = true;
 
   /// 언어 코드 → 진행률. 1 = 설치됨, 0~1 = 받는 중, 없음 = 받지 않음.
@@ -59,9 +58,17 @@ class _LanguageModelsScreenState extends State<LanguageModelsScreen> {
     });
   }
 
-  void _cancelOrDelete(String code) {
+  void _remove(String code) {
     _timers.remove(code)?.cancel();
     setState(() => _progress.remove(code));
+  }
+
+  Future<void> _pickLanguage() async {
+    final code = await context.push<String>(
+      AppRoutes.targetLanguage,
+      extra: _targetLanguage,
+    );
+    if (code != null) setState(() => _targetLanguage = code);
   }
 
   @override
@@ -77,67 +84,77 @@ class _LanguageModelsScreenState extends State<LanguageModelsScreen> {
         .where((l) => !_progress.containsKey(l.code))
         .toList();
 
-    Widget tile(SupportedLanguage language) => Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: _ModelTile(
-        name: language.displayName(locale),
-        language: language,
-        progress: _progress[language.code],
-        sizeMb: _modelSizeMb,
-        onDownload: () => setState(() => _simulateDownload(language.code)),
-        onRemove: () => _cancelOrDelete(language.code),
+    Widget group(List<SupportedLanguage> languages) => AppCard(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        children: [
+          for (var i = 0; i < languages.length; i++) ...[
+            if (i > 0) const AppDivider(),
+            _ModelRow(
+              name: languages[i].displayName(locale),
+              language: languages[i],
+              progress: _progress[languages[i].code],
+              sizeMb: _modelSizeMb,
+              onDownload: () =>
+                  setState(() => _simulateDownload(languages[i].code)),
+              onRemove: () => _remove(languages[i].code),
+            ),
+          ],
+        ],
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.modelsTitle)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppTokens.pagePadding,
-          8,
-          AppTokens.pagePadding,
-          32,
-        ),
-        children: [
-          AccentTitle(
-            text: l10n.modelsHeadline,
-            highlight: l10n.modelsHighlight,
-          ),
-          const SizedBox(height: 8),
-          Text(l10n.modelsBody, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 20),
-          AppCard(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: SwitchListTile(
-              value: _wifiOnly,
-              onChanged: (v) => setState(() => _wifiOnly = v),
-              secondary: const IconBadge(icon: Symbols.wifi_rounded),
-              title: Text(
-                l10n.modelsWifiOnly,
-                style: theme.textTheme.titleMedium,
-              ),
-              subtitle: Text(
-                l10n.modelsWifiOnlyDetail,
-                style: theme.textTheme.bodySmall,
-              ),
+    return AppPage(
+      title: l10n.languagesTitle,
+      withBottomNav: true,
+      children: [
+        AppSection(
+          title: l10n.languagesSectionTarget,
+          child: AppCard(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: AppListTile(
+              icon: Symbols.translate_rounded,
+              title: l10n.homeTargetLanguage,
+              value: SupportedLanguage.byCode(_targetLanguage)
+                  .displayName(locale),
+              onTap: _pickLanguage,
             ),
           ),
-          const SizedBox(height: 28),
-          SectionTitle(l10n.modelsSectionInstalled),
-          const SizedBox(height: 12),
-          ...installed.map(tile),
-          const SizedBox(height: 20),
-          SectionTitle(l10n.modelsSectionAvailable),
-          const SizedBox(height: 12),
-          ...available.map(tile),
-        ],
-      ),
+        ),
+        AppSection(
+          title: l10n.languagesSectionDownload,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppCard(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: AppListTile(
+                  icon: Symbols.wifi_rounded,
+                  title: l10n.modelsWifiOnly,
+                  subtitle: l10n.modelsWifiOnlyDetail,
+                  trailing: AppSwitch(
+                    value: _wifiOnly,
+                    onChanged: (v) => setState(() => _wifiOnly = v),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(l10n.modelsBody, style: theme.textTheme.bodySmall),
+              ),
+            ],
+          ),
+        ),
+        AppSection(title: l10n.modelsSectionInstalled, child: group(installed)),
+        AppSection(title: l10n.modelsSectionAvailable, child: group(available)),
+      ],
     );
   }
 }
 
-class _ModelTile extends StatelessWidget {
-  const _ModelTile({
+class _ModelRow extends StatelessWidget {
+  const _ModelRow({
     required this.name,
     required this.language,
     required this.progress,
@@ -168,8 +185,8 @@ class _ModelTile extends StatelessWidget {
         ? l10n.modelsDownloading((progress! * 100).round())
         : l10n.modelsSize(sizeMb);
 
-    return AppCard(
-      padding: const EdgeInsets.fromLTRB(20, 14, 8, 14),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -185,7 +202,7 @@ class _ModelTile extends StatelessWidget {
                       children: [
                         Text(name, style: theme.textTheme.titleMedium),
                         if (!language.ocrSupported)
-                          _Badge(label: l10n.modelsTargetOnly),
+                          AppBadge(label: l10n.modelsTargetOnly),
                       ],
                     ),
                     const SizedBox(height: 2),
@@ -199,74 +216,38 @@ class _ModelTile extends StatelessWidget {
                 ),
               ),
               if (_installed)
-                IconButton(
+                AppIconButton(
+                  icon: Symbols.delete_rounded,
                   tooltip: l10n.modelsDelete,
+                  plain: true,
+                  size: 40,
                   onPressed: onRemove,
-                  icon: Icon(
-                    Symbols.delete_rounded,
-                    color: colors.onSurfaceVariant,
-                  ),
                 )
               else if (_downloading)
-                IconButton(
+                AppIconButton(
+                  icon: Symbols.close_rounded,
                   tooltip: l10n.modelsCancel,
+                  plain: true,
+                  size: 40,
                   onPressed: onRemove,
-                  icon: Icon(
-                    Symbols.close_rounded,
-                    color: colors.onSurfaceVariant,
-                  ),
                 )
               else
-                IconButton.filledTonal(
+                AppIconButton(
+                  icon: Symbols.download_rounded,
                   tooltip: l10n.modelsDownload,
+                  size: 40,
                   onPressed: onDownload,
-                  icon: const Icon(Symbols.download_rounded),
                 ),
             ],
           ),
           if (_downloading) ...[
             const SizedBox(height: 10),
             Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 6,
-                  backgroundColor: colors.primaryContainer,
-                ),
-              ),
+              padding: const EdgeInsets.only(right: 8),
+              child: AppProgressBar(value: progress!),
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// 작은 배지 (secondaryContainer).
-class _Badge extends StatelessWidget {
-  const _Badge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: ShapeDecoration(
-        shape: const StadiumBorder(),
-        color: colors.secondaryContainer,
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: colors.onSecondaryContainer,
-        ),
       ),
     );
   }

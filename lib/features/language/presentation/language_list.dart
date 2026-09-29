@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../app/theme/app_tokens.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 import '../domain/supported_language.dart';
 
-/// 검색 가능한 대상 언어 목록 (FL-04). 온보딩 · 설정에서 같이 쓴다.
+/// 검색 가능한 대상 언어 목록 (FL-04). 온보딩 · 언어 선택 화면에서 같이 쓴다.
 class LanguageList extends StatefulWidget {
   const LanguageList({
     super.key,
@@ -40,15 +40,12 @@ class _LanguageListState extends State<LanguageList> {
       children: [
         Padding(
           padding: widget.padding,
-          child: TextField(
+          child: AppSearchField(
+            hint: l10n.languageSearchHint,
             onChanged: (value) => setState(() => _query = value),
-            decoration: InputDecoration(
-              hintText: l10n.languageSearchHint,
-              prefixIcon: const Icon(Symbols.search_rounded),
-            ),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Expanded(
           child: languages.isEmpty
               ? Center(
@@ -60,7 +57,7 @@ class _LanguageListState extends State<LanguageList> {
               : ListView.separated(
                   padding: widget.padding.copyWith(top: 4, bottom: 24),
                   itemCount: languages.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final language = languages[index];
                     return _LanguageTile(
@@ -99,6 +96,7 @@ class _LanguageTile extends StatelessWidget {
     return AppCard(
       onTap: onTap,
       color: selected ? colors.primaryContainer : null,
+      shadow: !selected,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
@@ -108,17 +106,19 @@ class _LanguageTile extends StatelessWidget {
               children: [
                 Text(name, style: theme.textTheme.titleMedium),
                 const SizedBox(height: 2),
-                Text(
-                  language.ocrSupported
-                      ? language.nativeName
-                      : '${language.nativeName} · ${l10n.languageOcrUnsupported}',
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(language.nativeName, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
-          if (selected)
-            Icon(Symbols.check_circle_rounded, color: colors.primary),
+          if (!language.ocrSupported) ...[
+            AppBadge(label: l10n.languageOcrUnsupported),
+            const SizedBox(width: 8),
+          ],
+          AnimatedOpacity(
+            opacity: selected ? 1 : 0,
+            duration: const Duration(milliseconds: 150),
+            child: Icon(Symbols.check_circle_rounded, color: colors.primary),
+          ),
         ],
       ),
     );
