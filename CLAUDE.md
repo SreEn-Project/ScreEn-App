@@ -11,7 +11,11 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 - 규칙 · 절차는 사용자에게 매번 묻지 말고 스스로 정해 docs/에 기록한 뒤 따른다. 사용자가 이미 정한 것은 다시 묻지 않는다.
 - 코드 · 설정(pubspec, Gradle, Manifest 등)을 바꿀 때는 무엇을 바꾸는지 보고에 적는다.
 - 작업을 마치면 [docs/progress.md](docs/progress.md)에 기록하고, 설계 결정은 [docs/decisions.md](docs/decisions.md)에 남긴다.
-- Notion [진행 기록](https://app.notion.com/p/3eac450c43a581b79e1ceb6229d026f1) 페이지에 docs/ 내용을 요약해 둔다. 갱신 시점: PR을 열거나 merge했을 때, 단계가 끝났을 때, 중요한 결정이 생겼을 때. "현재 상태"를 고치고 "기록"에 날짜별로 추가한다. 상세 원본은 항상 docs/.
+- Notion 기록은 페이지 본문이 아니라 **데이터베이스 행**으로 남긴다 ([진행 기록](https://app.notion.com/p/3eac450c43a581b79e1ceb6229d026f1) 아래).
+  - [작업 기록 DB](https://app.notion.com/p/b2eb20d69456469ca2b6340da86d78c3): 작업 단위(기능 ID · PR) 하나 = 한 행. 분류 · 기능 ID · 단계 · 상태 · PR · 브랜치 · 요약을 채우고 본문에 한 일 · 확인 · 남은 일.
+  - [설계 결정 DB](https://app.notion.com/p/e75c6bcec72049739f391565d86b77b9): docs/decisions.md와 같은 번호로 한 행. 바뀐 결정은 상태를 "대체됨"으로.
+  - 갱신 시점: PR 생성 · merge(상태 변경), 단계 완료, 중요한 결정, 막힌 일. 진행 기록 페이지의 "현재 상태"도 같이 고친다. 상세 원본은 항상 docs/.
+  - 새 기능 ID가 나오면 작업 기록 DB의 "기능 ID" 선택지에 추가한다.
 - 명세가 모호하거나 Notion과 코드가 다르면 추측하지 말고 사용자에게 묻는다.
 
 ## Git (상세: [docs/git.md](docs/git.md))
