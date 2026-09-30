@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.example.translation_poc_app.MainActivity
 import com.example.translation_poc_app.R
+import com.example.translation_poc_app.service.TranslatorService.Companion.isDebuggable
 
 /**
  * 번역 서비스 알림 (NA-03). 실행 중임을 알리고, 누르면 앱을 열고, "중지"로 서비스를 끈다.
@@ -48,7 +49,7 @@ object ServiceNotification {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        return NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(ContextCompat.getColor(context, R.color.brand_primary))
             .setContentTitle(context.getString(R.string.notification_title))
@@ -60,6 +61,17 @@ object ServiceNotification {
             .setSilent(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
-            .build()
+
+        // 디버그 빌드 전용: 플로팅 버튼(NA-18) 전까지 캡처를 시험하는 동작.
+        if (context.isDebuggable()) {
+            val debugCapture = PendingIntent.getService(
+                context,
+                2,
+                TranslatorService.debugCaptureIntent(context),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+            builder.addAction(0, context.getString(R.string.notification_action_debug_capture), debugCapture)
+        }
+        return builder.build()
     }
 }
