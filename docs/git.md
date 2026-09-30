@@ -1,6 +1,6 @@
 # Git 규칙
 
-저장소: https://github.com/Translation-App-Sample/Translation-App (private)
+저장소: https://github.com/Translation-App-Sample/ScreEn-App (private, 옛 이름 Translation-App에서 바뀜)
 
 ## 브랜치
 | 브랜치 | 용도 | 만드는 곳 → 합치는 곳 |
@@ -29,7 +29,9 @@
 
 ## Push · PR · Merge
 - 작업 브랜치 push는 자유롭게 한다.
-- `develop` · `main`으로의 합치기는 **PR로만** 하고, **merge 전에 사용자에게 알리고 승인을 받는다.**
+- 합치기는 **PR로만** 한다. `develop` merge는 analyze · test · 빌드가 통과하면 스스로 한다 (2026-09-30 사용자 결정). `main` merge는 사용자 승인 후.
+- 기능이 어느 정도 모이면 사용자에게 검토를 요청한다 (무엇이 되는지 + 확인 방법).
+- 쌓인 PR(앞 PR 위에 딴 브랜치)은 앞 PR merge 뒤 `git rebase --onto origin/develop <앞 브랜치 마지막 커밋>`으로 옮긴다 (앞 브랜치는 merge 때 자동 삭제되므로 커밋 해시를 쓴다).
 - PR 제목은 커밋 규칙과 같은 형식. 본문은 `.github/pull_request_template.md`를 채운다.
 - merge 방식: 작업 브랜치 → `develop`은 **Squash merge**가 기본. 화면별 커밋을 남겨야 하는 `ui/` 묶음은 **Merge commit**. `develop` → `main`은 Merge commit.
 - merge 후 작업 브랜치는 삭제 (GitHub 자동 삭제 켜 둠).

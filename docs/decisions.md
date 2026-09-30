@@ -43,7 +43,7 @@ Play 출시 전에 한 번에 바꾼다 (출시 후에는 applicationId 변경 �
 permission_handler_android 14.1이 compileSdk 37을 요구. 설치된 플랫폼 이름이 `android-37.0`이라 `release(37) { minorApiLevel = 0 }`로 지정. AGP 9.1은 36까지 권장한다는 경고가 나오지만 빌드는 됨. AGP를 올릴 때 다시 확인.
 
 ## D-012 · 2026-09-29 · Git 흐름
-main / develop + 작업 브랜치(Git Flow 축소판). 작업 브랜치 push는 자유, develop · main merge는 사용자 승인 후. 상세는 [git.md](git.md).
+main / develop + 작업 브랜치(Git Flow 축소판). 작업 브랜치 push는 자유, ~~develop · main merge는 사용자 승인 후~~ → D-022. 상세는 [git.md](git.md).
 그전까지 만든 기반 세팅 · 디자인 · NA-01 · NA-16은 규칙 이전 작업이라 `main` 초기 커밋 하나로 올리고 `develop`을 거기서 딴다.
 
 ## D-013 · 2026-09-29 · UI 퍼블리싱 먼저
@@ -101,6 +101,10 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 - 결정: 대상 언어와 같음 → 건너뜀 / 엔진이 원문으로 못 받음 → 미지원(안내) / 둘 다 모름 → 번역 안 함 / 그 밖 → 번역.
 - 코드 정리: "zh-Hant" → "zh", "iw" → "he", "in" → "id", "nb" → "no", "fil" → "tl". "ja-Latn"처럼 로마자로 적은 비라틴 언어는 해당 모델로 번역할 수 없어 모름으로 본다.
 - 엔진 지원 언어는 주입받는다 (기본 ML Kit 번역 59개). AI 엔진(3단계)은 자기 지원 목록을 넘긴다.
+
+## D-022 · 2026-09-30 · develop merge는 스스로, 검토는 기능 묶음 단위 (D-012 일부 대체)
+사용자 결정: "develop에 작업 알아서 다 merge하고, 기능이 어느 정도 개발되었다 싶으면 검토 요청".
+develop merge는 analyze · test · 빌드 통과 후 스스로. main merge만 승인. 검토 요청은 한 흐름이 기기에서 돌 때처럼 의미 있는 묶음마다.
 
 ## D-009 · 2026-09-29 · 아이콘 패키지
 Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가. Flutter 기본 `Icons`에는 Rounded + 선(outline) 조합이 없음.
