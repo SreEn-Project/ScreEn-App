@@ -42,6 +42,8 @@ presentation ──▶ domain ◀── data
 5. 캐시 확인 → 엔진 번역 (AI는 블록 묶어 1회 호출, JSON 배열 응답)
 6. 오버레이 표시 (목록형 / 원문 위치 덮어쓰기)
 
+네이티브 코드: 2~5는 `translate/TranslationPipeline`(서비스가 캡처 · OCR · 감지 · 엔진을 함수로 넘김), 1 · 6은 `overlay/OverlayController`(버튼 · 메뉴 · 닫기 영역 · 결과 시트 창). 둘 다 `TranslatorService`가 세션 동안 가진다 (D-024).
+
 ## 번역 엔진
 `TranslationEngine` 인터페이스 — ML Kit 온디바이스(기본), Gemini(내 키), Firebase AI Logic(구글 로그인). 실패 시 ML Kit 대체.
 

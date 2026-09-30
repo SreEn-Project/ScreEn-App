@@ -2,6 +2,15 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · NA-18 플로팅 버튼 · 모드 메뉴 · NA-19 결과 목록 시트 (브랜치 `feature/NA-18-floating-button`)
+- `overlay/`(Compose, D-024): `OverlayController`(창 4개 관리 · 제스처 · 번역 실행), `FloatingButton`(버튼 · 진행 링 · 닫기 영역 · 모드 메뉴), `ResultSheet`(결과 목록 · 안내), `OverlayComponents`(자체 컴포넌트), `OverlayTheme`(색 토큰 · 아이콘 글꼴), `OverlayWindow`(창 + Lifecycle 주인 + 제스처), `OverlayGeometry`(가장자리 붙기 · 닫기 영역 · 메뉴 위치 · 회전, 순수 로직).
+- `translate/TranslationPipeline`: 캡처 → OCR → 언어 감지 → `MlKitTranslationEngine`(NA-12, develop에 먼저 merge된 것) → 결과 조립(`TranslationAssembler`, 순수 로직).
+- `ScreenCapturer.awaitFreshFrame()`: 버튼을 숨긴 뒤의 프레임을 기다림. `TranslatorService`: 세션 시작 때 오버레이 띄움 · 종료 때 정리, 회전 전달, 엔진 수명 관리.
+- Gradle: Compose 컴파일러 플러그인(Kotlin 2.4.0), `buildFeatures.compose`, compose-bom 2026.09.00(ui · foundation), 테스트용 kotlinx-coroutines-test. 리소스: `res/font/material_symbols_rounded.ttf`(3.4KB 부분 글꼴, D-025), `values-night/colors.xml`, 색 토큰 추가, 오버레이 문구 ko/en.
+- 테스트: Kotlin `OverlayGeometryTest` 7 · `TranslationAssemblerTest` 6 · `TranslationPipelineTest` 2 추가 (testDebugUnitTest 37개 전부 통과). flutter analyze 0, flutter test 통과, debug APK 빌드. Flutter 코드 변경 없음.
+- 기기 확인 못 함: 에뮬레이터(Pixel_9)를 다른 스레드가 쓰는 중이라 실행하지 않음 → 기기에서 볼 것: 버튼 끌기 · 가장자리 붙기 · 닫기 영역 종료, 길게 눌러 메뉴, 탭 → 결과 시트(캡처에 버튼이 안 찍히는지), 복사, 회전, 다크 모드, 첫 사용 때 언어 모델 내려받기 시간.
+- 남은 일: 기기 확인 · 조정, 캡처 모드(2단계), AI로 다시 번역(NA-13), 버튼 크기 · 투명도(FL-07).
+
 ## 2026-10-01 · NA-11 번역 엔진 인터페이스 · NA-12 ML Kit 번역 엔진 (브랜치 `feature/NA-11-translation-engine`)
 - `translate/TranslationEngine`(NA-11): 엔진 규약(`supports` · `translate` · `isLanguageAvailable` · `downloadLanguage` · `deleteLanguage` · `close`), 요청 · 결과, 오류 종류(`TranslationError`), 예외 대신 `EngineResult`. Gemini 등은 이 인터페이스를 구현해 끼운다.
 - `translate/MlKitTranslationEngine`(NA-12): 원문 auto면 Language ID로 감지, 영어 중간 언어 때문에 영어 아닌 쌍은 영어 모델도 필요, 모델이 없으면 (자동 내려받기 켜짐) Wi-Fi 조건 옵션으로 내려받고 번역 / 꺼짐이면 `ModelNotDownloaded`. 같은 언어 · 빈 글자는 그대로 돌려줌.

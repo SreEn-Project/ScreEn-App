@@ -1,5 +1,7 @@
 plugins {
     id("com.android.application")
+    // 오버레이 UI를 Compose로 그린다 (NA-18, NA-19)
+    id("org.jetbrains.kotlin.plugin.compose")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -30,6 +32,10 @@ android {
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     buildTypes {
@@ -65,7 +71,12 @@ dependencies {
     implementation("com.google.mlkit:text-recognition-devanagari:16.0.1")
     implementation("com.google.mlkit:language-id:17.0.6")
     implementation("com.google.mlkit:translate:17.0.3")
+    // 오버레이 UI (NA-18 플로팅 버튼, NA-19 결과 시트). Material 컴포넌트 없이 foundation으로 직접 그린다.
+    implementation(platform("androidx.compose:compose-bom:2026.09.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.foundation:foundation")
 
     // 네이티브 순수 로직 단위 테스트 (OCR 결과 고르기 등)
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }

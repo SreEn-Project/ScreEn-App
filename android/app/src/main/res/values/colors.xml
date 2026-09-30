@@ -4,6 +4,14 @@
     <color name="brand_primary">#044B39</color>
     <color name="brand_on_primary">#FFFFFF</color>
     <color name="brand_primary_container">#C8EFC1</color>
+    <color name="brand_on_primary_container">#044B39</color>
     <color name="brand_background">#F6F8F5</color>
     <color name="brand_surface">#FFFFFF</color>
+    <color name="brand_on_surface">#0F1F1A</color>
+    <color name="brand_on_surface_variant">#6B7570</color>
+    <color name="brand_outline">#E3E8E4</color>
+    <color name="brand_error">#B3261E</color>
+    <!-- 오버레이 전용: 결과 시트 뒤를 어둡게, 그림자 색 -->
+    <color name="overlay_scrim">#520F1F1A</color>
+    <color name="overlay_shadow">#1A044B39</color>
 </resources>
