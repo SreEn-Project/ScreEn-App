@@ -5,8 +5,8 @@
 ## 2026-09-30 · NA-10 언어 감지 (브랜치 `feature/NA-10-language-detection`, NA-09 위에 쌓음)
 - `translate/LanguageDetector`: 블록별 ML Kit Language ID(신뢰도 0.5 미만 = 모름), 대상 언어는 저장된 설정.
 - `translate/LanguagePlan`(순수 로직): 언어 코드 정리(지역 · 문자 표기 제거, 옛 코드 변환, 로마자 표기 비라틴 = 모름), 블록별 결정 — 번역 / 대상과 같아 건너뜀 / 엔진 미지원 / 모름. Language ID가 모르면 OCR 추정 언어를 씀 (D-021).
-- 서비스 `detectLanguages()`, 디버그 "캡처 테스트"에 결정별 개수 로그. Kotlin 단위 테스트 `LanguagePlanTest` 7개 작성.
-- 빌드 · 테스트 실행 전: 명령 실행 권한 판정이 멈춰 대기 중. 기기 확인은 에뮬레이터 대기(첫 Pixel_9가 디스크 부족으로 안 켜짐).
+- 서비스 `detectLanguages()`, 디버그 "캡처 테스트"에 결정별 개수 로그. Kotlin 단위 테스트 `LanguagePlanTest` 7개 통과, debug APK 빌드 · analyze · flutter test 통과.
+- 기기 확인은 에뮬레이터 대기 (첫 Pixel_9가 디스크 부족으로 안 켜짐).
 
 ## 2026-09-30 · NA-09 문자 인식 (브랜치 `feature/NA-09-text-recognition`, NA-05 위에 쌓음)
 - `ocr/`: `ScreenTextRecognizer`(ML Kit v2, 인식기는 처음 쓸 때 만들고 서비스 종료 때 닫음), `OcrSelection`(인식기 고르기 · 낮은 신뢰도 거르기 · 결과 고르기, 순수 로직), 블록 · 줄 · 좌표 · 추정 언어 모델.
