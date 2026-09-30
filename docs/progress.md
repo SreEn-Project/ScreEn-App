@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-09-30 · NA-09 문자 인식 (브랜치 `feature/NA-09-text-recognition`, NA-05 위에 쌓음)
+- `ocr/`: `ScreenTextRecognizer`(ML Kit v2, 인식기는 처음 쓸 때 만들고 서비스 종료 때 닫음), `OcrSelection`(인식기 고르기 · 낮은 신뢰도 거르기 · 결과 고르기, 순수 로직), 블록 · 줄 · 좌표 · 추정 언어 모델.
+- 서비스 `recognizeText()`, 디버그 "캡처 테스트"에 인식 결과 · 소요 시간 로그.
+- Gradle: `text-recognition-devanagari`, `testImplementation junit` 추가. Kotlin 단위 테스트 `OcrSelectionTest` 6개 통과.
+- 기기 확인 못 함: Pixel_5는 종료되어 있고 Pixel_9는 다른 앱(music_download_play_app)이 사용 중.
+- 사용자 확인 필요: 자동 모드 인식기 고르기 (D-020).
+
 ## 2026-09-30 · NA-05 프레임 캡처 · NA-04 세션 관리 (브랜치 `feature/NA-05-frame-capture`)
 - `capture/ScreenCapturer`: VirtualDisplay + ImageReader, 최신 프레임 유지, RGBA → Bitmap(rowStride 패딩 제거), 검은 화면 감지, 회전 대응 (D-019).
 - `TranslatorService`: 세션 시작 때 캡처 준비 · 종료 때 해제, `captureFrame()`(NA-18이 부를 곳), 캡처 대상 크기 변경 콜백, 디버그 전용 알림 "캡처 테스트".
