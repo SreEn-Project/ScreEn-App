@@ -19,6 +19,8 @@ data class Settings(
     val captureRange: CaptureRange = CaptureRange.FULL_SCREEN,
     val resultDisplay: ResultDisplay = ResultDisplay.LIST,
     val onboardingCompleted: Boolean = false,
+    /** 고정 영역 모드가 번역할 영역 (NA-08). 아직 안 정했으면 null. 네이티브 전용 (Pigeon 없음). */
+    val fixedRegion: NormalizedRegion? = null,
 ) {
     companion object {
         const val DEFAULT_TARGET_LANGUAGE = "ko"

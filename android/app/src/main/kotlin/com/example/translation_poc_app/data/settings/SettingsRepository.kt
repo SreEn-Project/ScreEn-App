@@ -35,6 +35,8 @@ class SettingsRepository(context: Context) {
 
     suspend fun setResultDisplay(display: ResultDisplay) = edit { it[Keys.RESULT_DISPLAY] = display.name }
 
+    suspend fun setFixedRegion(region: NormalizedRegion) = edit { it[Keys.FIXED_REGION] = region.encode() }
+
     suspend fun setOnboardingCompleted(completed: Boolean) =
         edit { it[Keys.ONBOARDING_COMPLETED] = completed }
 
@@ -50,6 +52,7 @@ class SettingsRepository(context: Context) {
             captureRange = enumOrDefault(this[Keys.CAPTURE_RANGE], defaults.captureRange),
             resultDisplay = enumOrDefault(this[Keys.RESULT_DISPLAY], defaults.resultDisplay),
             onboardingCompleted = this[Keys.ONBOARDING_COMPLETED] ?: defaults.onboardingCompleted,
+            fixedRegion = NormalizedRegion.decode(this[Keys.FIXED_REGION]),
         )
     }
 
@@ -63,5 +66,6 @@ class SettingsRepository(context: Context) {
         val CAPTURE_RANGE = stringPreferencesKey("capture_range")
         val RESULT_DISPLAY = stringPreferencesKey("result_display")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val FIXED_REGION = stringPreferencesKey("fixed_region")
     }
 }

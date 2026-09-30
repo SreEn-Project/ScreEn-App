@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.translation_poc_app.data.settings.CaptureRange
+import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.translate.TranslationOutcome
 import com.example.translation_poc_app.translate.TranslationPipeline
@@ -57,6 +58,7 @@ class OverlayController(
 
     // Compose가 읽는 상태
     private var mode by mutableStateOf(CaptureRange.FULL_SCREEN)
+    private var fixedRegion: NormalizedRegion? = null
     private var busy by mutableStateOf(false)
     private var dragging by mutableStateOf(false)
     private var overClose by mutableStateOf(false)
@@ -93,6 +95,7 @@ class OverlayController(
 
     private var menu: OverlayWindow? = null
     private var sheet: OverlayWindow? = null
+    private var picker: OverlayWindow? = null
     private var settingsJob: Job? = null
     private var snapAnimator: ValueAnimator? = null
     private var dragStart = placement
@@ -108,7 +111,10 @@ class OverlayController(
         applyPlacement()
         button.show()
         settingsJob = scope.launch {
-            settingsRepository.settings.collect { mode = it.captureRange.effective() }
+            settingsRepository.settings.collect {
+                mode = it.captureRange
+                fixedRegion = it.fixedRegion
+            }
         }
         return true
     }
@@ -119,6 +125,7 @@ class OverlayController(
         gestures.cancel()
         dismissMenu()
         dismissSheet()
+        dismissPicker()
         closeZone.destroy()
         button.destroy()
         lastPlacement = placement to area
@@ -147,10 +154,14 @@ class OverlayController(
             dismissMenu()
             return
         }
-        translate()
+        when (mode) {
+            CaptureRange.FULL_SCREEN -> translate()
+            CaptureRange.DRAG_REGION -> showPicker(RegionPickMode.DRAG) { translate(it) }
+            CaptureRange.FIXED_REGION -> fixedRegion?.let { translate(it) } ?: showPicker(RegionPickMode.EDIT, ::saveFixedRegion)
+        }
     }
 
-    private fun translate() {
+    private fun translate(region: NormalizedRegion? = null) {
         if (busy) return
         dismissMenu()
         dismissSheet()
@@ -159,7 +170,7 @@ class OverlayController(
             // 버튼이 캡처에 찍히지 않도록 숨긴다. 캡처 쪽이 숨긴 뒤의 새 프레임을 기다린다.
             button.root.visibility = View.INVISIBLE
             val outcome = try {
-                pipeline.run(onCaptured = { button.root.visibility = View.VISIBLE })
+                pipeline.run(region, onCaptured = { button.root.visibility = View.VISIBLE })
             } finally {
                 button.root.visibility = View.VISIBLE
                 busy = false
@@ -252,10 +263,52 @@ class OverlayController(
 
     private fun onMenuSelect(item: ModeMenuItem) {
         val range = item.range
-        if (item.available && range != null) {
+        if (range != null) {
             scope.launch { settingsRepository.setCaptureRange(range) }
+        } else {
+            post { showPicker(RegionPickMode.EDIT, ::saveFixedRegion) }
         }
         post(::dismissMenu)
+    }
+
+    // ── 영역 선택 (NA-20 · NA-21) ────────────────────────
+
+    /** 고정 영역을 저장하고 고정 영역 모드로 바꾼다. */
+    private fun saveFixedRegion(region: NormalizedRegion) {
+        scope.launch {
+            settingsRepository.setFixedRegion(region)
+            settingsRepository.setCaptureRange(CaptureRange.FIXED_REGION)
+        }
+    }
+
+    /** 화면 전체를 덮는 영역 선택 창. 고르면 [onPicked]. 취소 · 뒤로 가기는 그냥 닫는다. */
+    private fun showPicker(pickMode: RegionPickMode, onPicked: (NormalizedRegion) -> Unit) {
+        if (busy || picker != null) return
+        dismissMenu()
+        dismissSheet()
+        val params = OverlayWindow.params(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            // 뒤로 가기를 받으려고 포커스를 받는다.
+            0,
+        )
+        picker = OverlayWindow(context, windowManager, params) {
+            RegionPicker(
+                pickMode,
+                initial = fixedRegion,
+                onDone = { region -> post { dismissPicker(); onPicked(region) } },
+                onCancel = { post(::dismissPicker) },
+            )
+        }.apply {
+            root.onBack = { post(::dismissPicker) }
+            show()
+        }
+    }
+
+    private fun dismissPicker() {
+        val current = picker ?: return
+        picker = null
+        current.destroy()
     }
 
     private fun dismissMenu() {
@@ -313,8 +366,5 @@ class OverlayController(
 
         /** 서비스를 다시 켜도 버튼이 마지막 자리에 뜨도록 (같은 화면 크기일 때만). 프로세스 안에서만 기억한다. */
         var lastPlacement: Pair<ButtonPlacement, ScreenArea>? = null
-
-        /** 1단계는 전체 화면만 된다. 다른 모드가 저장돼 있어도 전체 화면으로 번역한다 (2단계 NA-06에서 연결). */
-        fun CaptureRange.effective(): CaptureRange = CaptureRange.FULL_SCREEN
     }
 }

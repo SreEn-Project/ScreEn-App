@@ -43,7 +43,7 @@ import com.example.translation_poc_app.data.settings.CaptureRange
 internal const val BUTTON_DIAMETER_DP = 52
 internal const val BUTTON_WINDOW_DP = BUTTON_DIAMETER_DP + 16
 
-/** 모드 메뉴 항목 (O-02). 1단계는 전체 화면만 쓸 수 있고 나머지는 2단계(NA-06 · NA-20 · NA-21). */
+/** 모드 메뉴 항목 (O-02). 앞의 셋은 캡처 범위를 고르고, 마지막은 고정 영역을 다시 지정한다. */
 internal enum class ModeMenuItem(val symbol: Symbol, val label: Int, val range: CaptureRange?) {
     FULL_SCREEN(Symbol.FULLSCREEN, R.string.overlay_mode_full_screen, CaptureRange.FULL_SCREEN),
     DRAG_REGION(Symbol.CROP, R.string.overlay_mode_drag_region, CaptureRange.DRAG_REGION),
@@ -51,7 +51,6 @@ internal enum class ModeMenuItem(val symbol: Symbol, val label: Int, val range: 
     EDIT_FIXED_REGION(Symbol.EDIT, R.string.overlay_mode_edit_fixed_region, null),
     ;
 
-    val available: Boolean get() = this == FULL_SCREEN
 }
 
 internal fun CaptureRange.symbol(): Symbol = when (this) {
@@ -153,14 +152,13 @@ internal fun ModeMenu(current: CaptureRange, onSelect: (ModeMenuItem) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             ModeMenuItem.entries.forEach { item ->
-                val selected = item.range == current && item.available
+                val selected = item.range == current
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(if (selected) colors.primaryContainer else colors.surface)
-                        .alpha(if (item.available) 1f else 0.45f)
-                        .pressable(enabled = item.available) { onSelect(item) }
+                        .pressable { onSelect(item) }
                         .padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -170,13 +168,6 @@ internal fun ModeMenu(current: CaptureRange, onSelect: (ModeMenuItem) -> Unit) {
                         stringResource(item.label),
                         style = OverlayTheme.body.copy(color = if (selected) colors.onPrimaryContainer else colors.onSurface),
                     )
-                    if (!item.available) {
-                        Spacer(Modifier.width(12.dp).weight(1f))
-                        BasicText(
-                            stringResource(R.string.overlay_mode_coming_soon),
-                            style = OverlayTheme.badge.copy(color = colors.onSurfaceVariant),
-                        )
-                    }
                 }
             }
         }
