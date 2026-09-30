@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · NA-11 번역 엔진 인터페이스 · NA-12 ML Kit 번역 엔진 (브랜치 `feature/NA-11-translation-engine`)
+- `translate/TranslationEngine`(NA-11): 엔진 규약(`supports` · `translate` · `isLanguageAvailable` · `downloadLanguage` · `deleteLanguage` · `close`), 요청 · 결과, 오류 종류(`TranslationError`), 예외 대신 `EngineResult`. Gemini 등은 이 인터페이스를 구현해 끼운다.
+- `translate/MlKitTranslationEngine`(NA-12): 원문 auto면 Language ID로 감지, 영어 중간 언어 때문에 영어 아닌 쌍은 영어 모델도 필요, 모델이 없으면 (자동 내려받기 켜짐) Wi-Fi 조건 옵션으로 내려받고 번역 / 꺼짐이면 `ModelNotDownloaded`. 같은 언어 · 빈 글자는 그대로 돌려줌.
+- `translate/OnDeviceBackend`: ML Kit 호출만 감싼 층(번역기 캐시, RemoteModelManager) + `TranslationErrorMapper`(네트워크 · 저장 공간 · 기타). 규칙을 ML Kit 없이 테스트하려고 분리.
+- Gradle은 이미 `translate:17.0.3` 있어 변경 없음. `LanguageDetector`의 `await` 확장을 internal로 열어 재사용.
+- Kotlin 단위 테스트 `MlKitTranslationEngineTest` 9개 통과 (testDebugUnitTest 전체 성공). 기기 · APK 확인 안 함 (에뮬레이터 사용 금지 지시).
+- 남은 일: 번역 Pigeon 브릿지는 아직 없어 네이티브에만 둠. 서비스(NA-18 이후)에서 엔진 호출 · 캡처 → OCR → 감지 → 번역 연결, 오버레이 표시, ML Kit 대체 로직(NA-13/14 때).
+
 ## 2026-09-30 · NA-10 언어 감지 (브랜치 `feature/NA-10-language-detection`, NA-09 위에 쌓음)
 - `translate/LanguageDetector`: 블록별 ML Kit Language ID(신뢰도 0.5 미만 = 모름), 대상 언어는 저장된 설정.
 - `translate/LanguagePlan`(순수 로직): 언어 코드 정리(지역 · 문자 표기 제거, 옛 코드 변환, 로마자 표기 비라틴 = 모름), 블록별 결정 — 번역 / 대상과 같아 건너뜀 / 엔진 미지원 / 모름. Language ID가 모르면 OCR 추정 언어를 씀 (D-021).
