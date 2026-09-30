@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 다크 모드 토큰 (docs/design.md 색 토큰 표 "다크" 열). 오버레이가 시스템 다크 모드를 따른다. -->
+<resources>
+    <color name="brand_primary">#C8EFC1</color>
+    <color name="brand_on_primary">#04261D</color>
+    <color name="brand_primary_container">#1D3A31</color>
+    <color name="brand_on_primary_container">#C8EFC1</color>
+    <color name="brand_background">#0B1A16</color>
+    <color name="brand_surface">#13241F</color>
+    <color name="brand_on_surface">#E4EDE8</color>
+    <color name="brand_on_surface_variant">#9AA8A1</color>
+    <color name="brand_outline">#24362F</color>
+    <color name="brand_error">#F2B8B5</color>
+    <color name="overlay_scrim">#8C000000</color>
+    <color name="overlay_shadow">#52000000</color>
+</resources>

@@ -57,6 +57,9 @@ class ScreenCapturer(
     private var latest: Image? = null
     private var firstFrame = CompletableDeferred<Unit>()
 
+    /** [awaitFreshFrame]가 기다리는 다음 프레임. [lock]으로 보호한다. */
+    private var nextFrame: CompletableDeferred<Unit>? = null
+
     /** 세션 시작 때 한 번 부른다. */
     fun start() {
         readScreenSize()
@@ -105,6 +108,21 @@ class ScreenCapturer(
             return CaptureResult.Blank
         }
         return CaptureResult.Frame(bitmap)
+    }
+
+    /**
+     * 화면이 바뀐 뒤(오버레이를 숨긴 뒤 등)의 프레임이 들어올 때까지 기다린다 (NA-18).
+     * 멈춘 화면은 숨긴 변화로 프레임이 하나만 오고, 움직이는 화면은 이미 그리고 있던 프레임이 먼저 올 수 있어
+     * 하나를 받은 뒤 [settleMs] 안에 오는 프레임을 하나 더 받는다. 오지 않으면 그대로 넘어간다.
+     */
+    suspend fun awaitFreshFrame(timeoutMs: Long = 200, settleMs: Long = 50) {
+        if (awaitNextFrame(timeoutMs)) awaitNextFrame(settleMs)
+    }
+
+    private suspend fun awaitNextFrame(timeoutMs: Long): Boolean {
+        val deferred = CompletableDeferred<Unit>()
+        synchronized(lock) { nextFrame = deferred }
+        return withTimeoutOrNull(timeoutMs) { deferred.await() } != null
     }
 
     fun release() {
@@ -161,6 +179,8 @@ class ScreenCapturer(
                 synchronized(lock) {
                     latest?.close()
                     latest = image
+                    nextFrame?.complete(Unit)
+                    nextFrame = null
                 }
                 firstFrame.complete(Unit)
             }, handler)

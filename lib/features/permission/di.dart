@@ -6,7 +6,7 @@ import 'domain/repositories/permission_repository.dart';
 import 'domain/usecases/permission_usecases.dart';
 import 'presentation/bloc/permission_cubit.dart';
 
-// 권한 기능의 의존성 연결 (D-018, D-023). 테스트는 PermissionRepository를 바꿔 끼운다.
+// 권한 기능의 의존성 연결 (D-018, D-026). 테스트는 PermissionRepository를 바꿔 끼운다.
 
 void registerPermissionFeature(GetIt sl) {
   sl

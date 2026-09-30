@@ -6,7 +6,7 @@ import '../../features/service/di.dart';
 import '../../features/settings/di.dart';
 import '../bridge/bridge_module.dart';
 
-/// 앱 전체 의존성 컨테이너 (D-023). 화면은 BlocProvider로 Bloc · Cubit을 받고,
+/// 앱 전체 의존성 컨테이너 (D-026). 화면은 BlocProvider로 Bloc · Cubit을 받고,
 /// Bloc · Cubit을 만들 때만 여기서 꺼낸다.
 final GetIt getIt = GetIt.instance;
 

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// 클린 아키텍처 의존 규칙 검사 (D-018).
 /// - domain: 순수 Dart. Flutter · Bloc · get_it · Pigeon · 플러그인 · 다른 계층을 모른다.
 /// - presentation: data를 직접 쓰지 않는다 (Bloc · Cubit은 생성자로 유스케이스를 받는다).
-/// - presentation: DI 컨테이너(get_it)를 직접 꺼내 쓰지 않는다 (D-023).
+/// - presentation: DI 컨테이너(get_it)를 직접 꺼내 쓰지 않는다 (D-026).
 void main() {
   Iterable<File> dartFiles(String dir) =>
       Directory(dir)

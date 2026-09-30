@@ -22,7 +22,7 @@ Play 출시 전에 한 번에 바꾼다 (출시 후에는 applicationId 변경 �
 
 ## D-006 · 2026-09-29 · 상태 관리 Riverpod 유지
 비동기 상태(AsyncValue), DI 겸용, 테스트 override가 네이티브 연동 앱에 맞음. 사용자가 Riverpod에 익숙하지 않으므로 첫 화면에서 패턴을 문서화한다.
-→ D-023으로 대체.
+→ D-026으로 대체.
 
 ## D-007 · 2026-09-29 · 디자인 방향
 화이트 톤 + 연한 초록 포인트, 미니멀리즘 · 모노톤. Material 3, 그림자 대신 테두리. 상세는 [design.md](design.md).
@@ -80,7 +80,7 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 - data: 데이터소스(Pigeon · permission_handler 감싸기), 매퍼(Pigeon ↔ 엔티티), 리포지토리 구현. Pigeon 타입은 data 밖으로 안 나감.
 - presentation: screens / view_models / widgets. ViewModel은 유스케이스만 호출.
 - DI: 기능마다 `di.dart`에 Riverpod provider(데이터소스 → 리포지토리 → 유스케이스). 전용 DI 패키지(get_it 등)는 쓰지 않음 — Riverpod이 이미 DI와 테스트 override를 해 줌.
-- (DI · presentation 부분은 D-023으로 대체: get_it + Bloc/Cubit)
+- (DI · presentation 부분은 D-026으로 대체: get_it + Bloc/Cubit)
 - 규칙은 `test/architecture_test.dart`로 검사 (첫 실행에서 도메인이 Flutter를 import하던 곳 1건을 잡아 고침).
 - 네이티브(Kotlin)는 이미 bridge / service / data 로 나뉘어 있어 이번에는 바꾸지 않음.
 
@@ -108,7 +108,29 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 사용자 결정: "develop에 작업 알아서 다 merge하고, 기능이 어느 정도 개발되었다 싶으면 검토 요청".
 develop merge는 analyze · test · 빌드 통과 후 스스로. main merge만 승인. 검토 요청은 한 흐름이 기기에서 돌 때처럼 의미 있는 묶음마다.
 
-## D-023 · 2026-10-01 · 상태 관리 Bloc + DI get_it (D-006 · D-018 DI 부분 대체)
+## D-024 · 2026-10-01 · 오버레이 구조 (NA-18, NA-19)
+- **Compose로 그린다** (foundation만, Material 컴포넌트 없음 — 모양은 `overlay/OverlayComponents.kt`에 Flutter `core/ui`와 같게). 창마다 WindowManager `TYPE_APPLICATION_OVERLAY` + 자체 Lifecycle · SavedState 주인(서비스에는 Activity가 없음).
+- 창 4개: 플로팅 버튼(포커스 없음), 닫기 영역(끄는 동안만, 터치 안 받음), 모드 메뉴(버튼 옆 WRAP 창, 바깥 터치로 닫힘), 결과 시트(전체 화면, 포커스를 받아 뒤로 가기로 닫힘).
+- 버튼 제스처는 Compose가 아니라 View 층에서 화면 좌표(rawX/Y)로 처리 — 창이 손가락을 따라 움직여 창 기준 좌표가 흔들리기 때문. 놓으면 가까운 좌우 가장자리에 붙고 시스템 막대는 피한다(`OverlayGeometry`, 순수 로직 · 단위 테스트).
+- 캡처: 버튼을 숨김(INVISIBLE) → 숨긴 뒤의 새 프레임을 기다림(최대 200ms, 이어서 50ms 안의 프레임 하나 더) → 찍고 곧바로 다시 보임 + 번역 끝날 때까지 도는 링. D-019의 "최신 프레임을 들고 있는" 방식이라 기다리지 않으면 버튼이 찍힌다.
+- 1단계는 **전체 화면만** 된다. 저장된 캡처 모드가 다른 값이어도 전체 화면으로 번역하고, 메뉴의 드래그로 지정 · 고정 영역 · 고정 영역 편집은 "준비 중"(비활성)으로 보인다 → NA-06 · NA-20 · NA-21에서 연결.
+- 닫기 영역에 놓으면 서비스 종료(알림 "중지"와 같음). 버튼 위치는 프로세스 안에서만 기억(표시 설정 FL-07 때 저장 검토).
+- 결과: 블록마다 줄을 이어 한 문단으로 만들어(ja · zh 등은 공백 없이) 엔진에 동시에 요청. 모두 실패하면 목록 대신 이유(Wi-Fi 필요 · 저장 공간 · 모델 없음)를 안내하고, 일부만 실패하면 그 카드에 "번역하지 못했어요". 미지원 언어는 원문 + 안내.
+- 복사: 카드별 번역문, 전체 복사는 빈 줄로 잇는다. "AI로 다시 번역"은 ML Kit 결과일 때 비활성으로 보이고 NA-13에서 연결.
+- 엔진은 서비스가 `MlKitTranslationEngine` 하나를 세션 동안 가진다(설정 엔진과 무관, AI 엔진이 생기면 고르기 · 대체).
+- 다크 모드: `res/values-night/colors.xml` (design.md 다크 열).
+- 다른 앱 위 표시 권한이 없으면 버튼을 띄우지 않고 서비스만 돈다 (권한 화면이 시작 전에 막는다).
+
+## D-025 · 2026-10-01 · 오버레이 아이콘은 Material Symbols 부분 글꼴
+Flutter와 같은 Material Symbols Rounded 선 아이콘을 쓰되, 원본 글꼴(15MB) 대신 쓰는 글자만 남긴 3.4KB 글꼴 `res/font/material_symbols_rounded.ttf`를 넣는다. 코드포인트는 `overlay/OverlayTheme.kt`의 `Symbol`.
+아이콘을 추가할 때 다시 만드는 법 (fonttools, 원본은 pub 캐시 `material_symbols_icons/lib/fonts/MaterialSymbolsRounded.ttf`, 코드포인트는 같은 패키지 `symbols.dart`):
+```
+pip install fonttools
+pyftsubset MaterialSymbolsRounded.ttf --unicodes="U+e5d0,U+e3be,..." --layout-features='' --no-hinting --output-file=sub.ttf
+python -c "from fontTools.ttLib import TTFont; from fontTools.varLib import instancer; instancer.instantiateVariableFont(TTFont('sub.ttf'), {'FILL':0,'wght':400,'GRAD':0,'opsz':24}).save('material_symbols_rounded.ttf')"
+```
+
+## D-026 · 2026-10-01 · 상태 관리 Bloc + DI get_it (D-006 · D-018 DI 부분 대체)
 사용자 요청: "기능이 많아질 것 같아 bloc으로 상태 관리, 아키텍처는 클린 아키텍처 유지".
 - 상태 관리: `flutter_bloc`. 이벤트가 여럿이거나 스트림을 구독하면 Bloc(`ServiceBloc`), 메서드 몇 개로 끝나면 Cubit(`PermissionCubit`). 폴더는 `presentation/bloc/`.
 - DI: `get_it`. 기능마다 `di.dart`의 `register<기능>Feature(GetIt)` — 리포지토리 · Pigeon API는 lazySingleton, 유스케이스 · Bloc은 factory. `core/di/injector.dart`의 `configureDependencies()`가 모으고 `main()`에서 한 번 부른다.

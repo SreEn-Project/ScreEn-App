@@ -24,7 +24,7 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 - 작업 브랜치 커밋 · push · PR · **develop merge는 스스로** 한다 (analyze · test · 빌드 통과 후). **`main` merge(릴리스)만 사용자 승인**을 받는다. PR은 `.github/pull_request_template.md` 형식.
 
 ## 아키텍처 규칙
-- Flutter: **클린 아키텍처** + Bloc(`flutter_bloc`) 상태 관리 + get_it DI, feature-first (D-018 · D-023, 상세 [docs/architecture.md](docs/architecture.md)).
+- Flutter: **클린 아키텍처** + Bloc(`flutter_bloc`) 상태 관리 + get_it DI, feature-first (D-018 · D-026, 상세 [docs/architecture.md](docs/architecture.md)).
   - 의존 방향: presentation → domain ← data. **domain은 순수 Dart** (Flutter · bloc · get_it · Pigeon · 플러그인 import 금지, freezed_annotation만 허용).
   - domain: `entities/`(앱 자체 모델 · 열거형), `repositories/`(인터페이스), `usecases/`(동작 하나당 클래스 하나, `call()`).
   - data: `datasources/`(Pigeon · 플러그인 감싸기), `mappers/`(Pigeon ↔ 엔티티), `repositories/`(구현). Pigeon 타입은 data 밖으로 나가지 않는다.
@@ -65,7 +65,7 @@ android/app/src/main/kotlin/.../
 - 디자인은 [docs/design.md](docs/design.md)의 토큰만 쓴다. 색 하드코딩 금지, `Theme.of(context)`로 가져온다.
 - 화면은 `lib/core/ui/` 자체 컴포넌트로 만든다. Material 버튼 · AppBar · ListTile · Switch · Chip · Slider · Radio를 화면에서 직접 쓰지 않는다. 필요한 모양이 없으면 core/ui에 컴포넌트를 추가하고 design.md "컴포넌트" 표에 적는다.
 - UI 문자열은 ARB(`flutter_localizations`)로 관리, 한국어 · 영어.
-- Bloc · Cubit은 `mocktail`로 단위 테스트를 작성한다 (bloc_test는 freezed 4와 의존성이 충돌해 쓰지 않음, D-023).
+- Bloc · Cubit은 `mocktail`로 단위 테스트를 작성한다 (bloc_test는 freezed 4와 의존성이 충돌해 쓰지 않음, D-026).
 
 ## 자주 쓰는 명령
 - 실행: `flutter run` (Android 기기/에뮬레이터)

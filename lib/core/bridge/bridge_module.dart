@@ -2,7 +2,7 @@ import 'package:get_it/get_it.dart';
 
 import 'translator_api.g.dart';
 
-// Pigeon 생성 API를 get_it에 등록한다 (NA-01). data 계층의 데이터소스만 쓴다 (D-018, D-023).
+// Pigeon 생성 API를 get_it에 등록한다 (NA-01). data 계층의 데이터소스만 쓴다 (D-018, D-026).
 // 테스트에서는 리포지토리를 가짜로 바꿔 끼워 네이티브 없이 검증한다.
 
 void registerBridge(GetIt sl) {
