@@ -24,12 +24,12 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 - 작업 브랜치 커밋 · push · PR · **develop merge는 스스로** 한다 (analyze · test · 빌드 통과 후). **`main` merge(릴리스)만 사용자 승인**을 받는다. PR은 `.github/pull_request_template.md` 형식.
 
 ## 아키텍처 규칙
-- Flutter: **클린 아키텍처** + MVVM(presentation) + Riverpod(`riverpod_generator`), feature-first (D-018, 상세 [docs/architecture.md](docs/architecture.md)).
-  - 의존 방향: presentation → domain ← data. **domain은 순수 Dart** (Flutter · Riverpod · Pigeon · 플러그인 import 금지, freezed_annotation만 허용).
+- Flutter: **클린 아키텍처** + Bloc(`flutter_bloc`) 상태 관리 + get_it DI, feature-first (D-018 · D-023, 상세 [docs/architecture.md](docs/architecture.md)).
+  - 의존 방향: presentation → domain ← data. **domain은 순수 Dart** (Flutter · bloc · get_it · Pigeon · 플러그인 import 금지, freezed_annotation만 허용).
   - domain: `entities/`(앱 자체 모델 · 열거형), `repositories/`(인터페이스), `usecases/`(동작 하나당 클래스 하나, `call()`).
   - data: `datasources/`(Pigeon · 플러그인 감싸기), `mappers/`(Pigeon ↔ 엔티티), `repositories/`(구현). Pigeon 타입은 data 밖으로 나가지 않는다.
-  - presentation: `screens/` · `view_models/` · `widgets/`. ViewModel은 유스케이스만 부른다 (리포지토리 · data 직접 사용 금지).
-  - 연결: 기능마다 `di.dart`(Riverpod provider로 데이터소스 → 리포지토리 → 유스케이스). 테스트는 리포지토리 provider를 바꿔 끼운다.
+  - presentation: `screens/` · `bloc/` · `widgets/`. 이벤트가 여럿이거나 스트림을 구독하면 **Bloc**(`*_bloc.dart` + `*_event.dart`), 메서드 몇 개로 끝나면 **Cubit**(`*_cubit.dart`). Bloc · Cubit은 생성자로 유스케이스만 받는다 (리포지토리 · data · get_it 직접 사용 금지).
+  - 연결: 기능마다 `di.dart`의 `register<기능>Feature(GetIt)`(리포지토리 lazySingleton → 유스케이스 · Bloc factory), `lib/core/di/injector.dart`의 `configureDependencies()`가 모은다. 화면은 `BlocProvider`로 받는다 (여러 화면이 공유하면 `lib/app/app_bloc_providers.dart`). 테스트는 get_it의 리포지토리를 가짜로 바꿔 끼운다.
   - `test/architecture_test.dart`가 의존 규칙을 검사한다.
 - 라우팅 `go_router`, 모델 `freezed` + `json_serializable`.
 - Flutter ↔ 네이티브 통신은 Pigeon만 쓴다. 문자열 MethodChannel 금지.
@@ -44,15 +44,16 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 lib/
   app/                # 앱 진입, 라우터, 하단 탭, 테마
   core/
-    bridge/           # Pigeon 생성 코드 + provider (data 계층에서만 사용)
+    bridge/           # Pigeon 생성 코드 + get_it 등록 (data 계층에서만 사용)
+    di/               # get_it 컨테이너 (configureDependencies)
     domain/           # 유스케이스 공통 규약
     ui/               # 앱 자체 UI 컴포넌트
     l10n/             # 열거형 → 화면 문구
   features/<기능>/
     domain/           # entities/ repositories/ usecases/  (순수 Dart)
     data/             # datasources/ mappers/ repositories/
-    presentation/     # screens/ view_models/ widgets/
-    di.dart           # 의존성 연결 (Riverpod)
+    presentation/     # screens/ bloc/ widgets/
+    di.dart           # 의존성 연결 (get_it)
 pigeons/              # Pigeon 정의 (.dart)
 android/app/src/main/kotlin/.../
   bridge/  service/  capture/  overlay/  ocr/  translate/  data/
@@ -64,7 +65,7 @@ android/app/src/main/kotlin/.../
 - 디자인은 [docs/design.md](docs/design.md)의 토큰만 쓴다. 색 하드코딩 금지, `Theme.of(context)`로 가져온다.
 - 화면은 `lib/core/ui/` 자체 컴포넌트로 만든다. Material 버튼 · AppBar · ListTile · Switch · Chip · Slider · Radio를 화면에서 직접 쓰지 않는다. 필요한 모양이 없으면 core/ui에 컴포넌트를 추가하고 design.md "컴포넌트" 표에 적는다.
 - UI 문자열은 ARB(`flutter_localizations`)로 관리, 한국어 · 영어.
-- ViewModel은 `mocktail`로 단위 테스트를 작성한다.
+- Bloc · Cubit은 `mocktail`로 단위 테스트를 작성한다 (bloc_test는 freezed 4와 의존성이 충돌해 쓰지 않음, D-023).
 
 ## 자주 쓰는 명령
 - 실행: `flutter run` (Android 기기/에뮬레이터)

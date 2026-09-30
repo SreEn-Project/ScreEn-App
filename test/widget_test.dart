@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/app/app.dart';
 import 'package:translation_poc_app/features/home/presentation/screens/home_screen.dart';
@@ -13,9 +12,8 @@ void main() {
     tester.view.devicePixelRatio = 2.75;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      ProviderScope(overrides: fakeNativeOverrides(), child: const App()),
-    );
+    await setUpFakeNative();
+    await tester.pumpWidget(const App());
     await tester.pumpAndSettle();
 
     // 온보딩: 건너뛰기 → 언어 선택 페이지 → 시작하기

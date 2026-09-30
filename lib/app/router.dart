@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../features/about/presentation/screens/about_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
@@ -10,8 +9,6 @@ import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/permission/presentation/screens/permission_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import 'app_shell.dart';
-
-part 'router.g.dart';
 
 abstract final class AppRoutes {
   static const onboarding = '/onboarding';
@@ -25,13 +22,6 @@ abstract final class AppRoutes {
   // 탭 위로 덮는 화면
   static const targetLanguage = '/target-language';
   static const about = '/about';
-}
-
-@riverpod
-GoRouter router(Ref ref) {
-  // UI 퍼블리싱 단계: 첫 실행 흐름을 확인하도록 온보딩에서 시작한다.
-  // 온보딩 완료 여부에 따른 분기는 FL-01 기능 연결 때 redirect로 넣는다.
-  return createRouter();
 }
 
 /// 앱 라우터. 테스트 · 스크린샷에서 원하는 화면부터 열 때 [initialLocation]을 준다.

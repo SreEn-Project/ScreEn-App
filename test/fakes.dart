@@ -1,8 +1,6 @@
-import 'package:flutter_riverpod/misc.dart' show Override;
-import 'package:translation_poc_app/features/permission/di.dart';
+import 'package:translation_poc_app/core/di/injector.dart';
 import 'package:translation_poc_app/features/permission/domain/entities/app_permissions.dart';
 import 'package:translation_poc_app/features/permission/domain/repositories/permission_repository.dart';
-import 'package:translation_poc_app/features/service/di.dart';
 import 'package:translation_poc_app/features/service/domain/entities/service_status.dart';
 import 'package:translation_poc_app/features/service/domain/repositories/service_repository.dart';
 
@@ -43,16 +41,21 @@ class FakePermissionRepository implements PermissionRepository {
   Future<void> requestOverlay() async => overlay = true;
 }
 
-/// 네이티브 연결 provider를 가짜로 바꾼다.
-List<Override> fakeNativeOverrides({
+/// 의존성을 새로 등록하고 네이티브 연결 리포지토리만 가짜로 바꾼다.
+Future<void> setUpFakeNative({
   ServiceStatus service = ServiceStatus.stopped,
   bool permissionsGranted = false,
-}) => [
-  serviceRepositoryProvider.overrideWithValue(FakeServiceRepository(service)),
-  permissionRepositoryProvider.overrideWithValue(
-    FakePermissionRepository(
-      overlay: permissionsGranted,
-      notification: permissionsGranted,
-    ),
-  ),
-];
+}) async {
+  await getIt.reset();
+  configureDependencies();
+  getIt
+    ..unregister<ServiceRepository>()
+    ..registerSingleton<ServiceRepository>(FakeServiceRepository(service))
+    ..unregister<PermissionRepository>()
+    ..registerSingleton<PermissionRepository>(
+      FakePermissionRepository(
+        overlay: permissionsGranted,
+        notification: permissionsGranted,
+      ),
+    );
+}

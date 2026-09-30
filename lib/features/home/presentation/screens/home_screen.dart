@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -11,20 +11,20 @@ import '../../../../core/l10n/labels.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../language/domain/entities/supported_language.dart';
-import '../../../permission/presentation/view_models/permission_view_model.dart';
-import '../view_models/service_view_model.dart';
+import '../../../permission/presentation/bloc/permission_cubit.dart';
+import '../bloc/service_bloc.dart';
 
 /// 홈 (S-03, FL-03).
 /// 캡처 범위는 플로팅 버튼 메뉴에서 고르므로 홈에는 두지 않고, 언어 · 모델 설정을 둔다 (D-016).
 /// 시작/중지는 네이티브 서비스와 연결됨(FL-03). 언어 · 모델 값은 아직 자리 표시 (FL-04 · FL-05에서 연결).
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   // 설정 앱에서 권한을 끄고 돌아오는 경우까지 맞추려고 앞으로 올 때마다 다시 확인한다.
   late final AppLifecycleListener _lifecycle;
 
@@ -32,7 +32,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(
-      onResume: () => ref.read(permissionViewModelProvider.notifier).refresh(),
+      onResume: () => context.read<PermissionCubit>().refresh(),
     );
   }
 
@@ -63,12 +63,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final locale = Localizations.localeOf(context);
     final targetName = SupportedLanguage.byCode(_targetLanguage)
         .displayName(locale.languageCode);
-    final service =
-        ref.watch(serviceViewModelProvider).value ?? ServiceStatus.stopped;
+    final service = context.watch<ServiceBloc>().state;
     final running = service == ServiceStatus.running;
     // 권한 확인 전(로딩)에는 막지 않는다. 확인 결과 빠진 권한이 있으면 시작을 막는다 (FL-02).
     final permissionsMissing =
-        ref.watch(permissionViewModelProvider).value?.allGranted == false;
+        context.watch<PermissionCubit>().state?.allGranted == false;
 
     return AppPage(
       withBottomNav: true,
@@ -95,7 +94,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           onPressed: permissionsMissing && !running
               ? null
-              : () => ref.read(serviceViewModelProvider.notifier).toggle(),
+              : () => context.read<ServiceBloc>().add(const ServiceToggled()),
         ),
         const SizedBox(height: 12),
         if (permissionsMissing && !running)

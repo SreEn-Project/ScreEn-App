@@ -22,6 +22,7 @@ Play 출시 전에 한 번에 바꾼다 (출시 후에는 applicationId 변경 �
 
 ## D-006 · 2026-09-29 · 상태 관리 Riverpod 유지
 비동기 상태(AsyncValue), DI 겸용, 테스트 override가 네이티브 연동 앱에 맞음. 사용자가 Riverpod에 익숙하지 않으므로 첫 화면에서 패턴을 문서화한다.
+→ D-023으로 대체.
 
 ## D-007 · 2026-09-29 · 디자인 방향
 화이트 톤 + 연한 초록 포인트, 미니멀리즘 · 모노톤. Material 3, 그림자 대신 테두리. 상세는 [design.md](design.md).
@@ -79,6 +80,7 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 - data: 데이터소스(Pigeon · permission_handler 감싸기), 매퍼(Pigeon ↔ 엔티티), 리포지토리 구현. Pigeon 타입은 data 밖으로 안 나감.
 - presentation: screens / view_models / widgets. ViewModel은 유스케이스만 호출.
 - DI: 기능마다 `di.dart`에 Riverpod provider(데이터소스 → 리포지토리 → 유스케이스). 전용 DI 패키지(get_it 등)는 쓰지 않음 — Riverpod이 이미 DI와 테스트 override를 해 줌.
+- (DI · presentation 부분은 D-023으로 대체: get_it + Bloc/Cubit)
 - 규칙은 `test/architecture_test.dart`로 검사 (첫 실행에서 도메인이 Flutter를 import하던 곳 1건을 잡아 고침).
 - 네이티브(Kotlin)는 이미 bridge / service / data 로 나뉘어 있어 이번에는 바꾸지 않음.
 
@@ -105,6 +107,17 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 ## D-022 · 2026-09-30 · develop merge는 스스로, 검토는 기능 묶음 단위 (D-012 일부 대체)
 사용자 결정: "develop에 작업 알아서 다 merge하고, 기능이 어느 정도 개발되었다 싶으면 검토 요청".
 develop merge는 analyze · test · 빌드 통과 후 스스로. main merge만 승인. 검토 요청은 한 흐름이 기기에서 돌 때처럼 의미 있는 묶음마다.
+
+## D-023 · 2026-10-01 · 상태 관리 Bloc + DI get_it (D-006 · D-018 DI 부분 대체)
+사용자 요청: "기능이 많아질 것 같아 bloc으로 상태 관리, 아키텍처는 클린 아키텍처 유지".
+- 상태 관리: `flutter_bloc`. 이벤트가 여럿이거나 스트림을 구독하면 Bloc(`ServiceBloc`), 메서드 몇 개로 끝나면 Cubit(`PermissionCubit`). 폴더는 `presentation/bloc/`.
+- DI: `get_it`. 기능마다 `di.dart`의 `register<기능>Feature(GetIt)` — 리포지토리 · Pigeon API는 lazySingleton, 유스케이스 · Bloc은 factory. `core/di/injector.dart`의 `configureDependencies()`가 모으고 `main()`에서 한 번 부른다.
+- Bloc · Cubit은 생성자로 유스케이스만 받는다. get_it은 `di.dart` · `lib/app`에서만 꺼낸다 (`architecture_test`가 presentation의 get_it · di import를 막음).
+- 공유 상태(권한 · 서비스)는 `lib/app/app_bloc_providers.dart`에서 앱 위에 lazy로 둔다 (Riverpod keepAlive · 탭 유지와 같은 수명).
+- 라우터는 `App`(StatefulWidget)이 한 번 만들어 들고 있는다 (routerProvider 삭제).
+- 권한 상태 `null` = 확인 중 (AsyncValue 로딩 대신). 서비스 상태 초기값은 꺼짐.
+- 테스트: `bloc_test`는 `test` 패키지를 통해 freezed 4(analyzer 14)와 버전이 충돌해 못 씀 → mocktail + `pumpEventQueue`로 직접 검증. 위젯 · 스크린샷 테스트는 `setUpFakeNative()`(test/fakes.dart)가 get_it을 reset하고 리포지토리만 가짜로 바꾼다.
+- 삭제: flutter_riverpod, riverpod_annotation, riverpod_generator와 생성 파일(`*.g.dart` 중 provider). freezed · go_router · Pigeon은 그대로.
 
 ## D-009 · 2026-09-29 · 아이콘 패키지
 Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가. Flutter 기본 `Icons`에는 Rounded + 선(outline) 조합이 없음.

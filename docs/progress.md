@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 상태 관리 Riverpod → Bloc (브랜치 `refactor/bloc`, D-023)
+- pubspec: flutter_riverpod · riverpod_annotation · riverpod_generator 삭제, flutter_bloc ^9.1.1 · get_it ^9.3.0 추가. bloc_test는 freezed 4와 충돌해 추가하지 않음.
+- DI: `core/bridge/bridge_providers.dart` → `bridge_module.dart`(get_it 등록), `core/di/injector.dart`(`configureDependencies`), 기능별 `di.dart`를 `register<기능>Feature`로. 홈 기능 `di.dart` 추가.
+- 상태: `ServiceViewModel` → `ServiceBloc`(구독 요청 · 토글 이벤트), `PermissionViewModel` → `PermissionCubit`. `lib/app/app_bloc_providers.dart`에서 앱 위에 lazy 제공. 홈 · 권한 화면은 `context.watch/read`.
+- 라우터: `routerProvider` 삭제, `App`이 `createRouter()`를 한 번 만들어 보관.
+- 테스트: ServiceBloc 7개 · PermissionCubit 6개(mocktail), `architecture_test`에 "presentation은 DI 컨테이너를 직접 쓰지 않는다" 추가, 위젯 · 스크린샷 테스트는 `setUpFakeNative()`. analyze 0, test 20개 통과, 스크린샷 테스트 통과.
+- 동작 변화 없음 (화면 · 네이티브 그대로).
+
 ## 2026-09-30 · NA-10 언어 감지 (브랜치 `feature/NA-10-language-detection`, NA-09 위에 쌓음)
 - `translate/LanguageDetector`: 블록별 ML Kit Language ID(신뢰도 0.5 미만 = 모름), 대상 언어는 저장된 설정.
 - `translate/LanguagePlan`(순수 로직): 언어 코드 정리(지역 · 문자 표기 제거, 옛 코드 변환, 로마자 표기 비라틴 = 모름), 블록별 결정 — 번역 / 대상과 같아 건너뜀 / 엔진 미지원 / 모름. Language ID가 모르면 OCR 추정 언어를 씀 (D-021).

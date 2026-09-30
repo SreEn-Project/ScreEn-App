@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -7,25 +7,25 @@ import '../../../../app/router.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/app_permissions.dart';
-import '../view_models/permission_view_model.dart';
+import '../bloc/permission_cubit.dart';
 
 /// 권한 안내 (S-02, FL-02). 다른 앱 위에 표시 · 알림 권한을 확인하고 요청한다.
 /// 시스템 설정에서 앱으로 돌아오면 다시 확인한다. 둘 다 허용해야 계속할 수 있다.
-class PermissionScreen extends ConsumerStatefulWidget {
+class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key});
 
   @override
-  ConsumerState<PermissionScreen> createState() => _PermissionScreenState();
+  State<PermissionScreen> createState() => _PermissionScreenState();
 }
 
-class _PermissionScreenState extends ConsumerState<PermissionScreen> {
+class _PermissionScreenState extends State<PermissionScreen> {
   late final AppLifecycleListener _lifecycle;
 
   @override
   void initState() {
     super.initState();
     _lifecycle = AppLifecycleListener(
-      onResume: () => ref.read(permissionViewModelProvider.notifier).refresh(),
+      onResume: () => context.read<PermissionCubit>().refresh(),
     );
   }
 
@@ -40,9 +40,9 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final permissions =
-        ref.watch(permissionViewModelProvider).value ??
+        context.watch<PermissionCubit>().state ??
         const AppPermissions(overlay: false, notification: false);
-    final viewModel = ref.read(permissionViewModelProvider.notifier);
+    final cubit = context.read<PermissionCubit>();
     final allAllowed = permissions.allGranted;
 
     return AppPage(
@@ -84,7 +84,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
           body: l10n.permissionOverlayBody,
           allowed: permissions.overlay,
           actionLabel: l10n.commonOpenSettings,
-          onAction: viewModel.requestOverlay,
+          onAction: cubit.requestOverlay,
         ),
         const SizedBox(height: 16),
         _PermissionCard(
@@ -96,7 +96,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
           actionLabel: permissions.notificationBlocked
               ? l10n.commonOpenSettings
               : l10n.permissionAllow,
-          onAction: viewModel.requestNotification,
+          onAction: cubit.requestNotification,
         ),
       ],
     );
