@@ -7,7 +7,7 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 ## 진행 방식
 - 단계 순서대로 진행한다: 1 MVP → 2 캡처 범위 · 덮어쓰기 → 3 AI 번역 → 4 편의 기능. 단어장(AD-)은 핵심 기능 이후, 서버(SV-)는 결정 전까지 만들지 않는다.
 - 작업 단위는 Notion 세부 기능 ID(FL-/NA-/SV-/AD-) 하나. 커밋 메시지와 문서에 ID를 적는다. 예: `feat(FL-01): 온보딩 화면`
-- 현재: 1단계 UI 퍼블리싱 · 검증 끝, **기능 연결**을 roadmap 순서로 진행 중. 작업 시작 · 진행은 스스로 하고, **develop · main merge 때만 사용자 검증**을 받는다 (완료 보고는 짧게 + merge 요청).
+- 현재: 1단계 UI 퍼블리싱 · 검증 끝, **기능 연결**을 roadmap 순서로 진행 중. 작업 시작 · 진행 · **develop merge는 스스로** 한다. 기능이 어느 정도 모여 쓸 만해지면(예: 한 단계 흐름이 기기에서 돈다) **사용자에게 검토 요청**한다 (짧게: 무엇이 되는지 + 확인 방법).
 - 규칙 · 절차는 사용자에게 매번 묻지 말고 스스로 정해 docs/에 기록한 뒤 따른다. 사용자가 이미 정한 것은 다시 묻지 않는다.
 - 코드 · 설정(pubspec, Gradle, Manifest 등)을 바꿀 때는 무엇을 바꾸는지 보고에 적는다.
 - 작업을 마치면 [docs/progress.md](docs/progress.md)에 기록하고, 설계 결정은 [docs/decisions.md](docs/decisions.md)에 남긴다.
@@ -21,7 +21,7 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 ## Git (상세: [docs/git.md](docs/git.md))
 - 브랜치: `main` · `develop` 보호, 작업은 `feature/<ID>-<요약>` · `ui/<단계>-<요약>` · `fix/` · `chore/` · `docs/`를 `develop`에서 딴다.
 - 커밋: `<type>(<ID>): <한국어 요약>` (feat · fix · ui · refactor · test · docs · chore · style).
-- 작업 브랜치 커밋 · push는 자유롭게 한다. **`develop` · `main`으로 merge할 때만 사용자에게 알리고 승인받는다.** PR은 `.github/pull_request_template.md` 형식.
+- 작업 브랜치 커밋 · push · PR · **develop merge는 스스로** 한다 (analyze · test · 빌드 통과 후). **`main` merge(릴리스)만 사용자 승인**을 받는다. PR은 `.github/pull_request_template.md` 형식.
 
 ## 아키텍처 규칙
 - Flutter: **클린 아키텍처** + MVVM(presentation) + Riverpod(`riverpod_generator`), feature-first (D-018, 상세 [docs/architecture.md](docs/architecture.md)).
