@@ -10,6 +10,7 @@ import '../../../core/l10n/labels.dart';
 import '../../../core/ui/ui.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../language/domain/supported_language.dart';
+import '../../permission/presentation/permission_view_model.dart';
 import 'service_view_model.dart';
 
 /// 홈 (S-03, FL-03).
@@ -23,6 +24,23 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  // 설정 앱에서 권한을 끄고 돌아오는 경우까지 맞추려고 앞으로 올 때마다 다시 확인한다.
+  late final AppLifecycleListener _lifecycle;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(
+      onResume: () => ref.read(permissionViewModelProvider.notifier).refresh(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
   String _targetLanguage = 'ko';
   final EngineType _engine = EngineType.mlKit;
 
@@ -47,6 +65,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final service =
         ref.watch(serviceViewModelProvider).value ?? ServiceState.stopped;
     final running = service == ServiceState.running;
+    // 권한 확인 전(로딩)에는 막지 않는다. 확인 결과 빠진 권한이 있으면 시작을 막는다 (FL-02).
+    final permissionsMissing =
+        ref.watch(permissionViewModelProvider).value?.allGranted == false;
 
     return AppPage(
       withBottomNav: true,
@@ -71,16 +92,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             inactiveColor: Theme.of(context).colorScheme.onPrimary
                 .withValues(alpha: 0.5),
           ),
-          onPressed: service == ServiceState.starting
+          onPressed: permissionsMissing && !running
               ? null
               : () => ref.read(serviceViewModelProvider.notifier).toggle(),
         ),
         const SizedBox(height: 12),
-        Text(
-          l10n.homeAreaHint,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        if (permissionsMissing && !running)
+          Center(
+            child: AppButton.text(
+              label: l10n.homePermissionsNeeded,
+              trailingIcon: Symbols.arrow_forward_rounded,
+              onPressed: () => context.push(AppRoutes.permission),
+            ),
+          )
+        else
+          Text(
+            l10n.homeAreaHint,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         const SizedBox(height: 28),
         SectionTitle(l10n.homeSectionSetup),
         const SizedBox(height: 12),

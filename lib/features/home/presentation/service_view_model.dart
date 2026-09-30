@@ -16,16 +16,14 @@ class ServiceViewModel extends _$ServiceViewModel {
     yield* repository.watchState();
   }
 
-  /// 꺼짐 · 오류 → 시작(캡처 동의부터), 실행 중 → 중지. 동의 대기 중에는 아무것도 하지 않는다.
+  /// 실행 중 → 중지, 그 밖(꺼짐 · 오류 · 동의 대기) → 시작.
+  /// 동의 대기 중에 다시 누르면 동의 창을 다시 앞으로 가져온다 (다른 앱으로 갔다 온 경우).
   Future<void> toggle() async {
     final repository = ref.read(serviceRepositoryProvider);
-    switch (state.value) {
-      case ServiceState.running:
-        await repository.stop();
-      case ServiceState.starting:
-        return;
-      case ServiceState.stopped || ServiceState.error || null:
-        await repository.start();
+    if (state.value == ServiceState.running) {
+      await repository.stop();
+    } else {
+      await repository.start();
     }
   }
 }

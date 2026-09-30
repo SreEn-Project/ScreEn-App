@@ -26,9 +26,9 @@ void main() {
     expect(find.byType(PermissionScreen), findsOneWidget);
 
     // 권한 두 개를 허용해야 계속하기가 켜진다.
-    await tester.tap(find.text('Open settings').first);
+    await tester.tap(find.text('Open settings'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Open settings').first);
+    await tester.tap(find.text('Allow'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();

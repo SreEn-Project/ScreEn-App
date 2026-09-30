@@ -284,6 +284,12 @@ abstract class AppLocalizations {
   /// **'Lets you know while the service is on, and lets you stop it from there.'**
   String get permissionNotificationBody;
 
+  /// No description provided for @permissionAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get permissionAllow;
+
   /// No description provided for @permissionContinue.
   ///
   /// In en, this message translates to:
@@ -377,7 +383,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeStarting.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for consent'**
+  /// **'Reopen consent prompt'**
   String get homeStarting;
 
   /// No description provided for @homeStatusStarting.
@@ -403,6 +409,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t start. Please try again'**
   String get homeServiceErrorHint;
+
+  /// No description provided for @homePermissionsNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow permissions to start'**
+  String get homePermissionsNeeded;
 
   /// No description provided for @homeSourceAuto.
   ///

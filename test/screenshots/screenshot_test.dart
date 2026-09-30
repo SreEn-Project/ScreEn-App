@@ -17,7 +17,6 @@ import 'package:translation_poc_app/core/bridge/translator_api.g.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
 import 'package:translation_poc_app/features/about/presentation/about_screen.dart';
 import 'package:translation_poc_app/features/onboarding/presentation/onboarding_screen.dart';
-import 'package:translation_poc_app/features/permission/presentation/permission_screen.dart';
 import 'package:translation_poc_app/l10n/app_localizations.dart';
 
 import '../fakes.dart';
@@ -67,7 +66,10 @@ Widget _route(
   ThemeMode mode = ThemeMode.light,
   ServiceState service = ServiceState.stopped,
 }) => ProviderScope(
-  overrides: fakeNativeOverrides(service: service),
+  overrides: fakeNativeOverrides(
+    service: service,
+    permissionsGranted: location != AppRoutes.permission,
+  ),
   child: MaterialApp.router(
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
@@ -124,8 +126,9 @@ void main() {
     await tester.tap(find.text('건너뛰기'));
     await _shoot(tester, '02_onboarding_language');
 
-    await tester.pumpWidget(_wrap(const PermissionScreen()));
-    await tester.tap(find.text('설정 열기').first);
+    await tester.pumpWidget(_route(AppRoutes.permission));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('설정 열기'));
     await _shoot(tester, '03_permission');
 
     await _setSize(tester, const Size(412, 1100));

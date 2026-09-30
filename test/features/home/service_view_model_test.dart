@@ -79,12 +79,12 @@ void main() {
     verifyNever(() => repository.start());
   });
 
-  test('동의 대기 중에는 toggle이 아무것도 하지 않는다', () async {
+  test('동의 대기 중에 toggle하면 동의 창을 다시 띄운다', () async {
     await settle(ServiceState.starting);
 
     await container.read(serviceViewModelProvider.notifier).toggle();
 
-    verifyNever(() => repository.start());
+    verify(() => repository.start()).called(1);
     verifyNever(() => repository.stop());
   });
 }

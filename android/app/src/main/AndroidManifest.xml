@@ -40,8 +40,8 @@
             android:name=".service.CaptureConsentActivity"
             android:exported="false"
             android:excludeFromRecents="true"
-            android:noHistory="false"
-            android:taskAffinity=""
+            android:launchMode="singleInstance"
+            android:taskAffinity="com.example.translation_poc_app.consent"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <!-- 번역 포그라운드 서비스 (NA-02). 화면 캡처 세션을 가진다. -->
         <service

@@ -110,6 +110,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Lets you know while the service is on, and lets you stop it from there.';
 
   @override
+  String get permissionAllow => 'Allow';
+
+  @override
   String get permissionContinue => 'Continue';
 
   @override
@@ -156,7 +159,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeStatusOn => 'Running';
 
   @override
-  String get homeStarting => 'Waiting for consent';
+  String get homeStarting => 'Reopen consent prompt';
 
   @override
   String get homeStatusStarting => 'Waiting';
@@ -170,6 +173,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeServiceErrorHint => 'Couldn\'t start. Please try again';
+
+  @override
+  String get homePermissionsNeeded => 'Allow permissions to start';
 
   @override
   String get homeSourceAuto => 'Auto-detect';
