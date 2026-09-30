@@ -20,6 +20,9 @@ import com.example.translation_poc_app.capture.CaptureResult
 import com.example.translation_poc_app.capture.ScreenCapturer
 import com.example.translation_poc_app.ocr.OcrResult
 import com.example.translation_poc_app.ocr.ScreenTextRecognizer
+import com.example.translation_poc_app.AppGraph
+import com.example.translation_poc_app.translate.DetectedBlock
+import com.example.translation_poc_app.translate.LanguageDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -36,6 +39,7 @@ class TranslatorService : LifecycleService() {
     private var projection: MediaProjection? = null
     private var capturer: ScreenCapturer? = null
     private val textRecognizer by lazy { ScreenTextRecognizer() }
+    private val languageDetector by lazy { LanguageDetector() }
 
     private val projectionCallback = object : MediaProjection.Callback() {
         // 사용자가 시스템 UI(상태 표시줄 칩 등)에서 공유를 끄면 서비스도 멈춘다 (NA-04).
@@ -127,6 +131,12 @@ class TranslatorService : LifecycleService() {
     suspend fun recognizeText(frame: CaptureResult.Frame, sourceLanguage: String? = null): OcrResult =
         textRecognizer.recognize(frame.bitmap, sourceLanguage)
 
+    /** 블록별 원문 언어를 감지해 번역할지 정한다 (NA-10). 대상 언어는 저장된 설정(NA-16)을 쓴다. */
+    suspend fun detectLanguages(ocr: OcrResult): List<DetectedBlock> {
+        val target = AppGraph.settingsRepository(this).current().targetLanguage
+        return languageDetector.detect(ocr.blocks, target)
+    }
+
     /** 디버그 빌드 전용: 알림의 "캡처 테스트"로 한 장 찍어 앱 캐시에 저장하고 결과를 로그로 남긴다. */
     private fun debugCapture() {
         if (!isDebuggable()) return
@@ -149,6 +159,13 @@ class TranslatorService : LifecycleService() {
                         "문자 인식 ${ocr.script} 블록 ${ocr.blocks.size}개, ${System.currentTimeMillis() - started}ms: " +
                             ocr.blocks.take(5).joinToString(" | ") { "${it.language}:${it.text.replace('\n', ' ')}" },
                     )
+                    val detected = detectLanguages(ocr)
+                    Log.i(
+                        TAG,
+                        "언어 감지: " + detected.groupBy { it.decision.action }
+                            .map { (action, blocks) -> "$action ${blocks.size}개(${blocks.map { it.decision.language }.distinct().joinToString(",")})" }
+                            .joinToString(" / "),
+                    )
                     result.bitmap.recycle()
                 }
                 CaptureResult.Blank -> Log.i(TAG, "캡처 결과: 검은 화면 (보안 화면일 수 있음)")
@@ -170,6 +187,7 @@ class TranslatorService : LifecycleService() {
 
     override fun onDestroy() {
         textRecognizer.close()
+        languageDetector.close()
         capturer?.release()
         capturer = null
         projection?.unregisterCallback(projectionCallback)
