@@ -2,6 +2,15 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-09-30 · NA-05 프레임 캡처 · NA-04 세션 관리 (브랜치 `feature/NA-05-frame-capture`)
+- `capture/ScreenCapturer`: VirtualDisplay + ImageReader, 최신 프레임 유지, RGBA → Bitmap(rowStride 패딩 제거), 검은 화면 감지, 회전 대응 (D-019).
+- `TranslatorService`: 세션 시작 때 캡처 준비 · 종료 때 해제, `captureFrame()`(NA-18이 부를 곳), 캡처 대상 크기 변경 콜백, 디버그 전용 알림 "캡처 테스트".
+- 앱 이름을 문자열 리소스로 (영어 기기에서 "Screen Translate").
+- 확인 (Pixel_5 에뮬레이터, API 33 — Pixel_9는 다른 쪽이 조작 중이라 전용 에뮬레이터를 따로 띄움):
+  - 세로 1080×2340 ✅, 가로 2340×1080 ✅, 다시 세로 ✅ (첫 구현은 13에서 회전 뒤 화면이 어긋나 수정), 검은 화면 → Blank ✅, 멈춘 화면 반복 캡처 ✅.
+  - Android 14+ 회전 경로(onCapturedContentResize)는 기기 확인 전.
+- analyze 0, 테스트 16개 통과, debug APK 빌드.
+
 ## 2026-09-29 · 클린 아키텍처 적용 (D-018, 브랜치 `refactor/clean-architecture`)
 - 기능별 domain(entities · repositories · usecases) / data(datasources · mappers · repositories) / presentation(screens · view_models · widgets) + `di.dart`.
 - service · settings · permission: 유스케이스 추가(서비스 4, 설정 7, 권한 3), 데이터소스로 Pigeon · 플러그인 감쌈, 도메인 자체 열거형(ServiceStatus, EngineType 등) + 매퍼.

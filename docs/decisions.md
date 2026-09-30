@@ -82,5 +82,12 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 - 규칙은 `test/architecture_test.dart`로 검사 (첫 실행에서 도메인이 Flutter를 import하던 곳 1건을 잡아 고침).
 - 네이티브(Kotlin)는 이미 bridge / service / data 로 나뉘어 있어 이번에는 바꾸지 않음.
 
+## D-019 · 2026-09-30 · 프레임 캡처 방식 (NA-05)
+- 세션 시작 때 VirtualDisplay(AUTO_MIRROR) + ImageReader(RGBA_8888, 버퍼 2)를 만들고 세션 동안 유지. Android 14+는 토큰 하나로 VirtualDisplay를 한 번만 만들 수 있다.
+- 미러링은 화면이 바뀔 때만 프레임을 보내므로, 들어오는 최신 프레임 하나를 **계속 들고** 있다가 요청 때 Bitmap으로 바꾼다 → 멈춘 화면도 바로 찍힘.
+- 회전: Android 14+는 `onCapturedContentResize`에서 resize(시스템이 알려 준 크기), 13 이하는 설정 변경 때 VirtualDisplay를 새 크기로 다시 만든다 (13에서 resize는 비율이 어긋나는 것을 에뮬레이터에서 확인).
+- 전부 검은 프레임(밝기 ≤ 8, 24×24 표본)은 Blank → 보안 화면 안내에 쓴다.
+- 디버그 빌드에만 알림 "캡처 테스트" 동작(앱 캐시에 PNG 저장). 플로팅 버튼(NA-18)이 생기면 캡처 전에 오버레이를 숨긴다.
+
 ## D-009 · 2026-09-29 · 아이콘 패키지
 Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가. Flutter 기본 `Icons`에는 Rounded + 선(outline) 조합이 없음.
