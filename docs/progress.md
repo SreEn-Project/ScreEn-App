@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · NA-09 번역 속도 개선 (이슈 #11, 브랜치 `feat/11-translation-speed`)
+- 단계별 시간 로그 추가: `PipelineTimings`(캡처 · OCR · 언어 감지 · 번역), 태그 `TranslatorService`의 "번역 시간".
+- 측정(Pixel_9 (2) 에뮬레이터, 글자 17~21블록 화면): 캡처 0.2~0.3초, 언어 감지 0.1초 이하, 번역 0.3초(첫 회 1.9초), **OCR 17.8초(처음 63초)** → 병목은 문자 인식.
+- 조치: 인식 전 이미지를 긴 변 1280px로 줄이고 좌표는 원래 크기로 되돌림(`ScreenTextRecognizer`), 서비스 시작 때 인식기 예열(`warmUp`).
+- 결과: 같은 종류 화면 OCR 6.4~7초(약 2.8배 빠름), 전체 약 18초 → 7~9초. 에뮬레이터는 실기기보다 느려 실기기에서는 더 짧을 것.
+- 남은 일: 실기기에서 재측정. 더 줄이려면 자동 모드 인식기 3개(한 · 일 · 중)를 줄이는 방법(D-020) — 혼합 화면 정확도와 맞바꿈이라 실기기 결과를 보고 결정.
+
 ## 2026-10-01 · NA-18 플로팅 버튼 · 모드 메뉴 · NA-19 결과 목록 시트 (브랜치 `feature/NA-18-floating-button`)
 - `overlay/`(Compose, D-024): `OverlayController`(창 4개 관리 · 제스처 · 번역 실행), `FloatingButton`(버튼 · 진행 링 · 닫기 영역 · 모드 메뉴), `ResultSheet`(결과 목록 · 안내), `OverlayComponents`(자체 컴포넌트), `OverlayTheme`(색 토큰 · 아이콘 글꼴), `OverlayWindow`(창 + Lifecycle 주인 + 제스처), `OverlayGeometry`(가장자리 붙기 · 닫기 영역 · 메뉴 위치 · 회전, 순수 로직).
 - `translate/TranslationPipeline`: 캡처 → OCR → 언어 감지 → `MlKitTranslationEngine`(NA-12, develop에 먼저 merge된 것) → 결과 조립(`TranslationAssembler`, 순수 로직).

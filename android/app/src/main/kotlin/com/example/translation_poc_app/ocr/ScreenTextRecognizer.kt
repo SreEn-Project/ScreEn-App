@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.ocr
 
 import android.graphics.Bitmap
+import android.graphics.Rect
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
@@ -17,6 +18,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.Closeable
 import kotlin.coroutines.resume
+import kotlin.math.roundToInt
 import kotlin.coroutines.resumeWithException
 
 /**
@@ -32,16 +34,38 @@ class ScreenTextRecognizer : Closeable {
      * 여러 인식기를 돌리면 병렬로 돌리고 가장 잘 읽은 결과를 고른다. 신뢰도 낮은 줄은 뺀다.
      */
     suspend fun recognize(bitmap: Bitmap, sourceLanguage: String? = null): OcrResult {
-        val image = InputImage.fromBitmap(bitmap, 0)
+        // 글자 인식 시간은 픽셀 수에 거의 비례한다. 긴 변을 줄여 읽고, 좌표는 원래 크기로 되돌린다 (#11).
+        val scale = minOf(1f, MAX_SIDE.toFloat() / maxOf(bitmap.width, bitmap.height))
+        val input = if (scale < 1f) {
+            Bitmap.createScaledBitmap(bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
+        } else {
+            bitmap
+        }
+        val image = InputImage.fromBitmap(input, 0)
         val results = coroutineScope {
             OcrSelection.scriptsFor(sourceLanguage).map { script ->
                 async {
                     val text = recognizerFor(script).process(image).await()
-                    OcrResult(script, OcrSelection.filterLowConfidence(text.toBlocks()))
+                    OcrResult(script, OcrSelection.filterLowConfidence(text.toBlocks(1f / scale)))
                 }
             }.awaitAll()
-        }
+        }.also { if (input !== bitmap) input.recycle() }
         return OcrSelection.pickBest(results) ?: OcrResult(Script.LATIN, emptyList())
+    }
+
+    private companion object {
+        /** 인식에 넣는 이미지의 긴 변 상한(px). 휴대폰 글자 크기는 이 정도로 줄여도 읽힌다. */
+        const val MAX_SIDE = 1280
+    }
+
+    /** 첫 번역이 모델 불러오는 시간을 떠안지 않도록, 빈 이미지 한 장을 읽혀 인식기를 미리 깨운다 (#11). */
+    suspend fun warmUp() {
+        val blank = Bitmap.createBitmap(64, 64, Bitmap.Config.ARGB_8888)
+        try {
+            recognize(blank)
+        } finally {
+            blank.recycle()
+        }
     }
 
     override fun close() {
@@ -66,14 +90,18 @@ class ScreenTextRecognizer : Closeable {
     }
 }
 
-private fun Text.toBlocks(): List<OcrBlock> = textBlocks.map { block ->
+private fun Rect?.scaled(factor: Float): Rect? = this?.takeIf { factor != 1f }?.let {
+    Rect((it.left * factor).roundToInt(), (it.top * factor).roundToInt(), (it.right * factor).roundToInt(), (it.bottom * factor).roundToInt())
+} ?: this
+
+private fun Text.toBlocks(factor: Float): List<OcrBlock> = textBlocks.map { block ->
     OcrBlock(
         text = block.text,
-        bounds = block.boundingBox,
+        bounds = block.boundingBox.scaled(factor),
         lines = block.lines.map { line ->
             OcrLine(
                 text = line.text,
-                bounds = line.boundingBox,
+                bounds = line.boundingBox.scaled(factor),
                 // ML Kit이 신뢰도를 못 주면(0 또는 NaN) 버리지 않도록 1로 본다.
                 confidence = line.confidence.takeIf { it > 0f && !it.isNaN() } ?: 1f,
             )
