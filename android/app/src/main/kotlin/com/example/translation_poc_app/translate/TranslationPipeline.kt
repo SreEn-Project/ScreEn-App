@@ -54,15 +54,31 @@ sealed interface TranslationOutcome {
  * 캡처 → 문자 인식 → 언어 감지 → 엔진 번역을 한 번 돈다 (architecture.md "번역 파이프라인" 2~5).
  * 각 단계는 함수로 받아서 서비스 없이도 시험할 수 있다. 오버레이 표시는 부른 쪽(OverlayController)이 한다.
  */
+/** 단계별 소요 시간 (ms). 속도 조정용 로그. */
+data class PipelineTimings(
+    val capture: Long,
+    val ocr: Long = 0,
+    val detect: Long = 0,
+    val translate: Long = 0,
+    val blocks: Int = 0,
+    val segments: Int = 0,
+) {
+    val total: Long get() = capture + ocr + detect + translate
+}
+
 class TranslationPipeline(
     private val capture: suspend () -> CaptureResult,
     private val recognize: suspend (CaptureResult.Frame) -> OcrResult,
     private val detect: suspend (OcrResult, targetLanguage: String) -> List<DetectedBlock>,
     private val engineFor: (Settings) -> TranslationEngine,
     private val settings: suspend () -> Settings,
+    private val onTimings: (PipelineTimings) -> Unit = {},
+    private val clock: () -> Long = System::currentTimeMillis,
 ) {
     /** @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때. */
     suspend fun run(onCaptured: () -> Unit = {}): TranslationOutcome {
+        var mark = clock()
+        fun lap(): Long = clock().let { now -> (now - mark).also { mark = now } }
         val shot = try {
             capture()
         } finally {
@@ -74,6 +90,7 @@ class TranslationPipeline(
             is CaptureResult.Failed -> return TranslationOutcome.Failed(shot.reason)
         }
 
+        val captureMs = lap()
         return try {
             val current = settings()
             val ocr = try {
@@ -81,11 +98,18 @@ class TranslationPipeline(
             } finally {
                 frame.bitmap.recycle()
             }
-            if (ocr.blocks.isEmpty()) return TranslationOutcome.NoText
+            val ocrMs = lap()
+            if (ocr.blocks.isEmpty()) {
+                onTimings(PipelineTimings(captureMs, ocrMs))
+                return TranslationOutcome.NoText
+            }
 
             val detected = detect(ocr, current.targetLanguage)
+            val detectMs = lap()
             val engine = engineFor(current)
-            val results = translateAll(engine, TranslationAssembler.requests(detected, current.targetLanguage))
+            val requests = TranslationAssembler.requests(detected, current.targetLanguage)
+            val results = translateAll(engine, requests)
+            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), ocr.blocks.size, requests.size))
             TranslationAssembler.assemble(detected, results, engine.id, current.targetLanguage)
         } catch (e: CancellationException) {
             throw e

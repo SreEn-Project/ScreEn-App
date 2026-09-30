@@ -59,6 +59,7 @@ class TranslatorService : LifecycleService() {
             detect = { ocr, target -> languageDetector.detect(ocr.blocks, target) },
             engineFor = { translationEngine() },
             settings = { AppGraph.settingsRepository(this).current() },
+            onTimings = { Log.i(TAG, "번역 시간 $it total=${it.total}ms") },
         )
     }
 
@@ -135,6 +136,7 @@ class TranslatorService : LifecycleService() {
 
         TranslatorServiceState.update(RunState.RUNNING)
         showOverlay()
+        warmUp()
     }
 
     /**
@@ -143,6 +145,17 @@ class TranslatorService : LifecycleService() {
      */
     private fun translationEngine(): TranslationEngine =
         mlKitEngine ?: MlKitTranslationEngine().also { mlKitEngine = it }
+
+    /** 첫 번역이 느리지 않도록 문자 인식기를 미리 불러 둔다 (#11). 실패해도 번역 때 다시 시도한다. */
+    private fun warmUp() {
+        lifecycleScope.launch(Dispatchers.Default) {
+            try {
+                textRecognizer.warmUp()
+            } catch (e: Exception) {
+                Log.w(TAG, "인식기 예열 실패", e)
+            }
+        }
+    }
 
     /** 플로팅 버튼을 띄운다 (NA-18). 권한이 없으면 띄우지 않고 서비스만 돈다. */
     private fun showOverlay() {
