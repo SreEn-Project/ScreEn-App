@@ -10,7 +10,7 @@
 | `feature/<ID>-<요약>` | 기능 하나 (Notion 기능 ID) | `develop`에서 → `develop`으로 |
 | `ui/<단계>-<요약>` | 여러 화면 UI 퍼블리싱 묶음 (화면마다 커밋 분리) | `develop`에서 → `develop`으로 |
 | `fix/<ID 또는 이슈번호>-<요약>` | 버그 수정 | `develop`에서 → `develop`으로 |
-| `chore/<요약>`, `docs/<요약>` | 설정 · 빌드 · 문서 | `develop`에서 → `develop`으로 |
+| `chore/<요약>`, `docs/<요약>`, `refactor/<요약>` | 설정 · 빌드 · 문서 · 구조 변경 | `develop`에서 → `develop`으로 |
 | `hotfix/<요약>` | 배포본 긴급 수정 | `main`에서 → `main` + `develop` |
 
 - 요약은 영어 소문자 · 하이픈. 예: `feature/NA-02-foreground-service`, `ui/stage1-screens`

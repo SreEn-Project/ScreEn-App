@@ -13,10 +13,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/app/router.dart';
-import 'package:translation_poc_app/core/bridge/translator_api.g.dart';
+import 'package:translation_poc_app/features/service/domain/entities/service_status.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
-import 'package:translation_poc_app/features/about/presentation/about_screen.dart';
-import 'package:translation_poc_app/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:translation_poc_app/features/about/presentation/screens/about_screen.dart';
+import 'package:translation_poc_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:translation_poc_app/l10n/app_localizations.dart';
 
 import '../fakes.dart';
@@ -64,7 +64,7 @@ Widget _wrap(Widget child, {ThemeMode mode = ThemeMode.light}) => MaterialApp(
 Widget _route(
   String location, {
   ThemeMode mode = ThemeMode.light,
-  ServiceState service = ServiceState.stopped,
+  ServiceStatus service = ServiceStatus.stopped,
 }) => ProviderScope(
   overrides: fakeNativeOverrides(
     service: service,
@@ -137,7 +137,7 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(
-      _route(AppRoutes.home, service: ServiceState.running),
+      _route(AppRoutes.home, service: ServiceStatus.running),
     );
     await _shoot(tester, '05_home_running');
 

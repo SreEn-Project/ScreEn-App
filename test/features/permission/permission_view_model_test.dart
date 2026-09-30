@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:translation_poc_app/features/permission/data/system_permission_repository.dart';
-import 'package:translation_poc_app/features/permission/domain/app_permissions.dart';
-import 'package:translation_poc_app/features/permission/domain/permission_repository.dart';
-import 'package:translation_poc_app/features/permission/presentation/permission_view_model.dart';
+import 'package:translation_poc_app/features/permission/di.dart';
+import 'package:translation_poc_app/features/permission/domain/entities/app_permissions.dart';
+import 'package:translation_poc_app/features/permission/domain/repositories/permission_repository.dart';
+import 'package:translation_poc_app/features/permission/presentation/view_models/permission_view_model.dart';
 
 class _MockPermissionRepository extends Mock implements PermissionRepository {}
 

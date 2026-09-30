@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../bridge/bridge_providers.dart';
+import '../../features/settings/domain/entities/translator_settings.dart';
 
 /// Pigeon 열거형 → 화면 문구 · 아이콘. 여러 화면에서 같은 이름을 쓰도록 한곳에 둔다.
 extension EnumLabels on AppLocalizations {

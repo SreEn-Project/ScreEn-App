@@ -2,13 +2,13 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../features/about/presentation/about_screen.dart';
-import '../features/home/presentation/home_screen.dart';
-import '../features/language/presentation/language_picker_screen.dart';
-import '../features/models/presentation/language_models_screen.dart';
-import '../features/onboarding/presentation/onboarding_screen.dart';
-import '../features/permission/presentation/permission_screen.dart';
-import '../features/settings/presentation/settings_screen.dart';
+import '../features/about/presentation/screens/about_screen.dart';
+import '../features/home/presentation/screens/home_screen.dart';
+import '../features/language/presentation/screens/language_picker_screen.dart';
+import '../features/models/presentation/screens/language_models_screen.dart';
+import '../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../features/permission/presentation/screens/permission_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
 import 'app_shell.dart';
 
 part 'router.g.dart';

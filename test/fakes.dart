@@ -1,28 +1,28 @@
 import 'package:flutter_riverpod/misc.dart' show Override;
-import 'package:translation_poc_app/core/bridge/translator_api.g.dart';
-import 'package:translation_poc_app/features/service/data/pigeon_service_repository.dart';
-import 'package:translation_poc_app/features/permission/data/system_permission_repository.dart';
-import 'package:translation_poc_app/features/permission/domain/app_permissions.dart';
-import 'package:translation_poc_app/features/permission/domain/permission_repository.dart';
-import 'package:translation_poc_app/features/service/domain/service_repository.dart';
+import 'package:translation_poc_app/features/permission/di.dart';
+import 'package:translation_poc_app/features/permission/domain/entities/app_permissions.dart';
+import 'package:translation_poc_app/features/permission/domain/repositories/permission_repository.dart';
+import 'package:translation_poc_app/features/service/di.dart';
+import 'package:translation_poc_app/features/service/domain/entities/service_status.dart';
+import 'package:translation_poc_app/features/service/domain/repositories/service_repository.dart';
 
 /// 네이티브 없이 화면을 띄우는 위젯 · 스크린샷 테스트용 가짜 서비스.
 class FakeServiceRepository implements ServiceRepository {
-  FakeServiceRepository([this._state = ServiceState.stopped]);
+  FakeServiceRepository([this._state = ServiceStatus.stopped]);
 
-  ServiceState _state;
-
-  @override
-  Future<ServiceState> currentState() async => _state;
+  ServiceStatus _state;
 
   @override
-  Stream<ServiceState> watchState() => const Stream.empty();
+  Future<ServiceStatus> currentStatus() async => _state;
 
   @override
-  Future<void> start() async => _state = ServiceState.running;
+  Stream<ServiceStatus> watchStatus() => const Stream.empty();
 
   @override
-  Future<void> stop() async => _state = ServiceState.stopped;
+  Future<void> start() async => _state = ServiceStatus.running;
+
+  @override
+  Future<void> stop() async => _state = ServiceStatus.stopped;
 }
 
 /// 요청하면 바로 허용되는 가짜 권한.
@@ -45,7 +45,7 @@ class FakePermissionRepository implements PermissionRepository {
 
 /// 네이티브 연결 provider를 가짜로 바꾼다.
 List<Override> fakeNativeOverrides({
-  ServiceState service = ServiceState.stopped,
+  ServiceStatus service = ServiceStatus.stopped,
   bool permissionsGranted = false,
 }) => [
   serviceRepositoryProvider.overrideWithValue(FakeServiceRepository(service)),

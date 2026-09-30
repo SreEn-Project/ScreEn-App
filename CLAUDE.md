@@ -24,7 +24,13 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 - 작업 브랜치 커밋 · push는 자유롭게 한다. **`develop` · `main`으로 merge할 때만 사용자에게 알리고 승인받는다.** PR은 `.github/pull_request_template.md` 형식.
 
 ## 아키텍처 규칙
-- Flutter: MVVM + Riverpod(`riverpod_generator`), feature-first 폴더, 계층은 presentation / domain / data.
+- Flutter: **클린 아키텍처** + MVVM(presentation) + Riverpod(`riverpod_generator`), feature-first (D-018, 상세 [docs/architecture.md](docs/architecture.md)).
+  - 의존 방향: presentation → domain ← data. **domain은 순수 Dart** (Flutter · Riverpod · Pigeon · 플러그인 import 금지, freezed_annotation만 허용).
+  - domain: `entities/`(앱 자체 모델 · 열거형), `repositories/`(인터페이스), `usecases/`(동작 하나당 클래스 하나, `call()`).
+  - data: `datasources/`(Pigeon · 플러그인 감싸기), `mappers/`(Pigeon ↔ 엔티티), `repositories/`(구현). Pigeon 타입은 data 밖으로 나가지 않는다.
+  - presentation: `screens/` · `view_models/` · `widgets/`. ViewModel은 유스케이스만 부른다 (리포지토리 · data 직접 사용 금지).
+  - 연결: 기능마다 `di.dart`(Riverpod provider로 데이터소스 → 리포지토리 → 유스케이스). 테스트는 리포지토리 provider를 바꿔 끼운다.
+  - `test/architecture_test.dart`가 의존 규칙을 검사한다.
 - 라우팅 `go_router`, 모델 `freezed` + `json_serializable`.
 - Flutter ↔ 네이티브 통신은 Pigeon만 쓴다. 문자열 MethodChannel 금지.
 - 번역 서비스는 Flutter 엔진 없이 네이티브에서 돈다 (포그라운드 서비스).
@@ -36,13 +42,18 @@ Android 화면 번역 앱. Flutter(앱 UI) + Kotlin 네이티브(캡처 · 오�
 ## 폴더 구조 (목표)
 ```
 lib/
-  app/            # 앱 진입, 라우터, 테마
-  core/           # 공통 유틸, Pigeon 생성 코드 래퍼
+  app/                # 앱 진입, 라우터, 하단 탭, 테마
+  core/
+    bridge/           # Pigeon 생성 코드 + provider (data 계층에서만 사용)
+    domain/           # 유스케이스 공통 규약
+    ui/               # 앱 자체 UI 컴포넌트
+    l10n/             # 열거형 → 화면 문구
   features/<기능>/
-    presentation/ # 화면, ViewModel
-    domain/       # 모델, 리포지토리 인터페이스
-    data/         # 리포지토리 구현 (Pigeon 호출)
-pigeons/          # Pigeon 정의 (.dart)
+    domain/           # entities/ repositories/ usecases/  (순수 Dart)
+    data/             # datasources/ mappers/ repositories/
+    presentation/     # screens/ view_models/ widgets/
+    di.dart           # 의존성 연결 (Riverpod)
+pigeons/              # Pigeon 정의 (.dart)
 android/app/src/main/kotlin/.../
   bridge/  service/  capture/  overlay/  ocr/  translate/  data/
 ```

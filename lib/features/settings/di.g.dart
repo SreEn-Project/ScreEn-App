@@ -1,0 +1,371 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'di.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(settingsRepository)
+final settingsRepositoryProvider = SettingsRepositoryProvider._();
+
+final class SettingsRepositoryProvider
+    extends
+        $FunctionalProvider<
+          SettingsRepository,
+          SettingsRepository,
+          SettingsRepository
+        >
+    with $Provider<SettingsRepository> {
+  SettingsRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'settingsRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$settingsRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<SettingsRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SettingsRepository create(Ref ref) {
+    return settingsRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SettingsRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SettingsRepository>(value),
+    );
+  }
+}
+
+String _$settingsRepositoryHash() =>
+    r'f03c71b2908406000a06d82382b6ca2cd990c261';
+
+@ProviderFor(getSettings)
+final getSettingsProvider = GetSettingsProvider._();
+
+final class GetSettingsProvider
+    extends $FunctionalProvider<GetSettings, GetSettings, GetSettings>
+    with $Provider<GetSettings> {
+  GetSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getSettingsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GetSettings create(Ref ref) {
+    return getSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetSettings>(value),
+    );
+  }
+}
+
+String _$getSettingsHash() => r'd4d992c7e1e4fe9f455f5521a11659e65b1049d0';
+
+@ProviderFor(watchSettings)
+final watchSettingsProvider = WatchSettingsProvider._();
+
+final class WatchSettingsProvider
+    extends $FunctionalProvider<WatchSettings, WatchSettings, WatchSettings>
+    with $Provider<WatchSettings> {
+  WatchSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchSettingsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<WatchSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  WatchSettings create(Ref ref) {
+    return watchSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(WatchSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<WatchSettings>(value),
+    );
+  }
+}
+
+String _$watchSettingsHash() => r'3287ecd7fd32b46e2552b2321a960e19a6e055d5';
+
+@ProviderFor(changeTargetLanguage)
+final changeTargetLanguageProvider = ChangeTargetLanguageProvider._();
+
+final class ChangeTargetLanguageProvider
+    extends
+        $FunctionalProvider<
+          ChangeTargetLanguage,
+          ChangeTargetLanguage,
+          ChangeTargetLanguage
+        >
+    with $Provider<ChangeTargetLanguage> {
+  ChangeTargetLanguageProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeTargetLanguageProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeTargetLanguageHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeTargetLanguage> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeTargetLanguage create(Ref ref) {
+    return changeTargetLanguage(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeTargetLanguage value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeTargetLanguage>(value),
+    );
+  }
+}
+
+String _$changeTargetLanguageHash() =>
+    r'650c27fe23e25662f66d5ba205ec7f869eb60517';
+
+@ProviderFor(changeEngine)
+final changeEngineProvider = ChangeEngineProvider._();
+
+final class ChangeEngineProvider
+    extends $FunctionalProvider<ChangeEngine, ChangeEngine, ChangeEngine>
+    with $Provider<ChangeEngine> {
+  ChangeEngineProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeEngineProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeEngineHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeEngine> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChangeEngine create(Ref ref) {
+    return changeEngine(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeEngine value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeEngine>(value),
+    );
+  }
+}
+
+String _$changeEngineHash() => r'89c65625f44008c0b622a7201fbe13bca7e54937';
+
+@ProviderFor(changeCaptureMode)
+final changeCaptureModeProvider = ChangeCaptureModeProvider._();
+
+final class ChangeCaptureModeProvider
+    extends
+        $FunctionalProvider<
+          ChangeCaptureMode,
+          ChangeCaptureMode,
+          ChangeCaptureMode
+        >
+    with $Provider<ChangeCaptureMode> {
+  ChangeCaptureModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeCaptureModeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeCaptureModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeCaptureMode> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeCaptureMode create(Ref ref) {
+    return changeCaptureMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeCaptureMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeCaptureMode>(value),
+    );
+  }
+}
+
+String _$changeCaptureModeHash() => r'17f2063b1786fc79f09c86578fba69ad10f1fa05';
+
+@ProviderFor(changeDisplayMode)
+final changeDisplayModeProvider = ChangeDisplayModeProvider._();
+
+final class ChangeDisplayModeProvider
+    extends
+        $FunctionalProvider<
+          ChangeDisplayMode,
+          ChangeDisplayMode,
+          ChangeDisplayMode
+        >
+    with $Provider<ChangeDisplayMode> {
+  ChangeDisplayModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeDisplayModeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeDisplayModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeDisplayMode> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeDisplayMode create(Ref ref) {
+    return changeDisplayMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeDisplayMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeDisplayMode>(value),
+    );
+  }
+}
+
+String _$changeDisplayModeHash() => r'7c08b997249b45a869d90a0e85d1ef0dc02bb047';
+
+@ProviderFor(completeOnboarding)
+final completeOnboardingProvider = CompleteOnboardingProvider._();
+
+final class CompleteOnboardingProvider
+    extends
+        $FunctionalProvider<
+          CompleteOnboarding,
+          CompleteOnboarding,
+          CompleteOnboarding
+        >
+    with $Provider<CompleteOnboarding> {
+  CompleteOnboardingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'completeOnboardingProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$completeOnboardingHash();
+
+  @$internal
+  @override
+  $ProviderElement<CompleteOnboarding> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CompleteOnboarding create(Ref ref) {
+    return completeOnboarding(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CompleteOnboarding value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CompleteOnboarding>(value),
+    );
+  }
+}
+
+String _$completeOnboardingHash() =>
+    r'7a8d915553a3367122f68b7538ecac8b8f77e58d';

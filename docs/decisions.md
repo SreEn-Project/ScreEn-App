@@ -35,7 +35,7 @@ Play 출시 전에 한 번에 바꾼다 (출시 후에는 applicationId 변경 �
 ## D-010 · 2026-09-29 · 브리지 구조 (NA-01)
 - Pigeon 파일은 하나(`pigeons/translator_api.dart`)로 시작하고, 커지면 기능별로 나눈다.
 - 네이티브는 Pigeon 타입을 `bridge/` 안에서만 쓴다. 서비스 · 데이터는 자체 모델(`Settings`, `RunState`)을 쓰고 `Mappers.kt`에서 변환 → 서비스가 Flutter 코드 생성물에 묶이지 않음.
-- Flutter는 Pigeon 열거형(EngineType 등)을 도메인에서 그대로 쓴다. 같은 값을 세 번 정의하지 않기 위함. 모델 클래스는 freezed로 감싼다.
+- ~~Flutter는 Pigeon 열거형(EngineType 등)을 도메인에서 그대로 쓴다.~~ → D-018에서 도메인 자체 열거형으로 바꿈.
 - 이벤트 채널은 네이티브 리스너가 하나뿐이라 Flutter에서 `TranslatorEventBus`로 한 번만 구독해 나눠 쓴다. 현재 값은 조회 API로 가져온다.
 - 공유 객체는 Application 클래스 대신 `AppGraph` object (Manifest 변경 없음). 의존성이 늘면 DI 검토.
 
@@ -71,6 +71,16 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 - 토큰은 한 번만 쓸 수 있어 `START_NOT_STICKY`. 시스템이 공유를 끄면(MediaProjection.Callback.onStop) 서비스도 멈춘다.
 - 상태에 ERROR 추가 (FL-03 명세의 "오류"). 다시 시작하면 벗어난다.
 - 알림: 채널 IMPORTANCE_LOW(조용히), 누르면 앱 열기, "중지" 동작. 네이티브 문구는 `res/values(-ko)/strings.xml`, 색은 `res/values/colors.xml`(design 토큰과 같게).
+
+## D-018 · 2026-09-29 · 클린 아키텍처 (D-010의 Flutter 부분 대체)
+사용자 요청: MVVM만으로는 구조가 지저분해 보임 → 클린 아키텍처 적용.
+- 의존 방향 presentation → domain ← data. domain은 순수 Dart(freezed_annotation만 허용).
+- domain: 엔티티(앱 자체 열거형 — Pigeon 열거형을 쓰던 D-010을 바꿈), 리포지토리 인터페이스, 유스케이스(동작 하나당 클래스 하나, `call()`; 공통 규약 `core/domain/use_case.dart`).
+- data: 데이터소스(Pigeon · permission_handler 감싸기), 매퍼(Pigeon ↔ 엔티티), 리포지토리 구현. Pigeon 타입은 data 밖으로 안 나감.
+- presentation: screens / view_models / widgets. ViewModel은 유스케이스만 호출.
+- DI: 기능마다 `di.dart`에 Riverpod provider(데이터소스 → 리포지토리 → 유스케이스). 전용 DI 패키지(get_it 등)는 쓰지 않음 — Riverpod이 이미 DI와 테스트 override를 해 줌.
+- 규칙은 `test/architecture_test.dart`로 검사 (첫 실행에서 도메인이 Flutter를 import하던 곳 1건을 잡아 고침).
+- 네이티브(Kotlin)는 이미 bridge / service / data 로 나뉘어 있어 이번에는 바꾸지 않음.
 
 ## D-009 · 2026-09-29 · 아이콘 패키지
 Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가. Flutter 기본 `Icons`에는 Rounded + 선(outline) 조합이 없음.

@@ -2,12 +2,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'translator_api.g.dart';
 
-export 'translator_api.g.dart'
-    show CaptureMode, DisplayMode, EngineType, ServiceState;
-
 part 'bridge_providers.g.dart';
 
-// Pigeon 생성 API를 Riverpod으로 제공한다 (NA-01).
+// Pigeon 생성 API를 Riverpod으로 제공한다 (NA-01). data 계층의 데이터소스만 쓴다 (D-018).
 // 테스트에서는 이 provider들을 override해 네이티브 없이 검증한다.
 
 @Riverpod(keepAlive: true)
