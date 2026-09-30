@@ -94,8 +94,18 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 ### 온보딩
 - 큰 제목(한 단어 강조) + 설명 + 하단 "시작하기 →" 흰 알약 버튼(그림자).
 
-## 오버레이 (네이티브)
-- 플로팅 버튼: 흰 원 + 옅은 그림자, 아이콘 primary.
-- 결과 시트: 흰 하단 시트(상단 28dp)에 카드 목록. 카드마다 원문(회색 작은 글자) · 번역문(본문).
+## 오버레이 (네이티브, Compose — D-024)
+색은 `res/values(-night)/colors.xml`(이 문서 토큰과 같음)을 `OverlayTheme.colors`로만 가져온다. 아이콘은 같은 Material Symbols Rounded 부분 글꼴(D-025).
+- 플로팅 버튼: 흰 원 52dp + 초록 그림자, 현재 모드 아이콘 primary. 번역 중에는 둘레에 도는 호(primary, 바탕 링 primaryContainer). 끄는 동안 108%.
+- 닫기 영역: 아래 가운데 흰 원 60dp + ×, 버튼이 들어오면 primary로 채워지고 120%.
+- 모드 메뉴: 버튼 옆 흰 카드(24dp) + 그림자, 줄마다 아이콘 원 + 이름. 고른 모드는 primaryContainer 줄, 준비 중인 모드는 흐리게 + "준비 중".
+- 결과 시트: 어두운 막(scrim) 위 흰 하단 시트(상단 28dp, 화면 75%까지) · 손잡이. 머리: "번역 결과" + 엔진 배지 + "자동 감지 → 대상 언어" + 닫기. 카드(20dp, background 색)마다 원문(회색 13) · 번역문(16) · 복사. 아래 primary "전체 복사" + secondary "AI로 다시 번역". 결과가 없으면 같은 시트에 아이콘 원 + 제목 + 설명 + "닫기".
+
+| 오버레이 컴포넌트 (`overlay/OverlayComponents.kt`) | 모양 |
+|---|---|
+| `Modifier.pressable` | Flutter `Pressable`과 같음 (97% + 흐려짐, 물결 없음) |
+| `PillButton` | primary 초록 알약 + 빛 / secondary 연한 배경 알약 |
+| `PlainIconButton` | 배경 없는 원형 아이콘 버튼 |
+| `OverlayBadge` · `SymbolBadge` | 연두 배지 / 연한 초록 원 + 선 아이콘 |
 - 원문 위치 덮어쓰기(NA-22)는 원래 화면에 맞춰야 하므로 이 팔레트를 강제하지 않는다.
 - 다른 앱 위에 뜨므로 가독성 우선: 불투명 배경, 큰 글자, 빨리 닫힘.

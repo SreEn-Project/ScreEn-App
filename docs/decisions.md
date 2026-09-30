@@ -106,5 +106,27 @@ Android 14+는 mediaProjection 포그라운드 서비스를 캡처 동의 **뒤�
 사용자 결정: "develop에 작업 알아서 다 merge하고, 기능이 어느 정도 개발되었다 싶으면 검토 요청".
 develop merge는 analyze · test · 빌드 통과 후 스스로. main merge만 승인. 검토 요청은 한 흐름이 기기에서 돌 때처럼 의미 있는 묶음마다.
 
+## D-024 · 2026-10-01 · 오버레이 구조 (NA-18, NA-19)
+- **Compose로 그린다** (foundation만, Material 컴포넌트 없음 — 모양은 `overlay/OverlayComponents.kt`에 Flutter `core/ui`와 같게). 창마다 WindowManager `TYPE_APPLICATION_OVERLAY` + 자체 Lifecycle · SavedState 주인(서비스에는 Activity가 없음).
+- 창 4개: 플로팅 버튼(포커스 없음), 닫기 영역(끄는 동안만, 터치 안 받음), 모드 메뉴(버튼 옆 WRAP 창, 바깥 터치로 닫힘), 결과 시트(전체 화면, 포커스를 받아 뒤로 가기로 닫힘).
+- 버튼 제스처는 Compose가 아니라 View 층에서 화면 좌표(rawX/Y)로 처리 — 창이 손가락을 따라 움직여 창 기준 좌표가 흔들리기 때문. 놓으면 가까운 좌우 가장자리에 붙고 시스템 막대는 피한다(`OverlayGeometry`, 순수 로직 · 단위 테스트).
+- 캡처: 버튼을 숨김(INVISIBLE) → 숨긴 뒤의 새 프레임을 기다림(최대 200ms, 이어서 50ms 안의 프레임 하나 더) → 찍고 곧바로 다시 보임 + 번역 끝날 때까지 도는 링. D-019의 "최신 프레임을 들고 있는" 방식이라 기다리지 않으면 버튼이 찍힌다.
+- 1단계는 **전체 화면만** 된다. 저장된 캡처 모드가 다른 값이어도 전체 화면으로 번역하고, 메뉴의 드래그로 지정 · 고정 영역 · 고정 영역 편집은 "준비 중"(비활성)으로 보인다 → NA-06 · NA-20 · NA-21에서 연결.
+- 닫기 영역에 놓으면 서비스 종료(알림 "중지"와 같음). 버튼 위치는 프로세스 안에서만 기억(표시 설정 FL-07 때 저장 검토).
+- 결과: 블록마다 줄을 이어 한 문단으로 만들어(ja · zh 등은 공백 없이) 엔진에 동시에 요청. 모두 실패하면 목록 대신 이유(Wi-Fi 필요 · 저장 공간 · 모델 없음)를 안내하고, 일부만 실패하면 그 카드에 "번역하지 못했어요". 미지원 언어는 원문 + 안내.
+- 복사: 카드별 번역문, 전체 복사는 빈 줄로 잇는다. "AI로 다시 번역"은 ML Kit 결과일 때 비활성으로 보이고 NA-13에서 연결.
+- 엔진은 서비스가 `MlKitTranslationEngine` 하나를 세션 동안 가진다(설정 엔진과 무관, AI 엔진이 생기면 고르기 · 대체).
+- 다크 모드: `res/values-night/colors.xml` (design.md 다크 열).
+- 다른 앱 위 표시 권한이 없으면 버튼을 띄우지 않고 서비스만 돈다 (권한 화면이 시작 전에 막는다).
+
+## D-025 · 2026-10-01 · 오버레이 아이콘은 Material Symbols 부분 글꼴
+Flutter와 같은 Material Symbols Rounded 선 아이콘을 쓰되, 원본 글꼴(15MB) 대신 쓰는 글자만 남긴 3.4KB 글꼴 `res/font/material_symbols_rounded.ttf`를 넣는다. 코드포인트는 `overlay/OverlayTheme.kt`의 `Symbol`.
+아이콘을 추가할 때 다시 만드는 법 (fonttools, 원본은 pub 캐시 `material_symbols_icons/lib/fonts/MaterialSymbolsRounded.ttf`, 코드포인트는 같은 패키지 `symbols.dart`):
+```
+pip install fonttools
+pyftsubset MaterialSymbolsRounded.ttf --unicodes="U+e5d0,U+e3be,..." --layout-features='' --no-hinting --output-file=sub.ttf
+python -c "from fontTools.ttLib import TTFont; from fontTools.varLib import instancer; instancer.instantiateVariableFont(TTFont('sub.ttf'), {'FILL':0,'wght':400,'GRAD':0,'opsz':24}).save('material_symbols_rounded.ttf')"
+```
+
 ## D-009 · 2026-09-29 · 아이콘 패키지
 Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가. Flutter 기본 `Icons`에는 Rounded + 선(outline) 조합이 없음.
