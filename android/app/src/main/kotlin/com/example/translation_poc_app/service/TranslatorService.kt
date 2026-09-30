@@ -18,6 +18,8 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.example.translation_poc_app.capture.CaptureResult
 import com.example.translation_poc_app.capture.ScreenCapturer
+import com.example.translation_poc_app.ocr.OcrResult
+import com.example.translation_poc_app.ocr.ScreenTextRecognizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -33,6 +35,7 @@ class TranslatorService : LifecycleService() {
 
     private var projection: MediaProjection? = null
     private var capturer: ScreenCapturer? = null
+    private val textRecognizer by lazy { ScreenTextRecognizer() }
 
     private val projectionCallback = object : MediaProjection.Callback() {
         // 사용자가 시스템 UI(상태 표시줄 칩 등)에서 공유를 끄면 서비스도 멈춘다 (NA-04).
@@ -120,6 +123,10 @@ class TranslatorService : LifecycleService() {
     suspend fun captureFrame(): CaptureResult =
         capturer?.capture() ?: CaptureResult.Failed("서비스가 실행 중이 아님")
 
+    /** 캡처한 화면에서 글자를 읽는다 (NA-09). [sourceLanguage] null = 자동. */
+    suspend fun recognizeText(frame: CaptureResult.Frame, sourceLanguage: String? = null): OcrResult =
+        textRecognizer.recognize(frame.bitmap, sourceLanguage)
+
     /** 디버그 빌드 전용: 알림의 "캡처 테스트"로 한 장 찍어 앱 캐시에 저장하고 결과를 로그로 남긴다. */
     private fun debugCapture() {
         if (!isDebuggable()) return
@@ -135,6 +142,13 @@ class TranslatorService : LifecycleService() {
                         }
                     }
                     Log.i(TAG, "캡처 성공 ${result.bitmap.width}x${result.bitmap.height} → ${file.absolutePath}")
+                    val started = System.currentTimeMillis()
+                    val ocr = recognizeText(result)
+                    Log.i(
+                        TAG,
+                        "문자 인식 ${ocr.script} 블록 ${ocr.blocks.size}개, ${System.currentTimeMillis() - started}ms: " +
+                            ocr.blocks.take(5).joinToString(" | ") { "${it.language}:${it.text.replace('\n', ' ')}" },
+                    )
                     result.bitmap.recycle()
                 }
                 CaptureResult.Blank -> Log.i(TAG, "캡처 결과: 검은 화면 (보안 화면일 수 있음)")
@@ -155,6 +169,7 @@ class TranslatorService : LifecycleService() {
     }
 
     override fun onDestroy() {
+        textRecognizer.close()
         capturer?.release()
         capturer = null
         projection?.unregisterCallback(projectionCallback)
