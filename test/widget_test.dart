@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/app/app.dart';
-import 'package:translation_poc_app/features/home/presentation/home_screen.dart';
-import 'package:translation_poc_app/features/permission/presentation/permission_screen.dart';
+import 'package:translation_poc_app/features/home/presentation/screens/home_screen.dart';
+import 'package:translation_poc_app/features/permission/presentation/screens/permission_screen.dart';
 
 import 'fakes.dart';
 
