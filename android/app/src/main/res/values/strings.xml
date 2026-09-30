@@ -17,7 +17,10 @@
     <string name="overlay_mode_drag_region">Drag to select</string>
     <string name="overlay_mode_fixed_region">Fixed area</string>
     <string name="overlay_mode_edit_fixed_region">Edit fixed area</string>
-    <string name="overlay_mode_coming_soon">Soon</string>
+    <string name="region_hint_drag">Drag to choose the area to translate</string>
+    <string name="region_hint_edit">Move the area or drag a corner to resize</string>
+    <string name="region_cancel">Cancel</string>
+    <string name="region_save">Save</string>
     <!-- 오버레이 (NA-19 결과 시트) -->
     <string name="result_title">Translation</string>
     <string name="result_languages">Auto detect → %1$s</string>

@@ -1,6 +1,8 @@
 package com.example.translation_poc_app.translate
 
 import com.example.translation_poc_app.capture.CaptureResult
+import android.graphics.Bitmap
+import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.ocr.OcrBlock
 import com.example.translation_poc_app.ocr.OcrResult
@@ -66,6 +68,12 @@ data class PipelineTimings(
     val total: Long get() = capture + ocr + detect + translate
 }
 
+/** 캡처 프레임에서 [region]만 잘라낸 새 프레임. 원래 비트맵은 그대로 둔다 (부른 쪽이 해제). */
+private fun CaptureResult.Frame.cropped(region: NormalizedRegion): CaptureResult.Frame {
+    val rect = region.toPixels(bitmap.width, bitmap.height)
+    return CaptureResult.Frame(Bitmap.createBitmap(bitmap, rect.left, rect.top, rect.width, rect.height))
+}
+
 class TranslationPipeline(
     private val capture: suspend () -> CaptureResult,
     private val recognize: suspend (CaptureResult.Frame) -> OcrResult,
@@ -75,8 +83,11 @@ class TranslationPipeline(
     private val onTimings: (PipelineTimings) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
-    /** @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때. */
-    suspend fun run(onCaptured: () -> Unit = {}): TranslationOutcome {
+    /**
+     * @param region 이 영역만 번역한다 (NA-07). null이면 화면 전체.
+     * @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때.
+     */
+    suspend fun run(region: NormalizedRegion? = null, onCaptured: () -> Unit = {}): TranslationOutcome {
         var mark = clock()
         fun lap(): Long = clock().let { now -> (now - mark).also { mark = now } }
         val shot = try {
@@ -93,9 +104,11 @@ class TranslationPipeline(
         val captureMs = lap()
         return try {
             val current = settings()
+            val target = if (region != null) frame.cropped(region) else frame
             val ocr = try {
-                recognize(frame)
+                recognize(target)
             } finally {
+                target.bitmap.recycle()
                 frame.bitmap.recycle()
             }
             val ocrMs = lap()
