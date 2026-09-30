@@ -9,4 +9,39 @@
     <string name="notification_action_stop">중지</string>
     <!-- 디버그 빌드 전용 -->
     <string name="notification_action_debug_capture">캡처 테스트</string>
+    <!-- 오버레이 (NA-18 플로팅 버튼 · 모드 메뉴) -->
+    <string name="overlay_button_description">화면 번역</string>
+    <string name="overlay_close_description">여기에 놓으면 번역을 꺼요</string>
+    <string name="overlay_mode_full_screen">전체 화면</string>
+    <string name="overlay_mode_drag_region">드래그로 지정</string>
+    <string name="overlay_mode_fixed_region">고정 영역</string>
+    <string name="overlay_mode_edit_fixed_region">고정 영역 편집</string>
+    <string name="overlay_mode_coming_soon">준비 중</string>
+    <!-- 오버레이 (NA-19 결과 시트) -->
+    <string name="result_title">번역 결과</string>
+    <string name="result_languages">자동 감지 → %1$s</string>
+    <string name="result_copy">복사</string>
+    <string name="result_copy_all">전체 복사</string>
+    <string name="result_copied">복사했어요</string>
+    <string name="result_close">닫기</string>
+    <string name="result_retranslate_ai">AI로 다시 번역</string>
+    <string name="result_ai_coming_soon">AI 번역은 준비 중이에요</string>
+    <string name="result_unsupported">아직 번역할 수 없는 언어예요 (%1$s)</string>
+    <string name="result_skipped">이미 %2$s인 글 %1$d개는 건너뛰었어요</string>
+    <string name="result_secure_title">이 화면은 읽을 수 없어요</string>
+    <string name="result_secure_body">은행 · 동영상 앱처럼 화면 캡처를 막는 앱이에요.</string>
+    <string name="result_no_text_title">글자를 찾지 못했어요</string>
+    <string name="result_no_text_body">글자가 잘 보이는 화면에서 다시 눌러 주세요.</string>
+    <string name="result_already_target_title">번역할 글이 없어요</string>
+    <string name="result_already_target_body">화면의 글이 이미 대상 언어(%1$s)예요.</string>
+    <string name="result_failed_title">번역하지 못했어요</string>
+    <string name="result_failed_body">잠시 후 다시 시도해 주세요.</string>
+    <string name="result_item_failed">이 부분은 번역하지 못했어요</string>
+    <string name="result_network_title">언어 모델을 받지 못했어요</string>
+    <string name="result_network_body">언어 모델은 Wi-Fi에서 받아요. Wi-Fi에 연결한 뒤 다시 눌러 주세요.</string>
+    <string name="result_no_space_title">저장 공간이 부족해요</string>
+    <string name="result_no_space_body">언어 모델을 받을 공간을 비운 뒤 다시 시도해 주세요.</string>
+    <string name="result_no_model_title">언어 모델이 필요해요</string>
+    <string name="result_no_model_body">앱의 언어 탭에서 언어를 받아 주세요.</string>
+    <string name="engine_ml_kit">ML Kit</string>
 </resources>

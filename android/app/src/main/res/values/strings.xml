@@ -10,4 +10,39 @@
     <string name="notification_action_stop">Stop</string>
     <!-- 디버그 빌드 전용 -->
     <string name="notification_action_debug_capture">Capture test</string>
+    <!-- 오버레이 (NA-18 플로팅 버튼 · 모드 메뉴) -->
+    <string name="overlay_button_description">Translate screen</string>
+    <string name="overlay_close_description">Drop here to stop translation</string>
+    <string name="overlay_mode_full_screen">Full screen</string>
+    <string name="overlay_mode_drag_region">Drag to select</string>
+    <string name="overlay_mode_fixed_region">Fixed area</string>
+    <string name="overlay_mode_edit_fixed_region">Edit fixed area</string>
+    <string name="overlay_mode_coming_soon">Soon</string>
+    <!-- 오버레이 (NA-19 결과 시트) -->
+    <string name="result_title">Translation</string>
+    <string name="result_languages">Auto detect → %1$s</string>
+    <string name="result_copy">Copy</string>
+    <string name="result_copy_all">Copy all</string>
+    <string name="result_copied">Copied</string>
+    <string name="result_close">Close</string>
+    <string name="result_retranslate_ai">Retranslate with AI</string>
+    <string name="result_ai_coming_soon">AI translation is coming soon</string>
+    <string name="result_unsupported">This language can\'t be translated yet (%1$s)</string>
+    <string name="result_skipped">Skipped %1$d already in %2$s</string>
+    <string name="result_secure_title">Can\'t read this screen</string>
+    <string name="result_secure_body">This app blocks screen capture, like banking or video apps do.</string>
+    <string name="result_no_text_title">No text found</string>
+    <string name="result_no_text_body">Try again on a screen where the text is clearly visible.</string>
+    <string name="result_already_target_title">Nothing to translate</string>
+    <string name="result_already_target_body">The text on screen is already in %1$s.</string>
+    <string name="result_failed_title">Couldn\'t translate</string>
+    <string name="result_failed_body">Please try again in a moment.</string>
+    <string name="result_item_failed">Couldn\'t translate this part</string>
+    <string name="result_network_title">Couldn\'t get the language model</string>
+    <string name="result_network_body">Language models download over Wi-Fi. Connect to Wi-Fi and try again.</string>
+    <string name="result_no_space_title">Not enough storage</string>
+    <string name="result_no_space_body">Free up some space for the language model and try again.</string>
+    <string name="result_no_model_title">Language model needed</string>
+    <string name="result_no_model_body">Download the language in the app\'s Language tab.</string>
+    <string name="engine_ml_kit">ML Kit</string>
 </resources>

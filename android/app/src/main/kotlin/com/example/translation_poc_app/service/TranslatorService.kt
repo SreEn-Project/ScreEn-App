@@ -21,8 +21,12 @@ import com.example.translation_poc_app.capture.ScreenCapturer
 import com.example.translation_poc_app.ocr.OcrResult
 import com.example.translation_poc_app.ocr.ScreenTextRecognizer
 import com.example.translation_poc_app.AppGraph
+import com.example.translation_poc_app.overlay.OverlayController
 import com.example.translation_poc_app.translate.DetectedBlock
 import com.example.translation_poc_app.translate.LanguageDetector
+import com.example.translation_poc_app.translate.MlKitTranslationEngine
+import com.example.translation_poc_app.translate.TranslationEngine
+import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,7 +36,7 @@ import java.io.File
 /**
  * 번역 포그라운드 서비스 (NA-02). Flutter 엔진 없이 독립적으로 돈다.
  * 화면 캡처 동의 결과로만 시작하며([CaptureConsentActivity]), MediaProjection 세션을 가진다.
- * 캡처(NA-05) · 오버레이(NA-18)는 이 서비스 안에 붙인다.
+ * 캡처(NA-05) · 오버레이(NA-18, NA-19)는 이 서비스 안에 붙인다.
  */
 class TranslatorService : LifecycleService() {
 
@@ -40,6 +44,23 @@ class TranslatorService : LifecycleService() {
     private var capturer: ScreenCapturer? = null
     private val textRecognizer by lazy { ScreenTextRecognizer() }
     private val languageDetector by lazy { LanguageDetector() }
+    private var overlay: OverlayController? = null
+    private var mlKitEngine: MlKitTranslationEngine? = null
+
+    /** 플로팅 버튼 한 번 = 캡처 → 문자 인식 → 언어 감지 → 번역 (NA-18 → NA-19). */
+    private val pipeline by lazy {
+        TranslationPipeline(
+            capture = {
+                // 버튼을 숨긴 뒤의 화면을 찍는다.
+                capturer?.awaitFreshFrame()
+                captureFrame()
+            },
+            recognize = { frame -> recognizeText(frame) },
+            detect = { ocr, target -> languageDetector.detect(ocr.blocks, target) },
+            engineFor = { translationEngine() },
+            settings = { AppGraph.settingsRepository(this).current() },
+        )
+    }
 
     private val projectionCallback = object : MediaProjection.Callback() {
         // 사용자가 시스템 UI(상태 표시줄 칩 등)에서 공유를 끄면 서비스도 멈춘다 (NA-04).
@@ -113,16 +134,37 @@ class TranslatorService : LifecycleService() {
         }
 
         TranslatorServiceState.update(RunState.RUNNING)
+        showOverlay()
+    }
+
+    /**
+     * 번역 엔진 (NA-11). 지금은 ML Kit(NA-12)뿐이라 설정의 엔진과 상관없이 ML Kit을 쓴다.
+     * AI 엔진(NA-13 · NA-14)이 생기면 설정으로 고르고, 실패하면 ML Kit으로 대체한다.
+     */
+    private fun translationEngine(): TranslationEngine =
+        mlKitEngine ?: MlKitTranslationEngine().also { mlKitEngine = it }
+
+    /** 플로팅 버튼을 띄운다 (NA-18). 권한이 없으면 띄우지 않고 서비스만 돈다. */
+    private fun showOverlay() {
+        overlay?.destroy()
+        overlay = OverlayController(
+            context = this,
+            scope = lifecycleScope,
+            settingsRepository = AppGraph.settingsRepository(this),
+            pipeline = pipeline,
+            onStopRequested = { stopSelf() },
+        ).takeIf { it.show() }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         capturer?.onDisplayChanged()
+        overlay?.onConfigurationChanged()
     }
 
     /**
-     * 화면 한 장을 찍는다 (NA-05). 플로팅 버튼(NA-18)이 부른다.
-     * 오버레이가 생기면 찍기 직전에 숨기고 찍은 뒤 다시 보여 번역 대상에 섞이지 않게 한다.
+     * 화면 한 장을 찍는다 (NA-05). 플로팅 버튼(NA-18)은 [pipeline]으로 부르며,
+     * 찍기 전에 버튼을 숨기고 찍은 뒤 다시 보여 번역 대상에 섞이지 않게 한다.
      */
     suspend fun captureFrame(): CaptureResult =
         capturer?.capture() ?: CaptureResult.Failed("서비스가 실행 중이 아님")
@@ -186,6 +228,10 @@ class TranslatorService : LifecycleService() {
     }
 
     override fun onDestroy() {
+        overlay?.destroy()
+        overlay = null
+        mlKitEngine?.close()
+        mlKitEngine = null
         textRecognizer.close()
         languageDetector.close()
         capturer?.release()
