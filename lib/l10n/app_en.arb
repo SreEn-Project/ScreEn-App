@@ -125,6 +125,17 @@
       "min": {"type": "int"}
     }
   },
+  "settingsSectionAuto": "Auto translate",
+  "settingsAutoTranslate": "Translate automatically when the screen changes",
+  "settingsAutoTranslateDetail": "After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.",
+  "settingsAutoInterval": "Screen check interval (longer saves battery)",
+  "settingsAutoSettle": "Wait after the screen stops",
+  "secondsShort": "{value}s",
+  "@secondsShort": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
   "settingsSectionEtc": "More",
   "settingsAbout": "About",
 

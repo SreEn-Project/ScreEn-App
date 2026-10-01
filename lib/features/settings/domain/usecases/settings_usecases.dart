@@ -75,6 +75,39 @@ final class ChangeQuickLanguages implements UseCase<void, List<String>> {
   }
 }
 
+/// 자동 번역 켜고 끄기 (#23).
+final class ChangeAutoTranslate implements UseCase<void, bool> {
+  const ChangeAutoTranslate(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(bool enabled) => _repository.setAutoTranslate(enabled);
+}
+
+/// 자동 번역 화면 확인 간격 변경 (#23). 선택지 밖의 값은 가장 가까운 선택지로 맞춘다.
+final class ChangeAutoCheckInterval implements UseCase<void, int> {
+  const ChangeAutoCheckInterval(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(int ms) => _repository.setAutoCheckIntervalMs(
+    nearestChoice(autoCheckIntervalChoicesMs, ms),
+  );
+}
+
+/// 자동 번역 안정 대기 시간 변경 (#23). 선택지 밖의 값은 가장 가까운 선택지로 맞춘다.
+final class ChangeAutoSettle implements UseCase<void, int> {
+  const ChangeAutoSettle(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(int ms) =>
+      _repository.setAutoSettleMs(nearestChoice(autoSettleChoicesMs, ms));
+}
+
 /// 온보딩을 마쳤다고 기록 (FL-01). 다음 실행부터 온보딩을 건너뛴다.
 final class CompleteOnboarding implements NoParamsUseCase<void> {
   const CompleteOnboarding(this._repository);

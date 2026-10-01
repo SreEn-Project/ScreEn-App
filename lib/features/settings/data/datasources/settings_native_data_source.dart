@@ -27,6 +27,13 @@ class SettingsNativeDataSource {
   Future<void> setQuickLanguages(List<String> codes) =>
       _api.setQuickLanguages(codes);
 
+  Future<void> setAutoTranslate(bool enabled) => _api.setAutoTranslate(enabled);
+
+  Future<void> setAutoCheckIntervalMs(int ms) =>
+      _api.setAutoCheckIntervalMs(ms);
+
+  Future<void> setAutoSettleMs(int ms) => _api.setAutoSettleMs(ms);
+
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);
 }

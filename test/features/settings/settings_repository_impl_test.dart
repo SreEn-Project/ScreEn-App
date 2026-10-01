@@ -18,6 +18,9 @@ pigeon.AppSettings _pigeonSettings({String targetLanguage = 'ko'}) =>
       displayMode: pigeon.DisplayMode.overlay,
       onboardingCompleted: true,
       quickLanguages: ['en', 'ja'],
+      autoTranslate: true,
+      autoCheckIntervalMs: 3000,
+      autoSettleMs: 1500,
     );
 
 void main() {
@@ -48,6 +51,9 @@ void main() {
         displayMode: DisplayMode.overlay,
         onboardingCompleted: true,
         quickLanguages: ['en', 'ja'],
+        autoTranslate: true,
+        autoCheckIntervalMs: 3000,
+        autoSettleMs: 1500,
       ),
     );
   });

@@ -347,6 +347,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settingsSectionAuto => 'Auto translate';
+
+  @override
+  String get settingsAutoTranslate =>
+      'Translate automatically when the screen changes';
+
+  @override
+  String get settingsAutoTranslateDetail =>
+      'After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.';
+
+  @override
+  String get settingsAutoInterval =>
+      'Screen check interval (longer saves battery)';
+
+  @override
+  String get settingsAutoSettle => 'Wait after the screen stops';
+
+  @override
+  String secondsShort(String value) {
+    return '${value}s';
+  }
+
+  @override
   String get settingsSectionEtc => 'More';
 
   @override

@@ -370,6 +370,148 @@ final class ChangeQuickLanguagesProvider
 String _$changeQuickLanguagesHash() =>
     r'a4e5afa9e6c08f9a671e9148cb3134d6a50deb5f';
 
+@ProviderFor(changeAutoTranslate)
+final changeAutoTranslateProvider = ChangeAutoTranslateProvider._();
+
+final class ChangeAutoTranslateProvider
+    extends
+        $FunctionalProvider<
+          ChangeAutoTranslate,
+          ChangeAutoTranslate,
+          ChangeAutoTranslate
+        >
+    with $Provider<ChangeAutoTranslate> {
+  ChangeAutoTranslateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeAutoTranslateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeAutoTranslateHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeAutoTranslate> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeAutoTranslate create(Ref ref) {
+    return changeAutoTranslate(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeAutoTranslate value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeAutoTranslate>(value),
+    );
+  }
+}
+
+String _$changeAutoTranslateHash() =>
+    r'4de9cc03ef32ef9ed3677ad8f5465829134fe13c';
+
+@ProviderFor(changeAutoCheckInterval)
+final changeAutoCheckIntervalProvider = ChangeAutoCheckIntervalProvider._();
+
+final class ChangeAutoCheckIntervalProvider
+    extends
+        $FunctionalProvider<
+          ChangeAutoCheckInterval,
+          ChangeAutoCheckInterval,
+          ChangeAutoCheckInterval
+        >
+    with $Provider<ChangeAutoCheckInterval> {
+  ChangeAutoCheckIntervalProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeAutoCheckIntervalProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeAutoCheckIntervalHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeAutoCheckInterval> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeAutoCheckInterval create(Ref ref) {
+    return changeAutoCheckInterval(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeAutoCheckInterval value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeAutoCheckInterval>(value),
+    );
+  }
+}
+
+String _$changeAutoCheckIntervalHash() =>
+    r'4b37af5cdab8637723222dfdc3324f4b8719f5cd';
+
+@ProviderFor(changeAutoSettle)
+final changeAutoSettleProvider = ChangeAutoSettleProvider._();
+
+final class ChangeAutoSettleProvider
+    extends
+        $FunctionalProvider<
+          ChangeAutoSettle,
+          ChangeAutoSettle,
+          ChangeAutoSettle
+        >
+    with $Provider<ChangeAutoSettle> {
+  ChangeAutoSettleProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeAutoSettleProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeAutoSettleHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeAutoSettle> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChangeAutoSettle create(Ref ref) {
+    return changeAutoSettle(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeAutoSettle value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeAutoSettle>(value),
+    );
+  }
+}
+
+String _$changeAutoSettleHash() => r'0d271e76ad8aa7626f071e2dca7cd73ed88e662e';
+
 @ProviderFor(completeOnboarding)
 final completeOnboardingProvider = CompleteOnboardingProvider._();
 
