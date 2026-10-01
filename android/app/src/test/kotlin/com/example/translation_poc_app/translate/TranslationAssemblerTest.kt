@@ -27,6 +27,12 @@ class TranslationAssemblerTest {
     }
 
     @Test
+    fun `줄 끝 하이픈으로 잘린 낱말은 이어 붙인다`() {
+        assertEquals("a translation here", TranslationAssembler.sourceText(block("a trans-", "lation here"), "en"))
+        assertEquals("a - b", TranslationAssembler.sourceText(block("a -", "b"), "en"))
+    }
+
+    @Test
     fun `번역할 블록만 감지한 원문 언어로 요청한다`() {
         val requests = TranslationAssembler.requests(
             listOf(

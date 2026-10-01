@@ -2,6 +2,7 @@ package com.example.translation_poc_app.ocr
 
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
@@ -29,9 +30,17 @@ class ScreenTextRecognizer : Closeable {
 
     private val recognizers = mutableMapOf<Script, TextRecognizer>()
 
+    /** 자동 모드에서 직전에 가장 잘 읽은 인식기. 다음에도 먼저 시도한다 (#19). */
+    @Volatile
+    private var lastWinner: Script = OcrSelection.DEFAULT_FIRST
+
+    /** 직전 입력과 같은 화면이면 다시 읽지 않는다 (#19). 키는 입력 이미지 해시 + 원문 언어. */
+    private var cache: Pair<Long, OcrResult>? = null
+
     /**
      * [sourceLanguage]에 맞는 인식기로 읽는다 (null = 자동, [OcrSelection.scriptsFor]).
-     * 여러 인식기를 돌리면 병렬로 돌리고 가장 잘 읽은 결과를 고른다. 신뢰도 낮은 줄은 뺀다.
+     * 자동 모드는 직전에 잘 읽은 인식기 하나로 먼저 읽고, 결과가 미덥지 않을 때만 나머지를 병렬로
+     * 돌려 가장 잘 읽은 걸 고른다. 신뢰도 낮은 줄은 뺀다.
      */
     suspend fun recognize(bitmap: Bitmap, sourceLanguage: String? = null): OcrResult {
         // 글자 인식 시간은 픽셀 수에 거의 비례한다. 긴 변을 줄여 읽고, 좌표는 원래 크기로 되돌린다 (#11).
@@ -41,21 +50,67 @@ class ScreenTextRecognizer : Closeable {
         } else {
             bitmap
         }
-        val image = InputImage.fromBitmap(input, 0)
-        val results = coroutineScope {
-            OcrSelection.scriptsFor(sourceLanguage).map { script ->
-                async {
-                    val text = recognizerFor(script).process(image).await()
-                    OcrResult(script, OcrSelection.filterLowConfidence(text.toBlocks(1f / scale)))
-                }
-            }.awaitAll()
-        }.also { if (input !== bitmap) input.recycle() }
-        return OcrSelection.pickBest(results) ?: OcrResult(Script.LATIN, emptyList())
+        try {
+            val key = fingerprint(input) * 31 + (sourceLanguage?.hashCode() ?: 0)
+            synchronized(this) { cache }?.takeIf { it.first == key }?.let {
+                Log.i(TAG, "같은 화면 — 인식 결과 재사용")
+                return it.second
+            }
+            val result = read(InputImage.fromBitmap(input, 0), sourceLanguage, 1f / scale)
+            synchronized(this) { cache = key to result }
+            return result
+        } finally {
+            if (input !== bitmap) input.recycle()
+        }
+    }
+
+    private suspend fun read(image: InputImage, sourceLanguage: String?, factor: Float): OcrResult {
+        val auto = OcrSelection.scriptsFor(sourceLanguage).size > 1
+        val first = if (auto) setOf(lastWinner) else OcrSelection.scriptsFor(sourceLanguage)
+        var results = readWith(image, first, factor)
+        if (auto && !OcrSelection.isTrusted(results.flatMap { it.raw })) {
+            Log.i(TAG, "첫 인식기(${lastWinner}) 결과가 미덥지 않아 나머지도 읽는다")
+            results = results + readWith(image, OcrSelection.remainingAuto(lastWinner), factor)
+        }
+        val best = OcrSelection.pickBest(results.map { it.filtered }) ?: OcrResult(Script.LATIN, emptyList())
+        if (auto && best.blocks.isNotEmpty()) lastWinner = best.script
+        return best
+    }
+
+    private class Read(val raw: List<OcrBlock>, val filtered: OcrResult)
+
+    private suspend fun readWith(image: InputImage, scripts: Set<Script>, factor: Float): List<Read> = coroutineScope {
+        scripts.map { script ->
+            async {
+                val raw = recognizerFor(script).process(image).await().toBlocks(factor)
+                Read(raw, OcrResult(script, OcrSelection.filterLowConfidence(raw)))
+            }
+        }.awaitAll()
+    }
+
+    /** 이미지 전체를 가볍게 훑은 해시. 같은 화면이면 같고, 시계 · 애니메이션만 달라도 달라진다. */
+    private fun fingerprint(bitmap: Bitmap): Long {
+        val w = bitmap.width
+        val h = bitmap.height
+        val row = IntArray(w)
+        var hash = 1125899906842597L
+        var y = 0
+        while (y < h) {
+            bitmap.getPixels(row, 0, w, 0, y, w, 1)
+            var x = 0
+            while (x < w) {
+                hash = 31 * hash + row[x]
+                x += 2
+            }
+            y += 2
+        }
+        return hash * 31 + w * 7919 + h
     }
 
     private companion object {
         /** 인식에 넣는 이미지의 긴 변 상한(px). 휴대폰 글자 크기는 이 정도로 줄여도 읽힌다. */
         const val MAX_SIDE = 1280
+        const val TAG = "ScreenTextRecognizer"
     }
 
     /** 첫 번역이 모델 불러오는 시간을 떠안지 않도록, 빈 이미지 한 장을 읽혀 인식기를 미리 깨운다 (#11). */

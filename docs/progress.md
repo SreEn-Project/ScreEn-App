@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 번역 속도 · 정확도 개선 (이슈 #19, 브랜치 `feat/19-speed-accuracy`, NA-09 · NA-10 · NA-11)
+- (이슈 #17 브랜치를 base로 포함: 아직 develop에 없었음.) 설계는 D-030.
+- 속도: ① 자동 모드에서 인식기 3개를 항상 돌리던 것을 **직전에 잘 읽은 인식기 1개**로 먼저 읽고, 결과가 미덥지 않을 때(글자 12자 미만 · 평균 신뢰도 0.8 미만)만 나머지 둘을 병렬로 추가. ② 직전과 같은 화면(이미지 해시 동일)이면 인식 결과 재사용. ③ 같은 글자 · 언어 쌍 번역 결과 LRU 캐시(128개). ④ 쪼개진 블록을 문단으로 묶어 번역 호출 수 감소.
+- 정확도: ① 인접 OCR 블록 문단 묶기(`OcrBlockMerger`: 간격 ≤0.6줄 · 글자 크기 ±25% · 왼쪽 정렬 · 가로 겹침 · 앞 블록이 문장부호로 안 끝날 때만). ② 글자 없는 줄(기호 · 숫자뿐) 제거 · 공백 정리(`OcrCleaner`). ③ 줄 끝 하이픈 낱말 이어 붙임. ④ 언어 감지: 한글 · 가나가 글자의 30% 이상이면 Language ID 결과보다 우선(ko · ja) — 한자 많은 일본어가 zh로 읽히는 문제 보정. 감지에 줄바꿈 없는 한 문단 글자를 사용.
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트(OcrCleanAndMergeTest · ScriptLanguageTest · 하이픈 테스트 추가) 통과 · debug APK 빌드. **전 · 후 시간은 사용자 기기에서 측정** (logcat 태그 `TranslatorService` "번역 시간 … total=…ms"). 이전(#11) 기준 에뮬레이터 약 7~9초, 대부분 OCR.
+- 남은 일: 기기에서 시간 · 묶기 오탐(별개 UI 항목이 합쳐지는지) 확인. 필요하면 상수(`MAX_GAP_RATIO` 등) 조정.
+
 ## 2026-10-01 · 빠른 언어 편집 · 원문 위에 덮기 (이슈 #17, 브랜치 `feat/17-quick-language-overlay-result`, FL-04 · NA-22)
 - (이슈 #16 버블 메뉴 · 문단형 표시 커밋을 base로 포함: 아직 develop에 없었음.) 설계는 D-029.
 - 빠른 언어: 설정 탭에 "빠른 언어" 항목 → 편집 화면(`/quick-languages`)에서 언어 목록을 눌러 켜고 끔(최소 1 · 최대 8개). 버블 옵션 메뉴는 여기서 고른 언어만 보여 준다. Pigeon `AppSettings.quickLanguages` · `setQuickLanguages` 추가(기존 네이티브 전용 → Flutter와 공유), Flutter는 엔티티 · 매퍼 · 리포지토리 · `ChangeQuickLanguages` · `QuickLanguagesViewModel` · `QuickLanguagesScreen`, `LanguageList`에 다중 선택(`selectedCodes`).

@@ -34,10 +34,10 @@ class LanguageDetector(
         coroutineScope {
             blocks.map { block ->
                 async {
-                    val detected = runCatching { client.identifyLanguage(block.text).await() }.getOrNull()
+                    val detected = runCatching { client.identifyLanguage(TranslationAssembler.detectionText(block)).await() }.getOrNull()
                     DetectedBlock(
                         block,
-                        LanguagePlan.decide(detected, block.language, targetLanguage, supportedSources),
+                        LanguagePlan.decide(detected, block.language, targetLanguage, supportedSources, block.text),
                     )
                 }
             }.awaitAll()
