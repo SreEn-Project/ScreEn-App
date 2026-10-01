@@ -1,6 +1,10 @@
 package com.example.translation_poc_app.ocr
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Log
 import com.google.android.gms.tasks.Task
@@ -56,7 +60,20 @@ class ScreenTextRecognizer : Closeable {
                 Log.i(TAG, "같은 화면 — 인식 결과 재사용")
                 return it.second
             }
-            val result = read(InputImage.fromBitmap(input, 0), sourceLanguage, 1f / scale)
+            var result = read(InputImage.fromBitmap(input, 0), sourceLanguage, 1f / scale)
+            // 거의 못 읽은 화면은 어두운 배경의 밝은 글자일 수 있다. 이 경우에만 색을 뒤집어 한 번 더 읽는다 (#21).
+            if (OcrSelection.charCount(result.blocks) < OcrSelection.MIN_TRUSTED_CHARS) {
+                val inverted = inverted(input)
+                try {
+                    val second = read(InputImage.fromBitmap(inverted, 0), sourceLanguage, 1f / scale)
+                    if (OcrSelection.score(second) > OcrSelection.score(result)) {
+                        Log.i(TAG, "색을 뒤집어 읽은 결과가 더 낫다")
+                        result = second
+                    }
+                } finally {
+                    inverted.recycle()
+                }
+            }
             synchronized(this) { cache = key to result }
             return result
         } finally {
@@ -88,6 +105,24 @@ class ScreenTextRecognizer : Closeable {
         }.awaitAll()
     }
 
+    private fun inverted(src: Bitmap): Bitmap {
+        val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
+        val paint = Paint().apply {
+            colorFilter = ColorMatrixColorFilter(
+                ColorMatrix(
+                    floatArrayOf(
+                        -1f, 0f, 0f, 0f, 255f,
+                        0f, -1f, 0f, 0f, 255f,
+                        0f, 0f, -1f, 0f, 255f,
+                        0f, 0f, 0f, 1f, 0f,
+                    ),
+                ),
+            )
+        }
+        Canvas(out).drawBitmap(src, 0f, 0f, paint)
+        return out
+    }
+
     /** 이미지 전체를 가볍게 훑은 해시. 같은 화면이면 같고, 시계 · 애니메이션만 달라도 달라진다. */
     private fun fingerprint(bitmap: Bitmap): Long {
         val w = bitmap.width
@@ -109,7 +144,7 @@ class ScreenTextRecognizer : Closeable {
 
     private companion object {
         /** 인식에 넣는 이미지의 긴 변 상한(px). 휴대폰 글자 크기는 이 정도로 줄여도 읽힌다. */
-        const val MAX_SIDE = 1280
+        const val MAX_SIDE = 1600
         const val TAG = "ScreenTextRecognizer"
     }
 

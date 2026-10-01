@@ -8,6 +8,17 @@ object OcrSelection {
     /** 이보다 낮은 신뢰도의 줄은 버린다. 화면 장식 · 아이콘을 글자로 잘못 읽는 경우가 대부분이다. */
     const val MIN_LINE_CONFIDENCE = 0.5f
 
+    /** 글자가 [LONG_LINE_CHARS]자 이상인 줄은 이 신뢰도부터 남긴다. 긴 줄은 장식일 가능성이 낮다 (#21). */
+    const val MIN_LONG_LINE_CONFIDENCE = 0.3f
+    const val LONG_LINE_CHARS = 5
+
+    /** 읽은 글자 수(공백 제외). 첫 인식이 빈약한지 볼 때 쓴다. */
+    fun charCount(blocks: List<OcrBlock>): Int =
+        blocks.sumOf { b -> b.lines.sumOf { l -> l.text.count { !it.isWhitespace() } } }
+
+    private fun minConfidenceFor(line: OcrLine, minConfidence: Float): Float =
+        if (line.text.count { !it.isWhitespace() } >= LONG_LINE_CHARS) minOf(minConfidence, MIN_LONG_LINE_CONFIDENCE) else minConfidence
+
     /**
      * 원문 언어(BCP-47)에 맞는 인식기. null이면 자동: 한국어 · 일본어 · 중국어를 함께 돌리고
      * ([pickBest]로 하나를 고른다) 각 인식기가 라틴 글자도 읽으므로 라틴은 따로 돌리지 않는다.
@@ -55,7 +66,7 @@ object OcrSelection {
         blocks: List<OcrBlock>,
         minConfidence: Float = MIN_LINE_CONFIDENCE,
     ): List<OcrBlock> = blocks.mapNotNull { block ->
-        val kept = block.lines.filter { it.confidence >= minConfidence && it.text.isNotBlank() }
+        val kept = block.lines.filter { it.text.isNotBlank() && it.confidence >= minConfidenceFor(it, minConfidence) }
         when {
             kept.isEmpty() -> null
             kept.size == block.lines.size -> block

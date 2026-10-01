@@ -30,23 +30,35 @@ class LanguageDetector(
         LanguageIdentificationOptions.Builder().setConfidenceThreshold(CONFIDENCE_THRESHOLD).build(),
     )
 
+    // 첫 판별이 모른다고 한 블록만 낮은 기준으로 한 번 더 묻는다 (#21).
+    private val relaxedClient = LanguageIdentification.getClient(
+        LanguageIdentificationOptions.Builder().setConfidenceThreshold(RELAXED_THRESHOLD).build(),
+    )
+
     suspend fun detect(blocks: List<OcrBlock>, targetLanguage: String): List<DetectedBlock> =
         coroutineScope {
             blocks.map { block ->
                 async {
                     val detected = runCatching { client.identifyLanguage(TranslationAssembler.detectionText(block)).await() }.getOrNull()
-                    DetectedBlock(
-                        block,
-                        LanguagePlan.decide(detected, block.language, targetLanguage, supportedSources, block.text),
-                    )
+                    var decision = LanguagePlan.decide(detected, block.language, targetLanguage, supportedSources, block.text)
+                    if (decision.action == BlockAction.UNKNOWN) {
+                        val relaxed = runCatching { relaxedClient.identifyLanguage(TranslationAssembler.detectionText(block)).await() }
+                            .getOrNull() ?: LanguagePlan.UNDETERMINED
+                        decision = LanguagePlan.decide(detected, block.language, targetLanguage, supportedSources, block.text, relaxed)
+                    }
+                    DetectedBlock(block, decision)
                 }
             }.awaitAll()
         }
 
-    override fun close() = client.close()
+    override fun close() {
+        client.close()
+        relaxedClient.close()
+    }
 
     private companion object {
         const val CONFIDENCE_THRESHOLD = 0.5f
+        const val RELAXED_THRESHOLD = 0.2f
     }
 }
 
