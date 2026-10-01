@@ -23,9 +23,21 @@ data class Settings(
     val fixedRegion: NormalizedRegion? = null,
     /** 플로팅 버튼 "빠른 언어" 버블에 나오는 대상 언어 코드들. 앱 설정 화면(FL-04)에서 편집하며 Pigeon으로 주고받는다. */
     val quickLanguages: List<String> = DEFAULT_QUICK_LANGUAGES,
+    /** 자동 번역 (#23): 번역한 뒤 화면이 바뀌면 알아서 다시 번역한다. 기본 꺼짐. */
+    val autoTranslate: Boolean = false,
+    /** 자동 번역의 화면 확인 간격 (ms). 짧을수록 빨리 따라가지만 열 · 배터리를 더 쓴다. */
+    val autoCheckIntervalMs: Long = DEFAULT_AUTO_CHECK_INTERVAL_MS,
+    /** 화면이 바뀐 뒤 멈추고 이만큼 기다렸다가 번역한다 (ms). */
+    val autoSettleMs: Long = DEFAULT_AUTO_SETTLE_MS,
 ) {
     companion object {
         const val DEFAULT_TARGET_LANGUAGE = "ko"
         val DEFAULT_QUICK_LANGUAGES = listOf("ko", "en", "ja", "zh")
+        const val DEFAULT_AUTO_CHECK_INTERVAL_MS = 2_000L
+        const val DEFAULT_AUTO_SETTLE_MS = 1_000L
+
+        /** 설정 화면이 고르게 하는 값의 범위. 저장된 값이 벗어나면 이 안으로 맞춘다. */
+        val AUTO_CHECK_INTERVAL_RANGE_MS = 1_000L..5_000L
+        val AUTO_SETTLE_RANGE_MS = 500L..3_000L
     }
 }

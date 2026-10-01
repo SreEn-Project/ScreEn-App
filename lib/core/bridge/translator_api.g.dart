@@ -119,6 +119,9 @@ class AppSettings {
     required this.displayMode,
     required this.onboardingCompleted,
     required this.quickLanguages,
+    required this.autoTranslate,
+    required this.autoCheckIntervalMs,
+    required this.autoSettleMs,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -135,6 +138,15 @@ class AppSettings {
   /// 플로팅 버튼 "빠른 언어" 버블에 나올 대상 언어 코드들 (사용자 편집, 순서 유지).
   List<String> quickLanguages;
 
+  /// 자동 번역 (#23): 번역한 뒤 화면이 바뀌면 알아서 다시 번역. 기본 꺼짐.
+  bool autoTranslate;
+
+  /// 자동 번역의 화면 확인 간격 (ms).
+  int autoCheckIntervalMs;
+
+  /// 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms).
+  int autoSettleMs;
+
   List<Object?> _toList() {
     return <Object?>[
       targetLanguage,
@@ -143,6 +155,9 @@ class AppSettings {
       displayMode,
       onboardingCompleted,
       quickLanguages,
+      autoTranslate,
+      autoCheckIntervalMs,
+      autoSettleMs,
     ];
   }
 
@@ -159,6 +174,9 @@ class AppSettings {
       displayMode: result[3]! as DisplayMode,
       onboardingCompleted: result[4]! as bool,
       quickLanguages: (result[5]! as List<Object?>).cast<String>(),
+      autoTranslate: result[6]! as bool,
+      autoCheckIntervalMs: result[7]! as int,
+      autoSettleMs: result[8]! as int,
     );
   }
 
@@ -176,7 +194,10 @@ class AppSettings {
         _deepEquals(captureMode, other.captureMode) &&
         _deepEquals(displayMode, other.displayMode) &&
         _deepEquals(onboardingCompleted, other.onboardingCompleted) &&
-        _deepEquals(quickLanguages, other.quickLanguages);
+        _deepEquals(quickLanguages, other.quickLanguages) &&
+        _deepEquals(autoTranslate, other.autoTranslate) &&
+        _deepEquals(autoCheckIntervalMs, other.autoCheckIntervalMs) &&
+        _deepEquals(autoSettleMs, other.autoSettleMs);
   }
 
   @override
@@ -185,7 +206,7 @@ class AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages)';
+    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoCheckIntervalMs: $autoCheckIntervalMs, autoSettleMs: $autoSettleMs)';
   }
 }
 
@@ -462,6 +483,66 @@ class SettingsHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[languageCodes],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> setAutoTranslate(bool enabled) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoTranslate$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[enabled],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> setAutoCheckIntervalMs(int ms) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoCheckIntervalMs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ms],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> setAutoSettleMs(int ms) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoSettleMs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ms],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

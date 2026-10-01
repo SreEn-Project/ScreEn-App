@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +40,14 @@ class SettingsRepository(context: Context) {
 
     suspend fun setQuickLanguages(codes: List<String>) = edit { it[Keys.QUICK_LANGUAGES] = codes.joinToString(",") }
 
+    suspend fun setAutoTranslate(enabled: Boolean) = edit { it[Keys.AUTO_TRANSLATE] = enabled }
+
+    suspend fun setAutoCheckIntervalMs(ms: Long) =
+        edit { it[Keys.AUTO_CHECK_INTERVAL] = ms.coerceIn(Settings.AUTO_CHECK_INTERVAL_RANGE_MS) }
+
+    suspend fun setAutoSettleMs(ms: Long) =
+        edit { it[Keys.AUTO_SETTLE] = ms.coerceIn(Settings.AUTO_SETTLE_RANGE_MS) }
+
     suspend fun setOnboardingCompleted(completed: Boolean) =
         edit { it[Keys.ONBOARDING_COMPLETED] = completed }
 
@@ -59,6 +68,11 @@ class SettingsRepository(context: Context) {
                 ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
                 ?.takeIf { it.isNotEmpty() }
                 ?: defaults.quickLanguages,
+            autoTranslate = this[Keys.AUTO_TRANSLATE] ?: defaults.autoTranslate,
+            autoCheckIntervalMs = (this[Keys.AUTO_CHECK_INTERVAL] ?: defaults.autoCheckIntervalMs)
+                .coerceIn(Settings.AUTO_CHECK_INTERVAL_RANGE_MS),
+            autoSettleMs = (this[Keys.AUTO_SETTLE] ?: defaults.autoSettleMs)
+                .coerceIn(Settings.AUTO_SETTLE_RANGE_MS),
         )
     }
 
@@ -74,5 +88,8 @@ class SettingsRepository(context: Context) {
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val FIXED_REGION = stringPreferencesKey("fixed_region")
         val QUICK_LANGUAGES = stringPreferencesKey("quick_languages")
+        val AUTO_TRANSLATE = booleanPreferencesKey("auto_translate")
+        val AUTO_CHECK_INTERVAL = longPreferencesKey("auto_check_interval_ms")
+        val AUTO_SETTLE = longPreferencesKey("auto_settle_ms")
     }
 }

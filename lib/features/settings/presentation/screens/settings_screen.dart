@@ -6,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../../app/router.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
+import '../view_models/auto_translate_view_model.dart';
 import '../view_models/quick_languages_view_model.dart';
 import '../../../../core/l10n/labels.dart';
 import '../../../../core/ui/ui.dart';
@@ -138,6 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const _QuickLanguagesSection(),
+        const _AutoTranslateSection(),
         AppSection(
           title: l10n.settingsSectionEtc,
           child: AppCard(
@@ -272,6 +274,74 @@ class _QuickLanguagesSection extends ConsumerWidget {
               )
               .join(' · '),
           onTap: () => context.push(AppRoutes.quickLanguages),
+        ),
+      ),
+    );
+  }
+}
+
+/// 자동 번역 (#23): 켜기 · 화면 확인 간격 · 멈춘 뒤 기다리는 시간. 값은 네이티브 설정에 바로 저장된다.
+class _AutoTranslateSection extends ConsumerWidget {
+  const _AutoTranslateSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final settings =
+        ref.watch(autoTranslateViewModelProvider).value ??
+        const AutoTranslateSettings();
+    final viewModel = ref.read(autoTranslateViewModelProvider.notifier);
+    String seconds(int ms) =>
+        l10n.secondsShort((ms / 1000).toStringAsFixed(ms % 1000 == 0 ? 0 : 1));
+
+    return AppSection(
+      title: l10n.settingsSectionAuto,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppListTile(
+              icon: Symbols.autorenew_rounded,
+              title: l10n.settingsAutoTranslate,
+              subtitle: l10n.settingsAutoTranslateDetail,
+              onTap: () => viewModel.setEnabled(!settings.enabled),
+              trailing: AppSwitch(
+                value: settings.enabled,
+                onChanged: viewModel.setEnabled,
+              ),
+            ),
+            if (settings.enabled) ...[
+              const AppDivider(),
+              _Labeled(
+                label: l10n.settingsAutoInterval,
+                value: seconds(settings.checkIntervalMs),
+                child: AppSegmented<int>(
+                  values: autoCheckIntervalChoicesMs,
+                  selected: nearestChoice(
+                    autoCheckIntervalChoicesMs,
+                    settings.checkIntervalMs,
+                  ),
+                  label: seconds,
+                  onChanged: viewModel.setCheckInterval,
+                ),
+              ),
+              const AppDivider(),
+              _Labeled(
+                label: l10n.settingsAutoSettle,
+                value: seconds(settings.settleMs),
+                child: AppSegmented<int>(
+                  values: autoSettleChoicesMs,
+                  selected: nearestChoice(
+                    autoSettleChoicesMs,
+                    settings.settleMs,
+                  ),
+                  label: seconds,
+                  onChanged: viewModel.setSettle,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

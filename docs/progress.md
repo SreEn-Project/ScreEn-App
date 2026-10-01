@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 자동 번역 (이슈 #23, 브랜치 `feat/23-auto-translate`, NA-26)
+- (먼저 #20 · #22를 develop에 merge하고 그 위에서 땄다.) 설계는 D-032.
+- 설정 탭에 "자동 번역"(기본 꺼짐 · 확인 간격 · 멈춘 뒤 대기 시간). Pigeon `AppSettings`에 `autoTranslate` · `autoCheckIntervalMs` · `autoSettleMs`와 setter 3개 추가 → Flutter 엔티티 · 매퍼 · 리포지토리 · 유스케이스 3개 · `AutoTranslateViewModel` · 설정 화면 섹션 · ARB(ko/en).
+- 네이티브: `autotranslate/`(`FrameSignature` · `AutoTranslateTracker`(판단) · `AutoTranslateWatcher`(루프)), `ScreenCapturer.captureSignature`, `OverlayController`(자동 번역 호출 · 결과 창 숨김/교체 · 터치 통과 덮기 · 화면 꺼짐/절전 모드 시 중지), `Settings`/`SettingsRepository`(범위 보정).
+- 확인: flutter analyze 0 · flutter test 통과(AutoTranslateViewModel 5개 추가) · Kotlin 단위 테스트(Tracker 12 · Watcher 5 추가) 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
+- 남은 일: 기기에서 ① 변화 감지 임계(`FrameSignature.CHANGE_RATIO`)가 알맞은지(헛번역 · 놓침) ② 덮기 막 터치 통과(Android 12+ 알파 보정)와 옅어지는 정도 ③ 열 · 배터리 체감 확인.
+
 ## 2026-10-01 · 글자 크기 일관화 · 인식 누락 개선 (이슈 #21, 브랜치 `feat/21-font-recall`, NA-09 · NA-10 · NA-22)
 - (PR #20이 develop에 아직 없어 그 브랜치에서 땄다.) 설계는 D-031.
 - 글자 크기: `OverlayFontPlan`(줄 높이 기반 공통 기준 · 0.85~1.25배 · 11~20sp), 못 맞추면 막을 늘림. `TranslatedItem.lineHeight` 추가.

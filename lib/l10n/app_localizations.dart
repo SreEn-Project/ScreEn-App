@@ -734,6 +734,42 @@ abstract class AppLocalizations {
   /// **'{count}/{max} selected, at least {min}. Tap to toggle.'**
   String quickLanguagesHint(int count, int max, int min);
 
+  /// No description provided for @settingsSectionAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto translate'**
+  String get settingsSectionAuto;
+
+  /// No description provided for @settingsAutoTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate automatically when the screen changes'**
+  String get settingsAutoTranslate;
+
+  /// No description provided for @settingsAutoTranslateDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.'**
+  String get settingsAutoTranslateDetail;
+
+  /// No description provided for @settingsAutoInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen check interval (longer saves battery)'**
+  String get settingsAutoInterval;
+
+  /// No description provided for @settingsAutoSettle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait after the screen stops'**
+  String get settingsAutoSettle;
+
+  /// No description provided for @secondsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}s'**
+  String secondsShort(String value);
+
   /// No description provided for @settingsSectionEtc.
   ///
   /// In en, this message translates to:

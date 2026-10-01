@@ -37,6 +37,17 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _dataSource.setQuickLanguages(languageCodes);
 
   @override
+  Future<void> setAutoTranslate(bool enabled) =>
+      _dataSource.setAutoTranslate(enabled);
+
+  @override
+  Future<void> setAutoCheckIntervalMs(int ms) =>
+      _dataSource.setAutoCheckIntervalMs(ms);
+
+  @override
+  Future<void> setAutoSettleMs(int ms) => _dataSource.setAutoSettleMs(ms);
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) =>
       _dataSource.setOnboardingCompleted(completed);
 }

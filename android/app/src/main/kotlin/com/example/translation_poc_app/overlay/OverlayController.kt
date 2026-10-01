@@ -3,9 +3,15 @@ package com.example.translation_poc_app.overlay
 import android.animation.ValueAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.input.InputManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
@@ -16,14 +22,19 @@ import android.view.animation.DecelerateInterpolator
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.translation_poc_app.autotranslate.AutoTranslateConfig
+import com.example.translation_poc_app.autotranslate.AutoTranslateWatcher
 import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.ResultDisplay
 import com.example.translation_poc_app.data.settings.SettingsRepository
+import com.example.translation_poc_app.translate.TranslatedItem
 import com.example.translation_poc_app.translate.TranslationOutcome
 import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -43,6 +54,8 @@ class OverlayController(
     private val scope: CoroutineScope,
     private val settingsRepository: SettingsRepository,
     private val pipeline: TranslationPipeline,
+    /** 자동 번역(#23)이 화면이 바뀌었는지 볼 때 쓰는 가벼운 화면 지문. [region]만 본다. 프레임이 없으면 null. */
+    private val sampleSignature: suspend (region: NormalizedRegion?) -> IntArray?,
     private val onStopRequested: () -> Unit,
 ) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
@@ -65,6 +78,34 @@ class OverlayController(
     private var display = ResultDisplay.LIST
     private var targetLanguage = ""
     private var quickLanguages: List<String> = emptyList()
+    private var autoConfig = AutoTranslateConfig(
+        com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_CHECK_INTERVAL_MS,
+        com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_SETTLE_MS,
+    )
+    private var autoTranslate = false
+
+    /** 마지막으로 번역한 영역 (자동 번역이 같은 영역을 다시 번역한다). null = 화면 전체. */
+    private var lastRegion: NormalizedRegion? = null
+
+    /** 지금 떠 있는 결과의 항목. 자동 번역 결과가 같으면 시트를 바꾸지 않는다. */
+    private var shownItems: List<TranslatedItem>? = null
+
+    /** 결과가 터치를 통과시키는 '원문 위에 덮기'로 떠 있다 (자동 번역 중). 버튼을 누르면 닫는다. */
+    private var passthrough = false
+
+    private val watcher = AutoTranslateWatcher(
+        scope = scope,
+        sample = { withContext(Dispatchers.Default) { sampleSignature(lastRegion) } },
+        config = { autoConfig },
+        translate = ::autoTranslateOnce,
+    )
+    private val screenOffReceiver = object : BroadcastReceiver() {
+        // 화면이 꺼지거나 절전 모드가 켜지면 감시를 멈춘다 (배터리). 다음 번역 때 다시 시작한다.
+        override fun onReceive(context: Context, intent: Intent) {
+            watcher.stop()
+        }
+    }
+    private val powerManager = context.getSystemService(PowerManager::class.java)
     private var busy by mutableStateOf(false)
     private var dragging by mutableStateOf(false)
     private var overClose by mutableStateOf(false)
@@ -123,12 +164,21 @@ class OverlayController(
                 display = it.resultDisplay
                 targetLanguage = it.targetLanguage
                 quickLanguages = it.quickLanguages
+                autoTranslate = it.autoTranslate
+                autoConfig = AutoTranslateConfig(it.autoCheckIntervalMs, it.autoSettleMs)
+                if (!autoTranslate) watcher.stop()
             }
         }
+        context.registerReceiver(
+            screenOffReceiver,
+            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED) },
+        )
         return true
     }
 
     fun destroy() {
+        watcher.stop()
+        runCatching { context.unregisterReceiver(screenOffReceiver) }
         settingsJob?.cancel()
         snapAnimator?.cancel()
         gestures.cancel()
@@ -163,6 +213,11 @@ class OverlayController(
             dismissMenu()
             return
         }
+        if (passthrough) {
+            // 자동 번역 중인 막은 터치를 통과시켜 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (감시도 멈춘다).
+            dismissSheet()
+            return
+        }
         when (mode) {
             CaptureRange.FULL_SCREEN -> translate()
             CaptureRange.DRAG_REGION -> showPicker(RegionPickMode.DRAG) { translate(it) }
@@ -175,6 +230,7 @@ class OverlayController(
         dismissMenu()
         dismissSheet()
         busy = true
+        lastRegion = region
         scope.launch {
             // 버튼이 캡처에 찍히지 않도록 숨긴다. 캡처 쪽이 숨긴 뒤의 새 프레임을 기다린다.
             button.root.visibility = View.INVISIBLE
@@ -186,7 +242,40 @@ class OverlayController(
             }
             logOutcome(outcome)
             showSheet(outcome)
+            // 자동 번역: 번역이 화면에 올랐으면 이제부터 화면 변화를 지켜본다 (#23).
+            if (autoTranslate && !powerManager.isPowerSaveMode && outcome is TranslationOutcome.Translated) watcher.arm()
         }
+    }
+
+    /**
+     * 자동 번역(#23)이 부른다: 화면이 바뀌어 안정됐으니 같은 영역을 다시 번역한다. 지금 할 수 없으면 false.
+     * 떠 있는 결과가 캡처에 찍히지 않게 잠깐 숨겼다가, 결과가 같으면 그대로 다시 보이고 다르면 새 결과로 바꾼다.
+     */
+    private suspend fun autoTranslateOnce(): Boolean {
+        if (busy || menu != null || picker != null || dragging) return false
+        busy = true
+        val old = sheet
+        old?.root?.visibility = View.INVISIBLE
+        button.root.visibility = View.INVISIBLE
+        val outcome = try {
+            pipeline.run(lastRegion, onCaptured = {
+                button.root.visibility = View.VISIBLE
+                old?.root?.visibility = View.VISIBLE
+            })
+        } finally {
+            button.root.visibility = View.VISIBLE
+            old?.root?.visibility = View.VISIBLE
+            busy = false
+        }
+        logOutcome(outcome)
+        when (outcome) {
+            is TranslationOutcome.Translated -> if (outcome.items != shownItems) showSheet(outcome)
+            // 번역할 글이 없어졌다: 낡은 결과를 걷는다. 감시는 계속한다.
+            TranslationOutcome.NoText, is TranslationOutcome.AlreadyInTarget -> removeSheet()
+            // 보안 화면 · 실패: 있던 결과를 그대로 둔다.
+            else -> Unit
+        }
+        return true
     }
 
     private fun onDragStart() {
@@ -389,18 +478,30 @@ class OverlayController(
     // ── 결과 시트 (NA-19) ───────────────────────────────
 
     private fun showSheet(outcome: TranslationOutcome) {
-        dismissSheet()
-        val params = OverlayWindow.params(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
-            // 뒤로 가기를 받으려고 포커스를 받는다. 시트가 떠 있는 동안만.
-            0,
-        )
+        removeSheet()
         // 원문 위에 덮기(NA-22): 자리를 아는 번역 항목이 하나라도 있으면 막으로, 없으면 목록 시트로.
         val overItems = if (display == ResultDisplay.OVERLAY && outcome is TranslationOutcome.Translated) {
             overlayItems(outcome.items)
         } else {
             emptyList()
+        }
+        // 자동 번역 중인 막은 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다 (#23). 닫기는 플로팅 버튼.
+        passthrough = autoTranslate && overItems.isNotEmpty()
+        shownItems = (outcome as? TranslationOutcome.Translated)?.items
+        val params = OverlayWindow.params(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            // 뒤로 가기를 받으려고 포커스를 받는다. 시트가 떠 있는 동안만.
+            if (passthrough) {
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            } else {
+                0
+            },
+        ).apply {
+            // Android 12+는 불투명한 오버레이 뒤의 앱이 터치를 못 받게 막는다. 시스템이 허용하는 최대 불투명도로 맞춘다.
+            if (passthrough && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alpha = context.getSystemService(InputManager::class.java).maximumObscuringOpacityForTouch
+            }
         }
         sheet = OverlayWindow(context, windowManager, params) {
             if (overItems.isNotEmpty()) {
@@ -409,12 +510,21 @@ class OverlayController(
                 ResultSheet(outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
             }
         }.apply {
-            root.onBack = { post(::dismissSheet) }
+            if (!passthrough) root.onBack = { post(::dismissSheet) }
             show()
         }
     }
 
+    /** 사용자가 결과를 닫았다: 자동 번역 감시도 멈춘다. */
     private fun dismissSheet() {
+        watcher.stop()
+        removeSheet()
+    }
+
+    /** 결과 창만 걷는다. 자동 번역이 결과를 바꿀 때는 감시를 멈추지 않는다. */
+    private fun removeSheet() {
+        passthrough = false
+        shownItems = null
         val current = sheet ?: return
         sheet = null
         current.destroy()

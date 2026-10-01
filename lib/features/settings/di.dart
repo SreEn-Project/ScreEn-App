@@ -47,5 +47,17 @@ ChangeQuickLanguages changeQuickLanguages(Ref ref) =>
     ChangeQuickLanguages(ref.watch(settingsRepositoryProvider));
 
 @riverpod
+ChangeAutoTranslate changeAutoTranslate(Ref ref) =>
+    ChangeAutoTranslate(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ChangeAutoCheckInterval changeAutoCheckInterval(Ref ref) =>
+    ChangeAutoCheckInterval(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ChangeAutoSettle changeAutoSettle(Ref ref) =>
+    ChangeAutoSettle(ref.watch(settingsRepositoryProvider));
+
+@riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));

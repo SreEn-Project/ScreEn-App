@@ -79,6 +79,18 @@ class FakeSettingsRepository implements SettingsRepository {
       settings = settings.copyWith(quickLanguages: languageCodes);
 
   @override
+  Future<void> setAutoTranslate(bool enabled) async =>
+      settings = settings.copyWith(autoTranslate: enabled);
+
+  @override
+  Future<void> setAutoCheckIntervalMs(int ms) async =>
+      settings = settings.copyWith(autoCheckIntervalMs: ms);
+
+  @override
+  Future<void> setAutoSettleMs(int ms) async =>
+      settings = settings.copyWith(autoSettleMs: ms);
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) async =>
       settings = settings.copyWith(onboardingCompleted: completed);
 }

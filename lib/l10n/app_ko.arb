@@ -117,6 +117,17 @@
   "settingsQuickLanguagesDetail": "플로팅 버튼 길게 누르기 메뉴에 보일 언어",
   "quickLanguagesTitle": "빠른 언어 편집",
   "quickLanguagesHint": "{count}/{max}개 선택 · 최소 {min}개. 누르면 켜고 꺼요.",
+  "settingsSectionAuto": "자동 번역",
+  "settingsAutoTranslate": "화면이 바뀌면 자동으로 번역",
+  "settingsAutoTranslateDetail": "번역한 뒤 화면을 가볍게 지켜보다가, 글자가 바뀌거나 스크롤이 멈추면 다시 번역해요. 켜 두면 배터리를 더 쓰고 기기가 따뜻해질 수 있어요.",
+  "settingsAutoInterval": "화면 확인 간격 (길수록 배터리 절약)",
+  "settingsAutoSettle": "멈춘 뒤 기다리는 시간",
+  "secondsShort": "{value}초",
+  "@secondsShort": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
   "settingsSectionEtc": "기타",
   "settingsAbout": "앱 정보",
 

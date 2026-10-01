@@ -14,6 +14,8 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.view.WindowManager
+import com.example.translation_poc_app.autotranslate.FrameSignature
+import com.example.translation_poc_app.data.settings.NormalizedRegion
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -111,6 +113,33 @@ class ScreenCapturer(
     }
 
     /**
+     * 가장 최근 프레임의 격자 밝기 표본 ([FrameSignature.COLS]×[FrameSignature.ROWS]). 자동 번역(#23)이 화면이 바뀌었는지
+     * 볼 때 쓴다. 비트맵으로 바꾸지 않고 버퍼에서 칸마다 한 픽셀만 읽어 가볍다. [region]이 있으면 그 영역만.
+     * 프레임이 아직 없으면 null.
+     */
+    fun captureSignature(region: NormalizedRegion? = null): IntArray? = synchronized(lock) {
+        val image = latest ?: return null
+        val plane = image.planes[0]
+        val buffer = plane.buffer
+        val rect = (region ?: FULL).toPixels(image.width, image.height)
+        val out = IntArray(FrameSignature.COLS * FrameSignature.ROWS)
+        for (row in 0 until FrameSignature.ROWS) {
+            val y = rect.top + (rect.height * (2 * row + 1)) / (2 * FrameSignature.ROWS)
+            val rowStart = y * plane.rowStride
+            for (col in 0 until FrameSignature.COLS) {
+                val x = rect.left + (rect.width * (2 * col + 1)) / (2 * FrameSignature.COLS)
+                val i = rowStart + x * plane.pixelStride
+                out[row * FrameSignature.COLS + col] = FrameSignature.luma(
+                    buffer.get(i).toInt() and 0xFF,
+                    buffer.get(i + 1).toInt() and 0xFF,
+                    buffer.get(i + 2).toInt() and 0xFF,
+                )
+            }
+        }
+        out
+    }
+
+    /**
      * 화면이 바뀐 뒤(오버레이를 숨긴 뒤 등)의 프레임이 들어올 때까지 기다린다 (NA-18).
      * 멈춘 화면은 숨긴 변화로 프레임이 하나만 오고, 움직이는 화면은 이미 그리고 있던 프레임이 먼저 올 수 있어
      * 하나를 받은 뒤 [settleMs] 안에 오는 프레임을 하나 더 받는다. 오지 않으면 그대로 넘어간다.
@@ -195,6 +224,7 @@ class ScreenCapturer(
 
     companion object {
         private const val TAG = "ScreenCapturer"
+        private val FULL = NormalizedRegion(0f, 0f, 1f, 1f)
     }
 }
 

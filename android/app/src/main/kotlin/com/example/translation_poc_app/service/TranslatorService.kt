@@ -165,6 +165,7 @@ class TranslatorService : LifecycleService() {
             scope = lifecycleScope,
             settingsRepository = AppGraph.settingsRepository(this),
             pipeline = pipeline,
+            sampleSignature = { region -> capturer?.captureSignature(region) },
             onStopRequested = { stopSelf() },
         ).takeIf { it.show() }
     }

@@ -337,6 +337,27 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get settingsSectionAuto => '자동 번역';
+
+  @override
+  String get settingsAutoTranslate => '화면이 바뀌면 자동으로 번역';
+
+  @override
+  String get settingsAutoTranslateDetail =>
+      '번역한 뒤 화면을 가볍게 지켜보다가, 글자가 바뀌거나 스크롤이 멈추면 다시 번역해요. 켜 두면 배터리를 더 쓰고 기기가 따뜻해질 수 있어요.';
+
+  @override
+  String get settingsAutoInterval => '화면 확인 간격 (길수록 배터리 절약)';
+
+  @override
+  String get settingsAutoSettle => '멈춘 뒤 기다리는 시간';
+
+  @override
+  String secondsShort(String value) {
+    return '$value초';
+  }
+
+  @override
   String get settingsSectionEtc => '기타';
 
   @override
