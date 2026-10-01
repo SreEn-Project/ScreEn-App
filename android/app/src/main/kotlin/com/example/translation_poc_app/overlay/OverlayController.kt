@@ -262,22 +262,18 @@ class OverlayController(
     }
 
     private fun onMenuSelect(item: ModeMenuItem) {
-        val range = item.range
-        if (range != null) {
-            scope.launch { settingsRepository.setCaptureRange(range) }
-        } else {
-            post { showPicker(RegionPickMode.EDIT, ::saveFixedRegion) }
-        }
+        scope.launch { settingsRepository.setCaptureRange(item.range) }
         post(::dismissMenu)
+        // 고정 영역을 고르면 바로 영역을 지정 · 수정한다. 이후 버튼 탭 = 번역.
+        if (item.range == CaptureRange.FIXED_REGION) post { showPicker(RegionPickMode.EDIT, ::saveFixedRegion) }
     }
 
     // ── 영역 선택 (NA-20 · NA-21) ────────────────────────
 
-    /** 고정 영역을 저장하고 고정 영역 모드로 바꾼다. */
+    /** 고정 영역을 저장한다 (모드는 메뉴에서 이미 고정 영역). */
     private fun saveFixedRegion(region: NormalizedRegion) {
         scope.launch {
             settingsRepository.setFixedRegion(region)
-            settingsRepository.setCaptureRange(CaptureRange.FIXED_REGION)
         }
     }
 

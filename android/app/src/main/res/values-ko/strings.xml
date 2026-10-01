@@ -15,7 +15,6 @@
     <string name="overlay_mode_full_screen">전체 화면</string>
     <string name="overlay_mode_drag_region">드래그로 지정</string>
     <string name="overlay_mode_fixed_region">고정 영역</string>
-    <string name="overlay_mode_edit_fixed_region">고정 영역 편집</string>
     <string name="region_hint_drag">끌어서 번역할 영역을 고르세요</string>
     <string name="region_hint_edit">영역을 옮기거나 모서리를 끌어 크기를 바꾸세요</string>
     <string name="region_cancel">취소</string>

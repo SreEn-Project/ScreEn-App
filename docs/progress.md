@@ -3,6 +3,7 @@
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
 ## 2026-10-01 · 캡처 범위 모드 (이슈 #12, 브랜치 `feat/12-capture-range-modes`)
+- (이슈 #14) 사용자 요청으로 메뉴의 "고정 영역 편집"을 "고정 영역"에 합침: 고정 영역을 고르면 바로 편집 화면이 열리고, 저장 후 버튼 탭 = 번역.
 - NA-20 · NA-21 · NA-08 · NA-07 · NA-06(네이티브): 모드 메뉴의 드래그로 지정 · 고정 영역 · 고정 영역 편집을 연결 ("준비 중" 제거). 설계는 D-027.
 - 변경: `Settings.fixedRegion` + DataStore 키(`data/settings/NormalizedRegion.kt`), `TranslationPipeline.run(region)` 자르기, `overlay/RegionPicker.kt`(선택 · 편집 화면), `OverlayController` 모드별 탭 동작, 문자열 ko/en 추가.
 - 확인: 단위 테스트(NormalizedRegionTest) 통과, Pixel_9 에뮬레이터에서 영역 편집 → 저장 → 탭 시 그 영역 글자 3개만 번역, 드래그 모드에서 영역 선택 창 · 번역 진행 확인.
