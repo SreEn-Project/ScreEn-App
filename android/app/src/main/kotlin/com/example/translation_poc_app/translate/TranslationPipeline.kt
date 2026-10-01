@@ -138,6 +138,12 @@ class TranslationPipeline(
             val current = settings()
             val target = if (region != null) frame.cropped(region) else frame
             val ocr = try {
+                stats = runCatching { FrameStats.of(target.bitmap) }.getOrNull()
+                log(
+                    "캡처 ${screenWidth}x$screenHeight, 인식 대상 ${target.bitmap.width}x${target.bitmap.height}" +
+                        (origin?.let { " (영역 ${it.left},${it.top}-${it.right},${it.bottom})" } ?: " (전체)") +
+                        " ${stats ?: ""}",
+                )
                 recognize(target, incremental)
             } finally {
                 target.bitmap.recycle()
@@ -146,6 +152,7 @@ class TranslationPipeline(
             val ocrMs = lap()
             // 잡음 줄을 빼고, 흔한 오인식을 고치고(#45), 쪼개진 문단은 이어 붙여 번역 문맥을 늘린다 (#19).
             val blocks = OcrBlockMerger.merge(OcrPostProcessor.process(OcrCleaner.clean(ocr.blocks)))
+            log("인식 블록 ${ocr.blocks.size}개 → 정리 후 ${blocks.size}개")
             if (blocks.isEmpty()) {
                 onTimings(PipelineTimings(captureMs, ocrMs))
                 return noText(stats, region != null)
@@ -153,6 +160,11 @@ class TranslationPipeline(
 
             var cached = 0
             val detected = detectCached(ocr, blocks, current.targetLanguage)
+            log(
+                "언어 감지: " + detected.groupBy { it.decision.action }
+                    .map { (action, list) -> "$action ${list.size}개(${list.map { it.decision.language }.distinct().joinToString(",")})" }
+                    .joinToString(" / "),
+            )
             val detectMs = lap()
             val engine = engineFor(current)
             val requests = TranslationAssembler.requests(detected, current.targetLanguage)
@@ -173,7 +185,7 @@ class TranslationPipeline(
                     ?.let(onPartial)
             }) { cached++ }
             onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size, cached))
-            TranslationAssembler.assemble(
+            val assembled = TranslationAssembler.assemble(
                 detected, results, engine.id, current.targetLanguage,
                 lineHeightOf = lineHeight,
                 boundsOf = bounds,
@@ -185,6 +197,9 @@ class TranslationPipeline(
             TranslationOutcome.Failed(e.message ?: e::class.java.simpleName)
         }
     }
+
+    private fun noText(stats: FrameStats?, inRegion: Boolean): TranslationOutcome =
+        noTextOutcome(stats, inRegion).also { log("글자 없음 → $it") }
 
     /** 캐시에 없는 블록만 언어를 감지한다. 결과 순서는 [blocks] 그대로. */
     internal suspend fun detectCached(
