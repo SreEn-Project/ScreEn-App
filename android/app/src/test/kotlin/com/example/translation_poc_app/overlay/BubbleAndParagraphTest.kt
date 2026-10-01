@@ -25,6 +25,29 @@ class BubbleAndParagraphTest {
         assertEquals(listOf(-90f, -60f, -30f, 0f), OverlayGeometry.bubbleAngles(spaceAboveDp = 600f, spaceBelowDp = 40f))
     }
 
+    private val angles = listOf(-66f, -22f, 22f, 66f)
+
+    private fun hit(x: Float, y: Float, inwardRight: Boolean = true) =
+        OverlayGeometry.bubbleHit(x, y, 0f, 0f, inwardRight, angles, radius = 100f, hitRadius = 34f)
+
+    @Test
+    fun `버블 위 판정 - 버블 가운데에 있으면 그 번호`() {
+        // 22° 버블 가운데: (92.7, 37.5)
+        assertEquals(2, hit(93f, 37f))
+        assertEquals(0, hit(40f, -91f))
+    }
+
+    @Test
+    fun `버블 위 판정 - 안쪽이 왼쪽이면 x가 반대로`() {
+        assertEquals(2, hit(-93f, 37f, inwardRight = false))
+    }
+
+    @Test
+    fun `버블 위 판정 - 버블 밖이나 버튼 위면 없음`() {
+        assertEquals(-1, hit(0f, 0f))
+        assertEquals(-1, hit(93f, 120f))
+    }
+
     @Test
     fun `문단형은 번역문을 블록 구분 없이 공백으로 잇는다`() {
         assertEquals("안녕하세요 반갑습니다", paragraphText(listOf(item("안녕하세요"), item("반갑습니다")), "ko"))

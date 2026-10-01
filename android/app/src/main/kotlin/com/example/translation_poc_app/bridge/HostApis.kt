@@ -25,9 +25,9 @@ class SettingsHostApiImpl(private val repository: SettingsRepository) : Settings
 
     override suspend fun setAutoTranslate(enabled: Boolean) = repository.setAutoTranslate(enabled)
 
-    override suspend fun setAutoCheckIntervalMs(ms: Long) = repository.setAutoCheckIntervalMs(ms)
+    override suspend fun setAutoShowDelayMs(ms: Long) = repository.setAutoShowDelayMs(ms)
 
-    override suspend fun setAutoSettleMs(ms: Long) = repository.setAutoSettleMs(ms)
+    override suspend fun setHideAfterInteractionMs(ms: Long) = repository.setHideAfterInteractionMs(ms)
 
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)

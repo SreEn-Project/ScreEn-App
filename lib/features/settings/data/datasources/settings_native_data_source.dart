@@ -29,10 +29,10 @@ class SettingsNativeDataSource {
 
   Future<void> setAutoTranslate(bool enabled) => _api.setAutoTranslate(enabled);
 
-  Future<void> setAutoCheckIntervalMs(int ms) =>
-      _api.setAutoCheckIntervalMs(ms);
+  Future<void> setAutoShowDelayMs(int ms) => _api.setAutoShowDelayMs(ms);
 
-  Future<void> setAutoSettleMs(int ms) => _api.setAutoSettleMs(ms);
+  Future<void> setHideAfterInteractionMs(int ms) =>
+      _api.setHideAfterInteractionMs(ms);
 
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);

@@ -41,11 +41,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _dataSource.setAutoTranslate(enabled);
 
   @override
-  Future<void> setAutoCheckIntervalMs(int ms) =>
-      _dataSource.setAutoCheckIntervalMs(ms);
+  Future<void> setAutoShowDelayMs(int ms) => _dataSource.setAutoShowDelayMs(ms);
 
   @override
-  Future<void> setAutoSettleMs(int ms) => _dataSource.setAutoSettleMs(ms);
+  Future<void> setHideAfterInteractionMs(int ms) =>
+      _dataSource.setHideAfterInteractionMs(ms);
 
   @override
   Future<void> setOnboardingCompleted(bool completed) =>

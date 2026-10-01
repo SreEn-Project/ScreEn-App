@@ -16,8 +16,8 @@ fun Settings.toPigeon() = AppSettings(
     onboardingCompleted = onboardingCompleted,
     quickLanguages = quickLanguages,
     autoTranslate = autoTranslate,
-    autoCheckIntervalMs = autoCheckIntervalMs,
-    autoSettleMs = autoSettleMs,
+    autoShowDelayMs = autoShowDelayMs,
+    hideAfterInteractionMs = hideAfterInteractionMs,
 )
 
 fun Engine.toPigeon() = when (this) {

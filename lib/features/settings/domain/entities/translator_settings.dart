@@ -18,11 +18,16 @@ const defaultQuickLanguages = ['ko', 'en', 'ja', 'zh'];
 const minQuickLanguages = 1;
 const maxQuickLanguages = 8;
 
-/// 자동 번역(#23) 화면 확인 간격 · 안정 대기 선택지 (ms). 네이티브 `Settings`의 범위 안이다.
-const defaultAutoCheckIntervalMs = 2000;
-const autoCheckIntervalChoicesMs = [1000, 2000, 3000, 5000];
-const defaultAutoSettleMs = 1000;
-const autoSettleChoicesMs = [500, 1000, 1500, 2000];
+/// 자동 번역이 새 번역을 보여 주는 시점 (#35): 조작이 끝난 뒤 이 시간이 지나기 전에는 새 번역을 올리지 않는다.
+/// 0 = 번역이 되는 대로 바로. 번역 작업 자체는 화면이 멈추면 바로 시작한다.
+const defaultAutoShowDelayMs = 0;
+const autoShowDelayChoicesMs = [0, 1000, 2000, 3000];
+
+/// 사용자가 화면을 조작한 뒤 이전 번역(덮어쓰기)을 숨기기까지의 시간. 자동 번역과 무관하게 적용된다 (#35).
+/// 0 = 바로, [hideNever] = 숨기지 않고 새 번역이 뜰 때까지 둔다.
+const hideNever = -1;
+const defaultHideAfterInteractionMs = 0;
+const hideAfterInteractionChoicesMs = [0, 500, 1000, 2000, hideNever];
 
 /// [choices] 중 [value]에 가장 가까운 값.
 int nearestChoice(List<int> choices, int value) =>
@@ -45,10 +50,10 @@ abstract class TranslatorSettings with _$TranslatorSettings {
     /// 자동 번역 (#23): 번역한 뒤 화면이 바뀌면 알아서 다시 번역. 기본 꺼짐.
     @Default(false) bool autoTranslate,
 
-    /// 자동 번역의 화면 확인 간격 (ms). 짧을수록 열 · 배터리를 더 쓴다.
-    @Default(defaultAutoCheckIntervalMs) int autoCheckIntervalMs,
+    /// 자동 번역이 새 번역을 보여 주는 시점 (ms). 0 = 번역이 되는 대로 바로.
+    @Default(defaultAutoShowDelayMs) int autoShowDelayMs,
 
-    /// 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms).
-    @Default(defaultAutoSettleMs) int autoSettleMs,
+    /// 조작 뒤 이전 번역을 숨기기까지의 시간 (ms). [hideNever] = 숨기지 않음.
+    @Default(defaultHideAfterInteractionMs) int hideAfterInteractionMs,
   }) = _TranslatorSettings;
 }

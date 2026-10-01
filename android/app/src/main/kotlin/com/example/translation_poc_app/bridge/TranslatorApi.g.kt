@@ -270,10 +270,13 @@ data class AppSettings (
   val quickLanguages: List<String>,
   /** 자동 번역 (#23): 번역한 뒤 화면이 바뀌면 알아서 다시 번역. 기본 꺼짐. */
   val autoTranslate: Boolean,
-  /** 자동 번역의 화면 확인 간격 (ms). */
-  val autoCheckIntervalMs: Long,
-  /** 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms). */
-  val autoSettleMs: Long
+  /** 자동 번역이 새 번역을 보여 주는 시점 (ms): 조작이 끝난 뒤 이 시간 이후. 0 = 번역이 되는 대로 바로. */
+  val autoShowDelayMs: Long,
+  /**
+   * 사용자가 화면을 조작한 뒤 이전 번역(덮어쓰기)을 숨기기까지의 시간 (ms). 자동 번역과 무관하게 적용된다.
+   * 0 = 바로, -1 = 숨기지 않고 새 번역이 뜰 때까지 둔다.
+   */
+  val hideAfterInteractionMs: Long
 )
  {
   companion object {
@@ -285,9 +288,9 @@ data class AppSettings (
       val onboardingCompleted = pigeonVar_list[4] as Boolean
       val quickLanguages = pigeonVar_list[5] as List<String>
       val autoTranslate = pigeonVar_list[6] as Boolean
-      val autoCheckIntervalMs = pigeonVar_list[7] as Long
-      val autoSettleMs = pigeonVar_list[8] as Long
-      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoCheckIntervalMs, autoSettleMs)
+      val autoShowDelayMs = pigeonVar_list[7] as Long
+      val hideAfterInteractionMs = pigeonVar_list[8] as Long
+      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs)
     }
   }
   fun toList(): List<Any?> {
@@ -299,8 +302,8 @@ data class AppSettings (
       onboardingCompleted,
       quickLanguages,
       autoTranslate,
-      autoCheckIntervalMs,
-      autoSettleMs,
+      autoShowDelayMs,
+      hideAfterInteractionMs,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -311,7 +314,7 @@ data class AppSettings (
       return true
     }
     val other = other as AppSettings
-    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoCheckIntervalMs, other.autoCheckIntervalMs) && TranslatorApiPigeonUtils.deepEquals(this.autoSettleMs, other.autoSettleMs)
+    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs)
   }
 
   override fun hashCode(): Int {
@@ -323,12 +326,12 @@ data class AppSettings (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.onboardingCompleted)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.quickLanguages)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.autoTranslate)
-    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.autoCheckIntervalMs)
-    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.autoSettleMs)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.autoShowDelayMs)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.hideAfterInteractionMs)
     return result
   }
   override fun toString(): String {
-    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoCheckIntervalMs=$autoCheckIntervalMs, autoSettleMs=$autoSettleMs)"
+    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs)"
   }
 }
 
@@ -500,8 +503,8 @@ interface SettingsHostApi {
   suspend fun setDisplayMode(mode: DisplayMode)
   suspend fun setQuickLanguages(languageCodes: List<String>)
   suspend fun setAutoTranslate(enabled: Boolean)
-  suspend fun setAutoCheckIntervalMs(ms: Long)
-  suspend fun setAutoSettleMs(ms: Long)
+  suspend fun setAutoShowDelayMs(ms: Long)
+  suspend fun setHideAfterInteractionMs(ms: Long)
   suspend fun setOnboardingCompleted(completed: Boolean)
 
   companion object {
@@ -651,14 +654,14 @@ interface SettingsHostApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoCheckIntervalMs$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoShowDelayMs$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val msArg = args[0] as Long
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.setAutoCheckIntervalMs(msArg)
+                api.setAutoShowDelayMs(msArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
@@ -671,14 +674,14 @@ interface SettingsHostApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoSettleMs$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setHideAfterInteractionMs$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val msArg = args[0] as Long
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.setAutoSettleMs(msArg)
+                api.setHideAfterInteractionMs(msArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

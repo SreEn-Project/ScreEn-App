@@ -9,6 +9,7 @@ import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.ocr.OcrBlock
 import com.example.translation_poc_app.ocr.OcrBlockMerger
 import com.example.translation_poc_app.ocr.OcrCleaner
+import com.example.translation_poc_app.ocr.OcrPostProcessor
 import com.example.translation_poc_app.ocr.OcrResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
@@ -75,6 +76,8 @@ data class PipelineTimings(
     val translate: Long = 0,
     val blocks: Int = 0,
     val segments: Int = 0,
+    /** 캐시로 번역을 건너뛴 블록 수 (#35). */
+    val cachedBlocks: Int = 0,
 ) {
     val total: Long get() = capture + ocr + detect + translate
 }
@@ -87,7 +90,7 @@ private fun CaptureResult.Frame.cropped(region: NormalizedRegion): CaptureResult
 
 class TranslationPipeline(
     private val capture: suspend () -> CaptureResult,
-    private val recognize: suspend (CaptureResult.Frame) -> OcrResult,
+    private val recognize: suspend (CaptureResult.Frame, incremental: Boolean) -> OcrResult,
     private val detect: suspend (OcrResult, targetLanguage: String) -> List<DetectedBlock>,
     private val engineFor: (Settings) -> TranslationEngine,
     private val settings: suspend () -> Settings,
@@ -96,11 +99,22 @@ class TranslationPipeline(
     private val log: (String) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
+    // 블록(원문 글자) 단위 캐시 (#35). 안 바뀐 글자는 감지 · 번역을 건너뛴다. 크기는 자동(LRU).
+    private val decisions = BlockCache<DecisionKey, BlockDecision>()
+    private val translations = BlockCache<TranslationKey, TranslationResult>()
+
     /**
      * @param region 이 영역만 번역한다 (NA-07). null이면 화면 전체.
      * @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때.
+     * @param onPartial 번역이 일부만 끝났을 때 끝난 블록만 담아 부른다 (#41). 마지막 결과는 반환값으로 온다.
+     * @param incremental 자동 번역: 직전에 읽은 화면과 견줘 바뀐 영역만 다시 인식한다 (#43).
      */
-    suspend fun run(region: NormalizedRegion? = null, onCaptured: () -> Unit = {}): TranslationOutcome {
+    suspend fun run(
+        region: NormalizedRegion? = null,
+        onCaptured: () -> Unit = {},
+        onPartial: (TranslationOutcome.Translated) -> Unit = {},
+        incremental: Boolean = false,
+    ): TranslationOutcome {
         var mark = clock()
         fun lap(): Long = clock().let { now -> (now - mark).also { mark = now } }
         val shot = try {
@@ -130,21 +144,22 @@ class TranslationPipeline(
                         (origin?.let { " (영역 ${it.left},${it.top}-${it.right},${it.bottom})" } ?: " (전체)") +
                         " ${stats ?: ""}",
                 )
-                recognize(target)
+                recognize(target, incremental)
             } finally {
                 target.bitmap.recycle()
                 frame.bitmap.recycle()
             }
             val ocrMs = lap()
-            // 잡음 줄을 빼고, 쪼개진 문단은 이어 붙여 번역 문맥을 늘린다 (#19).
-            val blocks = OcrBlockMerger.merge(OcrCleaner.clean(ocr.blocks))
+            // 잡음 줄을 빼고, 흔한 오인식을 고치고(#45), 쪼개진 문단은 이어 붙여 번역 문맥을 늘린다 (#19).
+            val blocks = OcrBlockMerger.merge(OcrPostProcessor.process(OcrCleaner.clean(ocr.blocks)))
             log("인식 블록 ${ocr.blocks.size}개 → 정리 후 ${blocks.size}개")
             if (blocks.isEmpty()) {
                 onTimings(PipelineTimings(captureMs, ocrMs))
                 return noText(stats, region != null)
             }
 
-            val detected = detect(ocr.copy(blocks = blocks), current.targetLanguage)
+            var cached = 0
+            val detected = detectCached(ocr, blocks, current.targetLanguage)
             log(
                 "언어 감지: " + detected.groupBy { it.decision.action }
                     .map { (action, list) -> "$action ${list.size}개(${list.map { it.decision.language }.distinct().joinToString(",")})" }
@@ -153,12 +168,8 @@ class TranslationPipeline(
             val detectMs = lap()
             val engine = engineFor(current)
             val requests = TranslationAssembler.requests(detected, current.targetLanguage)
-            val results = translateAll(engine, requests)
-            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size))
-            val assembled = TranslationAssembler.assemble(
-                detected, results, engine.id, current.targetLanguage,
-                lineHeightOf = { block -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } },
-                boundsOf = { block ->
+            val lineHeight = { block: OcrBlock -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } }
+            val bounds = { block: OcrBlock ->
                 block.bounds?.let {
                     val dx = origin?.left ?: 0
                     val dy = origin?.top ?: 0
@@ -168,7 +179,16 @@ class TranslationPipeline(
                         screenHeight,
                     )
                 }
-                },
+            }
+            val results = translateAll(engine, requests, onProgress = { partial ->
+                TranslationAssembler.assemblePartial(detected, partial, engine.id, current.targetLanguage, lineHeight, bounds)
+                    ?.let(onPartial)
+            }) { cached++ }
+            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size, cached))
+            val assembled = TranslationAssembler.assemble(
+                detected, results, engine.id, current.targetLanguage,
+                lineHeightOf = lineHeight,
+                boundsOf = bounds,
             )
             if (assembled == TranslationOutcome.NoText) noText(stats, region != null) else assembled
         } catch (e: CancellationException) {
@@ -181,12 +201,57 @@ class TranslationPipeline(
     private fun noText(stats: FrameStats?, inRegion: Boolean): TranslationOutcome =
         noTextOutcome(stats, inRegion).also { log("글자 없음 → $it") }
 
-    /** 블록마다 따로 요청하고 동시에 기다린다. ML Kit은 블록 하나씩, AI 엔진(3단계)은 묶음 호출로 바꿀 수 있다. */
-    private suspend fun translateAll(
+    /** 캐시에 없는 블록만 언어를 감지한다. 결과 순서는 [blocks] 그대로. */
+    internal suspend fun detectCached(
+        ocr: OcrResult,
+        blocks: List<OcrBlock>,
+        target: String,
+    ): List<DetectedBlock> {
+        val keys = blocks.map { DecisionKey(TranslationAssembler.detectionText(it), it.language, target) }
+        val known = keys.map { decisions[it] }
+        val missing = blocks.filterIndexed { i, _ -> known[i] == null }
+        val fresh = if (missing.isEmpty()) emptyList() else detect(ocr.copy(blocks = missing), target)
+        val freshIterator = fresh.iterator()
+        return blocks.mapIndexed { i, block ->
+            val cachedDecision = known[i]
+            if (cachedDecision != null) {
+                DetectedBlock(block, cachedDecision)
+            } else {
+                freshIterator.next().also { decisions[keys[i]] = it.decision }
+            }
+        }
+    }
+
+    /**
+     * 블록마다 따로 요청하고 동시에 기다린다. 캐시에 있는 번역은 엔진을 부르지 않고(맞으면 [onHit]), 새로 성공한 번역은
+     * 캐시에 넣는다 (실패는 넣지 않아 다음에 다시 시도). ML Kit은 블록 하나씩, AI 엔진(3단계)은 묶음 호출로 바꿀 수 있다.
+     */
+    internal suspend fun translateAll(
         engine: TranslationEngine,
         requests: List<TranslationRequest>,
+        /** 블록이 하나 끝날 때마다 (요청 순서, 아직 안 끝난 칸은 null). 번역을 부른 코루틴의 스레드에서 불린다. */
+        onProgress: (List<EngineResult<TranslationResult>?>) -> Unit = {},
+        onHit: () -> Unit,
     ): List<EngineResult<TranslationResult>> = coroutineScope {
-        requests.map { async { engine.translate(it) } }.awaitAll()
+        val done = arrayOfNulls<EngineResult<TranslationResult>>(requests.size)
+        val keys = requests.map { TranslationKey(engine.id, it.text, it.source, it.target) }
+        keys.forEachIndexed { i, key ->
+            translations[key]?.let {
+                onHit()
+                done[i] = EngineResult.Ok(it)
+            }
+        }
+        // 캐시로 일부만 채워졌으면 그것부터 보여 준다.
+        if (done.any { it == null } && done.any { it != null }) onProgress(done.toList())
+        requests.mapIndexed { i, request ->
+            async<EngineResult<TranslationResult>> {
+                done[i] ?: engine.translate(request).also {
+                    if (it is EngineResult.Ok) translations[keys[i]] = it.value
+                    done[i] = it
+                    if (done.any { r -> r == null }) onProgress(done.toList())
+                }
+            }
+        }.awaitAll()
     }
 }
 
@@ -233,6 +298,26 @@ object TranslationAssembler {
     fun requests(detected: List<DetectedBlock>, targetLanguage: String): List<TranslationRequest> =
         detected.filter { it.decision.action == BlockAction.TRANSLATE }
             .map { TranslationRequest(sourceText(it.block, it.decision.language), it.decision.language, targetLanguage) }
+
+    /**
+     * 번역이 일부만 끝난 중간 결과 (#41). [results]는 번역할 블록 순서이고 안 끝난 칸은 null — 그 블록은 뺀다.
+     * 번역이 끝난 항목이 아직 없으면 null.
+     */
+    fun assemblePartial(
+        detected: List<DetectedBlock>,
+        results: List<EngineResult<TranslationResult>?>,
+        engine: EngineId,
+        targetLanguage: String,
+        lineHeightOf: (OcrBlock) -> Float? = { null },
+        boundsOf: (OcrBlock) -> NormalizedRegion? = { null },
+    ): TranslationOutcome.Translated? {
+        var index = 0
+        val ready = detected.filter {
+            it.decision.action != BlockAction.TRANSLATE || results.getOrNull(index++) != null
+        }
+        val outcome = assemble(ready, results.filterNotNull(), engine, targetLanguage, lineHeightOf, boundsOf)
+        return (outcome as? TranslationOutcome.Translated)?.takeIf { o -> o.items.any { it.translated != null } }
+    }
 
     fun assemble(
         detected: List<DetectedBlock>,

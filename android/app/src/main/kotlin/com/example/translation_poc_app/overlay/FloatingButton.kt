@@ -10,6 +10,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.zIndex
@@ -38,12 +39,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -244,23 +248,30 @@ internal data class BubbleSpec(val symbol: Symbol, val label: String, val angleD
 /** 버블은 버튼 가운데에서 [BUBBLE_RADIUS_DP]만큼 떨어진 안쪽 호 위에 놓는다. */
 internal const val BUBBLE_RADIUS_DP = 96
 internal const val BUBBLE_DIAMETER_DP = 52
-internal const val BUBBLE_CELL_WIDTH_DP = 76
-internal const val BUBBLE_CELL_HEIGHT_DP = BUBBLE_DIAMETER_DP + 24
+
+/** 길게 누른 채 버블 가운데에서 이 거리 안이면 그 버블 위에 있는 것으로 본다. 버블 사이(중심 간격 약 70dp)보다 좁게. */
+internal const val BUBBLE_HIT_RADIUS_DP = 34
+
+/** 이름표는 아이콘 옆(화면 안쪽)에 놓는다. 이름표 칸 너비와 아이콘과의 간격. */
+internal const val BUBBLE_LABEL_WIDTH_DP = 100
+internal const val BUBBLE_LABEL_GAP_DP = 6
+internal const val BUBBLE_CELL_WIDTH_DP = BUBBLE_DIAMETER_DP + BUBBLE_LABEL_GAP_DP + BUBBLE_LABEL_WIDTH_DP
 
 /**
  * 버블 창 크기 (dp). 버튼 가운데에서 바깥쪽으로 [BUBBLE_RING_OUTER_DP], 안쪽으로 [BUBBLE_RING_INNER_DP]를 잡는다.
- * 바깥쪽에도 버블 반 칸 + 여백을 두어 위 · 아래 끝에서 90°로 몰린 버블이 잘리지 않게 하고,
+ * 안쪽은 버블 아이콘 + 그 옆 이름표까지, 바깥쪽은 아이콘 반 칸 + 여백이다.
  * 눌림 · 튀어나오는 애니메이션 · 그림자가 창 밖으로 나가 잘리지 않게 [BUBBLE_RING_PAD_DP] 여백을 둔다.
- * 높이는 반지름 + 이름표까지 양쪽으로 잡는다 ([OverlayGeometry.bubbleAngles]가 위 · 아래 끝에서 버블을 안쪽으로 몰아 준다).
+ * 높이는 위 · 아래 끝 버블의 아이콘까지 양쪽으로 잡는다 ([OverlayGeometry.bubbleAngles]가 끝에서 버블을 안쪽으로 몰아 준다).
  */
 internal const val BUBBLE_RING_PAD_DP = 20
-internal const val BUBBLE_RING_OUTER_DP = BUBBLE_CELL_WIDTH_DP / 2 + BUBBLE_RING_PAD_DP
-internal const val BUBBLE_RING_INNER_DP = BUBBLE_RADIUS_DP + BUBBLE_CELL_WIDTH_DP / 2 + BUBBLE_RING_PAD_DP
+internal const val BUBBLE_RING_OUTER_DP = BUBBLE_DIAMETER_DP / 2 + BUBBLE_RING_PAD_DP
+internal const val BUBBLE_RING_INNER_DP =
+    BUBBLE_RADIUS_DP + BUBBLE_DIAMETER_DP / 2 + BUBBLE_LABEL_GAP_DP + BUBBLE_LABEL_WIDTH_DP + BUBBLE_RING_PAD_DP
 internal const val BUBBLE_RING_WIDTH_DP = BUBBLE_RING_OUTER_DP + BUBBLE_RING_INNER_DP
-internal const val BUBBLE_RING_HEIGHT_DP = 2 * (BUBBLE_RADIUS_DP + BUBBLE_DIAMETER_DP / 2 + 24 + BUBBLE_RING_PAD_DP)
+internal const val BUBBLE_RING_HEIGHT_DP = 2 * (BUBBLE_RADIUS_DP + BUBBLE_DIAMETER_DP / 2 + BUBBLE_RING_PAD_DP)
 
 /**
- * O-02 버블 메뉴: 길게 누르면 버튼 주위(화면 안쪽 호)에 뜨는 카테고리 버블. 아이콘 원 + 아래 이름표.
+ * O-02 버블 메뉴: 길게 누르면 버튼 주위(화면 안쪽 호)에 뜨는 카테고리 버블. 아이콘 원 + 그 옆(화면 안쪽) 이름표라 서로 겹치지 않는다.
  * [anchorXDp] · [anchorYDp]는 창 왼쪽 · 위쪽에서 버튼 가운데까지의 거리, [inwardRight]는 버튼이 왼쪽 가장자리일 때 true (안쪽이 오른쪽).
  */
 @Composable
@@ -269,6 +280,7 @@ internal fun BubbleRing(
     inwardRight: Boolean,
     anchorXDp: Float,
     anchorYDp: Float,
+    hovered: () -> Int,
     onBackgroundTap: () -> Unit,
 ) {
     val colors = OverlayTheme.colors
@@ -283,49 +295,74 @@ internal fun BubbleRing(
         bubbles.forEachIndexed { index, bubble ->
             val pressSource = remember { MutableInteractionSource() }
             val pressed by pressSource.collectIsPressedAsState()
+            val lifted = pressed || hovered() == index
+            val liftScale by animateFloatAsState(if (lifted) 1.12f else 1f, label = "bubble-lift")
             val rad = Math.toRadians(bubble.angleDeg.toDouble())
             val dx = (BUBBLE_RADIUS_DP * kotlin.math.cos(rad)).toFloat() * grow
             val dy = (BUBBLE_RADIUS_DP * kotlin.math.sin(rad)).toFloat() * grow
             val centerX = anchorXDp + if (inwardRight) dx else -dx
             val centerY = anchorYDp + dy
             val visible = grow.coerceIn(0f, 1f)
-            Column(
+            // 칸은 아이콘 + 이름표. 아이콘 가운데가 호 위에 오도록 바깥쪽 끝을 맞춘다.
+            val cellLeft = if (inwardRight) centerX - BUBBLE_DIAMETER_DP / 2f else centerX + BUBBLE_DIAMETER_DP / 2f - BUBBLE_CELL_WIDTH_DP
+            Box(
                 modifier = Modifier
-                    .offset(
-                        x = (centerX - BUBBLE_CELL_WIDTH_DP / 2f).dp,
-                        y = (centerY - BUBBLE_DIAMETER_DP / 2f).dp,
-                    )
-                    .width(BUBBLE_CELL_WIDTH_DP.dp)
-                    .scale(0.4f + 0.6f * visible)
-                    .alpha(visible)
-                    // 위 버블이 먼저 그려지면 아래 버블에 이름표가 가려진다: 위쪽이 앞, 누르고 있는 버블은 맨 앞.
-                    .zIndex(if (pressed) bubbles.size.toFloat() + 1f else (bubbles.size - index).toFloat())
-                    .pressable(interactionSource = pressSource) { bubble.onClick() },
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .offset(x = cellLeft.dp, y = (centerY - BUBBLE_DIAMETER_DP / 2f).dp)
+                    .size(BUBBLE_CELL_WIDTH_DP.dp, BUBBLE_DIAMETER_DP.dp)
+                    // 알파를 겹쳐 그리는 레이어로 처리하면 이름표가 칸 밖에서 잘린다: 요소마다 따로 알파를 준다.
+                    .graphicsLayer {
+                        val s = (0.4f + 0.6f * visible) * liftScale
+                        scaleX = s
+                        scaleY = s
+                        alpha = visible
+                        compositingStrategy = CompositingStrategy.ModulateAlpha
+                        // 커지는 기준은 아이콘 가운데.
+                        val pivot = (BUBBLE_DIAMETER_DP / 2f) / BUBBLE_CELL_WIDTH_DP
+                        transformOrigin = TransformOrigin(if (inwardRight) pivot else 1f - pivot, 0.5f)
+                    }
+                    // 누르거나 손가락이 올라간 버블은 맨 앞.
+                    .zIndex(if (lifted) bubbles.size.toFloat() + 1f else (bubbles.size - index).toFloat()),
+                contentAlignment = if (inwardRight) Alignment.CenterStart else Alignment.CenterEnd,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(BUBBLE_DIAMETER_DP.dp)
-                        .overlayShadow(8.dp, CircleShape, colors.primary)
-                        .clip(CircleShape)
-                        .background(colors.surface)
-                        .semantics { contentDescription = bubble.label },
-                    contentAlignment = Alignment.Center,
+                Row(
+                    modifier = Modifier.clickable(interactionSource = pressSource, indication = null, role = Role.Button) { bubble.onClick() },
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SymbolIcon(bubble.symbol, colors.primary, size = 26.dp)
+                    val icon: @Composable () -> Unit = {
+                        Box(
+                            modifier = Modifier
+                                .size(BUBBLE_DIAMETER_DP.dp)
+                                .overlayShadow(8.dp, CircleShape, colors.primary)
+                                .clip(CircleShape)
+                                .background(colors.surface)
+                                .semantics { contentDescription = bubble.label },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            SymbolIcon(bubble.symbol, colors.primary, size = 26.dp)
+                        }
+                    }
+                    val label: @Composable () -> Unit = {
+                        BasicText(
+                            bubble.label,
+                            style = OverlayTheme.badge.copy(color = colors.onSurface, textAlign = TextAlign.Center),
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(colors.surface)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                        )
+                    }
+                    if (inwardRight) {
+                        icon()
+                        Spacer(Modifier.width(BUBBLE_LABEL_GAP_DP.dp))
+                        label()
+                    } else {
+                        label()
+                        Spacer(Modifier.width(BUBBLE_LABEL_GAP_DP.dp))
+                        icon()
+                    }
                 }
-                Spacer(Modifier.height(4.dp))
-                BasicText(
-                    bubble.label,
-                    style = OverlayTheme.badge.copy(color = colors.onSurface, textAlign = TextAlign.Center),
-                    maxLines = 1,
-                    softWrap = false,
-                    modifier = Modifier
-                        .wrapContentWidth(Alignment.CenterHorizontally, unbounded = true)
-                        .clip(RoundedCornerShape(50))
-                        .background(colors.surface)
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                )
             }
         }
     }

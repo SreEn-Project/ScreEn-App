@@ -7,6 +7,7 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.Log
+import com.example.translation_poc_app.autotranslate.FrameSignature
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
@@ -23,6 +24,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.Closeable
 import kotlin.coroutines.resume
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 import kotlin.coroutines.resumeWithException
 
@@ -41,12 +44,26 @@ class ScreenTextRecognizer : Closeable {
     /** 직전 입력과 같은 화면이면 다시 읽지 않는다 (#19). 키는 입력 이미지 해시 + 원문 언어. */
     private var cache: Pair<Long, OcrResult>? = null
 
+    /** 직전에 읽은 화면의 밝기 격자와 결과. 자동 번역이 바뀐 영역만 다시 읽을 때 기준으로 쓴다 (#43). */
+    private class Baseline(
+        val grid: IntArray,
+        val width: Int,
+        val height: Int,
+        val sourceLanguage: String?,
+        val result: OcrResult,
+    )
+
+    private var baseline: Baseline? = null
+
     /**
      * [sourceLanguage]에 맞는 인식기로 읽는다 (null = 자동, [OcrSelection.scriptsFor]).
      * 자동 모드는 직전에 잘 읽은 인식기 하나로 먼저 읽고, 결과가 미덥지 않을 때만 나머지를 병렬로
      * 돌려 가장 잘 읽은 걸 고른다. 신뢰도 낮은 줄은 뺀다.
+     *
+     * [incremental]이면(자동 번역) 직전에 읽은 화면과 견줘 바뀐 영역만 다시 읽고 나머지 블록은 이전 결과를 쓴다 (#43).
+     * 비교할 수 없거나 너무 많이 바뀌었으면 통째로 읽는다.
      */
-    suspend fun recognize(bitmap: Bitmap, sourceLanguage: String? = null): OcrResult {
+    suspend fun recognize(bitmap: Bitmap, sourceLanguage: String? = null, incremental: Boolean = false): OcrResult {
         // 글자 인식 시간은 픽셀 수에 거의 비례한다. 긴 변을 줄여 읽고, 좌표는 원래 크기로 되돌린다 (#11).
         val scale = minOf(1f, MAX_SIDE.toFloat() / maxOf(bitmap.width, bitmap.height))
         val input = if (scale < 1f) {
@@ -60,7 +77,18 @@ class ScreenTextRecognizer : Closeable {
                 Log.i(TAG, "같은 화면 — 인식 결과 재사용")
                 return it.second
             }
+            val grid = lumaGrid(input)
+            if (incremental) {
+                readChanged(input, grid, sourceLanguage, scale)?.let {
+                    synchronized(this) {
+                        cache = key to it
+                        baseline = Baseline(grid, input.width, input.height, sourceLanguage, it)
+                    }
+                    return it
+                }
+            }
             var result = read(InputImage.fromBitmap(input, 0), sourceLanguage, 1f / scale)
+            var wasInverted = false
             // 거의 못 읽은 화면은 어두운 배경의 밝은 글자일 수 있다. 이 경우에만 색을 뒤집어 한 번 더 읽는다 (#21).
             if (OcrSelection.charCount(result.blocks) < OcrSelection.MIN_TRUSTED_CHARS) {
                 val inverted = inverted(input)
@@ -69,16 +97,85 @@ class ScreenTextRecognizer : Closeable {
                     if (OcrSelection.score(second) > OcrSelection.score(result)) {
                         Log.i(TAG, "색을 뒤집어 읽은 결과가 더 낫다")
                         result = second
+                        wasInverted = true
                     }
                 } finally {
                     inverted.recycle()
                 }
             }
-            synchronized(this) { cache = key to result }
+            synchronized(this) {
+                cache = key to result
+                // 색을 뒤집어 읽은 화면은 잘라 읽을 때도 뒤집어야 해서 기준으로 삼지 않는다.
+                baseline = if (wasInverted) null else Baseline(grid, input.width, input.height, sourceLanguage, result)
+            }
             return result
         } finally {
             if (input !== bitmap) input.recycle()
         }
+    }
+
+    /**
+     * 직전 화면과 견줘 바뀐 영역만 다시 읽은 결과. 통째로 읽어야 하면 null.
+     * 바뀐 칸이 없으면 이전 결과 그대로 — 기준 격자는 그대로 둔다 (서서히 바뀌는 것도 언젠가 잡힌다).
+     */
+    private suspend fun readChanged(input: Bitmap, grid: IntArray, sourceLanguage: String?, scale: Float): OcrResult? {
+        val base = synchronized(this) { baseline } ?: return null
+        if (base.sourceLanguage != sourceLanguage || base.width != input.width || base.height != input.height) return null
+        // 이전 결과 좌표는 원래 크기다 → 입력 크기로 줄여 견준다.
+        val oldBoxes = base.result.blocks.map { b ->
+            b.bounds?.let { Box(floor(it.left * scale).toInt(), floor(it.top * scale).toInt(), ceil(it.right * scale).toInt(), ceil(it.bottom * scale).toInt()) }
+        }
+        return when (val plan = ChangedRegions.plan(base.grid, grid, input.width, input.height, oldBoxes)) {
+            ChangedRegions.Plan.Reuse -> {
+                Log.i(TAG, "바뀐 칸 없음 — 이전 결과 재사용")
+                base.result
+            }
+            ChangedRegions.Plan.Full -> null
+            is ChangedRegions.Plan.Partial -> {
+                val fresh = plan.regions.flatMap { box ->
+                    val crop = Bitmap.createBitmap(input, box.left, box.top, box.width, box.height)
+                    try {
+                        read(InputImage.fromBitmap(crop, 0), sourceLanguage, 1f).blocks
+                            .map { it.shifted(box.left, box.top).scaledBy(1f / scale) }
+                    } finally {
+                        crop.recycle()
+                    }
+                }
+                val kept = plan.keep.map { base.result.blocks[it] }
+                Log.i(TAG, "바뀐 ${plan.regions.size}곳만 다시 읽음 — 블록 ${kept.size}개 재사용, ${fresh.size}개 새로")
+                OcrResult(
+                    base.result.script,
+                    (kept + fresh).sortedWith(compareBy({ it.bounds?.top ?: 0 }, { it.bounds?.left ?: 0 })),
+                )
+            }
+        }
+    }
+
+    /** [bitmap]을 격자 [ChangedRegions.COLS]×[ChangedRegions.ROWS]칸의 밝기로 줄인다 (칸마다 3×3 표본의 평균). */
+    private fun lumaGrid(bitmap: Bitmap): IntArray {
+        val w = bitmap.width
+        val h = bitmap.height
+        val cols = ChangedRegions.COLS
+        val rows = ChangedRegions.ROWS
+        val out = IntArray(cols * rows)
+        val row = IntArray(w)
+        val sums = IntArray(cols)
+        for (r in 0 until rows) {
+            sums.fill(0)
+            for (sy in 0 until 3) {
+                val y = ((r + (sy + 0.5f) / 3f) * h / rows).toInt().coerceIn(0, h - 1)
+                bitmap.getPixels(row, 0, w, 0, y, w, 1)
+                for (c in 0 until cols) {
+                    for (sx in 0 until 3) {
+                        val x = ((c + (sx + 0.5f) / 3f) * w / cols).toInt().coerceIn(0, w - 1)
+                        val p = row[x]
+                        sums[c] += FrameSignature.luma((p shr 16) and 0xFF, (p shr 8) and 0xFF, p and 0xFF)
+                    }
+                }
+            }
+            for (c in 0 until cols) out[r * cols + c] = sums[c] / 9
+        }
+        return out
     }
 
     private suspend fun read(image: InputImage, sourceLanguage: String?, factor: Float): OcrResult {
@@ -187,6 +284,19 @@ class ScreenTextRecognizer : Closeable {
 private fun Rect?.scaled(factor: Float): Rect? = this?.takeIf { factor != 1f }?.let {
     Rect((it.left * factor).roundToInt(), (it.top * factor).roundToInt(), (it.right * factor).roundToInt(), (it.bottom * factor).roundToInt())
 } ?: this
+
+private fun Rect.moved(dx: Int, dy: Int) = Rect(left + dx, top + dy, right + dx, bottom + dy)
+
+/** 잘라낸 이미지 기준 좌표를 (dx, dy)만큼 옮겨 이미지 전체 기준으로 바꾼다. */
+private fun OcrBlock.shifted(dx: Int, dy: Int) = copy(
+    bounds = bounds?.moved(dx, dy),
+    lines = lines.map { it.copy(bounds = it.bounds?.moved(dx, dy)) },
+)
+
+private fun OcrBlock.scaledBy(factor: Float) = if (factor == 1f) this else copy(
+    bounds = bounds.scaled(factor),
+    lines = lines.map { it.copy(bounds = it.bounds.scaled(factor)) },
+)
 
 private fun Text.toBlocks(factor: Float): List<OcrBlock> = textBlocks.map { block ->
     OcrBlock(

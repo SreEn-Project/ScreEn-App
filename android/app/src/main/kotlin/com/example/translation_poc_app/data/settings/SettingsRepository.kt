@@ -42,11 +42,11 @@ class SettingsRepository(context: Context) {
 
     suspend fun setAutoTranslate(enabled: Boolean) = edit { it[Keys.AUTO_TRANSLATE] = enabled }
 
-    suspend fun setAutoCheckIntervalMs(ms: Long) =
-        edit { it[Keys.AUTO_CHECK_INTERVAL] = ms.coerceIn(Settings.AUTO_CHECK_INTERVAL_RANGE_MS) }
+    suspend fun setAutoShowDelayMs(ms: Long) =
+        edit { it[Keys.AUTO_SHOW_DELAY] = ms.coerceIn(Settings.AUTO_SHOW_DELAY_RANGE_MS) }
 
-    suspend fun setAutoSettleMs(ms: Long) =
-        edit { it[Keys.AUTO_SETTLE] = ms.coerceIn(Settings.AUTO_SETTLE_RANGE_MS) }
+    suspend fun setHideAfterInteractionMs(ms: Long) =
+        edit { it[Keys.HIDE_AFTER_INTERACTION] = Settings.normalizeHideAfterInteraction(ms) }
 
     suspend fun setSourceLanguage(code: String) = edit { it[Keys.SOURCE_LANGUAGE] = code }
 
@@ -71,10 +71,11 @@ class SettingsRepository(context: Context) {
                 ?.takeIf { it.isNotEmpty() }
                 ?: defaults.quickLanguages,
             autoTranslate = this[Keys.AUTO_TRANSLATE] ?: defaults.autoTranslate,
-            autoCheckIntervalMs = (this[Keys.AUTO_CHECK_INTERVAL] ?: defaults.autoCheckIntervalMs)
-                .coerceIn(Settings.AUTO_CHECK_INTERVAL_RANGE_MS),
-            autoSettleMs = (this[Keys.AUTO_SETTLE] ?: defaults.autoSettleMs)
-                .coerceIn(Settings.AUTO_SETTLE_RANGE_MS),
+            autoShowDelayMs = (this[Keys.AUTO_SHOW_DELAY] ?: defaults.autoShowDelayMs)
+                .coerceIn(Settings.AUTO_SHOW_DELAY_RANGE_MS),
+            hideAfterInteractionMs = Settings.normalizeHideAfterInteraction(
+                this[Keys.HIDE_AFTER_INTERACTION] ?: defaults.hideAfterInteractionMs,
+            ),
             sourceLanguage = this[Keys.SOURCE_LANGUAGE]?.takeIf { it.isNotBlank() } ?: defaults.sourceLanguage,
         )
     }
@@ -92,8 +93,10 @@ class SettingsRepository(context: Context) {
         val FIXED_REGION = stringPreferencesKey("fixed_region")
         val QUICK_LANGUAGES = stringPreferencesKey("quick_languages")
         val AUTO_TRANSLATE = booleanPreferencesKey("auto_translate")
-        val AUTO_CHECK_INTERVAL = longPreferencesKey("auto_check_interval_ms")
-        val AUTO_SETTLE = longPreferencesKey("auto_settle_ms")
+        val AUTO_SHOW_DELAY = longPreferencesKey("auto_show_delay_ms")
+
+        // 이름은 자동 번역 전용이던 때(#29) 그대로 둔다: 저장된 값을 이어 받는다.
+        val HIDE_AFTER_INTERACTION = longPreferencesKey("auto_hide_ms")
         val SOURCE_LANGUAGE = stringPreferencesKey("source_language")
     }
 }

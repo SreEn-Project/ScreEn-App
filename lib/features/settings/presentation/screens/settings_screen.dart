@@ -7,6 +7,7 @@ import '../../../../app/router.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
 import '../view_models/auto_translate_view_model.dart';
+import '../view_models/hide_after_interaction_view_model.dart';
 import '../view_models/quick_languages_view_model.dart';
 import '../../../../core/l10n/labels.dart';
 import '../../../../core/ui/ui.dart';
@@ -110,6 +111,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: (mode) => setState(() => _displayMode = mode),
                   ),
                 ),
+                const AppDivider(),
+                const _HideAfterInteraction(),
                 const AppDivider(),
                 _Labeled(
                   label: l10n.settingsButtonSize,
@@ -280,7 +283,44 @@ class _QuickLanguagesSection extends ConsumerWidget {
   }
 }
 
-/// 자동 번역 (#23): 켜기 · 화면 확인 간격 · 멈춘 뒤 기다리는 시간. 값은 네이티브 설정에 바로 저장된다.
+/// 사용자가 화면을 조작한 뒤 이전 번역(덮어쓰기)을 숨기기까지의 시간 (#35). 자동 번역을 켜지 않아도 적용된다.
+class _HideAfterInteraction extends ConsumerWidget {
+  const _HideAfterInteraction();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final hideMs =
+        ref.watch(hideAfterInteractionViewModelProvider).value ??
+        defaultHideAfterInteractionMs;
+    final viewModel = ref.read(hideAfterInteractionViewModelProvider.notifier);
+    String label(int ms) => ms == hideNever
+        ? l10n.settingsAutoNever
+        : ms == 0
+        ? l10n.settingsAutoInstant
+        : l10n.secondsShort(
+            (ms / 1000).toStringAsFixed(ms % 1000 == 0 ? 0 : 1),
+          );
+
+    return _Labeled(
+      label: l10n.settingsHideAfterInteraction,
+      value: label(hideMs),
+      child: AppSegmented<int>(
+        values: hideAfterInteractionChoicesMs,
+        selected: hideMs < 0
+            ? hideNever
+            : nearestChoice(
+                hideAfterInteractionChoicesMs.sublist(0, 4),
+                hideMs,
+              ),
+        label: label,
+        onChanged: viewModel.setHide,
+      ),
+    );
+  }
+}
+
+/// 자동 번역 (#23): 켜기 · 새 번역을 보여 줄 시점 (#35). 값은 네이티브 설정에 바로 저장된다.
 class _AutoTranslateSection extends ConsumerWidget {
   const _AutoTranslateSection();
 
@@ -291,8 +331,11 @@ class _AutoTranslateSection extends ConsumerWidget {
         ref.watch(autoTranslateViewModelProvider).value ??
         const AutoTranslateSettings();
     final viewModel = ref.read(autoTranslateViewModelProvider.notifier);
-    String seconds(int ms) =>
-        l10n.secondsShort((ms / 1000).toStringAsFixed(ms % 1000 == 0 ? 0 : 1));
+    String delayLabel(int ms) => ms == 0
+        ? l10n.settingsAutoInstant
+        : l10n.secondsShort(
+            (ms / 1000).toStringAsFixed(ms % 1000 == 0 ? 0 : 1),
+          );
 
     return AppSection(
       title: l10n.settingsSectionAuto,
@@ -314,30 +357,16 @@ class _AutoTranslateSection extends ConsumerWidget {
             if (settings.enabled) ...[
               const AppDivider(),
               _Labeled(
-                label: l10n.settingsAutoInterval,
-                value: seconds(settings.checkIntervalMs),
+                label: l10n.settingsAutoShowDelay,
+                value: delayLabel(settings.showDelayMs),
                 child: AppSegmented<int>(
-                  values: autoCheckIntervalChoicesMs,
+                  values: autoShowDelayChoicesMs,
                   selected: nearestChoice(
-                    autoCheckIntervalChoicesMs,
-                    settings.checkIntervalMs,
+                    autoShowDelayChoicesMs,
+                    settings.showDelayMs,
                   ),
-                  label: seconds,
-                  onChanged: viewModel.setCheckInterval,
-                ),
-              ),
-              const AppDivider(),
-              _Labeled(
-                label: l10n.settingsAutoSettle,
-                value: seconds(settings.settleMs),
-                child: AppSegmented<int>(
-                  values: autoSettleChoicesMs,
-                  selected: nearestChoice(
-                    autoSettleChoicesMs,
-                    settings.settleMs,
-                  ),
-                  label: seconds,
-                  onChanged: viewModel.setSettle,
+                  label: delayLabel,
+                  onChanged: viewModel.setShowDelay,
                 ),
               ),
             ],

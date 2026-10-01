@@ -2,6 +2,64 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 인식 후처리 (NA-11, 이슈 #45, 브랜치 `feat/45-ocr-postprocess`)
+- #44(`feat/43-incremental-ocr`) 위에 쌓았다 (merge 전). 문자 인식 결과의 흔한 오인식을 번역 전에 보수적으로 고쳐 오역을 줄인다 (translation.md 개선 계획 4번).
+- `ocr/OcrPostProcessor.kt` 추가(순수 Kotlin) + `TranslationPipeline`에서 `OcrCleaner` 뒤 · `OcrBlockMerger` 앞에 호출. 규칙은 translation.md 참고. 설정 · 의존성 변경 없음.
+- 테스트 `OcrPostProcessorTest` 추가. 고치지 말아야 할 것(mp3 · win10 · 주소 · 파일 경로 · Illinois · McIntyre · 한글 섞인 줄)도 검증.
+- 한계: 1이 i인지 l인지는 알 수 없어 l로 본다(사전 단어는 예외). 영어만. 기기 실측 전.
+
+## 2026-10-02 · 자동 번역 — 바뀐 영역만 다시 인식 (NA-11, 이슈 #43, 브랜치 `feat/43-incremental-ocr`)
+- 자동 번역(`incremental`)에서 직전에 읽은 화면과 64×128 밝기 격자를 견줘 변한 칸 주변만 잘라 읽고, 안 바뀐 블록은 이전 결과를 쓴다. 바뀐 칸이 없으면 이전 결과 그대로. 순수 로직 `ocr/ChangedRegions.kt`(+ 테스트), 연결은 `ScreenTextRecognizer`.
+- 통째로 읽는 경우: 기준이 없음 · 원문 언어 · 화면 크기가 달라짐, 40% 넘게 변함, 영역 7곳 이상 · 화면 절반 넘음, 블록 자리를 모름, 색을 뒤집어 읽은 화면. 수동 번역은 그대로 전체 인식.
+- 변경: `ocr/ChangedRegions.kt` 추가, `ScreenTextRecognizer` · `TranslationPipeline`(recognize에 incremental 인자) · `TranslatorService` · `OverlayController`(자동 번역만 incremental). 설정 · 의존성 변경 없음.
+- 확인: Android 단위 테스트 · `flutter analyze` · `flutter test` · `flutter build apk --debug` 통과. 기기 실측(번역 시간 로그의 ocr ms) 전.
+- 남은 일: 기기에서 효과 측정, 인식 후처리(별도).
+
+## 2026-10-02 · 번역 점진 표시 (NA-11, 이슈 #41, 브랜치 `feat/41-progressive-display`)
+- 수동 번역이 모든 블록이 끝나야 뜨던 것을, 끝난 블록부터 먼저 보여 주고 마지막에 전체 결과로 바꾼다 (translation.md 개선 계획 2번).
+- `TranslationPipeline`: `run(onPartial)` 추가, `translateAll(onProgress)`가 블록이 끝날 때마다 알림, `TranslationAssembler.assemblePartial`(안 끝난 블록은 뺌). `OverlayController.translate`가 부분 결과를 시트로 띄움. 자동 번역은 표시 시점 규칙(D-036) 때문에 제외.
+- 테스트 2개 추가. analyze · test · debug 빌드 통과. 기기 확인 전 (블록이 많은 화면에서 먼저 뜨는지, 시트 교체 깜박임).
+- 다음: 바뀐 영역만 다시 인식 → 인식 후처리.
+
+## 2026-10-02 · 번역 기능 문서 (이슈 #39, 브랜치 `docs/39-translation-doc`)
+- [translation.md](translation.md) 추가: 파이프라인 현황, 캐시 방침, 개선 계획. AI 번역은 API 키가 필요해 보류로 기록.
+- 다음: 단계별 시간 측정 → 점진 표시.
+
+## 2026-10-01 · 버블 — 이름표를 아이콘 옆(화면 안쪽)으로 (NA-18, 이슈 #37, 브랜치 `feat/37-bubble-label-side`)
+- 이름표가 아이콘 아래 고정이라 버블끼리 겹침 → 이름표를 아이콘 옆에 둔다. 오른쪽 가장자리면 아이콘 왼쪽, 왼쪽 가장자리면 오른쪽.
+- `FloatingButton.kt`: `BubbleRing` 칸을 아이콘 + 이름표 가로 배치로 바꾸고, 창 안쪽 폭에 이름표 폭을 더함 (`BUBBLE_LABEL_WIDTH_DP` 등). `OverlayGeometry.bubbleAngles` 아래 여유를 아이콘 기준으로 줄임.
+- analyze · test · debug 빌드 통과. 기기 확인 전 (가장자리 양쪽, 위 · 아래 끝에서 이름표 겹침 · 잘림 확인 필요).
+
+## 2026-10-01 · 자동 번역 — 표시 시점 · 숨김 일반화 · 블록 캐시 · 켜면 바로 번역 (NA-26, 이슈 #35, 브랜치 `feat/35-auto-show-delay-cache`)
+- #34(`feat/33-auto-speed`) 위에 쌓았다 (스택 #24→#28→#30→#32→#34, 아직 merge 전). 설계는 D-036.
+- **이전 번역 숨김**을 자동 전용에서 일반 옵션으로: 설정 "표시" 섹션으로 옮기고, 자동 번역이 꺼져도 덮어쓰기 결과에 적용(감시는 숨김만 하고 다시 번역은 안 함). 덮어쓰기 결과는 숨김이 켜져 있으면 터치를 통과시킨다.
+- **자동 번역 설정은 "새 번역을 보여 줄 시점" 하나**(바로 / 1 · 2 · 3초): 번역은 화면이 멈추면 바로 시작하고, 올리는 것만 조작이 끝난 뒤 N초까지 미룬다 (그 사이 또 조작하면 취소). #34의 "다시 번역 속도"(확인 간격 · 대기 시간)는 없앴다. 확인 간격은 고정 0.5초(변화가 없으면 최대 1.5초).
+- **블록 캐시**(`BlockCache`, 파이프라인): 원문 글자 기준으로 언어 감지 결과와 성공한 번역을 LRU(512개)로 기억해 안 바뀐 블록은 감지 · 번역을 건너뛴다. 설정 없음. 엔진 안에 있던 128개 캐시는 파이프라인 캐시로 합쳤다.
+- **자동 번역 켜면 바로 번역**: 버블 메뉴에서 켜면 버튼을 한 번 누른 것처럼 바로 번역을 시작한다. 앱 설정 화면에서 켜면 우리 앱 화면을 찍게 되므로 시작하지 않고, 버튼을 누르면 그때부터 지켜본다.
+- 바꾼 곳: Pigeon `AppSettings`(`autoCheckIntervalMs` · `autoSettleMs` · `autoHideMs` 제거, `autoShowDelayMs` · `hideAfterInteractionMs` 추가; 저장 키 `auto_hide_ms`는 그대로 이어받음), `AutoTranslateConfig`/Tracker/Watcher, `OverlayController`, 설정 화면 · 문구(ARB 한/영).
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트 통과(캐시 · 감시 · 표시 시점 신규) · debug APK 빌드. 기기 확인은 사용자 몫.
+
+## 2026-10-01 · 자동 번역 설정 합치기 — "다시 번역 속도" 하나로 (NA-26, 이슈 #33, 브랜치 `feat/33-auto-speed`)
+- #32(`feat/31-bubble-hover-select`) 위에 쌓았다 (스택 #24→#28→#30→#32, 아직 merge 전).
+- 설정의 "화면 확인 간격"과 "조작이 끝난 뒤 대기 시간"이 헷갈려 **"다시 번역 속도"** 한 줄(빠르게 · 보통 · 절약 · 최대 절약)로 합쳤다. 설계는 D-035.
+- 바꾼 곳: `AutoSpeed` 열거형(도메인), `ChangeAutoSpeed` 유스케이스(기존 `ChangeAutoCheckInterval` · `ChangeAutoSettle` 대체), ViewModel `setSpeed`, 설정 화면 · 문구(ARB 한/영). Pigeon · 네이티브 · 저장 키는 그대로.
+- 확인: flutter analyze 0 · flutter test 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
+
+## 2026-10-01 · 버블 — 손가락 올리면 앞으로 · 끌었다 놓으면 선택 · 이름표 잘림 수정 (NA-18, 이슈 #31, 브랜치 `feat/31-bubble-hover-select`)
+- #30(`feat/29-auto-translate-responsive`) 위에 쌓았다 (버블 코드가 아직 develop에 없음).
+- 길게 누른 채 손가락을 버블 위로 옮기면 그 버블이 이름표와 함께 맨 앞으로 올라오고 커진다. 그 위에서 떼면 눌린 것으로 처리 (`ButtonGestures.onHold` · `onHoldRelease`, `OverlayGeometry.bubbleHit`, 판정 반경 34dp).
+- 이름표 잘림: 버블 칸에 알파 < 1(눌림 0.85)을 주면 Compose가 칸 크기 오프스크린 레이어로 그려 칸보다 넓은 이름표가 잘렸다 → `graphicsLayer` + `CompositingStrategy.ModulateAlpha`로 바꾸고 눌림은 크기만 바꾼다.
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트(버블 위 판정) 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
+- 남은 일: 기기에서 ① 길게 눌러 손가락을 버블로 옮길 때 앞으로 올라오는지 ② 떼면 해당 메뉴가 열리는지 ③ 눌렀다 떼도 이름표가 안 잘리는지.
+
+## 2026-10-01 · 자동 번역 반응성 — 이전 결과 숨김 · 바로 번역 · 번역 중 취소 (NA-26, 이슈 #29, 브랜치 `feat/29-auto-translate-responsive`)
+- #28(`feat/27-settings-bubble`) 위에 쌓았다 (자동 번역 코드가 아직 develop에 없음). 설계는 D-034.
+- 설정 "자동 번역"에 **이전 번역 숨김 시간**(바로 · 0.5 · 1 · 2초 · 안 숨김) 추가, **조작 뒤 번역까지 기다리는 시간**에 "바로" 선택지(0) 추가, 확인 간격에 0.5초 추가.
+- 네이티브: `Settings.autoHideMs` + Pigeon `setAutoHideMs`, `AutoTranslateTracker`(`isStale` · `observe` · `onCanceled`, 대기 0 = 멈춘 걸 본 즉시), `AutoTranslateWatcher`(번역을 자식 작업으로 돌리며 계속 감시, 캡처 뒤 화면이 또 바뀌면 취소), `OverlayController`(낡은 결과 숨김 · 취소 시 복원).
+- Flutter: `ChangeAutoHide` 유스케이스, 설정 화면 항목 · 문구(ko/en).
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트 통과(감시 취소 · 숨김 시험 추가) · debug APK 빌드. 기기 확인은 사용자 몫.
+- 남은 일: 기기에서 ① 스크롤 뒤 이전 번역이 바로 사라지는지 ② 조작 직후 번역이 빨리 뜨는지, 번역 중 다시 스크롤하면 취소되고 멈춘 뒤 다시 번역되는지 ③ 발열 · 배터리 체감 (확인 간격을 줄여서 늘었을 수 있음).
+
 ## 2026-10-01 · 버블 메뉴에 '설정' 추가 (이슈 #27, 브랜치 `feat/27-settings-bubble`)
 - 자동 번역 설정이 #24(`feat/23-auto-translate`)에만 있어 그 브랜치 위에 쌓았다. #24가 develop에 merge된 뒤 이 PR을 merge한다. 설계는 D-033.
 - 길게 누르기 버블이 3개 → 4개(캡처 범위 · 결과 표시 · 빠른 언어 · **설정**). 설정 버블을 누르면 옵션 메뉴: 인식 언어(자동 · English · 한국어 · 日本語 · 中文)와 자동 번역 켜기 · 끄기.
@@ -10,14 +68,12 @@
 - 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
 - 남은 일: 기기에서 ① 버블 4개가 겹치지 않는지(화면 위 · 아래 끝 포함) ② 인식 언어를 고정했을 때 인식이 나아지는지 ③ 앱 설정 화면에도 인식 언어를 노출할지 결정.
 
-
 ## 2026-10-01 · 자동 번역 (이슈 #23, 브랜치 `feat/23-auto-translate`, NA-26)
 - (먼저 #20 · #22를 develop에 merge하고 그 위에서 땄다.) 설계는 D-032.
 - 설정 탭에 "자동 번역"(기본 꺼짐 · 확인 간격 · 멈춘 뒤 대기 시간). Pigeon `AppSettings`에 `autoTranslate` · `autoCheckIntervalMs` · `autoSettleMs`와 setter 3개 추가 → Flutter 엔티티 · 매퍼 · 리포지토리 · 유스케이스 3개 · `AutoTranslateViewModel` · 설정 화면 섹션 · ARB(ko/en).
 - 네이티브: `autotranslate/`(`FrameSignature` · `AutoTranslateTracker`(판단) · `AutoTranslateWatcher`(루프)), `ScreenCapturer.captureSignature`, `OverlayController`(자동 번역 호출 · 결과 창 숨김/교체 · 터치 통과 덮기 · 화면 꺼짐/절전 모드 시 중지), `Settings`/`SettingsRepository`(범위 보정).
 - 확인: flutter analyze 0 · flutter test 통과(AutoTranslateViewModel 5개 추가) · Kotlin 단위 테스트(Tracker 12 · Watcher 5 추가) 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
 - 남은 일: 기기에서 ① 변화 감지 임계(`FrameSignature.CHANGE_RATIO`)가 알맞은지(헛번역 · 놓침) ② 덮기 막 터치 통과(Android 12+ 알파 보정)와 옅어지는 정도 ③ 열 · 배터리 체감 확인.
-
 
 ## 2026-10-01 · 글자 인식 실패 진단 · 보안 화면 판별 (이슈 #25, 브랜치 `fix/25-ocr-diagnostics`, NA-09 · NA-05)
 - 증상: 구글 로그인 화면(영어 본문이 뚜렷)에서 고정 영역 모드(핀 아이콘)로 눌렀더니 '글자를 찾지 못했어요'. 설계는 D-033b.

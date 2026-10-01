@@ -120,8 +120,8 @@ class AppSettings {
     required this.onboardingCompleted,
     required this.quickLanguages,
     required this.autoTranslate,
-    required this.autoCheckIntervalMs,
-    required this.autoSettleMs,
+    required this.autoShowDelayMs,
+    required this.hideAfterInteractionMs,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -141,11 +141,12 @@ class AppSettings {
   /// 자동 번역 (#23): 번역한 뒤 화면이 바뀌면 알아서 다시 번역. 기본 꺼짐.
   bool autoTranslate;
 
-  /// 자동 번역의 화면 확인 간격 (ms).
-  int autoCheckIntervalMs;
+  /// 자동 번역이 새 번역을 보여 주는 시점 (ms): 조작이 끝난 뒤 이 시간 이후. 0 = 번역이 되는 대로 바로.
+  int autoShowDelayMs;
 
-  /// 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms).
-  int autoSettleMs;
+  /// 사용자가 화면을 조작한 뒤 이전 번역(덮어쓰기)을 숨기기까지의 시간 (ms). 자동 번역과 무관하게 적용된다.
+  /// 0 = 바로, -1 = 숨기지 않고 새 번역이 뜰 때까지 둔다.
+  int hideAfterInteractionMs;
 
   List<Object?> _toList() {
     return <Object?>[
@@ -156,8 +157,8 @@ class AppSettings {
       onboardingCompleted,
       quickLanguages,
       autoTranslate,
-      autoCheckIntervalMs,
-      autoSettleMs,
+      autoShowDelayMs,
+      hideAfterInteractionMs,
     ];
   }
 
@@ -175,8 +176,8 @@ class AppSettings {
       onboardingCompleted: result[4]! as bool,
       quickLanguages: (result[5]! as List<Object?>).cast<String>(),
       autoTranslate: result[6]! as bool,
-      autoCheckIntervalMs: result[7]! as int,
-      autoSettleMs: result[8]! as int,
+      autoShowDelayMs: result[7]! as int,
+      hideAfterInteractionMs: result[8]! as int,
     );
   }
 
@@ -196,8 +197,8 @@ class AppSettings {
         _deepEquals(onboardingCompleted, other.onboardingCompleted) &&
         _deepEquals(quickLanguages, other.quickLanguages) &&
         _deepEquals(autoTranslate, other.autoTranslate) &&
-        _deepEquals(autoCheckIntervalMs, other.autoCheckIntervalMs) &&
-        _deepEquals(autoSettleMs, other.autoSettleMs);
+        _deepEquals(autoShowDelayMs, other.autoShowDelayMs) &&
+        _deepEquals(hideAfterInteractionMs, other.hideAfterInteractionMs);
   }
 
   @override
@@ -206,7 +207,7 @@ class AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoCheckIntervalMs: $autoCheckIntervalMs, autoSettleMs: $autoSettleMs)';
+    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs)';
   }
 }
 
@@ -513,9 +514,9 @@ class SettingsHostApi {
     );
   }
 
-  Future<void> setAutoCheckIntervalMs(int ms) async {
+  Future<void> setAutoShowDelayMs(int ms) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoCheckIntervalMs$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoShowDelayMs$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -533,9 +534,9 @@ class SettingsHostApi {
     );
   }
 
-  Future<void> setAutoSettleMs(int ms) async {
+  Future<void> setHideAfterInteractionMs(int ms) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAutoSettleMs$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setHideAfterInteractionMs$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

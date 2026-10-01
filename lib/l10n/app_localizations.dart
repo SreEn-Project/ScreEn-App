@@ -749,20 +749,32 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAutoTranslateDetail.
   ///
   /// In en, this message translates to:
-  /// **'After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.'**
+  /// **'After a translation, lightly watches the screen and starts translating as soon as the text changes or scrolling stops. Unchanged text is skipped. Leaving it on uses more battery and may warm the device.'**
   String get settingsAutoTranslateDetail;
 
-  /// No description provided for @settingsAutoInterval.
+  /// No description provided for @settingsAutoShowDelay.
   ///
   /// In en, this message translates to:
-  /// **'Screen check interval (longer saves battery)'**
-  String get settingsAutoInterval;
+  /// **'Show the new translation (after you stop)'**
+  String get settingsAutoShowDelay;
 
-  /// No description provided for @settingsAutoSettle.
+  /// No description provided for @settingsHideAfterInteraction.
   ///
   /// In en, this message translates to:
-  /// **'Wait after the screen stops'**
-  String get settingsAutoSettle;
+  /// **'Hide the old translation after you touch the screen'**
+  String get settingsHideAfterInteraction;
+
+  /// No description provided for @settingsAutoInstant.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get settingsAutoInstant;
+
+  /// No description provided for @settingsAutoNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get settingsAutoNever;
 
   /// No description provided for @secondsShort.
   ///

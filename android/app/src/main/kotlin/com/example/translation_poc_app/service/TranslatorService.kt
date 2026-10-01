@@ -56,9 +56,9 @@ class TranslatorService : LifecycleService() {
                 capturer?.awaitFreshFrame()
                 captureFrame()
             },
-            recognize = { frame ->
+            recognize = { frame, incremental ->
                 val source = AppGraph.settingsRepository(this).current().sourceLanguage
-                recognizeText(frame, source.takeIf { it != Settings.SOURCE_LANGUAGE_AUTO })
+                recognizeText(frame, source.takeIf { it != Settings.SOURCE_LANGUAGE_AUTO }, incremental)
             },
             detect = { ocr, target -> languageDetector.detect(ocr.blocks, target) },
             engineFor = { translationEngine() },
@@ -189,8 +189,8 @@ class TranslatorService : LifecycleService() {
         capturer?.capture() ?: CaptureResult.Failed("서비스가 실행 중이 아님")
 
     /** 캡처한 화면에서 글자를 읽는다 (NA-09). [sourceLanguage] null = 자동. */
-    suspend fun recognizeText(frame: CaptureResult.Frame, sourceLanguage: String? = null): OcrResult =
-        textRecognizer.recognize(frame.bitmap, sourceLanguage)
+    suspend fun recognizeText(frame: CaptureResult.Frame, sourceLanguage: String? = null, incremental: Boolean = false): OcrResult =
+        textRecognizer.recognize(frame.bitmap, sourceLanguage, incremental)
 
     /** 블록별 원문 언어를 감지해 번역할지 정한다 (NA-10). 대상 언어는 저장된 설정(NA-16)을 쓴다. */
     suspend fun detectLanguages(ocr: OcrResult): List<DetectedBlock> {

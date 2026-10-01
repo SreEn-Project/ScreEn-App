@@ -73,12 +73,42 @@ object OverlayGeometry {
         val spread = 66f
         val half = (radiusDp * kotlin.math.sin(Math.toRadians(spread.toDouble()))).toFloat()
         val needAbove = half + 26f // 위 버블 중심 위로 원 반지름
-        val needBelow = half + 50f // 아래 버블 중심 아래로 원 반지름 + 이름표
+        val needBelow = half + 26f // 아래 버블 중심 아래로 원 반지름
         return when {
             spaceAboveDp < needAbove -> listOf(0f, 30f, 60f, 90f)
             spaceBelowDp < needBelow -> listOf(-90f, -60f, -30f, 0f)
             else -> listOf(-spread, -spread / 3, spread / 3, spread)
         }
+    }
+
+    /**
+     * 길게 누른 채 손가락이 올라가 있는 버블 번호 (없으면 -1). 버블 가운데에서 [hitRadius] 안이고 가장 가까운 것.
+     * [centerX] · [centerY]는 버튼 가운데 (화면 좌표), [inwardRight]는 버튼이 왼쪽 가장자리일 때 true. 모두 픽셀.
+     */
+    fun bubbleHit(
+        fingerX: Float,
+        fingerY: Float,
+        centerX: Float,
+        centerY: Float,
+        inwardRight: Boolean,
+        angles: List<Float>,
+        radius: Float,
+        hitRadius: Float,
+    ): Int {
+        var best = -1
+        var bestDistance = hitRadius
+        angles.forEachIndexed { index, angle ->
+            val rad = Math.toRadians(angle.toDouble())
+            val dx = (radius * kotlin.math.cos(rad)).toFloat()
+            val x = centerX + if (inwardRight) dx else -dx
+            val y = centerY + (radius * kotlin.math.sin(rad)).toFloat()
+            val distance = kotlin.math.hypot(fingerX - x, fingerY - y)
+            if (distance <= bestDistance) {
+                best = index
+                bestDistance = distance
+            }
+        }
+        return best
     }
 
     private fun maxX(size: Int, area: ScreenArea): Int = (area.width - area.right - size).coerceAtLeast(area.left)

@@ -51,12 +51,12 @@ ChangeAutoTranslate changeAutoTranslate(Ref ref) =>
     ChangeAutoTranslate(ref.watch(settingsRepositoryProvider));
 
 @riverpod
-ChangeAutoCheckInterval changeAutoCheckInterval(Ref ref) =>
-    ChangeAutoCheckInterval(ref.watch(settingsRepositoryProvider));
+ChangeAutoShowDelay changeAutoShowDelay(Ref ref) =>
+    ChangeAutoShowDelay(ref.watch(settingsRepositoryProvider));
 
 @riverpod
-ChangeAutoSettle changeAutoSettle(Ref ref) =>
-    ChangeAutoSettle(ref.watch(settingsRepositoryProvider));
+ChangeHideAfterInteraction changeHideAfterInteraction(Ref ref) =>
+    ChangeHideAfterInteraction(ref.watch(settingsRepositoryProvider));
 
 @riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>

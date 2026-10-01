@@ -157,6 +157,10 @@ internal class ButtonGestures(
     private val onDragStart: () -> Unit,
     private val onDrag: (dx: Int, dy: Int) -> Unit,
     private val onDragEnd: () -> Unit,
+    /** 길게 누른 뒤 손가락이 움직일 때 (버블 위에 올라갔는지 보려고). 화면 좌표, 끝나면 (-1, -1). */
+    private val onHold: (x: Float, y: Float) -> Unit = { _, _ -> },
+    /** 길게 누른 채로 손가락을 뗄 때. 화면 좌표. */
+    private val onHoldRelease: (x: Float, y: Float) -> Unit = { _, _ -> },
 ) {
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
@@ -189,17 +193,20 @@ internal class ButtonGestures(
                     onDragStart()
                 }
                 if (dragging) onDrag(dx.toInt(), dy.toInt())
+                if (longPressed) onHold(event.rawX, event.rawY)
             }
             MotionEvent.ACTION_UP -> {
                 handler.removeCallbacks(longPress)
                 when {
                     dragging -> onDragEnd()
-                    !longPressed -> onTap()
+                    longPressed -> onHoldRelease(event.rawX, event.rawY)
+                    else -> onTap()
                 }
                 dragging = false
             }
             MotionEvent.ACTION_CANCEL -> {
                 handler.removeCallbacks(longPress)
+                if (longPressed) onHold(-1f, -1f)
                 if (dragging) onDragEnd()
                 dragging = false
             }
