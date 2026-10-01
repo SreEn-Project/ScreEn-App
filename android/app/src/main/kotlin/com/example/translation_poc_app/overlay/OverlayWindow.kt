@@ -57,6 +57,21 @@ internal class OverlayWindow(
         if (isShown) windowManager.updateViewLayout(root, params)
     }
 
+    private val baseFlags = params.flags
+
+    /**
+     * 창을 잠깐 안 보이게 한다 (캡처에 안 찍히게). 루트 뷰를 INVISIBLE로 바꾸면 창의 서피스가 해제됐다가 다시 만들어져
+     * 첫 프레임이 그려지기 전에 검은 네모가 비친다 (#47). 창은 그대로 두고 창 알파만 0으로 하고, 터치도 받지 않는다.
+     */
+    fun setHidden(hidden: Boolean) {
+        val flags = if (hidden) baseFlags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE else baseFlags
+        val alpha = if (hidden) 0f else 1f
+        if (params.alpha == alpha && params.flags == flags) return
+        params.alpha = alpha
+        params.flags = flags
+        update()
+    }
+
     fun hide() {
         if (!isShown) return
         windowManager.removeViewImmediate(root)

@@ -2,6 +2,12 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 플로팅 버튼 자리 검은 네모 수정 (NA-18, 이슈 #47, 브랜치 `fix/47-black-square-flash`)
+- 증상: 오른쪽 가장자리 버튼 자리에 버튼 대신 검은 네모가 순간 보인다.
+- 원인: 캡처 때 버튼 창의 루트 뷰를 `INVISIBLE` ↔ `VISIBLE`로 바꿨다. 루트 뷰가 보이지 않으면 창의 서피스가 해제되고 다시 보일 때 새로 만들어져, 첫 프레임이 그려지기 전 버퍼가 검게 비친다 (버튼 창 크기 = 정사각형). 결과 창도 같은 방식이라 같은 위험.
+- 수정: `OverlayWindow.setHidden()` 추가 — 창은 그대로 두고 창 알파를 0 ↔ 1로 바꾸고, 숨은 동안 `FLAG_NOT_TOUCHABLE`을 건다. 캡처는 숨긴 뒤 새 프레임을 기다리므로(`awaitFreshFrame`) 버튼이 찍히지 않는 것은 그대로. `OverlayController`의 뷰 가시성 호출 11곳을 교체. 설정 · 의존성 변경 없음.
+- 기록: D-037. 기기 확인 전 (에뮬레이터 없음).
+
 ## 2026-10-02 · 인식 후처리 (NA-11, 이슈 #45, 브랜치 `feat/45-ocr-postprocess`)
 - #44(`feat/43-incremental-ocr`) 위에 쌓았다 (merge 전). 문자 인식 결과의 흔한 오인식을 번역 전에 보수적으로 고쳐 오역을 줄인다 (translation.md 개선 계획 4번).
 - `ocr/OcrPostProcessor.kt` 추가(순수 Kotlin) + `TranslationPipeline`에서 `OcrCleaner` 뒤 · `OcrBlockMerger` 앞에 호출. 규칙은 translation.md 참고. 설정 · 의존성 변경 없음.
