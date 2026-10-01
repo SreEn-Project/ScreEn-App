@@ -21,6 +21,7 @@ import com.example.translation_poc_app.capture.ScreenCapturer
 import com.example.translation_poc_app.ocr.OcrResult
 import com.example.translation_poc_app.ocr.ScreenTextRecognizer
 import com.example.translation_poc_app.AppGraph
+import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.overlay.OverlayController
 import com.example.translation_poc_app.translate.DetectedBlock
 import com.example.translation_poc_app.translate.LanguageDetector
@@ -55,7 +56,10 @@ class TranslatorService : LifecycleService() {
                 capturer?.awaitFreshFrame()
                 captureFrame()
             },
-            recognize = { frame -> recognizeText(frame) },
+            recognize = { frame ->
+                val source = AppGraph.settingsRepository(this).current().sourceLanguage
+                recognizeText(frame, source.takeIf { it != Settings.SOURCE_LANGUAGE_AUTO })
+            },
             detect = { ocr, target -> languageDetector.detect(ocr.blocks, target) },
             engineFor = { translationEngine() },
             settings = { AppGraph.settingsRepository(this).current() },

@@ -35,8 +35,13 @@ import androidx.compose.ui.unit.dp
 
 /** 눌리면 97% 크기 + 살짝 흐려짐. 물결 효과 없음 (Flutter `Pressable`). */
 @Composable
-fun Modifier.pressable(enabled: Boolean = true, role: Role = Role.Button, onClick: () -> Unit): Modifier {
-    val interaction = remember { MutableInteractionSource() }
+fun Modifier.pressable(
+    enabled: Boolean = true,
+    role: Role = Role.Button,
+    interactionSource: MutableInteractionSource? = null,
+    onClick: () -> Unit,
+): Modifier {
+    val interaction = interactionSource ?: remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     return this
         .graphicsLayer {

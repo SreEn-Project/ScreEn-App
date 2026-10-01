@@ -96,6 +96,7 @@ enum class Symbol(val codepoint: Int) {
     VIEW_LIST(0xe8ef),
     NOTES(0xe26c),
     FLIP_TO_FRONT(0xe883),
+    SETTINGS(0xe8b8),
 }
 
 private val SymbolsFont = FontFamily(Font(R.font.material_symbols_rounded))

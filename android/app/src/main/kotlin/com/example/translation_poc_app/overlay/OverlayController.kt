@@ -28,6 +28,7 @@ import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.ResultDisplay
+import com.example.translation_poc_app.data.settings.Settings as AppSettings
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.translate.TranslatedItem
 import com.example.translation_poc_app.translate.TranslationOutcome
@@ -76,13 +77,14 @@ class OverlayController(
     private var mode by mutableStateOf(CaptureRange.FULL_SCREEN)
     private var fixedRegion: NormalizedRegion? = null
     private var display = ResultDisplay.LIST
-    private var targetLanguage = ""
+    private var targetLanguage by mutableStateOf("")
     private var quickLanguages: List<String> = emptyList()
     private var autoConfig = AutoTranslateConfig(
         com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_CHECK_INTERVAL_MS,
         com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_SETTLE_MS,
     )
     private var autoTranslate = false
+    private var sourceLanguage by mutableStateOf(AppSettings.SOURCE_LANGUAGE_AUTO)
 
     /** 마지막으로 번역한 영역 (자동 번역이 같은 영역을 다시 번역한다). null = 화면 전체. */
     private var lastRegion: NormalizedRegion? = null
@@ -165,6 +167,7 @@ class OverlayController(
                 targetLanguage = it.targetLanguage
                 quickLanguages = it.quickLanguages
                 autoTranslate = it.autoTranslate
+                sourceLanguage = it.sourceLanguage
                 autoConfig = AutoTranslateConfig(it.autoCheckIntervalMs, it.autoSettleMs)
                 if (!autoTranslate) watcher.stop()
             }
@@ -335,7 +338,7 @@ class OverlayController(
 
     // ── 버블 · 옵션 메뉴 (O-02) ───────────────────
 
-    private enum class OptionKind { RANGE, DISPLAY, LANGUAGE }
+    private enum class OptionKind { RANGE, DISPLAY, LANGUAGE, SETTINGS }
 
     /** 길게 누르기: 버블이 떠 있으면 닫고, 아니면 버튼 주위에 카테고리 버블을 띄운다. */
     private fun toggleMenu() {
@@ -351,6 +354,9 @@ class OverlayController(
         val inwardRight = placement.edge == Edge.LEFT
         val windowY = (centerY - ringHeight / 2)
             .coerceIn(area.top, (area.height - area.bottom - ringHeight).coerceAtLeast(area.top))
+        // 바깥쪽에도 여백이 있어야 해서 가장자리에 붙은 버튼이면 창이 화면 밖으로 나간다 → 화면 안으로 맞추고 버튼 위치는 따로 넘긴다.
+        val idealX = if (inwardRight) centerX - dp(BUBBLE_RING_OUTER_DP) else centerX - dp(BUBBLE_RING_INNER_DP)
+        val windowX = idealX.coerceIn(area.left, (area.width - area.right - ringWidth).coerceAtLeast(area.left))
         val angles = OverlayGeometry.bubbleAngles(
             spaceAboveDp = (centerY - area.top) / density,
             spaceBelowDp = (area.height - area.bottom - centerY) / density,
@@ -359,6 +365,7 @@ class OverlayController(
             BubbleSpec(Symbol.CROP, context.getString(R.string.overlay_bubble_range), angles[0]) { showOptions(OptionKind.RANGE) },
             BubbleSpec(Symbol.VIEW_LIST, context.getString(R.string.overlay_bubble_display), angles[1]) { showOptions(OptionKind.DISPLAY) },
             BubbleSpec(Symbol.TRANSLATE, context.getString(R.string.overlay_bubble_language), angles[2]) { showOptions(OptionKind.LANGUAGE) },
+            BubbleSpec(Symbol.SETTINGS, context.getString(R.string.overlay_bubble_settings), angles[3]) { showOptions(OptionKind.SETTINGS) },
         )
         val params = OverlayWindow.params(
             ringWidth,
@@ -366,12 +373,13 @@ class OverlayController(
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = if (inwardRight) centerX else centerX - ringWidth
+            x = windowX
             y = windowY
         }
+        val anchorXDp = (centerX - windowX) / density
         val anchorYDp = (centerY - windowY) / density
         menu = OverlayWindow(context, windowManager, params) {
-            BubbleRing(bubbles, inwardRight, anchorYDp, onBackgroundTap = { post(::dismissMenu) })
+            BubbleRing(bubbles, inwardRight, anchorXDp, anchorYDp, onBackgroundTap = { post(::dismissMenu) })
         }.apply {
             root.onOutsideTouch = { post(::dismissMenu) }
             show()
@@ -390,16 +398,75 @@ class OverlayController(
                     post(::dismissMenu)
                 }
             }
-            OptionKind.LANGUAGE -> quickLanguages.map { code ->
-                MenuOption(Symbol.TRANSLATE, languageDisplayName(code, Locale.getDefault()), code == targetLanguage) {
-                    scope.launch { settingsRepository.setTargetLanguage(code) }
-                    post(::dismissMenu)
-                }
-            }
+            OptionKind.LANGUAGE -> emptyList()
+            OptionKind.SETTINGS -> settingsOptions()
         }
         post {
             dismissMenu()
-            openOptionWindow(options)
+            if (kind == OptionKind.LANGUAGE) openLanguageWindow() else openOptionWindow(options)
+        }
+    }
+
+    /** '설정' 버블: 지금은 자동 번역 켜기 · 끄기만. 항목은 나중에 늘린다. 저장은 앱 설정과 같은 DataStore. */
+    private fun settingsOptions(): List<MenuOption> {
+        val autoLabel = context.getString(
+            R.string.overlay_setting_auto_translate,
+            context.getString(if (autoTranslate) R.string.overlay_on else R.string.overlay_off),
+        )
+        return listOf(
+            MenuOption(Symbol.AUTO_AWESOME, autoLabel, autoTranslate) {
+                scope.launch { settingsRepository.setAutoTranslate(!autoTranslate) }
+                post(::dismissMenu)
+            },
+        )
+    }
+
+    /**
+     * 빠른 언어 메뉴: "번역할 언어"(원문 인식, 자동 포함)와 "번역될 언어"를 한 카드에서 고른다.
+     * 고른 뒤에도 열려 있어 이어서 다른 쪽을 고를 수 있다. 바깥을 누르면 닫는다.
+     */
+    private fun openLanguageWindow() {
+        val locale = Locale.getDefault()
+        val anchor = OverlayGeometry.menu(placement, buttonSize, area, gap = 0)
+        val params = OverlayWindow.params(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+        ).apply {
+            gravity = Gravity.TOP or if (anchor.alignEnd) Gravity.END else Gravity.START
+            x = anchor.x
+            y = anchor.y
+        }
+        val sourceCodes = listOf(AppSettings.SOURCE_LANGUAGE_AUTO) + quickLanguages
+        menu = OverlayWindow(context, windowManager, params) {
+            LanguageMenu(
+                sourceTitle = context.getString(R.string.overlay_lang_source),
+                targetTitle = context.getString(R.string.overlay_lang_target),
+                source = {
+                    sourceCodes.map { code ->
+                        val name = if (code == AppSettings.SOURCE_LANGUAGE_AUTO) {
+                            context.getString(R.string.overlay_source_auto)
+                        } else {
+                            languageDisplayName(code, locale)
+                        }
+                        MenuOption(Symbol.TRANSLATE, name, code == sourceLanguage) {
+                            sourceLanguage = code
+                            scope.launch { settingsRepository.setSourceLanguage(code) }
+                        }
+                    }
+                },
+                target = {
+                    quickLanguages.map { code ->
+                        MenuOption(Symbol.TRANSLATE, languageDisplayName(code, locale), code == targetLanguage) {
+                            targetLanguage = code
+                            scope.launch { settingsRepository.setTargetLanguage(code) }
+                        }
+                    }
+                },
+            )
+        }.apply {
+            root.onOutsideTouch = { post(::dismissMenu) }
+            show()
         }
     }
 

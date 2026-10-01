@@ -11,18 +11,18 @@ class BubbleAndParagraphTest {
     private fun item(translated: String?) = TranslatedItem("원문", translated, "en", if (translated == null) ItemStatus.FAILED else ItemStatus.TRANSLATED)
 
     @Test
-    fun `버블 각도 - 여유가 있으면 위 가운데 아래`() {
-        assertEquals(listOf(-58f, 0f, 58f), OverlayGeometry.bubbleAngles(spaceAboveDp = 400f, spaceBelowDp = 400f))
+    fun `버블 각도 - 여유가 있으면 위에서 아래로`() {
+        assertEquals(listOf(-66f, -22f, 22f, 66f), OverlayGeometry.bubbleAngles(spaceAboveDp = 400f, spaceBelowDp = 400f))
     }
 
     @Test
     fun `버블 각도 - 위쪽 끝이면 아래로 몰린다`() {
-        assertEquals(listOf(0f, 42f, 84f), OverlayGeometry.bubbleAngles(spaceAboveDp = 40f, spaceBelowDp = 600f))
+        assertEquals(listOf(0f, 30f, 60f, 90f), OverlayGeometry.bubbleAngles(spaceAboveDp = 40f, spaceBelowDp = 600f))
     }
 
     @Test
     fun `버블 각도 - 아래쪽 끝이면 위로 몰린다`() {
-        assertEquals(listOf(-84f, -42f, 0f), OverlayGeometry.bubbleAngles(spaceAboveDp = 600f, spaceBelowDp = 40f))
+        assertEquals(listOf(-90f, -60f, -30f, 0f), OverlayGeometry.bubbleAngles(spaceAboveDp = 600f, spaceBelowDp = 40f))
     }
 
     @Test

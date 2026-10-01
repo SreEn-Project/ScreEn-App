@@ -2,6 +2,15 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 버블 메뉴에 '설정' 추가 (이슈 #27, 브랜치 `feat/27-settings-bubble`)
+- 자동 번역 설정이 #24(`feat/23-auto-translate`)에만 있어 그 브랜치 위에 쌓았다. #24가 develop에 merge된 뒤 이 PR을 merge한다. 설계는 D-033.
+- 길게 누르기 버블이 3개 → 4개(캡처 범위 · 결과 표시 · 빠른 언어 · **설정**). 설정 버블을 누르면 옵션 메뉴: 인식 언어(자동 · English · 한국어 · 日本語 · 中文)와 자동 번역 켜기 · 끄기.
+- 네이티브: `Settings.sourceLanguage`(기본 `auto`, Pigeon 없이 네이티브 전용) + `SettingsRepository.setSourceLanguage`, `TranslatorService`가 문자 인식에 반영, `OverlayController` 설정 메뉴, `OverlayGeometry.bubbleAngles` 4개 · 반지름 96dp, `Symbol.SETTINGS`와 아이콘 글꼴 부분집합에 settings 글자 추가, 문구(ko/en).
+- **기기 확인 후 수정**: 빠른 언어 메뉴를 두 열("번역할 언어"=인식 · "번역될 언어"=결과)로 바꾸고 고른 뒤에도 열어 둠. 설정 버블에서 언어 목록 삭제(자동 번역만). 버블 창에 바깥쪽 · 둘레 여백을 줘 눌림 · 90° 몰림에서 잘리지 않게 하고, 버블 그리는 순서(위쪽이 앞 · 누른 버블 맨 앞)로 이름표가 가려지지 않게 함. 덮어쓰기 번역문은 원문 크기(비율 허용 0.6~1.8배, 10~40sp)에 맞추고 가운데 정렬.
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
+- 남은 일: 기기에서 ① 버블 4개가 겹치지 않는지(화면 위 · 아래 끝 포함) ② 인식 언어를 고정했을 때 인식이 나아지는지 ③ 앱 설정 화면에도 인식 언어를 노출할지 결정.
+
+
 ## 2026-10-01 · 자동 번역 (이슈 #23, 브랜치 `feat/23-auto-translate`, NA-26)
 - (먼저 #20 · #22를 develop에 merge하고 그 위에서 땄다.) 설계는 D-032.
 - 설정 탭에 "자동 번역"(기본 꺼짐 · 확인 간격 · 멈춘 뒤 대기 시간). Pigeon `AppSettings`에 `autoTranslate` · `autoCheckIntervalMs` · `autoSettleMs`와 setter 3개 추가 → Flutter 엔티티 · 매퍼 · 리포지토리 · 유스케이스 3개 · `AutoTranslateViewModel` · 설정 화면 섹션 · ARB(ko/en).
@@ -9,8 +18,9 @@
 - 확인: flutter analyze 0 · flutter test 통과(AutoTranslateViewModel 5개 추가) · Kotlin 단위 테스트(Tracker 12 · Watcher 5 추가) 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
 - 남은 일: 기기에서 ① 변화 감지 임계(`FrameSignature.CHANGE_RATIO`)가 알맞은지(헛번역 · 놓침) ② 덮기 막 터치 통과(Android 12+ 알파 보정)와 옅어지는 정도 ③ 열 · 배터리 체감 확인.
 
+
 ## 2026-10-01 · 글자 인식 실패 진단 · 보안 화면 판별 (이슈 #25, 브랜치 `fix/25-ocr-diagnostics`, NA-09 · NA-05)
-- 증상: 구글 로그인 화면(영어 본문이 뚜렷)에서 고정 영역 모드(핀 아이콘)로 눌렀더니 '글자를 찾지 못했어요'. 설계는 D-033.
+- 증상: 구글 로그인 화면(영어 본문이 뚜렷)에서 고정 영역 모드(핀 아이콘)로 눌렀더니 '글자를 찾지 못했어요'. 설계는 D-033b.
 - 코드로 확인한 것: 오버레이(시트 · 버튼)는 캡처 전에 숨기고 새 프레임을 기다려 찍는다 / 인식 · 정리 · 합치기 · 언어 판별 경로는 영어 본문을 버리지 않는다. 구글 로그인 · 결제 화면은 보안 창(FLAG_SECURE)이라, 시스템이 그 창만 검게 칠하고 상태 표시줄 등은 그대로 준다 → 기존 `isBlank`(표본 전부 검정)에 안 걸려 '글자 없음'으로 나왔을 가능성이 가장 높다. 기기 로그로 확정은 못 함.
 - 고침: 글자를 못 읽었는데 인식 대상의 70% 이상이 검정이면 보안 화면 안내(`FrameStats`). 영역 모드에서 글자가 없으면 '영역을 옮기거나 키우세요' 안내(`NoTextInRegion`).
 - 진단 로그(태그 `TranslatorService`, `ScreenCapturer`, `ScreenTextRecognizer`): 프레임 크기 · 나이 · 밝기 · 검정 비율, 인식 대상 크기 · 영역, 인식기별 글자 수 · 신뢰도 · 남은 글자, 블록 수, 언어 판별 결과.

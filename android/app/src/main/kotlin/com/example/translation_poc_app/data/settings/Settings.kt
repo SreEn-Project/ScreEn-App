@@ -29,9 +29,12 @@ data class Settings(
     val autoCheckIntervalMs: Long = DEFAULT_AUTO_CHECK_INTERVAL_MS,
     /** 화면이 바뀐 뒤 멈추고 이만큼 기다렸다가 번역한다 (ms). */
     val autoSettleMs: Long = DEFAULT_AUTO_SETTLE_MS,
+    /** 문자 인식 언어 ([SOURCE_LANGUAGE_AUTO] = 자동 판별). 플로팅 버튼 '빠른 언어' 버블에서 바꾼다. 네이티브 전용 (Pigeon 없음). */
+    val sourceLanguage: String = SOURCE_LANGUAGE_AUTO,
 ) {
     companion object {
         const val DEFAULT_TARGET_LANGUAGE = "ko"
+        const val SOURCE_LANGUAGE_AUTO = "auto"
         val DEFAULT_QUICK_LANGUAGES = listOf("ko", "en", "ja", "zh")
         const val DEFAULT_AUTO_CHECK_INTERVAL_MS = 2_000L
         const val DEFAULT_AUTO_SETTLE_MS = 1_000L
