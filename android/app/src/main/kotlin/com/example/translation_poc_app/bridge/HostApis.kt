@@ -20,6 +20,9 @@ class SettingsHostApiImpl(private val repository: SettingsRepository) : Settings
 
     override suspend fun setDisplayMode(mode: DisplayMode) = repository.setResultDisplay(mode.toNative())
 
+    override suspend fun setQuickLanguages(languageCodes: List<String>) =
+        repository.setQuickLanguages(languageCodes)
+
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)
 }

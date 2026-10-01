@@ -10,7 +10,8 @@ import '../../domain/entities/supported_language.dart';
 class LanguageList extends StatefulWidget {
   const LanguageList({
     super.key,
-    required this.selectedCode,
+    this.selectedCode = '',
+    this.selectedCodes,
     required this.onSelected,
     this.padding = const EdgeInsets.symmetric(
       horizontal: AppTokens.pagePadding,
@@ -18,6 +19,9 @@ class LanguageList extends StatefulWidget {
   });
 
   final String selectedCode;
+
+  /// 여러 개를 고르는 화면(빠른 언어)에서 쓴다. 주면 [selectedCode] 대신 이 집합으로 선택을 표시한다.
+  final Set<String>? selectedCodes;
   final ValueChanged<SupportedLanguage> onSelected;
   final EdgeInsets padding;
 
@@ -63,7 +67,9 @@ class _LanguageListState extends State<LanguageList> {
                     return _LanguageTile(
                       language: language,
                       name: language.displayName(locale.languageCode),
-                      selected: language.code == widget.selectedCode,
+                      selected:
+                          widget.selectedCodes?.contains(language.code) ??
+                          language.code == widget.selectedCode,
                       onTap: () => widget.onSelected(language),
                     );
                   },

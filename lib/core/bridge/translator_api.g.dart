@@ -103,7 +103,7 @@ enum EngineType { mlKit, gemini, firebaseAi }
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
 
-/// 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22 전까지는 list로 보임).
+/// 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22).
 enum DisplayMode { list, paragraph, overlay }
 
 /// 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
@@ -118,6 +118,7 @@ class AppSettings {
     required this.captureMode,
     required this.displayMode,
     required this.onboardingCompleted,
+    required this.quickLanguages,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -131,6 +132,9 @@ class AppSettings {
 
   bool onboardingCompleted;
 
+  /// 플로팅 버튼 "빠른 언어" 버블에 나올 대상 언어 코드들 (사용자 편집, 순서 유지).
+  List<String> quickLanguages;
+
   List<Object?> _toList() {
     return <Object?>[
       targetLanguage,
@@ -138,6 +142,7 @@ class AppSettings {
       captureMode,
       displayMode,
       onboardingCompleted,
+      quickLanguages,
     ];
   }
 
@@ -153,6 +158,7 @@ class AppSettings {
       captureMode: result[2]! as CaptureMode,
       displayMode: result[3]! as DisplayMode,
       onboardingCompleted: result[4]! as bool,
+      quickLanguages: (result[5]! as List<Object?>).cast<String>(),
     );
   }
 
@@ -169,7 +175,8 @@ class AppSettings {
         _deepEquals(engine, other.engine) &&
         _deepEquals(captureMode, other.captureMode) &&
         _deepEquals(displayMode, other.displayMode) &&
-        _deepEquals(onboardingCompleted, other.onboardingCompleted);
+        _deepEquals(onboardingCompleted, other.onboardingCompleted) &&
+        _deepEquals(quickLanguages, other.quickLanguages);
   }
 
   @override
@@ -178,7 +185,7 @@ class AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted)';
+    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages)';
   }
 }
 
@@ -435,6 +442,26 @@ class SettingsHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[mode],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> setQuickLanguages(List<String> languageCodes) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setQuickLanguages$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[languageCodes],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

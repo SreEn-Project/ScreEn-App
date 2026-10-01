@@ -224,7 +224,7 @@ enum class CaptureMode(val raw: Int) {
   }
 }
 
-/** 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22 전까지는 list로 보임). */
+/** 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22). */
 enum class DisplayMode(val raw: Int) {
   LIST(0),
   PARAGRAPH(1),
@@ -265,7 +265,9 @@ data class AppSettings (
   val engine: EngineType,
   val captureMode: CaptureMode,
   val displayMode: DisplayMode,
-  val onboardingCompleted: Boolean
+  val onboardingCompleted: Boolean,
+  /** 플로팅 버튼 "빠른 언어" 버블에 나올 대상 언어 코드들 (사용자 편집, 순서 유지). */
+  val quickLanguages: List<String>
 )
  {
   companion object {
@@ -275,7 +277,8 @@ data class AppSettings (
       val captureMode = pigeonVar_list[2] as CaptureMode
       val displayMode = pigeonVar_list[3] as DisplayMode
       val onboardingCompleted = pigeonVar_list[4] as Boolean
-      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted)
+      val quickLanguages = pigeonVar_list[5] as List<String>
+      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages)
     }
   }
   fun toList(): List<Any?> {
@@ -285,6 +288,7 @@ data class AppSettings (
       captureMode,
       displayMode,
       onboardingCompleted,
+      quickLanguages,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -295,7 +299,7 @@ data class AppSettings (
       return true
     }
     val other = other as AppSettings
-    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted)
+    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages)
   }
 
   override fun hashCode(): Int {
@@ -305,10 +309,11 @@ data class AppSettings (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.captureMode)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.displayMode)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.onboardingCompleted)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.quickLanguages)
     return result
   }
   override fun toString(): String {
-    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted)"
+    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages)"
   }
 }
 
@@ -478,6 +483,7 @@ interface SettingsHostApi {
   suspend fun setEngine(engine: EngineType)
   suspend fun setCaptureMode(mode: CaptureMode)
   suspend fun setDisplayMode(mode: DisplayMode)
+  suspend fun setQuickLanguages(languageCodes: List<String>)
   suspend fun setOnboardingCompleted(completed: Boolean)
 
   companion object {
@@ -575,6 +581,26 @@ interface SettingsHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.setDisplayMode(modeArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setQuickLanguages$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val languageCodesArg = args[0] as List<String>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setQuickLanguages(languageCodesArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

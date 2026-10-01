@@ -396,8 +396,18 @@ class OverlayController(
             // 뒤로 가기를 받으려고 포커스를 받는다. 시트가 떠 있는 동안만.
             0,
         )
+        // 원문 위에 덮기(NA-22): 자리를 아는 번역 항목이 하나라도 있으면 막으로, 없으면 목록 시트로.
+        val overItems = if (display == ResultDisplay.OVERLAY && outcome is TranslationOutcome.Translated) {
+            overlayItems(outcome.items)
+        } else {
+            emptyList()
+        }
         sheet = OverlayWindow(context, windowManager, params) {
-            ResultSheet(outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
+            if (overItems.isNotEmpty()) {
+                OverlayResult(overItems, onDismiss = { post(::dismissSheet) })
+            } else {
+                ResultSheet(outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
+            }
         }.apply {
             root.onBack = { post(::dismissSheet) }
             show()

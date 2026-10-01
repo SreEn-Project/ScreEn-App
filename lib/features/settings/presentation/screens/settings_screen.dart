@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
+import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
+import '../view_models/quick_languages_view_model.dart';
 import '../../../../core/l10n/labels.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -134,6 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
+        const _QuickLanguagesSection(),
         AppSection(
           title: l10n.settingsSectionEtc,
           child: AppCard(
@@ -237,6 +241,38 @@ class _Labeled extends StatelessWidget {
           const SizedBox(height: 12),
           child,
         ],
+      ),
+    );
+  }
+}
+
+/// 빠른 언어 (FL-04): 플로팅 버튼 "빠른 언어" 버블에 나올 언어. 눌러서 편집 화면으로.
+class _QuickLanguagesSection extends ConsumerWidget {
+  const _QuickLanguagesSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final uiLanguage = Localizations.localeOf(context).languageCode;
+    final codes =
+        ref.watch(quickLanguagesViewModelProvider).value ??
+        defaultQuickLanguages;
+
+    return AppSection(
+      title: l10n.settingsQuickLanguages,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: AppListTile(
+          icon: Symbols.translate_rounded,
+          title: l10n.settingsQuickLanguagesDetail,
+          subtitle: codes
+              .map(
+                (code) =>
+                    SupportedLanguage.byCode(code).displayName(uiLanguage),
+              )
+              .join(' · '),
+          onTap: () => context.push(AppRoutes.quickLanguages),
+        ),
       ),
     );
   }

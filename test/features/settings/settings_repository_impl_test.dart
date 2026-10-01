@@ -17,6 +17,7 @@ pigeon.AppSettings _pigeonSettings({String targetLanguage = 'ko'}) =>
       captureMode: pigeon.CaptureMode.fixedRegion,
       displayMode: pigeon.DisplayMode.overlay,
       onboardingCompleted: true,
+      quickLanguages: ['en', 'ja'],
     );
 
 void main() {
@@ -46,6 +47,7 @@ void main() {
         captureMode: CaptureMode.fixedRegion,
         displayMode: DisplayMode.overlay,
         onboardingCompleted: true,
+        quickLanguages: ['en', 'ja'],
       ),
     );
   });

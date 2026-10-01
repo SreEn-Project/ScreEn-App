@@ -322,6 +322,54 @@ final class ChangeDisplayModeProvider
 
 String _$changeDisplayModeHash() => r'7c08b997249b45a869d90a0e85d1ef0dc02bb047';
 
+@ProviderFor(changeQuickLanguages)
+final changeQuickLanguagesProvider = ChangeQuickLanguagesProvider._();
+
+final class ChangeQuickLanguagesProvider
+    extends
+        $FunctionalProvider<
+          ChangeQuickLanguages,
+          ChangeQuickLanguages,
+          ChangeQuickLanguages
+        >
+    with $Provider<ChangeQuickLanguages> {
+  ChangeQuickLanguagesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeQuickLanguagesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeQuickLanguagesHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeQuickLanguages> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeQuickLanguages create(Ref ref) {
+    return changeQuickLanguages(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeQuickLanguages value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeQuickLanguages>(value),
+    );
+  }
+}
+
+String _$changeQuickLanguagesHash() =>
+    r'a4e5afa9e6c08f9a671e9148cb3134d6a50deb5f';
+
 @ProviderFor(completeOnboarding)
 final completeOnboardingProvider = CompleteOnboardingProvider._();
 

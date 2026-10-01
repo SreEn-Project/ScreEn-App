@@ -323,6 +323,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsButtonOpacity => '플로팅 버튼 투명도';
 
   @override
+  String get settingsQuickLanguages => '빠른 언어';
+
+  @override
+  String get settingsQuickLanguagesDetail => '플로팅 버튼 길게 누르기 메뉴에 보일 언어';
+
+  @override
+  String get quickLanguagesTitle => '빠른 언어 편집';
+
+  @override
+  String quickLanguagesHint(int count, int max, int min) {
+    return '$count/$max개 선택 · 최소 $min개. 누르면 켜고 꺼요.';
+  }
+
+  @override
   String get settingsSectionEtc => '기타';
 
   @override

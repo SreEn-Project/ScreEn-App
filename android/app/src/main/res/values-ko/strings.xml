@@ -32,6 +32,7 @@
     <string name="result_copy_all">전체 복사</string>
     <string name="result_copied">복사했어요</string>
     <string name="result_close">닫기</string>
+    <string name="result_overlay_hint">화면을 누르면 닫혀요</string>
     <string name="result_retranslate_ai">AI로 다시 번역</string>
     <string name="result_ai_coming_soon">AI 번역은 준비 중이에요</string>
     <string name="result_unsupported">아직 번역할 수 없는 언어예요 (%1$s)</string>
