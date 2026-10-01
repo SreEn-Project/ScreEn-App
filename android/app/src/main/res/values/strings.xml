@@ -16,7 +16,6 @@
     <string name="overlay_mode_full_screen">Full screen</string>
     <string name="overlay_mode_drag_region">Drag to select</string>
     <string name="overlay_mode_fixed_region">Fixed area</string>
-    <string name="overlay_mode_edit_fixed_region">Edit fixed area</string>
     <string name="region_hint_drag">Drag to choose the area to translate</string>
     <string name="region_hint_edit">Move the area or drag a corner to resize</string>
     <string name="region_cancel">Cancel</string>

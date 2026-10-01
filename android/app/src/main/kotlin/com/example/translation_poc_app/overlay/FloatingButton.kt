@@ -43,14 +43,12 @@ import com.example.translation_poc_app.data.settings.CaptureRange
 internal const val BUTTON_DIAMETER_DP = 52
 internal const val BUTTON_WINDOW_DP = BUTTON_DIAMETER_DP + 16
 
-/** 모드 메뉴 항목 (O-02). 앞의 셋은 캡처 범위를 고르고, 마지막은 고정 영역을 다시 지정한다. */
-internal enum class ModeMenuItem(val symbol: Symbol, val label: Int, val range: CaptureRange?) {
+/** 모드 메뉴 항목 (O-02). 고르면 그 캡처 범위가 된다. 고정 영역은 고르는 즉시 영역 편집 화면이 열린다. */
+internal enum class ModeMenuItem(val symbol: Symbol, val label: Int, val range: CaptureRange) {
     FULL_SCREEN(Symbol.FULLSCREEN, R.string.overlay_mode_full_screen, CaptureRange.FULL_SCREEN),
     DRAG_REGION(Symbol.CROP, R.string.overlay_mode_drag_region, CaptureRange.DRAG_REGION),
     FIXED_REGION(Symbol.PUSH_PIN, R.string.overlay_mode_fixed_region, CaptureRange.FIXED_REGION),
-    EDIT_FIXED_REGION(Symbol.EDIT, R.string.overlay_mode_edit_fixed_region, null),
     ;
-
 }
 
 internal fun CaptureRange.symbol(): Symbol = when (this) {
