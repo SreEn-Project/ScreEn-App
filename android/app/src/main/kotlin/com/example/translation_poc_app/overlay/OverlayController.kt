@@ -20,6 +20,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.translation_poc_app.autotranslate.AutoTranslateConfig
@@ -125,6 +126,8 @@ class OverlayController(
         onDragStart = ::onDragStart,
         onDrag = ::onDrag,
         onDragEnd = ::onDragEnd,
+        onHold = ::onHold,
+        onHoldRelease = ::onHoldRelease,
     )
 
     private val button = OverlayWindow(
@@ -148,6 +151,11 @@ class OverlayController(
     ) { CloseTarget(overClose) }
 
     private var menu: OverlayWindow? = null
+
+    /** 길게 누른 채 손가락이 올라가 있는 버블 번호 (없으면 -1). 버블 창이 있는 동안만 쓴다. */
+    private var hoveredBubble by mutableIntStateOf(-1)
+    private var bubbleAnglesNow: List<Float> = emptyList()
+    private var bubbleActions: List<() -> Unit> = emptyList()
     private var sheet: OverlayWindow? = null
     private var picker: OverlayWindow? = null
     private var settingsJob: Job? = null
@@ -384,12 +392,15 @@ class OverlayController(
             spaceAboveDp = (centerY - area.top) / density,
             spaceBelowDp = (area.height - area.bottom - centerY) / density,
         )
+        bubbleAnglesNow = angles
+        hoveredBubble = -1
         val bubbles = listOf(
             BubbleSpec(Symbol.CROP, context.getString(R.string.overlay_bubble_range), angles[0]) { showOptions(OptionKind.RANGE) },
             BubbleSpec(Symbol.VIEW_LIST, context.getString(R.string.overlay_bubble_display), angles[1]) { showOptions(OptionKind.DISPLAY) },
             BubbleSpec(Symbol.TRANSLATE, context.getString(R.string.overlay_bubble_language), angles[2]) { showOptions(OptionKind.LANGUAGE) },
             BubbleSpec(Symbol.SETTINGS, context.getString(R.string.overlay_bubble_settings), angles[3]) { showOptions(OptionKind.SETTINGS) },
         )
+        bubbleActions = bubbles.map { it.onClick }
         val params = OverlayWindow.params(
             ringWidth,
             ringHeight,
@@ -402,11 +413,37 @@ class OverlayController(
         val anchorXDp = (centerX - windowX) / density
         val anchorYDp = (centerY - windowY) / density
         menu = OverlayWindow(context, windowManager, params) {
-            BubbleRing(bubbles, inwardRight, anchorXDp, anchorYDp, onBackgroundTap = { post(::dismissMenu) })
+            BubbleRing(bubbles, inwardRight, anchorXDp, anchorYDp, hovered = { hoveredBubble }, onBackgroundTap = { post(::dismissMenu) })
         }.apply {
             root.onOutsideTouch = { post(::dismissMenu) }
             show()
         }
+    }
+
+    private fun bubbleUnder(x: Float, y: Float): Int {
+        if (menu == null || x < 0f) return -1
+        return OverlayGeometry.bubbleHit(
+            fingerX = x,
+            fingerY = y,
+            centerX = (placement.x + buttonSize / 2).toFloat(),
+            centerY = (placement.y + buttonSize / 2).toFloat(),
+            inwardRight = placement.edge == Edge.LEFT,
+            angles = bubbleAnglesNow,
+            radius = BUBBLE_RADIUS_DP * density,
+            hitRadius = BUBBLE_HIT_RADIUS_DP * density,
+        )
+    }
+
+    /** 길게 누른 채 손가락을 움직이면 그 아래 버블을 앞으로 올린다. */
+    private fun onHold(x: Float, y: Float) {
+        hoveredBubble = bubbleUnder(x, y)
+    }
+
+    /** 길게 누른 채 버블 위에서 손가락을 떼면 그 버블을 누른 것으로 친다. */
+    private fun onHoldRelease(x: Float, y: Float) {
+        val index = bubbleUnder(x, y)
+        hoveredBubble = -1
+        if (index in bubbleActions.indices) bubbleActions[index]()
     }
 
     /** 버블을 누르면 버블은 닫고 그 종류의 옵션 메뉴를 버튼 옆에 연다. */

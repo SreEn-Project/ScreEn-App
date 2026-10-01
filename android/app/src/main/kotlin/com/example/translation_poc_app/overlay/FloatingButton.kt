@@ -10,6 +10,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.zIndex
@@ -38,12 +39,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -244,6 +247,9 @@ internal data class BubbleSpec(val symbol: Symbol, val label: String, val angleD
 /** 버블은 버튼 가운데에서 [BUBBLE_RADIUS_DP]만큼 떨어진 안쪽 호 위에 놓는다. */
 internal const val BUBBLE_RADIUS_DP = 96
 internal const val BUBBLE_DIAMETER_DP = 52
+
+/** 길게 누른 채 버블 가운데에서 이 거리 안이면 그 버블 위에 있는 것으로 본다. 버블 사이(중심 간격 약 70dp)보다 좁게. */
+internal const val BUBBLE_HIT_RADIUS_DP = 34
 internal const val BUBBLE_CELL_WIDTH_DP = 76
 internal const val BUBBLE_CELL_HEIGHT_DP = BUBBLE_DIAMETER_DP + 24
 
@@ -269,6 +275,7 @@ internal fun BubbleRing(
     inwardRight: Boolean,
     anchorXDp: Float,
     anchorYDp: Float,
+    hovered: () -> Int,
     onBackgroundTap: () -> Unit,
 ) {
     val colors = OverlayTheme.colors
@@ -283,6 +290,8 @@ internal fun BubbleRing(
         bubbles.forEachIndexed { index, bubble ->
             val pressSource = remember { MutableInteractionSource() }
             val pressed by pressSource.collectIsPressedAsState()
+            val lifted = pressed || hovered() == index
+            val liftScale by animateFloatAsState(if (lifted) 1.12f else 1f, label = "bubble-lift")
             val rad = Math.toRadians(bubble.angleDeg.toDouble())
             val dx = (BUBBLE_RADIUS_DP * kotlin.math.cos(rad)).toFloat() * grow
             val dy = (BUBBLE_RADIUS_DP * kotlin.math.sin(rad)).toFloat() * grow
@@ -296,11 +305,17 @@ internal fun BubbleRing(
                         y = (centerY - BUBBLE_DIAMETER_DP / 2f).dp,
                     )
                     .width(BUBBLE_CELL_WIDTH_DP.dp)
-                    .scale(0.4f + 0.6f * visible)
-                    .alpha(visible)
-                    // 위 버블이 먼저 그려지면 아래 버블에 이름표가 가려진다: 위쪽이 앞, 누르고 있는 버블은 맨 앞.
-                    .zIndex(if (pressed) bubbles.size.toFloat() + 1f else (bubbles.size - index).toFloat())
-                    .pressable(interactionSource = pressSource) { bubble.onClick() },
+                    // 알파를 겹쳐 그리는 레이어로 처리하면 이름표가 칸 밖에서 잘린다: 요소마다 따로 알파를 준다.
+                    .graphicsLayer {
+                        val s = (0.4f + 0.6f * visible) * liftScale
+                        scaleX = s
+                        scaleY = s
+                        alpha = visible
+                        compositingStrategy = CompositingStrategy.ModulateAlpha
+                    }
+                    // 위 버블이 먼저 그려지면 아래 버블에 이름표가 가려진다: 위쪽이 앞, 누르거나 손가락이 올라간 버블은 맨 앞.
+                    .zIndex(if (lifted) bubbles.size.toFloat() + 1f else (bubbles.size - index).toFloat())
+                    .clickable(interactionSource = pressSource, indication = null, role = Role.Button) { bubble.onClick() },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(

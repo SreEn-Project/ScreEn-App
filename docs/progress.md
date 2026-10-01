@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 버블 — 손가락 올리면 앞으로 · 끌었다 놓으면 선택 · 이름표 잘림 수정 (NA-18, 이슈 #31, 브랜치 `feat/31-bubble-hover-select`)
+- #30(`feat/29-auto-translate-responsive`) 위에 쌓았다 (버블 코드가 아직 develop에 없음).
+- 길게 누른 채 손가락을 버블 위로 옮기면 그 버블이 이름표와 함께 맨 앞으로 올라오고 커진다. 그 위에서 떼면 눌린 것으로 처리 (`ButtonGestures.onHold` · `onHoldRelease`, `OverlayGeometry.bubbleHit`, 판정 반경 34dp).
+- 이름표 잘림: 버블 칸에 알파 < 1(눌림 0.85)을 주면 Compose가 칸 크기 오프스크린 레이어로 그려 칸보다 넓은 이름표가 잘렸다 → `graphicsLayer` + `CompositingStrategy.ModulateAlpha`로 바꾸고 눌림은 크기만 바꾼다.
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트(버블 위 판정) 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
+- 남은 일: 기기에서 ① 길게 눌러 손가락을 버블로 옮길 때 앞으로 올라오는지 ② 떼면 해당 메뉴가 열리는지 ③ 눌렀다 떼도 이름표가 안 잘리는지.
+
 ## 2026-10-01 · 자동 번역 반응성 — 이전 결과 숨김 · 바로 번역 · 번역 중 취소 (NA-26, 이슈 #29, 브랜치 `feat/29-auto-translate-responsive`)
 - #28(`feat/27-settings-bubble`) 위에 쌓았다 (자동 번역 코드가 아직 develop에 없음). 설계는 D-034.
 - 설정 "자동 번역"에 **이전 번역 숨김 시간**(바로 · 0.5 · 1 · 2초 · 안 숨김) 추가, **조작 뒤 번역까지 기다리는 시간**에 "바로" 선택지(0) 추가, 확인 간격에 0.5초 추가.
