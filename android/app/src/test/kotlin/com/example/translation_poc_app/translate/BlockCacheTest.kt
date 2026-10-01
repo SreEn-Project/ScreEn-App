@@ -113,4 +113,14 @@ class BlockCacheTest {
         val retried = pipeline.translateAll(engine, listOf(TranslationRequest("New", "en", "ko"))) {}
         assertEquals("번역:New", (retried.single() as EngineResult.Ok).value.text)
     }
+
+    @Test
+    fun `블록이 끝날 때마다 진행을 알린다`() = runTest {
+        val engine = CountingEngine()
+        val seen = mutableListOf<Int>()
+        val requests = listOf(TranslationRequest("A1", "en", "ko"), TranslationRequest("B1", "en", "ko"))
+        pipeline.translateAll(engine, requests, onProgress = { seen += it.count { r -> r != null } }) {}
+        // 하나 끝난 중간 상태만 알린다 (전부 끝나면 최종 결과가 반환값으로 온다).
+        assertEquals(listOf(1), seen)
+    }
 }

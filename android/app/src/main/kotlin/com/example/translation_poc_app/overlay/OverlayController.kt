@@ -266,7 +266,12 @@ class OverlayController(
             // 버튼이 캡처에 찍히지 않도록 숨긴다. 캡처 쪽이 숨긴 뒤의 새 프레임을 기다린다.
             button.root.visibility = View.INVISIBLE
             val outcome = try {
-                pipeline.run(region, onCaptured = { button.root.visibility = View.VISIBLE })
+                pipeline.run(
+                    region,
+                    onCaptured = { button.root.visibility = View.VISIBLE },
+                    // 끝난 블록부터 먼저 보여 준다 (#41). 마지막에 전체 결과로 바뀐다.
+                    onPartial = { partial -> showSheet(partial) },
+                )
             } finally {
                 button.root.visibility = View.VISIBLE
                 busy = false

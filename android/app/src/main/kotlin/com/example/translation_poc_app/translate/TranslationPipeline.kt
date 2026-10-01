@@ -99,8 +99,13 @@ class TranslationPipeline(
     /**
      * @param region 이 영역만 번역한다 (NA-07). null이면 화면 전체.
      * @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때.
+     * @param onPartial 번역이 일부만 끝났을 때 끝난 블록만 담아 부른다 (#41). 마지막 결과는 반환값으로 온다.
      */
-    suspend fun run(region: NormalizedRegion? = null, onCaptured: () -> Unit = {}): TranslationOutcome {
+    suspend fun run(
+        region: NormalizedRegion? = null,
+        onCaptured: () -> Unit = {},
+        onPartial: (TranslationOutcome.Translated) -> Unit = {},
+    ): TranslationOutcome {
         var mark = clock()
         fun lap(): Long = clock().let { now -> (now - mark).also { mark = now } }
         val shot = try {
@@ -141,12 +146,8 @@ class TranslationPipeline(
             val detectMs = lap()
             val engine = engineFor(current)
             val requests = TranslationAssembler.requests(detected, current.targetLanguage)
-            val results = translateAll(engine, requests) { cached++ }
-            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size, cached))
-            TranslationAssembler.assemble(
-                detected, results, engine.id, current.targetLanguage,
-                lineHeightOf = { block -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } },
-                boundsOf = { block ->
+            val lineHeight = { block: OcrBlock -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } }
+            val bounds = { block: OcrBlock ->
                 block.bounds?.let {
                     val dx = origin?.left ?: 0
                     val dy = origin?.top ?: 0
@@ -156,7 +157,16 @@ class TranslationPipeline(
                         screenHeight,
                     )
                 }
-                },
+            }
+            val results = translateAll(engine, requests, onProgress = { partial ->
+                TranslationAssembler.assemblePartial(detected, partial, engine.id, current.targetLanguage, lineHeight, bounds)
+                    ?.let(onPartial)
+            }) { cached++ }
+            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size, cached))
+            TranslationAssembler.assemble(
+                detected, results, engine.id, current.targetLanguage,
+                lineHeightOf = lineHeight,
+                boundsOf = bounds,
             )
         } catch (e: CancellationException) {
             throw e
@@ -193,17 +203,26 @@ class TranslationPipeline(
     internal suspend fun translateAll(
         engine: TranslationEngine,
         requests: List<TranslationRequest>,
+        /** 블록이 하나 끝날 때마다 (요청 순서, 아직 안 끝난 칸은 null). 번역을 부른 코루틴의 스레드에서 불린다. */
+        onProgress: (List<EngineResult<TranslationResult>?>) -> Unit = {},
         onHit: () -> Unit,
     ): List<EngineResult<TranslationResult>> = coroutineScope {
-        requests.map { request ->
-            val key = TranslationKey(engine.id, request.text, request.source, request.target)
-            val hit = translations[key]
-            if (hit != null) {
+        val done = arrayOfNulls<EngineResult<TranslationResult>>(requests.size)
+        val keys = requests.map { TranslationKey(engine.id, it.text, it.source, it.target) }
+        keys.forEachIndexed { i, key ->
+            translations[key]?.let {
                 onHit()
-                async<EngineResult<TranslationResult>> { EngineResult.Ok(hit) }
-            } else {
-                async<EngineResult<TranslationResult>> {
-                    engine.translate(request).also { if (it is EngineResult.Ok) translations[key] = it.value }
+                done[i] = EngineResult.Ok(it)
+            }
+        }
+        // 캐시로 일부만 채워졌으면 그것부터 보여 준다.
+        if (done.any { it == null } && done.any { it != null }) onProgress(done.toList())
+        requests.mapIndexed { i, request ->
+            async<EngineResult<TranslationResult>> {
+                done[i] ?: engine.translate(request).also {
+                    if (it is EngineResult.Ok) translations[keys[i]] = it.value
+                    done[i] = it
+                    if (done.any { r -> r == null }) onProgress(done.toList())
                 }
             }
         }.awaitAll()
@@ -244,6 +263,26 @@ object TranslationAssembler {
     fun requests(detected: List<DetectedBlock>, targetLanguage: String): List<TranslationRequest> =
         detected.filter { it.decision.action == BlockAction.TRANSLATE }
             .map { TranslationRequest(sourceText(it.block, it.decision.language), it.decision.language, targetLanguage) }
+
+    /**
+     * 번역이 일부만 끝난 중간 결과 (#41). [results]는 번역할 블록 순서이고 안 끝난 칸은 null — 그 블록은 뺀다.
+     * 번역이 끝난 항목이 아직 없으면 null.
+     */
+    fun assemblePartial(
+        detected: List<DetectedBlock>,
+        results: List<EngineResult<TranslationResult>?>,
+        engine: EngineId,
+        targetLanguage: String,
+        lineHeightOf: (OcrBlock) -> Float? = { null },
+        boundsOf: (OcrBlock) -> NormalizedRegion? = { null },
+    ): TranslationOutcome.Translated? {
+        var index = 0
+        val ready = detected.filter {
+            it.decision.action != BlockAction.TRANSLATE || results.getOrNull(index++) != null
+        }
+        val outcome = assemble(ready, results.filterNotNull(), engine, targetLanguage, lineHeightOf, boundsOf)
+        return (outcome as? TranslationOutcome.Translated)?.takeIf { o -> o.items.any { it.translated != null } }
+    }
 
     fun assemble(
         detected: List<DetectedBlock>,

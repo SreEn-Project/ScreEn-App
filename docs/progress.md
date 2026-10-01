@@ -2,6 +2,12 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 번역 점진 표시 (NA-11, 이슈 #41, 브랜치 `feat/41-progressive-display`)
+- 수동 번역이 모든 블록이 끝나야 뜨던 것을, 끝난 블록부터 먼저 보여 주고 마지막에 전체 결과로 바꾼다 (translation.md 개선 계획 2번).
+- `TranslationPipeline`: `run(onPartial)` 추가, `translateAll(onProgress)`가 블록이 끝날 때마다 알림, `TranslationAssembler.assemblePartial`(안 끝난 블록은 뺌). `OverlayController.translate`가 부분 결과를 시트로 띄움. 자동 번역은 표시 시점 규칙(D-036) 때문에 제외.
+- 테스트 2개 추가. analyze · test · debug 빌드 통과. 기기 확인 전 (블록이 많은 화면에서 먼저 뜨는지, 시트 교체 깜박임).
+- 다음: 바뀐 영역만 다시 인식 → 인식 후처리.
+
 ## 2026-10-02 · 번역 기능 문서 (이슈 #39, 브랜치 `docs/39-translation-doc`)
 - [translation.md](translation.md) 추가: 파이프라인 현황, 캐시 방침, 개선 계획. AI 번역은 API 키가 필요해 보류로 기록.
 - 다음: 단계별 시간 측정 → 점진 표시.

@@ -135,4 +135,17 @@ class TranslationAssemblerTest {
         )
         assertEquals(TranslationOutcome.Failed("번역 결과 수가 맞지 않음 (1 → 0)"), outcome)
     }
+
+    @Test
+    fun `중간 결과는 끝난 블록만 화면 순서대로 담고 아직 없으면 null`() {
+        val blocks = listOf(
+            detected(BlockAction.TRANSLATE, "en", "Hello"),
+            detected(BlockAction.SKIP_SAME_AS_TARGET, "ko", "안녕"),
+            detected(BlockAction.TRANSLATE, "ja", "ありがとう"),
+        )
+        assertEquals(null, TranslationAssembler.assemblePartial(blocks, listOf(null, null), EngineId.ML_KIT, "ko"))
+        val partial = TranslationAssembler.assemblePartial(blocks, listOf(null, ok("고마워", "ja")), EngineId.ML_KIT, "ko")!!
+        assertEquals(listOf("ありがとう"), partial.items.map { it.original })
+        assertEquals(1, partial.skipped)
+    }
 }
