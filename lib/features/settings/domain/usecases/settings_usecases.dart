@@ -108,6 +108,18 @@ final class ChangeAutoSettle implements UseCase<void, int> {
       _repository.setAutoSettleMs(nearestChoice(autoSettleChoicesMs, ms));
 }
 
+/// 자동 번역 이전 결과 숨김 시간 변경 (#29). 음수는 "숨기지 않음", 나머지는 가장 가까운 선택지로 맞춘다.
+final class ChangeAutoHide implements UseCase<void, int> {
+  const ChangeAutoHide(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(int ms) => _repository.setAutoHideMs(
+    ms < 0 ? autoHideNever : nearestChoice(autoHideChoicesMs.sublist(0, 4), ms),
+  );
+}
+
 /// 온보딩을 마쳤다고 기록 (FL-01). 다음 실행부터 온보딩을 건너뛴다.
 final class CompleteOnboarding implements NoParamsUseCase<void> {
   const CompleteOnboarding(this._repository);

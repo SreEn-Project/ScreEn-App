@@ -34,6 +34,8 @@ class SettingsNativeDataSource {
 
   Future<void> setAutoSettleMs(int ms) => _api.setAutoSettleMs(ms);
 
+  Future<void> setAutoHideMs(int ms) => _api.setAutoHideMs(ms);
+
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);
 }

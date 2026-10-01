@@ -293,6 +293,11 @@ class _AutoTranslateSection extends ConsumerWidget {
     final viewModel = ref.read(autoTranslateViewModelProvider.notifier);
     String seconds(int ms) =>
         l10n.secondsShort((ms / 1000).toStringAsFixed(ms % 1000 == 0 ? 0 : 1));
+    // 0은 "바로", 숨김 시간의 음수는 "안 숨김".
+    String instantOr(int ms) =>
+        ms == 0 ? l10n.settingsAutoInstant : seconds(ms);
+    String hideLabel(int ms) =>
+        ms == autoHideNever ? l10n.settingsAutoNever : instantOr(ms);
 
     return AppSection(
       title: l10n.settingsSectionAuto,
@@ -328,15 +333,31 @@ class _AutoTranslateSection extends ConsumerWidget {
               ),
               const AppDivider(),
               _Labeled(
+                label: l10n.settingsAutoHide,
+                value: hideLabel(settings.hideMs),
+                child: AppSegmented<int>(
+                  values: autoHideChoicesMs,
+                  selected: settings.hideMs < 0
+                      ? autoHideNever
+                      : nearestChoice(
+                          autoHideChoicesMs.sublist(0, 4),
+                          settings.hideMs,
+                        ),
+                  label: hideLabel,
+                  onChanged: viewModel.setHide,
+                ),
+              ),
+              const AppDivider(),
+              _Labeled(
                 label: l10n.settingsAutoSettle,
-                value: seconds(settings.settleMs),
+                value: instantOr(settings.settleMs),
                 child: AppSegmented<int>(
                   values: autoSettleChoicesMs,
                   selected: nearestChoice(
                     autoSettleChoicesMs,
                     settings.settleMs,
                   ),
-                  label: seconds,
+                  label: instantOr,
                   onChanged: viewModel.setSettle,
                 ),
               ),

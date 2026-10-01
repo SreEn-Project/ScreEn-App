@@ -8,18 +8,18 @@ part of 'auto_translate_view_model.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기. 네이티브 설정(DataStore)이 원본이라
+/// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기 · 이전 결과 숨김. 네이티브 설정(DataStore)이 원본이라
 /// 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
 
 @ProviderFor(AutoTranslateViewModel)
 final autoTranslateViewModelProvider = AutoTranslateViewModelProvider._();
 
-/// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기. 네이티브 설정(DataStore)이 원본이라
+/// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기 · 이전 결과 숨김. 네이티브 설정(DataStore)이 원본이라
 /// 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
 final class AutoTranslateViewModelProvider
     extends
         $StreamNotifierProvider<AutoTranslateViewModel, AutoTranslateSettings> {
-  /// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기. 네이티브 설정(DataStore)이 원본이라
+  /// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기 · 이전 결과 숨김. 네이티브 설정(DataStore)이 원본이라
   /// 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
   AutoTranslateViewModelProvider._()
     : super(
@@ -41,9 +41,9 @@ final class AutoTranslateViewModelProvider
 }
 
 String _$autoTranslateViewModelHash() =>
-    r'587785b878e10e1da7a73cfdfb13e58cd46a6682';
+    r'589d7c4d41bb9bd9987f50aeab83f0051f0f4ab7';
 
-/// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기. 네이티브 설정(DataStore)이 원본이라
+/// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기 · 이전 결과 숨김. 네이티브 설정(DataStore)이 원본이라
 /// 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
 
 abstract class _$AutoTranslateViewModel

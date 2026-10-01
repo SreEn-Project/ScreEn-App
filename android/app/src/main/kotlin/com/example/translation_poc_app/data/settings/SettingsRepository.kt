@@ -48,6 +48,9 @@ class SettingsRepository(context: Context) {
     suspend fun setAutoSettleMs(ms: Long) =
         edit { it[Keys.AUTO_SETTLE] = ms.coerceIn(Settings.AUTO_SETTLE_RANGE_MS) }
 
+    suspend fun setAutoHideMs(ms: Long) =
+        edit { it[Keys.AUTO_HIDE] = Settings.normalizeAutoHide(ms) }
+
     suspend fun setSourceLanguage(code: String) = edit { it[Keys.SOURCE_LANGUAGE] = code }
 
     suspend fun setOnboardingCompleted(completed: Boolean) =
@@ -75,6 +78,7 @@ class SettingsRepository(context: Context) {
                 .coerceIn(Settings.AUTO_CHECK_INTERVAL_RANGE_MS),
             autoSettleMs = (this[Keys.AUTO_SETTLE] ?: defaults.autoSettleMs)
                 .coerceIn(Settings.AUTO_SETTLE_RANGE_MS),
+            autoHideMs = Settings.normalizeAutoHide(this[Keys.AUTO_HIDE] ?: defaults.autoHideMs),
             sourceLanguage = this[Keys.SOURCE_LANGUAGE]?.takeIf { it.isNotBlank() } ?: defaults.sourceLanguage,
         )
     }
@@ -94,6 +98,7 @@ class SettingsRepository(context: Context) {
         val AUTO_TRANSLATE = booleanPreferencesKey("auto_translate")
         val AUTO_CHECK_INTERVAL = longPreferencesKey("auto_check_interval_ms")
         val AUTO_SETTLE = longPreferencesKey("auto_settle_ms")
+        val AUTO_HIDE = longPreferencesKey("auto_hide_ms")
         val SOURCE_LANGUAGE = stringPreferencesKey("source_language")
     }
 }

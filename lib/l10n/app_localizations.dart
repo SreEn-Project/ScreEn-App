@@ -761,8 +761,26 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAutoSettle.
   ///
   /// In en, this message translates to:
-  /// **'Wait after the screen stops'**
+  /// **'Wait after you stop interacting'**
   String get settingsAutoSettle;
+
+  /// No description provided for @settingsAutoHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the old translation after the screen changes'**
+  String get settingsAutoHide;
+
+  /// No description provided for @settingsAutoInstant.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get settingsAutoInstant;
+
+  /// No description provided for @settingsAutoNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get settingsAutoNever;
 
   /// No description provided for @secondsShort.
   ///

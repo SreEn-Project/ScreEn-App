@@ -18,6 +18,7 @@ fun Settings.toPigeon() = AppSettings(
     autoTranslate = autoTranslate,
     autoCheckIntervalMs = autoCheckIntervalMs,
     autoSettleMs = autoSettleMs,
+    autoHideMs = autoHideMs,
 )
 
 fun Engine.toPigeon() = when (this) {

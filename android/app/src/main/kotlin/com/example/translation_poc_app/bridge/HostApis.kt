@@ -29,6 +29,8 @@ class SettingsHostApiImpl(private val repository: SettingsRepository) : Settings
 
     override suspend fun setAutoSettleMs(ms: Long) = repository.setAutoSettleMs(ms)
 
+    override suspend fun setAutoHideMs(ms: Long) = repository.setAutoHideMs(ms)
+
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)
 }

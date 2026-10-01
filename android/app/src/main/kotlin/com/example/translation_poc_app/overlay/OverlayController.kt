@@ -82,6 +82,7 @@ class OverlayController(
     private var autoConfig = AutoTranslateConfig(
         com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_CHECK_INTERVAL_MS,
         com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_SETTLE_MS,
+        com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_HIDE_MS,
     )
     private var autoTranslate = false
     private var sourceLanguage by mutableStateOf(AppSettings.SOURCE_LANGUAGE_AUTO)
@@ -95,11 +96,15 @@ class OverlayController(
     /** 결과가 터치를 통과시키는 '원문 위에 덮기'로 떠 있다 (자동 번역 중). 버튼을 누르면 닫는다. */
     private var passthrough = false
 
+    /** 화면이 바뀌어서 낡은 결과를 숨기는 중이다 (자동 번역, #29). 새 결과가 뜨면 풀린다. */
+    private var staleHidden = false
+
     private val watcher = AutoTranslateWatcher(
         scope = scope,
         sample = { withContext(Dispatchers.Default) { sampleSignature(lastRegion) } },
         config = { autoConfig },
         translate = ::autoTranslateOnce,
+        setStale = ::setStaleHidden,
     )
     private val screenOffReceiver = object : BroadcastReceiver() {
         // 화면이 꺼지거나 절전 모드가 켜지면 감시를 멈춘다 (배터리). 다음 번역 때 다시 시작한다.
@@ -168,7 +173,7 @@ class OverlayController(
                 quickLanguages = it.quickLanguages
                 autoTranslate = it.autoTranslate
                 sourceLanguage = it.sourceLanguage
-                autoConfig = AutoTranslateConfig(it.autoCheckIntervalMs, it.autoSettleMs)
+                autoConfig = AutoTranslateConfig(it.autoCheckIntervalMs, it.autoSettleMs, it.autoHideMs)
                 if (!autoTranslate) watcher.stop()
             }
         }
@@ -260,25 +265,43 @@ class OverlayController(
         val old = sheet
         old?.root?.visibility = View.INVISIBLE
         button.root.visibility = View.INVISIBLE
+        // 사용자가 또 조작해서 감시가 이 번역을 취소하면 finally만 돌고 결과는 버려진다.
         val outcome = try {
             pipeline.run(lastRegion, onCaptured = {
                 button.root.visibility = View.VISIBLE
-                old?.root?.visibility = View.VISIBLE
+                old?.root?.visibility = sheetVisibility()
+                watcher.markCaptured()
             })
         } finally {
             button.root.visibility = View.VISIBLE
-            old?.root?.visibility = View.VISIBLE
+            old?.root?.visibility = sheetVisibility()
             busy = false
         }
         logOutcome(outcome)
         when (outcome) {
-            is TranslationOutcome.Translated -> if (outcome.items != shownItems) showSheet(outcome)
+            is TranslationOutcome.Translated -> if (outcome.items != shownItems) {
+                showSheet(outcome)
+            } else {
+                // 같은 결과가 다시 맞는다: 숨겼던 것을 다시 보인다.
+                staleHidden = false
+                sheet?.root?.visibility = View.VISIBLE
+            }
             // 번역할 글이 없어졌다: 낡은 결과를 걷는다. 감시는 계속한다.
             TranslationOutcome.NoText, is TranslationOutcome.AlreadyInTarget -> removeSheet()
             // 보안 화면 · 실패: 있던 결과를 그대로 둔다.
             else -> Unit
         }
         return true
+    }
+
+    private fun sheetVisibility() = if (staleHidden) View.INVISIBLE else View.VISIBLE
+
+    /** 자동 번역 감시가 부른다: 화면이 바뀌어 낡은 결과를 숨기거나(true), 바뀐 화면이 번역한 화면으로 돌아와 다시 보인다(false). */
+    private fun setStaleHidden(hidden: Boolean) {
+        if (staleHidden == hidden) return
+        staleHidden = hidden
+        // 번역 중이면 번역이 끝날 때 이 상태로 맞춘다 (캡처에 안 찍히게 이미 숨겨 둔 상태일 수 있다).
+        if (!busy) sheet?.root?.visibility = sheetVisibility()
     }
 
     private fun onDragStart() {
@@ -546,6 +569,7 @@ class OverlayController(
 
     private fun showSheet(outcome: TranslationOutcome) {
         removeSheet()
+        staleHidden = false
         // 원문 위에 덮기(NA-22): 자리를 아는 번역 항목이 하나라도 있으면 막으로, 없으면 목록 시트로.
         val overItems = if (display == ResultDisplay.OVERLAY && outcome is TranslationOutcome.Translated) {
             overlayItems(outcome.items)
@@ -591,6 +615,7 @@ class OverlayController(
     /** 결과 창만 걷는다. 자동 번역이 결과를 바꿀 때는 감시를 멈추지 않는다. */
     private fun removeSheet() {
         passthrough = false
+        staleHidden = false
         shownItems = null
         val current = sheet ?: return
         sheet = null

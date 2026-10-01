@@ -122,4 +122,54 @@ class AutoTranslateTrackerTest {
         repeat(60) { t.onSample(screen(), 1_000L + it) }
         assertEquals(8_000, t.nextDelayMs())
     }
+
+    @Test
+    fun `바로 번역(대기 0)은 움직임이 멈춘 걸 본 즉시 번역한다`() {
+        val c = AutoTranslateConfig(checkIntervalMs = 500, settleMs = 0)
+        assertEquals(0L, c.minTranslateGapMs)
+        val t = AutoTranslateTracker { c }.also { it.onTranslated(0) }
+        t.onSample(screen(), 1_000)
+        assertEquals(Decision.WAIT, t.onSample(changed(0.3f), 1_500)) // 아직 움직이는 중
+        assertEquals(Decision.WAIT, t.onSample(changed(0.5f), 2_000)) // 또 움직임
+        assertEquals(Decision.TRANSLATE, t.onSample(changed(0.5f), 2_500)) // 멈춤 → 바로
+    }
+
+    @Test
+    fun `이전 결과 숨김은 바뀐 걸 안 뒤 숨김 시간이 지나면 true, 기준으로 돌아오면 false`() {
+        val c = AutoTranslateConfig(checkIntervalMs = 500, settleMs = 5_000, hideMs = 1_000)
+        val t = AutoTranslateTracker { c }.also { it.onTranslated(0) }
+        t.onSample(screen(), 1_000)
+        assertFalse(t.isStale(1_000))
+        t.onSample(changed(0.3f), 2_000)
+        assertFalse(t.isStale(2_500))
+        assertTrue(t.isStale(3_000))
+        t.onSample(screen(), 3_500)
+        assertFalse(t.isStale(4_000))
+    }
+
+    @Test
+    fun `숨김 시간 0은 바뀐 걸 안 즉시 숨기고, 음수는 숨기지 않는다`() {
+        val now = AutoTranslateTracker { AutoTranslateConfig(500, 5_000, hideMs = 0) }.also { it.onTranslated(0) }
+        now.onSample(screen(), 1_000)
+        now.onSample(changed(0.3f), 2_000)
+        assertTrue(now.isStale(2_000))
+
+        val never = AutoTranslateTracker { AutoTranslateConfig(500, 5_000, hideMs = -1) }.also { it.onTranslated(0) }
+        never.onSample(screen(), 1_000)
+        never.onSample(changed(0.3f), 2_000)
+        assertFalse(never.isStale(60_000))
+    }
+
+    @Test
+    fun `번역을 취소하면 안정 대기를 그 시점부터 다시 센다`() {
+        val c = AutoTranslateConfig(checkIntervalMs = 500, settleMs = 1_000, minTranslateGapMs = 0)
+        val t = AutoTranslateTracker { c }.also { it.onTranslated(0) }
+        t.onSample(screen(), 1_000)
+        t.onSample(changed(0.3f), 2_000)
+        t.onSample(changed(0.3f), 3_000) // 안정 → 번역 시작
+        t.observe(changed(0.6f)) // 번역 중 또 바뀜
+        t.onCanceled(3_500)
+        assertEquals(Decision.WAIT, t.onSample(changed(0.6f), 4_000)) // 500 < 1000
+        assertEquals(Decision.TRANSLATE, t.onSample(changed(0.6f), 4_500))
+    }
 }

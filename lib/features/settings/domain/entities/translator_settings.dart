@@ -19,10 +19,17 @@ const minQuickLanguages = 1;
 const maxQuickLanguages = 8;
 
 /// 자동 번역(#23) 화면 확인 간격 · 안정 대기 선택지 (ms). 네이티브 `Settings`의 범위 안이다.
-const defaultAutoCheckIntervalMs = 2000;
-const autoCheckIntervalChoicesMs = [1000, 2000, 3000, 5000];
-const defaultAutoSettleMs = 1000;
-const autoSettleChoicesMs = [500, 1000, 1500, 2000];
+const defaultAutoCheckIntervalMs = 1000;
+const autoCheckIntervalChoicesMs = [500, 1000, 2000, 3000, 5000];
+
+/// 0 = 조작이 끝나면 바로 번역.
+const defaultAutoSettleMs = 0;
+const autoSettleChoicesMs = [0, 500, 1000, 1500, 2000];
+
+/// 화면이 바뀐 뒤 이전 결과를 숨기기까지의 시간. 0 = 바로, [autoHideNever] = 새 결과가 뜰 때까지 둔다.
+const autoHideNever = -1;
+const defaultAutoHideMs = 0;
+const autoHideChoicesMs = [0, 500, 1000, 2000, autoHideNever];
 
 /// [choices] 중 [value]에 가장 가까운 값.
 int nearestChoice(List<int> choices, int value) =>
@@ -48,7 +55,10 @@ abstract class TranslatorSettings with _$TranslatorSettings {
     /// 자동 번역의 화면 확인 간격 (ms). 짧을수록 열 · 배터리를 더 쓴다.
     @Default(defaultAutoCheckIntervalMs) int autoCheckIntervalMs,
 
-    /// 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms).
+    /// 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms). 0 = 바로.
     @Default(defaultAutoSettleMs) int autoSettleMs,
+
+    /// 화면이 바뀐 뒤 이전 결과를 숨기기까지의 시간 (ms). [autoHideNever] = 숨기지 않음.
+    @Default(defaultAutoHideMs) int autoHideMs,
   }) = _TranslatorSettings;
 }

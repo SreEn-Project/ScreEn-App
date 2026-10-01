@@ -350,7 +350,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAutoInterval => '화면 확인 간격 (길수록 배터리 절약)';
 
   @override
-  String get settingsAutoSettle => '멈춘 뒤 기다리는 시간';
+  String get settingsAutoSettle => '조작이 끝난 뒤 번역까지 기다리는 시간';
+
+  @override
+  String get settingsAutoHide => '화면이 바뀌면 이전 번역을 숨기기까지';
+
+  @override
+  String get settingsAutoInstant => '바로';
+
+  @override
+  String get settingsAutoNever => '안 숨김';
 
   @override
   String secondsShort(String value) {

@@ -59,5 +59,9 @@ ChangeAutoSettle changeAutoSettle(Ref ref) =>
     ChangeAutoSettle(ref.watch(settingsRepositoryProvider));
 
 @riverpod
+ChangeAutoHide changeAutoHide(Ref ref) =>
+    ChangeAutoHide(ref.watch(settingsRepositoryProvider));
+
+@riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));

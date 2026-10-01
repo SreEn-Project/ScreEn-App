@@ -362,7 +362,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Screen check interval (longer saves battery)';
 
   @override
-  String get settingsAutoSettle => 'Wait after the screen stops';
+  String get settingsAutoSettle => 'Wait after you stop interacting';
+
+  @override
+  String get settingsAutoHide =>
+      'Hide the old translation after the screen changes';
+
+  @override
+  String get settingsAutoInstant => 'Now';
+
+  @override
+  String get settingsAutoNever => 'Never';
 
   @override
   String secondsShort(String value) {

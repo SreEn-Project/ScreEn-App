@@ -14,5 +14,6 @@ abstract interface class SettingsRepository {
   Future<void> setAutoTranslate(bool enabled);
   Future<void> setAutoCheckIntervalMs(int ms);
   Future<void> setAutoSettleMs(int ms);
+  Future<void> setAutoHideMs(int ms);
   Future<void> setOnboardingCompleted(bool completed);
 }

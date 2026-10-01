@@ -19,6 +19,7 @@ void main() {
     when(() => repository.setAutoCheckIntervalMs(any()))
         .thenAnswer((_) async {});
     when(() => repository.setAutoSettleMs(any())).thenAnswer((_) async {});
+    when(() => repository.setAutoHideMs(any())).thenAnswer((_) async {});
     container = ProviderContainer(
       overrides: [settingsRepositoryProvider.overrideWithValue(repository)],
     );
@@ -38,8 +39,8 @@ void main() {
     final s = await ready();
 
     expect(s.enabled, isFalse);
-    expect(s.checkIntervalMs, 2000);
-    expect(s.settleMs, 1000);
+    expect(s.checkIntervalMs, 1000);
+    expect(s.settleMs, 0);
   });
 
   test('저장된 값을 보여 준다', () async {
@@ -72,9 +73,13 @@ void main() {
 
     await viewModel.setCheckInterval(2400);
     await viewModel.setSettle(10000);
+    await viewModel.setHide(-5);
+    await viewModel.setHide(700);
 
     verify(() => repository.setAutoCheckIntervalMs(2000)).called(1);
     verify(() => repository.setAutoSettleMs(2000)).called(1);
+    verify(() => repository.setAutoHideMs(autoHideNever)).called(1);
+    verify(() => repository.setAutoHideMs(500)).called(1);
   });
 
   test('nearestChoice는 가까운 값을 고르고 같은 거리면 앞쪽을 고른다', () {

@@ -38,6 +38,7 @@ class AppSettings {
     required this.autoTranslate,
     required this.autoCheckIntervalMs,
     required this.autoSettleMs,
+    required this.autoHideMs,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -56,8 +57,11 @@ class AppSettings {
   /// 자동 번역의 화면 확인 간격 (ms).
   int autoCheckIntervalMs;
 
-  /// 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms).
+  /// 화면이 멈춘 뒤 번역하기까지 기다리는 시간 (ms). 0 = 조작이 끝나면 바로.
   int autoSettleMs;
+
+  /// 화면이 바뀐 뒤 이전 결과를 숨기기까지의 시간 (ms). 0 = 바로, -1 = 새 결과가 뜰 때까지 둔다.
+  int autoHideMs;
 }
 
 @HostApi()
@@ -88,6 +92,9 @@ abstract class SettingsHostApi {
 
   @async
   void setAutoSettleMs(int ms);
+
+  @async
+  void setAutoHideMs(int ms);
 
   @async
   void setOnboardingCompleted(bool completed);

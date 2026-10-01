@@ -1,6 +1,8 @@
 package com.example.translation_poc_app.autotranslate
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.currentTime
@@ -80,6 +82,58 @@ class AutoTranslateWatcherTest {
         w.arm()
         advanceTimeBy(20_000)
         assertEquals(0, translated)
+        w.stop()
+    }
+
+    @Test
+    fun `번역 중 캡처한 뒤 화면이 또 바뀌면 그 번역을 취소하고 조작이 끝나면 다시 번역한다`() = runTest {
+        var screen = still
+        var started = 0
+        var finished = 0
+        var cancelled = 0
+        lateinit var w: AutoTranslateWatcher
+        val fast = AutoTranslateConfig(checkIntervalMs = 500, settleMs = 0)
+        w = AutoTranslateWatcher(this, { screen }, { fast }, {
+            started++
+            try {
+                w.markCaptured()
+                delay(10_000) // 오래 걸리는 번역
+                finished++
+                true
+            } catch (e: CancellationException) {
+                cancelled++
+                throw e
+            }
+        }, clock = { currentTime })
+        w.arm()
+        advanceTimeBy(5_000)
+        screen = scrolled // 조작 → 바로 번역 시작
+        advanceTimeBy(2_000)
+        assertEquals(1, started)
+        screen = IntArray(size) { if (it % 3 == 0) 220 else 90 } // 번역 중 또 조작
+        advanceTimeBy(1_500)
+        assertEquals(1, cancelled)
+        assertEquals(0, finished)
+        advanceTimeBy(1_500) // 조작이 끝났다 → 바로 다시 번역
+        assertEquals(2, started)
+        w.stop()
+    }
+
+    @Test
+    fun `화면이 바뀌면 숨김 시간 뒤 낡은 결과를 숨기고 새 번역이 끝나면 숨김 상태를 알리지 않는다`() = runTest {
+        var screen = still
+        val events = mutableListOf<Boolean>()
+        val cfg = AutoTranslateConfig(checkIntervalMs = 500, settleMs = 60_000, hideMs = 1_000)
+        val w = AutoTranslateWatcher(this, { screen }, { cfg }, { true }, { events += it }, { currentTime })
+        w.arm()
+        advanceTimeBy(5_000)
+        assertTrue(events.isEmpty())
+        screen = scrolled
+        advanceTimeBy(3_000)
+        assertEquals(listOf(true), events)
+        screen = still // 번역한 화면으로 돌아옴 → 다시 보임
+        advanceTimeBy(3_000)
+        assertEquals(listOf(true, false), events)
         w.stop()
     }
 }

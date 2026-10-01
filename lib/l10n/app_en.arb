@@ -129,7 +129,10 @@
   "settingsAutoTranslate": "Translate automatically when the screen changes",
   "settingsAutoTranslateDetail": "After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.",
   "settingsAutoInterval": "Screen check interval (longer saves battery)",
-  "settingsAutoSettle": "Wait after the screen stops",
+  "settingsAutoSettle": "Wait after you stop interacting",
+  "settingsAutoHide": "Hide the old translation after the screen changes",
+  "settingsAutoInstant": "Now",
+  "settingsAutoNever": "Never",
   "secondsShort": "{value}s",
   "@secondsShort": {
     "placeholders": {

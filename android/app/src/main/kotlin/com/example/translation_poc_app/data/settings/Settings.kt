@@ -27,8 +27,10 @@ data class Settings(
     val autoTranslate: Boolean = false,
     /** 자동 번역의 화면 확인 간격 (ms). 짧을수록 빨리 따라가지만 열 · 배터리를 더 쓴다. */
     val autoCheckIntervalMs: Long = DEFAULT_AUTO_CHECK_INTERVAL_MS,
-    /** 화면이 바뀐 뒤 멈추고 이만큼 기다렸다가 번역한다 (ms). */
+    /** 화면이 바뀐 뒤 멈추고 이만큼 기다렸다가 번역한다 (ms). 0 = 조작이 끝나면 바로. */
     val autoSettleMs: Long = DEFAULT_AUTO_SETTLE_MS,
+    /** 화면이 바뀐 걸 안 뒤 이전 결과를 숨기기까지의 시간 (ms). 0 = 바로, [AUTO_HIDE_NEVER] = 새 결과가 뜰 때까지 둔다. */
+    val autoHideMs: Long = DEFAULT_AUTO_HIDE_MS,
     /** 문자 인식 언어 ([SOURCE_LANGUAGE_AUTO] = 자동 판별). 플로팅 버튼 '빠른 언어' 버블에서 바꾼다. 네이티브 전용 (Pigeon 없음). */
     val sourceLanguage: String = SOURCE_LANGUAGE_AUTO,
 ) {
@@ -36,11 +38,17 @@ data class Settings(
         const val DEFAULT_TARGET_LANGUAGE = "ko"
         const val SOURCE_LANGUAGE_AUTO = "auto"
         val DEFAULT_QUICK_LANGUAGES = listOf("ko", "en", "ja", "zh")
-        const val DEFAULT_AUTO_CHECK_INTERVAL_MS = 2_000L
-        const val DEFAULT_AUTO_SETTLE_MS = 1_000L
+        const val DEFAULT_AUTO_CHECK_INTERVAL_MS = 1_000L
+        const val DEFAULT_AUTO_SETTLE_MS = 0L
+        const val DEFAULT_AUTO_HIDE_MS = 0L
+        const val AUTO_HIDE_NEVER = -1L
 
         /** 설정 화면이 고르게 하는 값의 범위. 저장된 값이 벗어나면 이 안으로 맞춘다. */
-        val AUTO_CHECK_INTERVAL_RANGE_MS = 1_000L..5_000L
-        val AUTO_SETTLE_RANGE_MS = 500L..3_000L
+        val AUTO_CHECK_INTERVAL_RANGE_MS = 500L..5_000L
+        val AUTO_SETTLE_RANGE_MS = 0L..3_000L
+        val AUTO_HIDE_RANGE_MS = 0L..5_000L
+
+        /** 사라짐 시간: 음수는 "안 숨김", 나머지는 범위 안으로. */
+        fun normalizeAutoHide(ms: Long): Long = if (ms < 0) AUTO_HIDE_NEVER else ms.coerceIn(AUTO_HIDE_RANGE_MS)
     }
 }

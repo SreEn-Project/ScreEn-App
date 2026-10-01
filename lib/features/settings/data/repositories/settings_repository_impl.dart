@@ -48,6 +48,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<void> setAutoSettleMs(int ms) => _dataSource.setAutoSettleMs(ms);
 
   @override
+  Future<void> setAutoHideMs(int ms) => _dataSource.setAutoHideMs(ms);
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) =>
       _dataSource.setOnboardingCompleted(completed);
 }

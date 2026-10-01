@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 자동 번역 반응성 — 이전 결과 숨김 · 바로 번역 · 번역 중 취소 (NA-26, 이슈 #29, 브랜치 `feat/29-auto-translate-responsive`)
+- #28(`feat/27-settings-bubble`) 위에 쌓았다 (자동 번역 코드가 아직 develop에 없음). 설계는 D-034.
+- 설정 "자동 번역"에 **이전 번역 숨김 시간**(바로 · 0.5 · 1 · 2초 · 안 숨김) 추가, **조작 뒤 번역까지 기다리는 시간**에 "바로" 선택지(0) 추가, 확인 간격에 0.5초 추가.
+- 네이티브: `Settings.autoHideMs` + Pigeon `setAutoHideMs`, `AutoTranslateTracker`(`isStale` · `observe` · `onCanceled`, 대기 0 = 멈춘 걸 본 즉시), `AutoTranslateWatcher`(번역을 자식 작업으로 돌리며 계속 감시, 캡처 뒤 화면이 또 바뀌면 취소), `OverlayController`(낡은 결과 숨김 · 취소 시 복원).
+- Flutter: `ChangeAutoHide` 유스케이스, 설정 화면 항목 · 문구(ko/en).
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트 통과(감시 취소 · 숨김 시험 추가) · debug APK 빌드. 기기 확인은 사용자 몫.
+- 남은 일: 기기에서 ① 스크롤 뒤 이전 번역이 바로 사라지는지 ② 조작 직후 번역이 빨리 뜨는지, 번역 중 다시 스크롤하면 취소되고 멈춘 뒤 다시 번역되는지 ③ 발열 · 배터리 체감 (확인 간격을 줄여서 늘었을 수 있음).
+
 ## 2026-10-01 · 버블 메뉴에 '설정' 추가 (이슈 #27, 브랜치 `feat/27-settings-bubble`)
 - 자동 번역 설정이 #24(`feat/23-auto-translate`)에만 있어 그 브랜치 위에 쌓았다. #24가 develop에 merge된 뒤 이 PR을 merge한다. 설계는 D-033.
 - 길게 누르기 버블이 3개 → 4개(캡처 범위 · 결과 표시 · 빠른 언어 · **설정**). 설정 버블을 누르면 옵션 메뉴: 인식 언어(자동 · English · 한국어 · 日本語 · 中文)와 자동 번역 켜기 · 끄기.

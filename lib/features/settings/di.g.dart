@@ -512,6 +512,47 @@ final class ChangeAutoSettleProvider
 
 String _$changeAutoSettleHash() => r'0d271e76ad8aa7626f071e2dca7cd73ed88e662e';
 
+@ProviderFor(changeAutoHide)
+final changeAutoHideProvider = ChangeAutoHideProvider._();
+
+final class ChangeAutoHideProvider
+    extends $FunctionalProvider<ChangeAutoHide, ChangeAutoHide, ChangeAutoHide>
+    with $Provider<ChangeAutoHide> {
+  ChangeAutoHideProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeAutoHideProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeAutoHideHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeAutoHide> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChangeAutoHide create(Ref ref) {
+    return changeAutoHide(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeAutoHide value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeAutoHide>(value),
+    );
+  }
+}
+
+String _$changeAutoHideHash() => r'26bc7bd4a3bb912dcb4636013855c63d364e62bd';
+
 @ProviderFor(completeOnboarding)
 final completeOnboardingProvider = CompleteOnboardingProvider._();
 
