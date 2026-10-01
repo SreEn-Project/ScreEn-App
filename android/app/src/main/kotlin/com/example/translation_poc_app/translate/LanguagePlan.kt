@@ -59,9 +59,14 @@ object LanguagePlan {
         target: String,
         supported: Set<String>,
         text: String? = null,
+        relaxed: String? = null,
     ): BlockDecision {
         val fromId = text?.let(::scriptLanguage) ?: normalize(detected)
-        val language = if (fromId != UNDETERMINED) fromId else normalize(ocrHint)
+        var language = if (fromId != UNDETERMINED) fromId else normalize(ocrHint)
+        // 짧은 글자("Settings", "OK")는 Language ID가 모르기 쉽다. 기준을 낮춘 두 번째 판별 결과([relaxed]),
+        // 그래도 모르면 글자 체계로 짐작해 번역에서 통째로 빠지는 일을 줄인다 (#21).
+        if (language == UNDETERMINED && relaxed != null) language = normalize(relaxed)
+        if (language == UNDETERMINED && relaxed != null && text != null) language = guessByScript(text)
         val action = when {
             language == UNDETERMINED -> BlockAction.UNKNOWN
             language == normalize(target) -> BlockAction.SKIP_SAME_AS_TARGET
@@ -98,6 +103,31 @@ object LanguagePlan {
     }
 
     private const val MIN_SHARE = 0.3f
+
+    /**
+     * 판별이 모두 실패한 짧은 글자의 마지막 짐작: 로마자가 대부분이면 영어, 한자뿐이면 중국어.
+     * 틀릴 수 있지만 번역에서 통째로 빠지는 것보다 낫다. 모르면 [UNDETERMINED].
+     */
+    fun guessByScript(text: String): String {
+        var latin = 0
+        var han = 0
+        var total = 0
+        for (c in text) {
+            if (!c.isLetter()) continue
+            total++
+            when (Character.UnicodeScript.of(c.code)) {
+                Character.UnicodeScript.LATIN -> latin++
+                Character.UnicodeScript.HAN -> han++
+                else -> Unit
+            }
+        }
+        return when {
+            total == 0 -> UNDETERMINED
+            latin.toFloat() / total >= 0.8f -> "en"
+            han == total -> "zh"
+            else -> UNDETERMINED
+        }
+    }
 
     /** 로마자 표기가 원래 표기인 언어 ("en-Latn" 같은 태그도 그대로 쓴다). */
     private val LATIN_BASED = setOf(

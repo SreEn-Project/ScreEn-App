@@ -32,6 +32,8 @@ data class TranslatedItem(
     val status: ItemStatus = ItemStatus.TRANSLATED,
     /** 원문이 화면에 있던 자리 (화면 대비 비율). '원문 위에 덮기'(NA-22)가 쓴다. 모르면 null. */
     val bounds: NormalizedRegion? = null,
+    /** 원문 줄 높이 (화면 높이 대비 비율). 덮어쓰기 글자 크기의 기준 (#21). 모르면 null. */
+    val lineHeight: Float? = null,
 )
 
 /** 플로팅 버튼 한 번 누른 결과 (NA-18 → NA-19). */
@@ -134,7 +136,10 @@ class TranslationPipeline(
             val requests = TranslationAssembler.requests(detected, current.targetLanguage)
             val results = translateAll(engine, requests)
             onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size))
-            TranslationAssembler.assemble(detected, results, engine.id, current.targetLanguage) { block ->
+            TranslationAssembler.assemble(
+                detected, results, engine.id, current.targetLanguage,
+                lineHeightOf = { block -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } },
+                boundsOf = { block ->
                 block.bounds?.let {
                     val dx = origin?.left ?: 0
                     val dy = origin?.top ?: 0
@@ -144,7 +149,8 @@ class TranslationPipeline(
                         screenHeight,
                     )
                 }
-            }
+                },
+            )
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -201,6 +207,8 @@ object TranslationAssembler {
         results: List<EngineResult<TranslationResult>>,
         engine: EngineId,
         targetLanguage: String,
+        /** 블록의 원문 줄 높이 (화면 높이 대비). 안 주면 모름. */
+        lineHeightOf: (OcrBlock) -> Float? = { null },
         /** 블록의 화면 위 자리 (비율). 안 주면 자리 정보 없음. */
         boundsOf: (OcrBlock) -> NormalizedRegion? = { null },
     ): TranslationOutcome {
@@ -221,16 +229,17 @@ object TranslationAssembler {
             val original = sourceText(block, decision.language)
             when (decision.action) {
                 BlockAction.TRANSLATE -> when (val result = next.next()) {
-                    is EngineResult.Ok -> TranslatedItem(original, result.value.text, decision.language, bounds = boundsOf(block))
+                    is EngineResult.Ok -> TranslatedItem(original, result.value.text, decision.language, bounds = boundsOf(block), lineHeight = lineHeightOf(block))
                     is EngineResult.Err -> TranslatedItem(
                         original,
                         null,
                         decision.language,
                         if (result.error is TranslationError.UnsupportedLanguage) ItemStatus.UNSUPPORTED else ItemStatus.FAILED,
                         boundsOf(block),
+                        lineHeightOf(block),
                     )
                 }
-                BlockAction.UNSUPPORTED -> TranslatedItem(original, null, decision.language, ItemStatus.UNSUPPORTED, boundsOf(block))
+                BlockAction.UNSUPPORTED -> TranslatedItem(original, null, decision.language, ItemStatus.UNSUPPORTED, boundsOf(block), lineHeightOf(block))
                 BlockAction.SKIP_SAME_AS_TARGET, BlockAction.UNKNOWN -> null
             }
         }
@@ -242,4 +251,10 @@ object TranslationAssembler {
             else -> TranslationOutcome.NoText
         }
     }
+}
+
+/** 블록 안 줄 높이(px)의 중앙값. 줄 좌표가 없으면 null. */
+internal fun medianLineHeight(block: OcrBlock): Int? {
+    val heights = block.lines.mapNotNull { it.bounds?.height()?.takeIf { h -> h > 0 } }.sorted()
+    return heights.getOrNull(heights.size / 2)
 }

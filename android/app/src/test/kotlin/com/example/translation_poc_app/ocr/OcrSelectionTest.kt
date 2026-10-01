@@ -63,4 +63,12 @@ class OcrSelectionTest {
     fun `결과가 없으면 null`() {
         assertNull(OcrSelection.pickBest(emptyList()))
     }
+
+    @Test
+    fun `긴 줄은 낮은 신뢰도도 남기고 짧은 줄은 엄격하게 거른다`() {
+        val filtered = OcrSelection.filterLowConfidence(
+            listOf(block(line("Settings page", 0.35f), line("ab", 0.35f))),
+        )
+        assertEquals(listOf("Settings page"), filtered.single().lines.map { it.text })
+    }
 }

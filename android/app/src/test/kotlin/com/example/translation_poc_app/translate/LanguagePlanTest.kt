@@ -71,4 +71,17 @@ class ScriptLanguageTest {
         val d = LanguagePlan.decide("zh", null, "en", setOf("ja", "zh", "ko"), "今日はいい天気です")
         assertEquals("ja", d.language)
     }
+
+    @Test
+    fun `짧은 로마자 글자는 판별에 실패해도 영어로 짐작해 번역한다`() {
+        val supported = setOf("en", "ko")
+        val d = LanguagePlan.decide("und", "und", "ko", supported, "Settings", relaxed = "und")
+        assertEquals(BlockDecision("en", BlockAction.TRANSLATE), d)
+        // 낮춘 기준 판별이 있으면 그것이 먼저
+        assertEquals("en", LanguagePlan.decide("und", "und", "ko", supported, "Hola", relaxed = "en").language)
+        // 두 번째 판별을 하지 않은 경우(relaxed == null)에는 짐작하지 않는다
+        assertEquals(BlockAction.UNKNOWN, LanguagePlan.decide("und", "und", "ko", supported, "Settings").action)
+        // 숫자 · 기호뿐이면 계속 모름
+        assertEquals(BlockAction.UNKNOWN, LanguagePlan.decide("und", "und", "ko", supported, "12:30", relaxed = "und").action)
+    }
 }

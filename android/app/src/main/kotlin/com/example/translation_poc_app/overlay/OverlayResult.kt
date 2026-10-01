@@ -42,8 +42,8 @@ internal fun overlayItems(items: List<TranslatedItem>): List<TranslatedItem> =
 
 /** 막 색: 반투명 검정 (NA-22). */
 private val BoxColor = Color.Black.copy(alpha = 0.78f)
-private const val MAX_SP = 22
-private const val MIN_SP = 8
+private const val MAX_SP = 20
+private const val MIN_SP = 11
 
 /**
  * 원문 위에 덮기 (NA-22): 인식한 글자 영역마다 반투명 검은 막을 깔고 그 위, 원문 자리에 번역문을 흰 글자로 보여 준다.
@@ -64,12 +64,21 @@ internal fun OverlayResult(items: List<TranslatedItem>, onDismiss: () -> Unit) {
         val widthPx = constraints.maxWidth.toFloat()
         val heightPx = constraints.maxHeight.toFloat()
         val pad = with(density) { 3.dp.toPx() }
-        for (item in items) {
+        // 글자 크기는 원문 줄 높이에서 화면 공통 기준으로 정한다 (#21).
+        val targets = remember(items, heightPx) {
+            OverlayFontPlan.targetSizes(
+                items.map { it.lineHeight?.times(heightPx) },
+                minPx = with(density) { MIN_SP.sp.toPx() },
+                maxPx = with(density) { MAX_SP.sp.toPx() },
+            )
+        }
+        for ((index, item) in items.withIndex()) {
             val region = item.bounds ?: continue
             val text = item.translated.orEmpty()
-            val box = paddedBox(region, widthPx, heightPx, pad)
             val style = OverlayTheme.translated.copy(color = Color.White)
-            val fontSp = fitFontSize(measurer, text, style, box.width, box.height, density)
+            val fit = fitText(measurer, text, style, paddedBox(region, widthPx, heightPx, pad), targets[index], density, heightPx)
+            val box = fit.box
+            val fontSp = fit.sp
             Box(
                 modifier = Modifier
                     .offset { IntOffset(box.left.roundToInt(), box.top.roundToInt()) }
@@ -114,22 +123,35 @@ internal fun paddedBox(region: NormalizedRegion, widthPx: Float, heightPx: Float
     return PxBox(left, top, (right - left).coerceAtLeast(1f), (bottom - top).coerceAtLeast(1f))
 }
 
-/** [text]가 [widthPx]x[heightPx] 안에 들어가는 가장 큰 글자 크기(sp). 끝까지 안 맞으면 최소 크기. */
-private fun fitFontSize(
+private class Fit(val box: PxBox, val sp: Float)
+
+/**
+ * [target]px 글자가 상자에 들어가면 그대로, 안 들어가면 [OverlayFontPlan.SHRINK_FLOOR]까지만 줄여 본다.
+ * 그래도 안 들어가면 크기를 더 줄이지 않고 막을 아래로 늘린다 (화면 끝까지). 블록마다 크기가 튀는 것보다 낫다 (#21).
+ */
+private fun fitText(
     measurer: TextMeasurer,
     text: String,
     style: TextStyle,
-    widthPx: Float,
-    heightPx: Float,
+    box: PxBox,
+    target: Float,
     density: Density,
-): Int {
+    screenHeightPx: Float,
+): Fit {
     // 막 안쪽 여백(가로 8dp, 세로 4dp)을 뺀 공간.
-    val innerW = (widthPx - with(density) { 8.dp.toPx() }).coerceAtLeast(1f).toInt()
-    val innerH = (heightPx - with(density) { 4.dp.toPx() }).coerceAtLeast(1f)
-    for (sp in MAX_SP downTo MIN_SP) {
-        val candidate = style.copy(fontSize = sp.sp, lineHeight = (sp * 1.2f).sp)
-        val layout = measurer.measure(text, candidate, constraints = Constraints(maxWidth = innerW))
-        if (layout.size.height <= innerH) return sp
+    val vPad = with(density) { 4.dp.toPx() }
+    val innerW = (box.width - with(density) { 8.dp.toPx() }).coerceAtLeast(1f).toInt()
+    val innerH = (box.height - vPad).coerceAtLeast(1f)
+    val steps = 6
+    var needed = 0f
+    for (i in 0..steps) {
+        val px = target * (1f - (1f - OverlayFontPlan.SHRINK_FLOOR) * i / steps)
+        val sp = with(density) { px.toSp() }
+        val layout = measurer.measure(text, style.copy(fontSize = sp, lineHeight = sp * 1.2f), constraints = Constraints(maxWidth = innerW))
+        needed = layout.size.height.toFloat()
+        if (needed <= innerH) return Fit(box, sp.value)
     }
-    return MIN_SP
+    val floor = with(density) { (target * OverlayFontPlan.SHRINK_FLOOR).toSp() }
+    val grownHeight = (needed + vPad).coerceAtMost(screenHeightPx - box.top).coerceAtLeast(box.height)
+    return Fit(box.copy(height = grownHeight), floor.value)
 }
