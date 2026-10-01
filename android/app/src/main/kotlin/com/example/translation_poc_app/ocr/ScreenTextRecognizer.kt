@@ -187,6 +187,10 @@ class ScreenTextRecognizer : Closeable {
             results = results + readWith(image, OcrSelection.remainingAuto(lastWinner), factor)
         }
         val best = OcrSelection.pickBest(results.map { it.filtered }) ?: OcrResult(Script.LATIN, emptyList())
+        // 진단 (#25): 인식기별 글자 수 · 평균 신뢰도, 거르고 남은 글자 수.
+        Log.i(TAG, "인식 ${image.width}x${image.height}: " + results.joinToString(" / ") {
+            "${it.filtered.script} ${OcrSelection.describe(it.raw)} → 남음 ${OcrSelection.charCount(it.filtered.blocks)}자"
+        } + " → 선택 ${best.script}")
         if (auto && best.blocks.isNotEmpty()) lastWinner = best.script
         return best
     }

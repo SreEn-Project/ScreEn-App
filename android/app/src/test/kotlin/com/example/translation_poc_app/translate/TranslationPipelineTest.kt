@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.translate
 
 import com.example.translation_poc_app.capture.CaptureResult
+import com.example.translation_poc_app.capture.FrameStats
 import com.example.translation_poc_app.data.settings.Settings
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -39,5 +40,20 @@ class TranslationPipelineTest {
     @Test
     fun `캡처 실패는 실패로`() = runTest {
         assertEquals(TranslationOutcome.Failed("x"), pipeline(CaptureResult.Failed("x")).run())
+    }
+
+    @Test
+    fun `글자가 없고 대부분 검으면 보안 화면 (본문 창만 검게 찍힌 경우)`() {
+        val mostlyBlack = FrameStats(meanLuma = 12f, blackShare = 0.85f)
+        assertEquals(TranslationOutcome.SecureScreen, noTextOutcome(mostlyBlack, inRegion = false))
+        assertEquals(TranslationOutcome.SecureScreen, noTextOutcome(mostlyBlack, inRegion = true))
+    }
+
+    @Test
+    fun `글자가 없고 밝은 화면이면 일반 안내, 영역을 골랐으면 영역 안내`() {
+        val bright = FrameStats(meanLuma = 180f, blackShare = 0f)
+        assertEquals(TranslationOutcome.NoText, noTextOutcome(bright, inRegion = false))
+        assertEquals(TranslationOutcome.NoText, noTextOutcome(null, inRegion = false))
+        assertEquals(TranslationOutcome.NoTextInRegion, noTextOutcome(bright, inRegion = true))
     }
 }

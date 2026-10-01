@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.translate
 
 import com.example.translation_poc_app.capture.CaptureResult
+import com.example.translation_poc_app.capture.FrameStats
 import android.graphics.Bitmap
 import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.PixelRect
@@ -53,6 +54,9 @@ sealed interface TranslationOutcome {
     /** 읽은 글자가 없거나 언어를 알 수 없는 것뿐. */
     data object NoText : TranslationOutcome
 
+    /** 고른 영역(드래그 · 고정)에 글자가 없다. 영역이 어긋났을 수 있어 따로 안내한다 (#25). */
+    data object NoTextInRegion : TranslationOutcome
+
     /** 읽은 글이 모두 이미 대상 언어. */
     data class AlreadyInTarget(val targetLanguage: String) : TranslationOutcome
 
@@ -91,6 +95,8 @@ class TranslationPipeline(
     private val engineFor: (Settings) -> TranslationEngine,
     private val settings: suspend () -> Settings,
     private val onTimings: (PipelineTimings) -> Unit = {},
+    /** 진단 로그 (#25). 캡처 크기 · 밝기, 영역, 단계별 결과 수. */
+    private val log: (String) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     // 블록(원문 글자) 단위 캐시 (#35). 안 바뀐 글자는 감지 · 번역을 건너뛴다. 크기는 자동(LRU).
@@ -127,6 +133,7 @@ class TranslationPipeline(
         val screenWidth = frame.bitmap.width
         val screenHeight = frame.bitmap.height
         val origin = region?.toPixels(screenWidth, screenHeight)
+        var stats: FrameStats? = null
         return try {
             val current = settings()
             val target = if (region != null) frame.cropped(region) else frame
@@ -141,7 +148,7 @@ class TranslationPipeline(
             val blocks = OcrBlockMerger.merge(OcrPostProcessor.process(OcrCleaner.clean(ocr.blocks)))
             if (blocks.isEmpty()) {
                 onTimings(PipelineTimings(captureMs, ocrMs))
-                return TranslationOutcome.NoText
+                return noText(stats, region != null)
             }
 
             var cached = 0
@@ -171,6 +178,7 @@ class TranslationPipeline(
                 lineHeightOf = lineHeight,
                 boundsOf = bounds,
             )
+            if (assembled == TranslationOutcome.NoText) noText(stats, region != null) else assembled
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -230,6 +238,15 @@ class TranslationPipeline(
             }
         }.awaitAll()
     }
+}
+
+/**
+ * 글자를 못 읽었을 때 왜인지 고른다 (#25): 대부분 검은 화면이면 보안 화면, 영역을 골랐으면 영역 안내, 아니면 일반 안내.
+ */
+internal fun noTextOutcome(stats: FrameStats?, inRegion: Boolean): TranslationOutcome = when {
+    stats?.looksSecure == true -> TranslationOutcome.SecureScreen
+    inRegion -> TranslationOutcome.NoTextInRegion
+    else -> TranslationOutcome.NoText
 }
 
 /** 언어 감지 결과 + 엔진 결과 → 결과 시트 목록. Android 의존 없는 순수 로직. */
