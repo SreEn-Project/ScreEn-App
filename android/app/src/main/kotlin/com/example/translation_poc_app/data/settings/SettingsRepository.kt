@@ -37,6 +37,8 @@ class SettingsRepository(context: Context) {
 
     suspend fun setFixedRegion(region: NormalizedRegion) = edit { it[Keys.FIXED_REGION] = region.encode() }
 
+    suspend fun setQuickLanguages(codes: List<String>) = edit { it[Keys.QUICK_LANGUAGES] = codes.joinToString(",") }
+
     suspend fun setOnboardingCompleted(completed: Boolean) =
         edit { it[Keys.ONBOARDING_COMPLETED] = completed }
 
@@ -53,6 +55,10 @@ class SettingsRepository(context: Context) {
             resultDisplay = enumOrDefault(this[Keys.RESULT_DISPLAY], defaults.resultDisplay),
             onboardingCompleted = this[Keys.ONBOARDING_COMPLETED] ?: defaults.onboardingCompleted,
             fixedRegion = NormalizedRegion.decode(this[Keys.FIXED_REGION]),
+            quickLanguages = this[Keys.QUICK_LANGUAGES]
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+                ?.takeIf { it.isNotEmpty() }
+                ?: defaults.quickLanguages,
         )
     }
 
@@ -67,5 +73,6 @@ class SettingsRepository(context: Context) {
         val RESULT_DISPLAY = stringPreferencesKey("result_display")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val FIXED_REGION = stringPreferencesKey("fixed_region")
+        val QUICK_LANGUAGES = stringPreferencesKey("quick_languages")
     }
 }

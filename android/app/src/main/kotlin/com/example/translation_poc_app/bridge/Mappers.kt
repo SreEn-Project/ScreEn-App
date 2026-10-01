@@ -42,11 +42,13 @@ fun CaptureMode.toNative() = when (this) {
 
 fun ResultDisplay.toPigeon() = when (this) {
     ResultDisplay.LIST -> DisplayMode.LIST
+    ResultDisplay.PARAGRAPH -> DisplayMode.PARAGRAPH
     ResultDisplay.OVERLAY -> DisplayMode.OVERLAY
 }
 
 fun DisplayMode.toNative() = when (this) {
     DisplayMode.LIST -> ResultDisplay.LIST
+    DisplayMode.PARAGRAPH -> ResultDisplay.PARAGRAPH
     DisplayMode.OVERLAY -> ResultDisplay.OVERLAY
 }
 

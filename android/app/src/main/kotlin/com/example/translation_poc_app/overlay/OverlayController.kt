@@ -17,19 +17,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.translation_poc_app.data.settings.CaptureRange
+import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.NormalizedRegion
+import com.example.translation_poc_app.data.settings.ResultDisplay
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.translate.TranslationOutcome
 import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 /**
  * 오버레이 전체 (NA-18 플로팅 버튼 · 모드 메뉴, NA-19 결과 시트). [TranslatorService]가 세션 동안 하나 가진다.
  *
- * - 버튼: 탭 = 현재 모드로 번역, 길게 누르기 = 모드 메뉴, 끌기 = 이동(놓으면 가장자리에 붙음),
- *   아래 닫기 영역에 놓기 = 서비스 종료.
+ * - 버튼: 탭 = 현재 모드로 번역, 길게 누르기 = 카테고리 버블(캡처 범위 · 결과 표시 · 빠른 언어, O-02),
+ *   버블을 누르면 그 옵션 메뉴(O-02), 끌기 = 이동(놓으면 가장자리에 붙음), 아래 닫기 영역에 놓기 = 서비스 종료.
  * - 번역: 캡처에 버튼이 찍히지 않도록 숨기고 찍은 뒤 다시 보여 주고, 끝날 때까지 진행 표시.
  * - 결과: 화면 전체를 덮는 시트 창. 바깥 · 뒤로 가기로 닫는다.
  *
@@ -59,6 +62,9 @@ class OverlayController(
     // Compose가 읽는 상태
     private var mode by mutableStateOf(CaptureRange.FULL_SCREEN)
     private var fixedRegion: NormalizedRegion? = null
+    private var display = ResultDisplay.LIST
+    private var targetLanguage = ""
+    private var quickLanguages: List<String> = emptyList()
     private var busy by mutableStateOf(false)
     private var dragging by mutableStateOf(false)
     private var overClose by mutableStateOf(false)
@@ -114,6 +120,9 @@ class OverlayController(
             settingsRepository.settings.collect {
                 mode = it.captureRange
                 fixedRegion = it.fixedRegion
+                display = it.resultDisplay
+                targetLanguage = it.targetLanguage
+                quickLanguages = it.quickLanguages
             }
         }
         return true
@@ -235,14 +244,77 @@ class OverlayController(
         button.update()
     }
 
-    // ── 모드 메뉴 (O-02) ─────────────────────────────────
+    // ── 버블 · 옵션 메뉴 (O-02) ───────────────────
 
+    private enum class OptionKind { RANGE, DISPLAY, LANGUAGE }
+
+    /** 길게 누르기: 버블이 떠 있으면 닫고, 아니면 버튼 주위에 카테고리 버블을 띄운다. */
     private fun toggleMenu() {
         if (menu != null) {
             dismissMenu()
             return
         }
         if (busy) return
+        val ringWidth = dp(BUBBLE_RING_WIDTH_DP)
+        val ringHeight = dp(BUBBLE_RING_HEIGHT_DP)
+        val centerX = placement.x + buttonSize / 2
+        val centerY = placement.y + buttonSize / 2
+        val inwardRight = placement.edge == Edge.LEFT
+        val windowY = (centerY - ringHeight / 2)
+            .coerceIn(area.top, (area.height - area.bottom - ringHeight).coerceAtLeast(area.top))
+        val angles = OverlayGeometry.bubbleAngles(
+            spaceAboveDp = (centerY - area.top) / density,
+            spaceBelowDp = (area.height - area.bottom - centerY) / density,
+        )
+        val bubbles = listOf(
+            BubbleSpec(Symbol.CROP, context.getString(R.string.overlay_bubble_range), angles[0]) { showOptions(OptionKind.RANGE) },
+            BubbleSpec(Symbol.VIEW_LIST, context.getString(R.string.overlay_bubble_display), angles[1]) { showOptions(OptionKind.DISPLAY) },
+            BubbleSpec(Symbol.TRANSLATE, context.getString(R.string.overlay_bubble_language), angles[2]) { showOptions(OptionKind.LANGUAGE) },
+        )
+        val params = OverlayWindow.params(
+            ringWidth,
+            ringHeight,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = if (inwardRight) centerX else centerX - ringWidth
+            y = windowY
+        }
+        val anchorYDp = (centerY - windowY) / density
+        menu = OverlayWindow(context, windowManager, params) {
+            BubbleRing(bubbles, inwardRight, anchorYDp, onBackgroundTap = { post(::dismissMenu) })
+        }.apply {
+            root.onOutsideTouch = { post(::dismissMenu) }
+            show()
+        }
+    }
+
+    /** 버블을 누르면 버블은 닫고 그 종류의 옵션 메뉴를 버튼 옆에 연다. */
+    private fun showOptions(kind: OptionKind) {
+        val options = when (kind) {
+            OptionKind.RANGE -> ModeMenuItem.entries.map { item ->
+                MenuOption(item.symbol, context.getString(item.label), item.range == mode) { onRangeSelect(item) }
+            }
+            OptionKind.DISPLAY -> DisplayMenuItem.entries.map { item ->
+                MenuOption(item.symbol, context.getString(item.label), item.display == display) {
+                    scope.launch { settingsRepository.setResultDisplay(item.display) }
+                    post(::dismissMenu)
+                }
+            }
+            OptionKind.LANGUAGE -> quickLanguages.map { code ->
+                MenuOption(Symbol.TRANSLATE, languageDisplayName(code, Locale.getDefault()), code == targetLanguage) {
+                    scope.launch { settingsRepository.setTargetLanguage(code) }
+                    post(::dismissMenu)
+                }
+            }
+        }
+        post {
+            dismissMenu()
+            openOptionWindow(options)
+        }
+    }
+
+    private fun openOptionWindow(options: List<MenuOption>) {
         val anchor = OverlayGeometry.menu(placement, buttonSize, area, gap = 0)
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -254,14 +326,14 @@ class OverlayController(
             y = anchor.y
         }
         menu = OverlayWindow(context, windowManager, params) {
-            ModeMenu(mode) { item -> onMenuSelect(item) }
+            OptionMenu(options)
         }.apply {
             root.onOutsideTouch = { post(::dismissMenu) }
             show()
         }
     }
 
-    private fun onMenuSelect(item: ModeMenuItem) {
+    private fun onRangeSelect(item: ModeMenuItem) {
         scope.launch { settingsRepository.setCaptureRange(item.range) }
         post(::dismissMenu)
         // 고정 영역을 고르면 바로 영역을 지정 · 수정한다. 이후 버튼 탭 = 번역.
@@ -325,7 +397,7 @@ class OverlayController(
             0,
         )
         sheet = OverlayWindow(context, windowManager, params) {
-            ResultSheet(outcome, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
+            ResultSheet(outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
         }.apply {
             root.onBack = { post(::dismissSheet) }
             show()

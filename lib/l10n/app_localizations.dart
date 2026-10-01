@@ -686,6 +686,12 @@ abstract class AppLocalizations {
   /// **'List'**
   String get displayModeList;
 
+  /// No description provided for @displayModeParagraph.
+  ///
+  /// In en, this message translates to:
+  /// **'Paragraph'**
+  String get displayModeParagraph;
+
   /// No description provided for @displayModeOverlay.
   ///
   /// In en, this message translates to:

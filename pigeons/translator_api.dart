@@ -6,8 +6,7 @@ import 'package:pigeon/pigeon.dart';
   PigeonOptions(
     dartOut: 'lib/core/bridge/translator_api.g.dart',
     dartOptions: DartOptions(),
-    kotlinOut:
-        'android/app/src/main/kotlin/com/example/translation_poc_app/bridge/TranslatorApi.g.kt',
+    kotlinOut: 'android/app/src/main/kotlin/com/example/translation_poc_app/bridge/TranslatorApi.g.kt',
     kotlinOptions: KotlinOptions(
       package: 'com.example.translation_poc_app.bridge',
     ),
@@ -20,8 +19,8 @@ enum EngineType { mlKit, gemini, firebaseAi }
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
 
-/// 결과 표시 방식 (FL-07). 1단계는 list만 동작.
-enum DisplayMode { list, overlay }
+/// 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22 전까지는 list로 보임).
+enum DisplayMode { list, paragraph, overlay }
 
 /// 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
 /// error = 시작 실패 (동의 후 서비스 시작 실패 등). 다시 시작하면 벗어난다.

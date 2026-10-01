@@ -109,6 +109,7 @@
   "settingsSectionDisplay": "표시",
   "settingsDisplayMode": "결과 표시 방식",
   "displayModeList": "목록",
+  "displayModeParagraph": "문단",
   "displayModeOverlay": "원문 위에 덮기",
   "settingsButtonSize": "플로팅 버튼 크기",
   "settingsButtonOpacity": "플로팅 버튼 투명도",

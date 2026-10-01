@@ -16,6 +16,12 @@
     <string name="overlay_mode_full_screen">Full screen</string>
     <string name="overlay_mode_drag_region">Drag to select</string>
     <string name="overlay_mode_fixed_region">Fixed area</string>
+    <string name="overlay_bubble_range">Capture range</string>
+    <string name="overlay_bubble_display">Result display</string>
+    <string name="overlay_bubble_language">Quick language</string>
+    <string name="overlay_display_list">List</string>
+    <string name="overlay_display_paragraph">Paragraph</string>
+    <string name="overlay_display_overlay">Over original</string>
     <string name="region_hint_drag">Drag to choose the area to translate</string>
     <string name="region_hint_edit">Move the area or drag a corner to resize</string>
     <string name="region_cancel">Cancel</string>

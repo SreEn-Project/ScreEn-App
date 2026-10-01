@@ -26,6 +26,7 @@ extension EnumLabels on AppLocalizations {
 
   String displayModeName(DisplayMode mode) => switch (mode) {
     DisplayMode.list => displayModeList,
+    DisplayMode.paragraph => displayModeParagraph,
     DisplayMode.overlay => displayModeOverlay,
   };
 }

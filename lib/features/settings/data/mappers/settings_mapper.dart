@@ -32,6 +32,7 @@ extension on pigeon.CaptureMode {
 extension on pigeon.DisplayMode {
   DisplayMode toEntity() => switch (this) {
     pigeon.DisplayMode.list => DisplayMode.list,
+    pigeon.DisplayMode.paragraph => DisplayMode.paragraph,
     pigeon.DisplayMode.overlay => DisplayMode.overlay,
   };
 }
@@ -55,6 +56,7 @@ extension CaptureModeToPigeon on CaptureMode {
 extension DisplayModeToPigeon on DisplayMode {
   pigeon.DisplayMode toPigeon() => switch (this) {
     DisplayMode.list => pigeon.DisplayMode.list,
+    DisplayMode.paragraph => pigeon.DisplayMode.paragraph,
     DisplayMode.overlay => pigeon.DisplayMode.overlay,
   };
 }
