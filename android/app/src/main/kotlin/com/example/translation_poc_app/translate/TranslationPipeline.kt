@@ -8,6 +8,7 @@ import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.ocr.OcrBlock
 import com.example.translation_poc_app.ocr.OcrBlockMerger
 import com.example.translation_poc_app.ocr.OcrCleaner
+import com.example.translation_poc_app.ocr.OcrPostProcessor
 import com.example.translation_poc_app.ocr.OcrResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
@@ -136,8 +137,8 @@ class TranslationPipeline(
                 frame.bitmap.recycle()
             }
             val ocrMs = lap()
-            // 잡음 줄을 빼고, 쪼개진 문단은 이어 붙여 번역 문맥을 늘린다 (#19).
-            val blocks = OcrBlockMerger.merge(OcrCleaner.clean(ocr.blocks))
+            // 잡음 줄을 빼고, 흔한 오인식을 고치고(#45), 쪼개진 문단은 이어 붙여 번역 문맥을 늘린다 (#19).
+            val blocks = OcrBlockMerger.merge(OcrPostProcessor.process(OcrCleaner.clean(ocr.blocks)))
             if (blocks.isEmpty()) {
                 onTimings(PipelineTimings(captureMs, ocrMs))
                 return TranslationOutcome.NoText

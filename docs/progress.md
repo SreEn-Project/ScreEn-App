@@ -2,6 +2,12 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 인식 후처리 (NA-11, 이슈 #45, 브랜치 `feat/45-ocr-postprocess`)
+- #44(`feat/43-incremental-ocr`) 위에 쌓았다 (merge 전). 문자 인식 결과의 흔한 오인식을 번역 전에 보수적으로 고쳐 오역을 줄인다 (translation.md 개선 계획 4번).
+- `ocr/OcrPostProcessor.kt` 추가(순수 Kotlin) + `TranslationPipeline`에서 `OcrCleaner` 뒤 · `OcrBlockMerger` 앞에 호출. 규칙은 translation.md 참고. 설정 · 의존성 변경 없음.
+- 테스트 `OcrPostProcessorTest` 추가. 고치지 말아야 할 것(mp3 · win10 · 주소 · 파일 경로 · Illinois · McIntyre · 한글 섞인 줄)도 검증.
+- 한계: 1이 i인지 l인지는 알 수 없어 l로 본다(사전 단어는 예외). 영어만. 기기 실측 전.
+
 ## 2026-10-02 · 자동 번역 — 바뀐 영역만 다시 인식 (NA-11, 이슈 #43, 브랜치 `feat/43-incremental-ocr`)
 - 자동 번역(`incremental`)에서 직전에 읽은 화면과 64×128 밝기 격자를 견줘 변한 칸 주변만 잘라 읽고, 안 바뀐 블록은 이전 결과를 쓴다. 바뀐 칸이 없으면 이전 결과 그대로. 순수 로직 `ocr/ChangedRegions.kt`(+ 테스트), 연결은 `ScreenTextRecognizer`.
 - 통째로 읽는 경우: 기준이 없음 · 원문 언어 · 화면 크기가 달라짐, 40% 넘게 변함, 영역 7곳 이상 · 화면 절반 넘음, 블록 자리를 모름, 색을 뒤집어 읽은 화면. 수동 번역은 그대로 전체 인식.
