@@ -39,9 +39,10 @@
     <string name="result_unsupported">This language can\'t be translated yet (%1$s)</string>
     <string name="result_skipped">Skipped %1$d already in %2$s</string>
     <string name="result_secure_title">Can\'t read this screen</string>
-    <string name="result_secure_body">This app blocks screen capture, like banking or video apps do.</string>
+    <string name="result_secure_body">This screen blocks screen capture (sign-in, payment, banking and video apps often do).</string>
     <string name="result_no_text_title">No text found</string>
     <string name="result_no_text_body">Try again on a screen where the text is clearly visible.</string>
+    <string name="result_no_text_region_body">No text in the selected area. Move or enlarge the area, or switch to full screen.</string>
     <string name="result_already_target_title">Nothing to translate</string>
     <string name="result_already_target_body">The text on screen is already in %1$s.</string>
     <string name="result_failed_title">Couldn\'t translate</string>
