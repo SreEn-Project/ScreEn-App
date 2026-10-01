@@ -28,6 +28,7 @@ import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.ResultDisplay
+import com.example.translation_poc_app.data.settings.Settings as AppSettings
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.translate.TranslatedItem
 import com.example.translation_poc_app.translate.TranslationOutcome
@@ -83,6 +84,7 @@ class OverlayController(
         com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_SETTLE_MS,
     )
     private var autoTranslate = false
+    private var sourceLanguage = AppSettings.SOURCE_LANGUAGE_AUTO
 
     /** 마지막으로 번역한 영역 (자동 번역이 같은 영역을 다시 번역한다). null = 화면 전체. */
     private var lastRegion: NormalizedRegion? = null
@@ -165,6 +167,7 @@ class OverlayController(
                 targetLanguage = it.targetLanguage
                 quickLanguages = it.quickLanguages
                 autoTranslate = it.autoTranslate
+                sourceLanguage = it.sourceLanguage
                 autoConfig = AutoTranslateConfig(it.autoCheckIntervalMs, it.autoSettleMs)
                 if (!autoTranslate) watcher.stop()
             }
@@ -335,7 +338,7 @@ class OverlayController(
 
     // ── 버블 · 옵션 메뉴 (O-02) ───────────────────
 
-    private enum class OptionKind { RANGE, DISPLAY, LANGUAGE }
+    private enum class OptionKind { RANGE, DISPLAY, LANGUAGE, SETTINGS }
 
     /** 길게 누르기: 버블이 떠 있으면 닫고, 아니면 버튼 주위에 카테고리 버블을 띄운다. */
     private fun toggleMenu() {
@@ -359,6 +362,7 @@ class OverlayController(
             BubbleSpec(Symbol.CROP, context.getString(R.string.overlay_bubble_range), angles[0]) { showOptions(OptionKind.RANGE) },
             BubbleSpec(Symbol.VIEW_LIST, context.getString(R.string.overlay_bubble_display), angles[1]) { showOptions(OptionKind.DISPLAY) },
             BubbleSpec(Symbol.TRANSLATE, context.getString(R.string.overlay_bubble_language), angles[2]) { showOptions(OptionKind.LANGUAGE) },
+            BubbleSpec(Symbol.SETTINGS, context.getString(R.string.overlay_bubble_settings), angles[3]) { showOptions(OptionKind.SETTINGS) },
         )
         val params = OverlayWindow.params(
             ringWidth,
@@ -396,11 +400,38 @@ class OverlayController(
                     post(::dismissMenu)
                 }
             }
+            OptionKind.SETTINGS -> settingsOptions()
         }
         post {
             dismissMenu()
             openOptionWindow(options)
         }
+    }
+
+    /** '설정' 버블: 인식 언어(자동 · 영어 · 한국어 · 일본어 · 중국어)와 자동 번역 켜기 · 끄기. 저장은 앱 설정과 같은 DataStore. */
+    private fun settingsOptions(): List<MenuOption> {
+        val locale = Locale.getDefault()
+        val sources = listOf(AppSettings.SOURCE_LANGUAGE_AUTO) + AppSettings.SOURCE_LANGUAGES
+        val languageOptions = sources.map { code ->
+            val name = if (code == AppSettings.SOURCE_LANGUAGE_AUTO) {
+                context.getString(R.string.overlay_source_auto)
+            } else {
+                languageDisplayName(code, locale)
+            }
+            MenuOption(Symbol.TRANSLATE, context.getString(R.string.overlay_setting_source, name), code == sourceLanguage) {
+                scope.launch { settingsRepository.setSourceLanguage(code) }
+                post(::dismissMenu)
+            }
+        }
+        val autoLabel = context.getString(
+            R.string.overlay_setting_auto_translate,
+            context.getString(if (autoTranslate) R.string.overlay_on else R.string.overlay_off),
+        )
+        val toggle = MenuOption(Symbol.AUTO_AWESOME, autoLabel, autoTranslate) {
+            scope.launch { settingsRepository.setAutoTranslate(!autoTranslate) }
+            post(::dismissMenu)
+        }
+        return languageOptions + toggle
     }
 
     private fun openOptionWindow(options: List<MenuOption>) {

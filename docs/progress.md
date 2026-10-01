@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 버블 메뉴에 '설정' 추가 (이슈 #27, 브랜치 `feat/27-settings-bubble`)
+- 자동 번역 설정이 #24(`feat/23-auto-translate`)에만 있어 그 브랜치 위에 쌓았다. #24가 develop에 merge된 뒤 이 PR을 merge한다. 설계는 D-033.
+- 길게 누르기 버블이 3개 → 4개(캡처 범위 · 결과 표시 · 빠른 언어 · **설정**). 설정 버블을 누르면 옵션 메뉴: 인식 언어(자동 · English · 한국어 · 日本語 · 中文)와 자동 번역 켜기 · 끄기.
+- 네이티브: `Settings.sourceLanguage`(기본 `auto`, Pigeon 없이 네이티브 전용) + `SettingsRepository.setSourceLanguage`, `TranslatorService`가 문자 인식에 반영, `OverlayController` 설정 메뉴, `OverlayGeometry.bubbleAngles` 4개 · 반지름 96dp, `Symbol.SETTINGS`와 아이콘 글꼴 부분집합에 settings 글자 추가, 문구(ko/en).
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트(버블 각도 갱신) 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
+- 남은 일: 기기에서 ① 버블 4개가 겹치지 않는지(화면 위 · 아래 끝 포함) ② 인식 언어를 고정했을 때 인식이 나아지는지 ③ 앱 설정 화면에도 인식 언어를 노출할지 결정.
+
 ## 2026-10-01 · 자동 번역 (이슈 #23, 브랜치 `feat/23-auto-translate`, NA-26)
 - (먼저 #20 · #22를 develop에 merge하고 그 위에서 땄다.) 설계는 D-032.
 - 설정 탭에 "자동 번역"(기본 꺼짐 · 확인 간격 · 멈춘 뒤 대기 시간). Pigeon `AppSettings`에 `autoTranslate` · `autoCheckIntervalMs` · `autoSettleMs`와 setter 3개 추가 → Flutter 엔티티 · 매퍼 · 리포지토리 · 유스케이스 3개 · `AutoTranslateViewModel` · 설정 화면 섹션 · ARB(ko/en).

@@ -198,7 +198,7 @@ internal fun OptionMenu(options: List<MenuOption>) {
 internal data class BubbleSpec(val symbol: Symbol, val label: String, val angleDeg: Float, val onClick: () -> Unit)
 
 /** 버블은 버튼 가운데에서 [BUBBLE_RADIUS_DP]만큼 떨어진 안쪽 호 위에 놓는다. */
-internal const val BUBBLE_RADIUS_DP = 84
+internal const val BUBBLE_RADIUS_DP = 96
 internal const val BUBBLE_DIAMETER_DP = 52
 internal const val BUBBLE_CELL_WIDTH_DP = 76
 internal const val BUBBLE_CELL_HEIGHT_DP = BUBBLE_DIAMETER_DP + 24
