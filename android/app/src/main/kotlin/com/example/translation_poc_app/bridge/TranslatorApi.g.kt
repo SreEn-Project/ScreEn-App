@@ -224,10 +224,11 @@ enum class CaptureMode(val raw: Int) {
   }
 }
 
-/** 결과 표시 방식 (FL-07). 1단계는 list만 동작. */
+/** 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22 전까지는 list로 보임). */
 enum class DisplayMode(val raw: Int) {
   LIST(0),
-  OVERLAY(1);
+  PARAGRAPH(1),
+  OVERLAY(2);
 
   companion object {
     fun ofRaw(raw: Int): DisplayMode? {

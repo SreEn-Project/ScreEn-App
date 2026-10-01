@@ -110,6 +110,7 @@
   "settingsSectionDisplay": "Display",
   "settingsDisplayMode": "Show results as",
   "displayModeList": "List",
+  "displayModeParagraph": "Paragraph",
   "displayModeOverlay": "Over original",
   "settingsButtonSize": "Floating button size",
   "settingsButtonOpacity": "Floating button opacity",

@@ -9,7 +9,7 @@ enum EngineType { mlKit, gemini, firebaseAi }
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
 
 /// 결과 표시 방식 (FL-07). 1단계는 list만 동작.
-enum DisplayMode { list, overlay }
+enum DisplayMode { list, paragraph, overlay }
 
 /// 번역 설정 (NA-16). 원본은 네이티브 DataStore이며 앱은 읽고 바꾸기만 한다.
 @freezed

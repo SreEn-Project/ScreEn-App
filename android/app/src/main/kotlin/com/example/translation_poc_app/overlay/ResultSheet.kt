@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.example.translation_poc_app.R
+import com.example.translation_poc_app.data.settings.ResultDisplay
 import com.example.translation_poc_app.translate.EngineId
 import com.example.translation_poc_app.translate.ItemStatus
 import com.example.translation_poc_app.translate.TranslatedItem
@@ -59,6 +60,7 @@ private const val ALL = -1
 @Composable
 internal fun ResultSheet(
     outcome: TranslationOutcome,
+    display: ResultDisplay,
     onDismiss: () -> Unit,
     onCopy: (String) -> Unit,
 ) {
@@ -73,7 +75,7 @@ internal fun ResultSheet(
     ) {
         SheetSurface {
             when (outcome) {
-                is TranslationOutcome.Translated -> ResultList(outcome, onDismiss, onCopy)
+                is TranslationOutcome.Translated -> ResultList(outcome, display, onDismiss, onCopy)
                 TranslationOutcome.SecureScreen -> Message(
                     Symbol.VISIBILITY_OFF,
                     stringResource(R.string.result_secure_title),
@@ -141,10 +143,13 @@ private fun SheetSurface(content: @Composable ColumnScope.() -> Unit) {
 @Composable
 private fun ColumnScope.ResultList(
     result: TranslationOutcome.Translated,
+    display: ResultDisplay,
     onDismiss: () -> Unit,
     onCopy: (String) -> Unit,
 ) {
     val colors = OverlayTheme.colors
+    // 문단형: 번역된 블록을 나누지 않고 한 문단으로 잇는다. 번역된 게 없으면 목록으로 보여 준다.
+    val paragraph = if (display == ResultDisplay.PARAGRAPH) paragraphText(result.items, result.targetLanguage) else null
     var copied by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(copied) {
         if (copied != null) {
@@ -174,11 +179,15 @@ private fun ColumnScope.ResultList(
         modifier = Modifier.weight(1f, fill = false),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        itemsIndexed(result.items) { index, item ->
-            ResultCard(item, copied = copied == index) {
-                item.translated?.let {
-                    onCopy(it)
-                    copied = index
+        if (paragraph != null) {
+            item { ParagraphCard(paragraph, copied = copied == 0) { onCopy(paragraph); copied = 0 } }
+        } else {
+            itemsIndexed(result.items) { index, item ->
+                ResultCard(item, copied = copied == index) {
+                    item.translated?.let {
+                        onCopy(it)
+                        copied = index
+                    }
                 }
             }
         }
@@ -199,7 +208,7 @@ private fun ColumnScope.ResultList(
             text = stringResource(if (copied == ALL) R.string.result_copied else R.string.result_copy_all),
             icon = if (copied == ALL) Symbol.CHECK else Symbol.CONTENT_COPY,
             onClick = {
-                onCopy(copyAllText(result.items))
+                onCopy(paragraph ?: copyAllText(result.items))
                 copied = ALL
             },
             modifier = Modifier.weight(1f),
@@ -264,6 +273,31 @@ private fun ResultCard(item: TranslatedItem, copied: Boolean, onCopy: () -> Unit
     }
 }
 
+/** 문단형 카드: 번역문만 한 덩어리로. 오른쪽 위 복사. */
+@Composable
+private fun ParagraphCard(text: String, copied: Boolean, onCopy: () -> Unit) {
+    val colors = OverlayTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(colors.background)
+            .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+    ) {
+        BasicText(
+            text,
+            style = OverlayTheme.translated.copy(color = colors.onSurface),
+            modifier = Modifier.weight(1f).padding(top = 2.dp),
+        )
+        PlainIconButton(
+            if (copied) Symbol.CHECK else Symbol.CONTENT_COPY,
+            stringResource(R.string.result_copy),
+            if (copied) colors.primary else colors.onSurfaceVariant,
+            onCopy,
+        )
+    }
+}
+
 @Composable
 private fun ColumnScope.Message(symbol: Symbol, title: String, body: String, onDismiss: () -> Unit) {
     val colors = OverlayTheme.colors
@@ -309,10 +343,24 @@ private fun failureText(error: TranslationError?): Pair<Int, Int> = when (error)
 
 /** 언어 코드 → 기기 언어로 된 이름 ("ko" → "한국어"). */
 @Composable
-private fun languageName(code: String): String {
-    val locale = LocalConfiguration.current.locales[0]
+private fun languageName(code: String): String = languageDisplayName(code, LocalConfiguration.current.locales[0])
+
+internal fun languageDisplayName(code: String, locale: Locale): String {
     val name = Locale.forLanguageTag(code).getDisplayLanguage(locale)
     return name.ifBlank { code }.replaceFirstChar { it.titlecase(locale) }
+}
+
+/** 글자 사이에 띄어쓰기를 하지 않는 언어 (TranslationPipeline과 같은 목록). */
+private val NO_SPACE_LANGUAGES = setOf("ja", "zh", "th", "lo", "km", "my")
+
+/**
+ * 문단형 결과: 번역된 블록의 번역문을 화면 순서대로 한 문단으로 잇는다 (블록 · 문장 구분 없음).
+ * 번역된 블록이 없으면 null.
+ */
+internal fun paragraphText(items: List<TranslatedItem>, targetLanguage: String): String? {
+    val parts = items.mapNotNull { it.translated?.trim()?.takeIf(String::isNotEmpty) }
+    if (parts.isEmpty()) return null
+    return parts.joinToString(if (targetLanguage in NO_SPACE_LANGUAGES) "" else " ")
 }
 
 /** 전체 복사: 번역문을 빈 줄로 잇는다. 번역하지 못한 블록은 원문. */

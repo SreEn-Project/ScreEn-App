@@ -93,6 +93,9 @@ enum class Symbol(val codepoint: Int) {
     AUTO_AWESOME(0xe65f),
     ERROR(0xf8b6),
     VISIBILITY_OFF(0xe8f5),
+    VIEW_LIST(0xe8ef),
+    NOTES(0xe26c),
+    FLIP_TO_FRONT(0xe883),
 }
 
 private val SymbolsFont = FontFamily(Font(R.font.material_symbols_rounded))

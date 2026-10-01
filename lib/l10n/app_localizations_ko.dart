@@ -311,6 +311,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get displayModeList => '목록';
 
   @override
+  String get displayModeParagraph => '문단';
+
+  @override
   String get displayModeOverlay => '원문 위에 덮기';
 
   @override

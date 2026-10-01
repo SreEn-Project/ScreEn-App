@@ -65,6 +65,22 @@ object OverlayGeometry {
             MenuPlacement(button.x + size + gap, button.y, alignEnd = false)
         }
 
+    /**
+     * 버블 3개의 각도 (안쪽 방향 기준, 도). 보통은 위 · 가운데 · 아래로 고르게 벌리고,
+     * 버튼이 화면 위(아래) 끝에 가까워 호가 잘리면 버블을 아래(위)쪽으로 몰아 낸다. 간격은 dp.
+     */
+    fun bubbleAngles(spaceAboveDp: Float, spaceBelowDp: Float, radiusDp: Int = 84): List<Float> {
+        val spread = 58f
+        val half = (radiusDp * kotlin.math.sin(Math.toRadians(spread.toDouble()))).toFloat()
+        val needAbove = half + 26f // 위 버블 중심 위로 원 반지름
+        val needBelow = half + 50f // 아래 버블 중심 아래로 원 반지름 + 이름표
+        return when {
+            spaceAboveDp < needAbove -> listOf(0f, 42f, 84f)
+            spaceBelowDp < needBelow -> listOf(-84f, -42f, 0f)
+            else -> listOf(-spread, 0f, spread)
+        }
+    }
+
     private fun maxX(size: Int, area: ScreenArea): Int = (area.width - area.right - size).coerceAtLeast(area.left)
 
     private fun clampY(y: Int, size: Int, area: ScreenArea): Int {

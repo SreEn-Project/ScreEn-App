@@ -320,6 +320,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get displayModeList => 'List';
 
   @override
+  String get displayModeParagraph => 'Paragraph';
+
+  @override
   String get displayModeOverlay => 'Over original';
 
   @override

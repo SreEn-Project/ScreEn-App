@@ -2,6 +2,15 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 버블 메뉴 · 문단형 표시 (이슈 #16, 브랜치 `feat/16-bubble-menu`, NA-18)
+- 길게 누르면 버튼 주위에 카테고리 버블 3개(캡처 범위 · 결과 표시 · 빠른 언어)가 뜨고, 버블을 누르면 그 옵션 메뉴가 열린다. 기존 모드 메뉴는 "캡처 범위" 버블의 옵션 메뉴가 됐다. 설계는 D-028.
+- 결과 표시에 **문단**(`paragraph`) 추가: 번역문을 블록 · 문장 구분 없이 한 문단으로 보여 줌. Pigeon `DisplayMode`에 추가 → Flutter 엔티티 · 매퍼 · 라벨 · ARB(ko/en)도 반영.
+- 빠른 언어: `Settings.quickLanguages`(기본 ko · en · ja · zh, DataStore, 네이티브 전용). 고르면 대상 언어가 바뀐다. 편집 화면은 FL-04에서.
+- 변경: `overlay/FloatingButton.kt`(OptionMenu · BubbleRing), `OverlayController`, `OverlayGeometry.bubbleAngles`, `ResultSheet`(문단 카드 · `paragraphText`), 아이콘 글꼴에 view_list · notes · flip_to_front 추가(D-025 방식으로 재생성), 문자열 ko/en. Pigeon 재생성.
+- Notion 명세 갱신: 플로팅 버튼 · 모드 메뉴(O-02), 캡처 범위 · 인식, 오버레이 UI, 개발 기능(사용자 흐름).
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트(BubbleAndParagraphTest 6개 포함) 통과 · debug APK 빌드. **기기 확인 못 함**: 에뮬레이터가 켜지지 않거나(AVD 정의 파일 누락) 켜져도 화면이 검고 MainActivity가 실행되지 않음.
+- 남은 일: 기기에서 버블 위치(화면 위 · 아래 끝, 왼쪽 가장자리) · 옵션 메뉴 · 문단 표시 확인, "원문 위에 덮기"는 NA-22 전까지 목록으로 보임.
+
 ## 2026-10-01 · 캡처 범위 모드 (이슈 #12, 브랜치 `feat/12-capture-range-modes`)
 - (이슈 #14) 사용자 요청으로 메뉴의 "고정 영역 편집"을 "고정 영역"에 합침: 고정 영역을 고르면 바로 편집 화면이 열리고, 저장 후 버튼 탭 = 번역.
 - NA-20 · NA-21 · NA-08 · NA-07 · NA-06(네이티브): 모드 메뉴의 드래그로 지정 · 고정 영역 · 고정 영역 편집을 연결 ("준비 중" 제거). 설계는 D-027.

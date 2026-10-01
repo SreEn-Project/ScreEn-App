@@ -1,0 +1,42 @@
+package com.example.translation_poc_app.overlay
+
+import com.example.translation_poc_app.translate.ItemStatus
+import com.example.translation_poc_app.translate.TranslatedItem
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class BubbleAndParagraphTest {
+
+    private fun item(translated: String?) = TranslatedItem("원문", translated, "en", if (translated == null) ItemStatus.FAILED else ItemStatus.TRANSLATED)
+
+    @Test
+    fun `버블 각도 - 여유가 있으면 위 가운데 아래`() {
+        assertEquals(listOf(-58f, 0f, 58f), OverlayGeometry.bubbleAngles(spaceAboveDp = 400f, spaceBelowDp = 400f))
+    }
+
+    @Test
+    fun `버블 각도 - 위쪽 끝이면 아래로 몰린다`() {
+        assertEquals(listOf(0f, 42f, 84f), OverlayGeometry.bubbleAngles(spaceAboveDp = 40f, spaceBelowDp = 600f))
+    }
+
+    @Test
+    fun `버블 각도 - 아래쪽 끝이면 위로 몰린다`() {
+        assertEquals(listOf(-84f, -42f, 0f), OverlayGeometry.bubbleAngles(spaceAboveDp = 600f, spaceBelowDp = 40f))
+    }
+
+    @Test
+    fun `문단형은 번역문을 블록 구분 없이 공백으로 잇는다`() {
+        assertEquals("안녕하세요 반갑습니다", paragraphText(listOf(item("안녕하세요"), item("반갑습니다")), "ko"))
+    }
+
+    @Test
+    fun `문단형 - 띄어쓰기 없는 언어는 공백 없이 잇고 실패한 블록은 건너뛴다`() {
+        assertEquals("こんにちは世界", paragraphText(listOf(item("こんにちは"), item(null), item("世界")), "ja"))
+    }
+
+    @Test
+    fun `문단형 - 번역된 블록이 없으면 null`() {
+        assertNull(paragraphText(listOf(item(null)), "ko"))
+    }
+}
