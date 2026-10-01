@@ -749,44 +749,20 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAutoTranslateDetail.
   ///
   /// In en, this message translates to:
-  /// **'After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.'**
+  /// **'After a translation, lightly watches the screen and starts translating as soon as the text changes or scrolling stops. Unchanged text is skipped. Leaving it on uses more battery and may warm the device.'**
   String get settingsAutoTranslateDetail;
 
-  /// No description provided for @settingsAutoSpeed.
+  /// No description provided for @settingsAutoShowDelay.
   ///
   /// In en, this message translates to:
-  /// **'Re-translate speed (slower saves battery)'**
-  String get settingsAutoSpeed;
+  /// **'Show the new translation (after you stop)'**
+  String get settingsAutoShowDelay;
 
-  /// No description provided for @autoSpeedFast.
+  /// No description provided for @settingsHideAfterInteraction.
   ///
   /// In en, this message translates to:
-  /// **'Fast'**
-  String get autoSpeedFast;
-
-  /// No description provided for @autoSpeedNormal.
-  ///
-  /// In en, this message translates to:
-  /// **'Normal'**
-  String get autoSpeedNormal;
-
-  /// No description provided for @autoSpeedSaver.
-  ///
-  /// In en, this message translates to:
-  /// **'Saver'**
-  String get autoSpeedSaver;
-
-  /// No description provided for @autoSpeedBatterySaver.
-  ///
-  /// In en, this message translates to:
-  /// **'Max saver'**
-  String get autoSpeedBatterySaver;
-
-  /// No description provided for @settingsAutoHide.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide the old translation after the screen changes'**
-  String get settingsAutoHide;
+  /// **'Hide the old translation after you touch the screen'**
+  String get settingsHideAfterInteraction;
 
   /// No description provided for @settingsAutoInstant.
   ///

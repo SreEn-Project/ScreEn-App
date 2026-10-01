@@ -85,28 +85,28 @@ final class ChangeAutoTranslate implements UseCase<void, bool> {
   Future<void> call(bool enabled) => _repository.setAutoTranslate(enabled);
 }
 
-/// 자동 번역 "다시 번역 속도" 변경 (#33). 확인 간격과 조작 후 대기 시간을 함께 저장한다.
-final class ChangeAutoSpeed implements UseCase<void, AutoSpeed> {
-  const ChangeAutoSpeed(this._repository);
+/// 자동 번역이 새 번역을 보여 주는 시점 변경 (#35). 가장 가까운 선택지로 맞춘다.
+final class ChangeAutoShowDelay implements UseCase<void, int> {
+  const ChangeAutoShowDelay(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<void> call(AutoSpeed speed) async {
-    await _repository.setAutoCheckIntervalMs(speed.checkIntervalMs);
-    await _repository.setAutoSettleMs(speed.settleMs);
-  }
+  Future<void> call(int ms) =>
+      _repository.setAutoShowDelayMs(nearestChoice(autoShowDelayChoicesMs, ms));
 }
 
-/// 자동 번역 이전 결과 숨김 시간 변경 (#29). 음수는 "숨기지 않음", 나머지는 가장 가까운 선택지로 맞춘다.
-final class ChangeAutoHide implements UseCase<void, int> {
-  const ChangeAutoHide(this._repository);
+/// 조작 뒤 이전 번역 숨김 시간 변경 (#29, #35). 음수는 "숨기지 않음", 나머지는 가장 가까운 선택지로 맞춘다.
+final class ChangeHideAfterInteraction implements UseCase<void, int> {
+  const ChangeHideAfterInteraction(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<void> call(int ms) => _repository.setAutoHideMs(
-    ms < 0 ? autoHideNever : nearestChoice(autoHideChoicesMs.sublist(0, 4), ms),
+  Future<void> call(int ms) => _repository.setHideAfterInteractionMs(
+    ms < 0
+        ? hideNever
+        : nearestChoice(hideAfterInteractionChoicesMs.sublist(0, 4), ms),
   );
 }
 

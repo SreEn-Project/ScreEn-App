@@ -18,13 +18,6 @@ extension EnumLabels on AppLocalizations {
     EngineType.firebaseAi => engineFirebaseDetail,
   };
 
-  String autoSpeedName(AutoSpeed speed) => switch (speed) {
-    AutoSpeed.fast => autoSpeedFast,
-    AutoSpeed.normal => autoSpeedNormal,
-    AutoSpeed.saver => autoSpeedSaver,
-    AutoSpeed.batterySaver => autoSpeedBatterySaver,
-  };
-
   String captureModeName(CaptureMode mode) => switch (mode) {
     CaptureMode.fullScreen => captureModeFull,
     CaptureMode.dragRegion => captureModeRegion,

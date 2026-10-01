@@ -418,88 +418,102 @@ final class ChangeAutoTranslateProvider
 String _$changeAutoTranslateHash() =>
     r'4de9cc03ef32ef9ed3677ad8f5465829134fe13c';
 
-@ProviderFor(changeAutoSpeed)
-final changeAutoSpeedProvider = ChangeAutoSpeedProvider._();
+@ProviderFor(changeAutoShowDelay)
+final changeAutoShowDelayProvider = ChangeAutoShowDelayProvider._();
 
-final class ChangeAutoSpeedProvider
+final class ChangeAutoShowDelayProvider
     extends
-        $FunctionalProvider<ChangeAutoSpeed, ChangeAutoSpeed, ChangeAutoSpeed>
-    with $Provider<ChangeAutoSpeed> {
-  ChangeAutoSpeedProvider._()
+        $FunctionalProvider<
+          ChangeAutoShowDelay,
+          ChangeAutoShowDelay,
+          ChangeAutoShowDelay
+        >
+    with $Provider<ChangeAutoShowDelay> {
+  ChangeAutoShowDelayProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'changeAutoSpeedProvider',
+        name: r'changeAutoShowDelayProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$changeAutoSpeedHash();
+  String debugGetCreateSourceHash() => _$changeAutoShowDelayHash();
 
   @$internal
   @override
-  $ProviderElement<ChangeAutoSpeed> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $ProviderElement<ChangeAutoShowDelay> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  ChangeAutoSpeed create(Ref ref) {
-    return changeAutoSpeed(ref);
+  ChangeAutoShowDelay create(Ref ref) {
+    return changeAutoShowDelay(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ChangeAutoSpeed value) {
+  Override overrideWithValue(ChangeAutoShowDelay value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<ChangeAutoSpeed>(value),
+      providerOverride: $SyncValueProvider<ChangeAutoShowDelay>(value),
     );
   }
 }
 
-String _$changeAutoSpeedHash() => r'28bc444cc0639204464ee352d66e53ff5767192e';
+String _$changeAutoShowDelayHash() =>
+    r'194fbd87c4a01785b6c51d7b360504d206b47cf5';
 
-@ProviderFor(changeAutoHide)
-final changeAutoHideProvider = ChangeAutoHideProvider._();
+@ProviderFor(changeHideAfterInteraction)
+final changeHideAfterInteractionProvider =
+    ChangeHideAfterInteractionProvider._();
 
-final class ChangeAutoHideProvider
-    extends $FunctionalProvider<ChangeAutoHide, ChangeAutoHide, ChangeAutoHide>
-    with $Provider<ChangeAutoHide> {
-  ChangeAutoHideProvider._()
+final class ChangeHideAfterInteractionProvider
+    extends
+        $FunctionalProvider<
+          ChangeHideAfterInteraction,
+          ChangeHideAfterInteraction,
+          ChangeHideAfterInteraction
+        >
+    with $Provider<ChangeHideAfterInteraction> {
+  ChangeHideAfterInteractionProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'changeAutoHideProvider',
+        name: r'changeHideAfterInteractionProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$changeAutoHideHash();
+  String debugGetCreateSourceHash() => _$changeHideAfterInteractionHash();
 
   @$internal
   @override
-  $ProviderElement<ChangeAutoHide> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $ProviderElement<ChangeHideAfterInteraction> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  ChangeAutoHide create(Ref ref) {
-    return changeAutoHide(ref);
+  ChangeHideAfterInteraction create(Ref ref) {
+    return changeHideAfterInteraction(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ChangeAutoHide value) {
+  Override overrideWithValue(ChangeHideAfterInteraction value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<ChangeAutoHide>(value),
+      providerOverride: $SyncValueProvider<ChangeHideAfterInteraction>(value),
     );
   }
 }
 
-String _$changeAutoHideHash() => r'26bc7bd4a3bb912dcb4636013855c63d364e62bd';
+String _$changeHideAfterInteractionHash() =>
+    r'3dc75206567d2be8ac5ea28c83f15df369c83f47';
 
 @ProviderFor(completeOnboarding)
 final completeOnboardingProvider = CompleteOnboardingProvider._();

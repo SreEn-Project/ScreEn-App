@@ -12,9 +12,8 @@ extension AppSettingsMapper on pigeon.AppSettings {
     onboardingCompleted: onboardingCompleted,
     quickLanguages: List.of(quickLanguages),
     autoTranslate: autoTranslate,
-    autoCheckIntervalMs: autoCheckIntervalMs,
-    autoSettleMs: autoSettleMs,
-    autoHideMs: autoHideMs,
+    autoShowDelayMs: autoShowDelayMs,
+    hideAfterInteractionMs: hideAfterInteractionMs,
   );
 }
 

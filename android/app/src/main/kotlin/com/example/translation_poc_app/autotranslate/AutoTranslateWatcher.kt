@@ -10,8 +10,9 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * 자동 번역 감시 루프 (#23). [arm]하면 [sample]로 화면 지문을 주기적으로 읽어 [AutoTranslateTracker]에 넘기고,
- * 다시 번역할 때가 되면 [translate]를 부른다. [stop]하면 즉시 멈춘다 (오버레이를 닫음 · 화면 꺼짐 · 서비스 종료).
+ * 자동 번역 · 이전 번역 숨김 감시 루프 (#23, #35). [arm]하면 [sample]로 화면 지문을 주기적으로 읽어 [AutoTranslateTracker]에 넘기고,
+ * 다시 번역할 때가 되면 [translate]를 부른다
+ * ([AutoTranslateConfig.retranslate]가 꺼져 있으면 번역은 하지 않고 낡은 결과 숨김만 한다). [stop]하면 즉시 멈춘다 (오버레이를 닫음 · 화면 꺼짐 · 서비스 종료).
  *
  * 비용을 줄이는 점: 지문은 프레임 버퍼에서 바로 뽑은 격자 표본이고, 화면이 안 바뀌면 확인 간격이 늘어나며,
  * 번역(OCR)은 화면이 뚜렷이 바뀌고 안정된 뒤에만 돈다. 정지한 화면에서 하는 일은 지문 읽기뿐이다.
@@ -28,8 +29,10 @@ class AutoTranslateWatcher(
     /**
      * 다시 번역한다. 지금 할 수 없으면(번역 중 · 메뉴 열림 등) false — 다음 확인에서 다시 시도한다.
      * 번역할 화면을 캡처하면 [markCaptured]를 불러야 한다 (그 뒤에 화면이 바뀌어야 취소로 본다).
+     * [showNotBefore]는 새 번역을 올릴 수 있는 가장 이른 시각 ([now] 기준): 번역이 일찍 끝나도 그때까지 기다렸다가
+     * 올려야 한다. 기다리는 동안 사용자가 또 조작하면 이 작업은 취소된다.
      */
-    private val translate: suspend () -> Boolean,
+    private val translate: suspend (showNotBefore: Long) -> Boolean,
     /** 낡은 결과를 숨기거나(true) 다시 보이게(false) 한다. 새 번역이 끝나면 호출하지 않는다 (결과를 새로 그리므로). */
     private val setStale: (Boolean) -> Unit = {},
     private val clock: () -> Long = { System.nanoTime() / 1_000_000 },
@@ -42,6 +45,9 @@ class AutoTranslateWatcher(
     private var captured = false
 
     val isWatching: Boolean get() = job?.isActive == true
+
+    /** 감시가 쓰는 시계(ms). [translate]가 받은 시각과 견줄 때 쓴다. */
+    fun now(): Long = clock()
 
     /** 번역 결과가 막 화면에 올랐다: 지금부터 감시한다 (이미 감시 중이면 기준을 새로 잡는다). */
     fun arm() {
@@ -91,12 +97,13 @@ class AutoTranslateWatcher(
                             stale = nowStale
                             setStale(nowStale)
                         }
-                        if (decision == AutoTranslateTracker.Decision.TRANSLATE) {
+                        if (decision == AutoTranslateTracker.Decision.TRANSLATE && config().retranslate) {
                             captured = false
                             runningBase = null
+                            val showNotBefore = tracker.showNotBefore()
                             running = launch {
                                 val done = try {
-                                    translate()
+                                    translate(showNotBefore)
                                 } catch (e: CancellationException) {
                                     throw e
                                 } catch (e: Exception) {

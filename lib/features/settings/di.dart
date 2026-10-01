@@ -51,12 +51,12 @@ ChangeAutoTranslate changeAutoTranslate(Ref ref) =>
     ChangeAutoTranslate(ref.watch(settingsRepositoryProvider));
 
 @riverpod
-ChangeAutoSpeed changeAutoSpeed(Ref ref) =>
-    ChangeAutoSpeed(ref.watch(settingsRepositoryProvider));
+ChangeAutoShowDelay changeAutoShowDelay(Ref ref) =>
+    ChangeAutoShowDelay(ref.watch(settingsRepositoryProvider));
 
 @riverpod
-ChangeAutoHide changeAutoHide(Ref ref) =>
-    ChangeAutoHide(ref.watch(settingsRepositoryProvider));
+ChangeHideAfterInteraction changeHideAfterInteraction(Ref ref) =>
+    ChangeHideAfterInteraction(ref.watch(settingsRepositoryProvider));
 
 @riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>

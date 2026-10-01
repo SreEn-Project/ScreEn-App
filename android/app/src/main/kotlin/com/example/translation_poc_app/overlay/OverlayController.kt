@@ -36,6 +36,7 @@ import com.example.translation_poc_app.translate.TranslationOutcome
 import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -81,9 +82,9 @@ class OverlayController(
     private var targetLanguage by mutableStateOf("")
     private var quickLanguages: List<String> = emptyList()
     private var autoConfig = AutoTranslateConfig(
-        com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_CHECK_INTERVAL_MS,
-        com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_SETTLE_MS,
-        com.example.translation_poc_app.data.settings.Settings.DEFAULT_AUTO_HIDE_MS,
+        showDelayMs = AppSettings.DEFAULT_AUTO_SHOW_DELAY_MS,
+        hideMs = AppSettings.DEFAULT_HIDE_AFTER_INTERACTION_MS,
+        retranslate = false,
     )
     private var autoTranslate = false
     private var sourceLanguage by mutableStateOf(AppSettings.SOURCE_LANGUAGE_AUTO)
@@ -94,10 +95,10 @@ class OverlayController(
     /** 지금 떠 있는 결과의 항목. 자동 번역 결과가 같으면 시트를 바꾸지 않는다. */
     private var shownItems: List<TranslatedItem>? = null
 
-    /** 결과가 터치를 통과시키는 '원문 위에 덮기'로 떠 있다 (자동 번역 중). 버튼을 누르면 닫는다. */
+    /** 결과가 터치를 통과시키는 '원문 위에 덮기'로 떠 있다 (자동 번역 중이거나 조작 뒤 숨김이 켜져 있을 때). 버튼을 누르면 닫는다. */
     private var passthrough = false
 
-    /** 화면이 바뀌어서 낡은 결과를 숨기는 중이다 (자동 번역, #29). 새 결과가 뜨면 풀린다. */
+    /** 화면이 바뀌어서 낡은 결과를 숨기는 중이다 (#29, #35). 새 결과가 뜨면 풀린다. */
     private var staleHidden = false
 
     private val watcher = AutoTranslateWatcher(
@@ -181,8 +182,16 @@ class OverlayController(
                 quickLanguages = it.quickLanguages
                 autoTranslate = it.autoTranslate
                 sourceLanguage = it.sourceLanguage
-                autoConfig = AutoTranslateConfig(it.autoCheckIntervalMs, it.autoSettleMs, it.autoHideMs)
-                if (!autoTranslate) watcher.stop()
+                autoConfig = AutoTranslateConfig(
+                    showDelayMs = it.autoShowDelayMs,
+                    hideMs = it.hideAfterInteractionMs,
+                    retranslate = it.autoTranslate,
+                )
+                // 자동 번역을 꺼도 조작 뒤 숨김이 켜진 채 덮어쓰기 결과가 떠 있으면 숨김 감시는 이어간다 (다시 번역만 멈춘다).
+                if (!autoTranslate && !(passthrough && autoConfig.hideMs >= 0)) {
+                    watcher.stop()
+                    setStaleHidden(false)
+                }
             }
         }
         context.registerReceiver(
@@ -229,11 +238,17 @@ class OverlayController(
             dismissMenu()
             return
         }
-        if (passthrough) {
-            // 자동 번역 중인 막은 터치를 통과시켜 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (감시도 멈춘다).
+        if (passthrough && !staleHidden) {
+            // 터치를 통과시키는 막은 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (감시도 멈춘다).
+            // 낡아서 숨겨진 막은 보이는 게 없으니 이 탭은 닫기가 아니라 다시 번역이다.
             dismissSheet()
             return
         }
+        startTranslation()
+    }
+
+    /** 버튼을 누른 것과 같다: 캡처 범위 모드에 맞게 번역을 시작한다 (드래그 · 고정 영역 미지정이면 영역 선택부터). */
+    private fun startTranslation() {
         when (mode) {
             CaptureRange.FULL_SCREEN -> translate()
             CaptureRange.DRAG_REGION -> showPicker(RegionPickMode.DRAG) { translate(it) }
@@ -258,16 +273,20 @@ class OverlayController(
             }
             logOutcome(outcome)
             showSheet(outcome)
-            // 자동 번역: 번역이 화면에 올랐으면 이제부터 화면 변화를 지켜본다 (#23).
-            if (autoTranslate && !powerManager.isPowerSaveMode && outcome is TranslationOutcome.Translated) watcher.arm()
+            // 번역이 화면에 올랐으면 이제부터 화면 변화를 지켜본다: 자동 번역은 다시 번역하고 (#23),
+            // 조작 뒤 숨김이 켜진 덮어쓰기 결과(passthrough)는 숨김만 한다 (#35).
+            if ((autoTranslate || passthrough) && !powerManager.isPowerSaveMode && outcome is TranslationOutcome.Translated) {
+                watcher.arm()
+            }
         }
     }
 
     /**
      * 자동 번역(#23)이 부른다: 화면이 바뀌어 안정됐으니 같은 영역을 다시 번역한다. 지금 할 수 없으면 false.
      * 떠 있는 결과가 캡처에 찍히지 않게 잠깐 숨겼다가, 결과가 같으면 그대로 다시 보이고 다르면 새 결과로 바꾼다.
+     * 번역은 바로 하되, 화면에 올리는 것은 [showNotBefore](조작이 끝난 시각 + 표시 시점 설정)까지 기다린다 (#35).
      */
-    private suspend fun autoTranslateOnce(): Boolean {
+    private suspend fun autoTranslateOnce(showNotBefore: Long): Boolean {
         if (busy || menu != null || picker != null || dragging) return false
         busy = true
         val old = sheet
@@ -286,6 +305,13 @@ class OverlayController(
             busy = false
         }
         logOutcome(outcome)
+        // 새 번역이 일찍 끝나도 설정한 시점 전에는 올리지 않는다. 기다리는 동안 또 조작하면 감시가 이 작업을 취소한다.
+        val changesScreen = outcome is TranslationOutcome.Translated || outcome == TranslationOutcome.NoText ||
+            outcome is TranslationOutcome.AlreadyInTarget
+        if (changesScreen) {
+            val wait = showNotBefore - watcher.now()
+            if (wait > 0) delay(wait)
+        }
         when (outcome) {
             is TranslationOutcome.Translated -> if (outcome.items != shownItems) {
                 showSheet(outcome)
@@ -475,8 +501,13 @@ class OverlayController(
         )
         return listOf(
             MenuOption(Symbol.AUTO_AWESOME, autoLabel, autoTranslate) {
-                scope.launch { settingsRepository.setAutoTranslate(!autoTranslate) }
+                val enable = !autoTranslate
+                // 저장된 설정이 돌아오기 전에 바로 번역을 시작하므로 켜진 상태를 먼저 반영한다 (끝난 번역이 감시를 시작하도록).
+                autoTranslate = enable
+                scope.launch { settingsRepository.setAutoTranslate(enable) }
                 post(::dismissMenu)
+                // 켜면 지금 화면부터 바로 번역한다 (버튼을 한 번 누른 것과 같다).
+                if (enable) post(::startTranslation)
             },
         )
     }
@@ -613,8 +644,9 @@ class OverlayController(
         } else {
             emptyList()
         }
-        // 자동 번역 중인 막은 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다 (#23). 닫기는 플로팅 버튼.
-        passthrough = autoTranslate && overItems.isNotEmpty()
+        // 자동 번역 중이거나 조작 뒤 숨김이 켜져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
+        // (#23, #35). 닫기는 플로팅 버튼.
+        passthrough = (autoTranslate || autoConfig.hideMs >= 0) && overItems.isNotEmpty()
         shownItems = (outcome as? TranslationOutcome.Translated)?.items
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.MATCH_PARENT,

@@ -71,6 +71,8 @@ data class PipelineTimings(
     val translate: Long = 0,
     val blocks: Int = 0,
     val segments: Int = 0,
+    /** 캐시로 번역을 건너뛴 블록 수 (#35). */
+    val cachedBlocks: Int = 0,
 ) {
     val total: Long get() = capture + ocr + detect + translate
 }
@@ -90,6 +92,10 @@ class TranslationPipeline(
     private val onTimings: (PipelineTimings) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
+    // 블록(원문 글자) 단위 캐시 (#35). 안 바뀐 글자는 감지 · 번역을 건너뛴다. 크기는 자동(LRU).
+    private val decisions = BlockCache<DecisionKey, BlockDecision>()
+    private val translations = BlockCache<TranslationKey, TranslationResult>()
+
     /**
      * @param region 이 영역만 번역한다 (NA-07). null이면 화면 전체.
      * @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때.
@@ -130,12 +136,13 @@ class TranslationPipeline(
                 return TranslationOutcome.NoText
             }
 
-            val detected = detect(ocr.copy(blocks = blocks), current.targetLanguage)
+            var cached = 0
+            val detected = detectCached(ocr, blocks, current.targetLanguage)
             val detectMs = lap()
             val engine = engineFor(current)
             val requests = TranslationAssembler.requests(detected, current.targetLanguage)
-            val results = translateAll(engine, requests)
-            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size))
+            val results = translateAll(engine, requests) { cached++ }
+            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size, cached))
             TranslationAssembler.assemble(
                 detected, results, engine.id, current.targetLanguage,
                 lineHeightOf = { block -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } },
@@ -158,12 +165,48 @@ class TranslationPipeline(
         }
     }
 
-    /** 블록마다 따로 요청하고 동시에 기다린다. ML Kit은 블록 하나씩, AI 엔진(3단계)은 묶음 호출로 바꿀 수 있다. */
-    private suspend fun translateAll(
+    /** 캐시에 없는 블록만 언어를 감지한다. 결과 순서는 [blocks] 그대로. */
+    internal suspend fun detectCached(
+        ocr: OcrResult,
+        blocks: List<OcrBlock>,
+        target: String,
+    ): List<DetectedBlock> {
+        val keys = blocks.map { DecisionKey(TranslationAssembler.detectionText(it), it.language, target) }
+        val known = keys.map { decisions[it] }
+        val missing = blocks.filterIndexed { i, _ -> known[i] == null }
+        val fresh = if (missing.isEmpty()) emptyList() else detect(ocr.copy(blocks = missing), target)
+        val freshIterator = fresh.iterator()
+        return blocks.mapIndexed { i, block ->
+            val cachedDecision = known[i]
+            if (cachedDecision != null) {
+                DetectedBlock(block, cachedDecision)
+            } else {
+                freshIterator.next().also { decisions[keys[i]] = it.decision }
+            }
+        }
+    }
+
+    /**
+     * 블록마다 따로 요청하고 동시에 기다린다. 캐시에 있는 번역은 엔진을 부르지 않고(맞으면 [onHit]), 새로 성공한 번역은
+     * 캐시에 넣는다 (실패는 넣지 않아 다음에 다시 시도). ML Kit은 블록 하나씩, AI 엔진(3단계)은 묶음 호출로 바꿀 수 있다.
+     */
+    internal suspend fun translateAll(
         engine: TranslationEngine,
         requests: List<TranslationRequest>,
+        onHit: () -> Unit,
     ): List<EngineResult<TranslationResult>> = coroutineScope {
-        requests.map { async { engine.translate(it) } }.awaitAll()
+        requests.map { request ->
+            val key = TranslationKey(engine.id, request.text, request.source, request.target)
+            val hit = translations[key]
+            if (hit != null) {
+                onHit()
+                async<EngineResult<TranslationResult>> { EngineResult.Ok(hit) }
+            } else {
+                async<EngineResult<TranslationResult>> {
+                    engine.translate(request).also { if (it is EngineResult.Ok) translations[key] = it.value }
+                }
+            }
+        }.awaitAll()
     }
 }
 

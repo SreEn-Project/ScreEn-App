@@ -12,8 +12,7 @@ abstract interface class SettingsRepository {
   Future<void> setDisplayMode(DisplayMode mode);
   Future<void> setQuickLanguages(List<String> languageCodes);
   Future<void> setAutoTranslate(bool enabled);
-  Future<void> setAutoCheckIntervalMs(int ms);
-  Future<void> setAutoSettleMs(int ms);
-  Future<void> setAutoHideMs(int ms);
+  Future<void> setAutoShowDelayMs(int ms);
+  Future<void> setHideAfterInteractionMs(int ms);
   Future<void> setOnboardingCompleted(bool completed);
 }
