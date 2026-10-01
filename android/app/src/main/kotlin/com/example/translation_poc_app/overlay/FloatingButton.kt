@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -260,7 +261,9 @@ internal fun BubbleRing(bubbles: List<BubbleSpec>, inwardRight: Boolean, anchorY
                     bubble.label,
                     style = OverlayTheme.badge.copy(color = colors.onSurface, textAlign = TextAlign.Center),
                     maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier
+                        .wrapContentWidth(Alignment.CenterHorizontally, unbounded = true)
                         .clip(RoundedCornerShape(50))
                         .background(colors.surface)
                         .padding(horizontal = 8.dp, vertical = 2.dp),
