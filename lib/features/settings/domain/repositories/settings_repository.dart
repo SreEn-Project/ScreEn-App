@@ -10,5 +10,6 @@ abstract interface class SettingsRepository {
   Future<void> setEngine(EngineType engine);
   Future<void> setCaptureMode(CaptureMode mode);
   Future<void> setDisplayMode(DisplayMode mode);
+  Future<void> setQuickLanguages(List<String> languageCodes);
   Future<void> setOnboardingCompleted(bool completed);
 }

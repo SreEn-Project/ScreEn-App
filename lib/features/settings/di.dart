@@ -43,5 +43,9 @@ ChangeDisplayMode changeDisplayMode(Ref ref) =>
     ChangeDisplayMode(ref.watch(settingsRepositoryProvider));
 
 @riverpod
+ChangeQuickLanguages changeQuickLanguages(Ref ref) =>
+    ChangeQuickLanguages(ref.watch(settingsRepositoryProvider));
+
+@riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));

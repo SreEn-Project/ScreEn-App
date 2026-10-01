@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:translation_poc_app/features/settings/di.dart';
+import 'package:translation_poc_app/features/settings/domain/entities/translator_settings.dart';
+import 'package:translation_poc_app/features/settings/domain/repositories/settings_repository.dart';
 import 'package:translation_poc_app/features/permission/di.dart';
 import 'package:translation_poc_app/features/permission/domain/entities/app_permissions.dart';
 import 'package:translation_poc_app/features/permission/domain/repositories/permission_repository.dart';
@@ -43,12 +46,50 @@ class FakePermissionRepository implements PermissionRepository {
   Future<void> requestOverlay() async => overlay = true;
 }
 
+/// 기본 설정을 돌려주는 가짜 설정 저장소 (바꾸면 기억만 한다).
+class FakeSettingsRepository implements SettingsRepository {
+  FakeSettingsRepository([this.settings = const TranslatorSettings()]);
+
+  TranslatorSettings settings;
+
+  @override
+  Future<TranslatorSettings> load() async => settings;
+
+  @override
+  Stream<TranslatorSettings> watch() => const Stream.empty();
+
+  @override
+  Future<void> setTargetLanguage(String languageCode) async =>
+      settings = settings.copyWith(targetLanguage: languageCode);
+
+  @override
+  Future<void> setEngine(EngineType engine) async =>
+      settings = settings.copyWith(engine: engine);
+
+  @override
+  Future<void> setCaptureMode(CaptureMode mode) async =>
+      settings = settings.copyWith(captureMode: mode);
+
+  @override
+  Future<void> setDisplayMode(DisplayMode mode) async =>
+      settings = settings.copyWith(displayMode: mode);
+
+  @override
+  Future<void> setQuickLanguages(List<String> languageCodes) async =>
+      settings = settings.copyWith(quickLanguages: languageCodes);
+
+  @override
+  Future<void> setOnboardingCompleted(bool completed) async =>
+      settings = settings.copyWith(onboardingCompleted: completed);
+}
+
 /// 네이티브 연결 provider를 가짜로 바꾼다.
 List<Override> fakeNativeOverrides({
   ServiceStatus service = ServiceStatus.stopped,
   bool permissionsGranted = false,
 }) => [
   serviceRepositoryProvider.overrideWithValue(FakeServiceRepository(service)),
+  settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository()),
   permissionRepositoryProvider.overrideWithValue(
     FakePermissionRepository(
       overlay: permissionsGranted,

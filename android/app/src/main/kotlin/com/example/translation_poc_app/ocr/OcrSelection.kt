@@ -21,6 +21,35 @@ object OcrSelection {
         else -> setOf(Script.LATIN)
     }
 
+    /** 자동 모드의 첫 시도에 쓰는 인식기 (직전에 잘 읽은 것이 없을 때). 한 · 영을 읽고 가장 가볍게 시작한다. */
+    val DEFAULT_FIRST: Script = Script.KOREAN
+
+    /** 자동 모드에서 [first]를 뺀 나머지 한중일 인식기. 첫 시도 결과가 미덥지 않을 때만 돌린다. */
+    fun remainingAuto(first: Script): Set<Script> =
+        setOf(Script.KOREAN, Script.JAPANESE, Script.CHINESE) - first
+
+    /** 첫 시도에서 이 글자 수 미만이면 인식기가 안 맞았을 수 있다. */
+    const val MIN_TRUSTED_CHARS = 12
+
+    /** 첫 시도의 글자 가중 평균 신뢰도가 이보다 낮으면 다른 문자 체계가 섞여 있을 수 있다. */
+    const val MIN_TRUSTED_CONFIDENCE = 0.8f
+
+    /**
+     * 인식기 하나로 읽은 결과가 믿을 만한지 (거르기 전 줄 기준). 믿기 어려우면 나머지 인식기도 돌려
+     * 가장 잘 읽은 걸 고른다. 맞지 않는 인식기는 글자를 적게 · 낮은 신뢰도로 읽는 점을 이용한다 (D-030).
+     */
+    fun isTrusted(raw: List<OcrBlock>): Boolean {
+        var chars = 0
+        var weighted = 0.0
+        for (block in raw) for (line in block.lines) {
+            val n = line.text.count { !it.isWhitespace() }
+            chars += n
+            weighted += n * line.confidence
+        }
+        // 읽은 게 없는 경우도 믿지 않는다: 맞지 않는 인식기는 아예 아무것도 못 읽기도 한다.
+        return chars >= MIN_TRUSTED_CHARS && weighted / chars >= MIN_TRUSTED_CONFIDENCE
+    }
+
     /** 신뢰도 낮은 줄을 빼고, 줄이 남지 않은 블록은 버린다. 블록 글자는 남은 줄로 다시 만든다. */
     fun filterLowConfidence(
         blocks: List<OcrBlock>,

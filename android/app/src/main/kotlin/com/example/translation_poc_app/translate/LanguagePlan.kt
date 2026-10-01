@@ -51,14 +51,16 @@ object LanguagePlan {
      * @param ocrHint OCR 인식기가 추정한 언어 (Language ID가 모를 때만 쓴다)
      * @param target 대상 언어
      * @param supported 번역 엔진이 원문으로 받을 수 있는 언어
+     * @param text 블록 글자. 한글 · 가나가 있으면 Language ID 결과보다 우선한다 ([scriptLanguage]).
      */
     fun decide(
         detected: String?,
         ocrHint: String?,
         target: String,
         supported: Set<String>,
+        text: String? = null,
     ): BlockDecision {
-        val fromId = normalize(detected)
+        val fromId = text?.let(::scriptLanguage) ?: normalize(detected)
         val language = if (fromId != UNDETERMINED) fromId else normalize(ocrHint)
         val action = when {
             language == UNDETERMINED -> BlockAction.UNKNOWN
@@ -68,6 +70,34 @@ object LanguagePlan {
         }
         return BlockDecision(language, action)
     }
+
+    /**
+     * 글자 체계만으로 언어가 확실한 경우 (#19). 한글이 있으면 ko, 가나가 있으면 ja.
+     * Language ID는 한자가 많은 일본어를 zh로, 영어가 섞인 한국어를 en으로 읽는 일이 있다.
+     * 글자 수의 [MIN_SHARE] 이상일 때만 따라 우연히 섞인 글자에 끌려가지 않게 한다.
+     */
+    fun scriptLanguage(text: String): String? {
+        var hangul = 0
+        var kana = 0
+        var total = 0
+        for (c in text) {
+            if (!c.isLetter()) continue
+            total++
+            when (Character.UnicodeScript.of(c.code)) {
+                Character.UnicodeScript.HANGUL -> hangul++
+                Character.UnicodeScript.HIRAGANA, Character.UnicodeScript.KATAKANA -> kana++
+                else -> Unit
+            }
+        }
+        if (total == 0) return null
+        return when {
+            hangul >= kana && hangul.toFloat() / total >= MIN_SHARE -> "ko"
+            kana.toFloat() / total >= MIN_SHARE -> "ja"
+            else -> null
+        }
+    }
+
+    private const val MIN_SHARE = 0.3f
 
     /** 로마자 표기가 원래 표기인 언어 ("en-Latn" 같은 태그도 그대로 쓴다). */
     private val LATIN_BASED = setOf(

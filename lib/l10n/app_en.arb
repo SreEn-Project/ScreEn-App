@@ -114,6 +114,17 @@
   "displayModeOverlay": "Over original",
   "settingsButtonSize": "Floating button size",
   "settingsButtonOpacity": "Floating button opacity",
+  "settingsQuickLanguages": "Quick languages",
+  "settingsQuickLanguagesDetail": "Languages shown in the floating button's long-press menu",
+  "quickLanguagesTitle": "Edit quick languages",
+  "quickLanguagesHint": "{count}/{max} selected, at least {min}. Tap to toggle.",
+  "@quickLanguagesHint": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "max": {"type": "int"},
+      "min": {"type": "int"}
+    }
+  },
   "settingsSectionEtc": "More",
   "settingsAbout": "About",
 

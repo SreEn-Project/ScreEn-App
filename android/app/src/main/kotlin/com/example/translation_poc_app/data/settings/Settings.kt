@@ -21,7 +21,7 @@ data class Settings(
     val onboardingCompleted: Boolean = false,
     /** 고정 영역 모드가 번역할 영역 (NA-08). 아직 안 정했으면 null. 네이티브 전용 (Pigeon 없음). */
     val fixedRegion: NormalizedRegion? = null,
-    /** 플로팅 버튼 "빠른 언어" 버블에 나오는 대상 언어 코드들. 네이티브 전용 (편집 화면은 FL-04에서). */
+    /** 플로팅 버튼 "빠른 언어" 버블에 나오는 대상 언어 코드들. 앱 설정 화면(FL-04)에서 편집하며 Pigeon으로 주고받는다. */
     val quickLanguages: List<String> = DEFAULT_QUICK_LANGUAGES,
 ) {
     companion object {

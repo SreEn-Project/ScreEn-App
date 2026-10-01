@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 mixin _$TranslatorSettings {
 
 /// BCP-47 언어 코드. 예: "ko", "en".
- String get targetLanguage; EngineType get engine; CaptureMode get captureMode; DisplayMode get displayMode; bool get onboardingCompleted;
+ String get targetLanguage; EngineType get engine; CaptureMode get captureMode; DisplayMode get displayMode; bool get onboardingCompleted;/// 플로팅 버튼 "빠른 언어" 버블에 나올 대상 언어 코드들 (사용자 편집, 순서 유지).
+ List<String> get quickLanguages;
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,20 +29,20 @@ $TranslatorSettingsCopyWith<TranslatorSettings> get copyWith => _$TranslatorSett
 @override
 bool operator ==(Object other) {
   final _this = this as TranslatorSettings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TranslatorSettings&&(identical(other.targetLanguage, _this.targetLanguage) || other.targetLanguage == _this.targetLanguage)&&(identical(other.engine, _this.engine) || other.engine == _this.engine)&&(identical(other.captureMode, _this.captureMode) || other.captureMode == _this.captureMode)&&(identical(other.displayMode, _this.displayMode) || other.displayMode == _this.displayMode)&&(identical(other.onboardingCompleted, _this.onboardingCompleted) || other.onboardingCompleted == _this.onboardingCompleted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TranslatorSettings&&(identical(other.targetLanguage, _this.targetLanguage) || other.targetLanguage == _this.targetLanguage)&&(identical(other.engine, _this.engine) || other.engine == _this.engine)&&(identical(other.captureMode, _this.captureMode) || other.captureMode == _this.captureMode)&&(identical(other.displayMode, _this.displayMode) || other.displayMode == _this.displayMode)&&(identical(other.onboardingCompleted, _this.onboardingCompleted) || other.onboardingCompleted == _this.onboardingCompleted)&&const DeepCollectionEquality().equals(other.quickLanguages, _this.quickLanguages));
 }
 
 
 @override
 int get hashCode {
   final _this = this as TranslatorSettings;
-  return Object.hash(runtimeType,_this.targetLanguage,_this.engine,_this.captureMode,_this.displayMode,_this.onboardingCompleted);
+  return Object.hash(runtimeType,_this.targetLanguage,_this.engine,_this.captureMode,_this.displayMode,_this.onboardingCompleted,const DeepCollectionEquality().hash(_this.quickLanguages));
 }
 
 @override
 String toString() {
   final _this = this as TranslatorSettings;
-  return 'TranslatorSettings(targetLanguage: ${_this.targetLanguage}, engine: ${_this.engine}, captureMode: ${_this.captureMode}, displayMode: ${_this.displayMode}, onboardingCompleted: ${_this.onboardingCompleted})';
+  return 'TranslatorSettings(targetLanguage: ${_this.targetLanguage}, engine: ${_this.engine}, captureMode: ${_this.captureMode}, displayMode: ${_this.displayMode}, onboardingCompleted: ${_this.onboardingCompleted}, quickLanguages: ${_this.quickLanguages})';
 }
 
 
@@ -52,7 +53,7 @@ abstract mixin class $TranslatorSettingsCopyWith<$Res>  {
   factory $TranslatorSettingsCopyWith(TranslatorSettings value, $Res Function(TranslatorSettings) _then) = _$TranslatorSettingsCopyWithImpl;
 @useResult
 $Res call({
- String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted
+ String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted, List<String> quickLanguages
 });
 
 
@@ -69,14 +70,15 @@ class _$TranslatorSettingsCopyWithImpl<$Res>
 
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,Object? quickLanguages = null,}) {
   return _then(TranslatorSettings(
 targetLanguage: null == targetLanguage ? _self.targetLanguage : targetLanguage // ignore: cast_nullable_to_non_nullable
 as String,engine: null == engine ? _self.engine : engine // ignore: cast_nullable_to_non_nullable
 as EngineType,captureMode: null == captureMode ? _self.captureMode : captureMode // ignore: cast_nullable_to_non_nullable
 as CaptureMode,displayMode: null == displayMode ? _self.displayMode : displayMode // ignore: cast_nullable_to_non_nullable
 as DisplayMode,onboardingCompleted: null == onboardingCompleted ? _self.onboardingCompleted : onboardingCompleted // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,quickLanguages: null == quickLanguages ? _self.quickLanguages : quickLanguages // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -161,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TranslatorSettings() when $default != null:
-return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted);case _:
+return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages);case _:
   return orElse();
 
 }
@@ -182,10 +184,10 @@ return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages)  $default,) {final _that = this;
 switch (_that) {
 case _TranslatorSettings():
-return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted);case _:
+return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +204,10 @@ return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages)?  $default,) {final _that = this;
 switch (_that) {
 case _TranslatorSettings() when $default != null:
-return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted);case _:
+return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages);case _:
   return null;
 
 }
@@ -217,7 +219,7 @@ return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displa
 
 
 class _TranslatorSettings implements TranslatorSettings {
-  const _TranslatorSettings({this.targetLanguage = 'ko', this.engine = EngineType.mlKit, this.captureMode = CaptureMode.fullScreen, this.displayMode = DisplayMode.list, this.onboardingCompleted = false});
+  const _TranslatorSettings({this.targetLanguage = 'ko', this.engine = EngineType.mlKit, this.captureMode = CaptureMode.fullScreen, this.displayMode = DisplayMode.list, this.onboardingCompleted = false,  List<String> quickLanguages = defaultQuickLanguages}): _quickLanguages = quickLanguages;
   
 
 /// BCP-47 언어 코드. 예: "ko", "en".
@@ -226,6 +228,15 @@ class _TranslatorSettings implements TranslatorSettings {
 @override@JsonKey() final  CaptureMode captureMode;
 @override@JsonKey() final  DisplayMode displayMode;
 @override@JsonKey() final  bool onboardingCompleted;
+/// 플로팅 버튼 "빠른 언어" 버블에 나올 대상 언어 코드들 (사용자 편집, 순서 유지).
+ final  List<String> _quickLanguages;
+/// 플로팅 버튼 "빠른 언어" 버블에 나올 대상 언어 코드들 (사용자 편집, 순서 유지).
+@override@JsonKey() List<String> get quickLanguages {
+  if (_quickLanguages is EqualUnmodifiableListView) return _quickLanguages;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_quickLanguages);
+}
+
 
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -237,18 +248,18 @@ _$TranslatorSettingsCopyWith<_TranslatorSettings> get copyWith => __$TranslatorS
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TranslatorSettings&&(identical(other.targetLanguage, targetLanguage) || other.targetLanguage == targetLanguage)&&(identical(other.engine, engine) || other.engine == engine)&&(identical(other.captureMode, captureMode) || other.captureMode == captureMode)&&(identical(other.displayMode, displayMode) || other.displayMode == displayMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TranslatorSettings&&(identical(other.targetLanguage, targetLanguage) || other.targetLanguage == targetLanguage)&&(identical(other.engine, engine) || other.engine == engine)&&(identical(other.captureMode, captureMode) || other.captureMode == captureMode)&&(identical(other.displayMode, displayMode) || other.displayMode == displayMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&const DeepCollectionEquality().equals(other.quickLanguages, _quickLanguages));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,targetLanguage,engine,captureMode,displayMode,onboardingCompleted);
+    return Object.hash(runtimeType,targetLanguage,engine,captureMode,displayMode,onboardingCompleted,const DeepCollectionEquality().hash(_quickLanguages));
 }
 
 @override
 String toString() {
-    return 'TranslatorSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted)';
+    return 'TranslatorSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages)';
 }
 
 
@@ -259,7 +270,7 @@ abstract mixin class _$TranslatorSettingsCopyWith<$Res> implements $TranslatorSe
   factory _$TranslatorSettingsCopyWith(_TranslatorSettings value, $Res Function(_TranslatorSettings) _then) = __$TranslatorSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted
+ String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted, List<String> quickLanguages
 });
 
 
@@ -276,14 +287,15 @@ class __$TranslatorSettingsCopyWithImpl<$Res>
 
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,Object? quickLanguages = null,}) {
   return _then(_TranslatorSettings(
 targetLanguage: null == targetLanguage ? _self.targetLanguage : targetLanguage // ignore: cast_nullable_to_non_nullable
 as String,engine: null == engine ? _self.engine : engine // ignore: cast_nullable_to_non_nullable
 as EngineType,captureMode: null == captureMode ? _self.captureMode : captureMode // ignore: cast_nullable_to_non_nullable
 as CaptureMode,displayMode: null == displayMode ? _self.displayMode : displayMode // ignore: cast_nullable_to_non_nullable
 as DisplayMode,onboardingCompleted: null == onboardingCompleted ? _self.onboardingCompleted : onboardingCompleted // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,quickLanguages: null == quickLanguages ? _self._quickLanguages : quickLanguages // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

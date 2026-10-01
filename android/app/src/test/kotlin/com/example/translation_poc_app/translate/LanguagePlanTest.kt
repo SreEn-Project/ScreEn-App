@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.translate
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class LanguagePlanTest {
@@ -52,5 +53,22 @@ class LanguagePlanTest {
     fun `둘 다 모르면 번역하지 않는다`() {
         assertEquals(BlockAction.UNKNOWN, decide("und", hint = "und").action)
         assertEquals(BlockAction.UNKNOWN, decide(null, hint = null).action)
+    }
+}
+
+class ScriptLanguageTest {
+    @Test
+    fun `한글 · 가나가 있으면 글자 체계로 정한다`() {
+        assertEquals("ko", LanguagePlan.scriptLanguage("오늘 날씨 Weather"))
+        assertEquals("ja", LanguagePlan.scriptLanguage("今日はいい天気です"))
+        assertNull(LanguagePlan.scriptLanguage("今日天气很好"))
+        assertNull(LanguagePlan.scriptLanguage("Hello 안"))
+        assertNull(LanguagePlan.scriptLanguage("1234"))
+    }
+
+    @Test
+    fun `글자 체계가 Language ID보다 우선한다`() {
+        val d = LanguagePlan.decide("zh", null, "en", setOf("ja", "zh", "ko"), "今日はいい天気です")
+        assertEquals("ja", d.language)
     }
 }

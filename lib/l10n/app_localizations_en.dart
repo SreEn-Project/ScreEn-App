@@ -332,6 +332,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsButtonOpacity => 'Floating button opacity';
 
   @override
+  String get settingsQuickLanguages => 'Quick languages';
+
+  @override
+  String get settingsQuickLanguagesDetail =>
+      'Languages shown in the floating button\'s long-press menu';
+
+  @override
+  String get quickLanguagesTitle => 'Edit quick languages';
+
+  @override
+  String quickLanguagesHint(int count, int max, int min) {
+    return '$count/$max selected, at least $min. Tap to toggle.';
+  }
+
+  @override
   String get settingsSectionEtc => 'More';
 
   @override

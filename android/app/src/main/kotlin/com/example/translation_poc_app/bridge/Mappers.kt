@@ -14,6 +14,7 @@ fun Settings.toPigeon() = AppSettings(
     captureMode = captureRange.toPigeon(),
     displayMode = resultDisplay.toPigeon(),
     onboardingCompleted = onboardingCompleted,
+    quickLanguages = quickLanguages,
 )
 
 fun Engine.toPigeon() = when (this) {

@@ -19,7 +19,7 @@ enum EngineType { mlKit, gemini, firebaseAi }
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
 
-/// 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22 전까지는 list로 보임).
+/// 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22).
 enum DisplayMode { list, paragraph, overlay }
 
 /// 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
@@ -34,6 +34,7 @@ class AppSettings {
     required this.captureMode,
     required this.displayMode,
     required this.onboardingCompleted,
+    required this.quickLanguages,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -42,6 +43,9 @@ class AppSettings {
   CaptureMode captureMode;
   DisplayMode displayMode;
   bool onboardingCompleted;
+
+  /// 플로팅 버튼 "빠른 언어" 버블에 나올 대상 언어 코드들 (사용자 편집, 순서 유지).
+  List<String> quickLanguages;
 }
 
 @HostApi()
@@ -60,6 +64,9 @@ abstract class SettingsHostApi {
 
   @async
   void setDisplayMode(DisplayMode mode);
+
+  @async
+  void setQuickLanguages(List<String> languageCodes);
 
   @async
   void setOnboardingCompleted(bool completed);

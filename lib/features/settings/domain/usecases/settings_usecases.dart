@@ -61,6 +61,20 @@ final class ChangeDisplayMode implements UseCase<void, DisplayMode> {
   Future<void> call(DisplayMode mode) => _repository.setDisplayMode(mode);
 }
 
+/// 빠른 언어 목록 변경 (FL-04). 최소 [minQuickLanguages]개, 최대 [maxQuickLanguages]개로 맞추고 중복은 없앤다.
+final class ChangeQuickLanguages implements UseCase<void, List<String>> {
+  const ChangeQuickLanguages(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(List<String> languageCodes) {
+    final codes = languageCodes.toSet().take(maxQuickLanguages).toList();
+    if (codes.length < minQuickLanguages) return Future.value();
+    return _repository.setQuickLanguages(codes);
+  }
+}
+
 /// 온보딩을 마쳤다고 기록 (FL-01). 다음 실행부터 온보딩을 건너뛴다.
 final class CompleteOnboarding implements NoParamsUseCase<void> {
   const CompleteOnboarding(this._repository);

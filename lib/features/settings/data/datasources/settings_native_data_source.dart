@@ -24,6 +24,9 @@ class SettingsNativeDataSource {
   Future<void> setDisplayMode(pigeon.DisplayMode mode) =>
       _api.setDisplayMode(mode);
 
+  Future<void> setQuickLanguages(List<String> codes) =>
+      _api.setQuickLanguages(codes);
+
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);
 }

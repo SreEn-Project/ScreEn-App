@@ -33,6 +33,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _dataSource.setDisplayMode(mode.toPigeon());
 
   @override
+  Future<void> setQuickLanguages(List<String> languageCodes) =>
+      _dataSource.setQuickLanguages(languageCodes);
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) =>
       _dataSource.setOnboardingCompleted(completed);
 }

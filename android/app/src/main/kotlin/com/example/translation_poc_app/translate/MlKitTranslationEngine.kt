@@ -17,6 +17,12 @@ class MlKitTranslationEngine(
 
     override val id = EngineId.ML_KIT
 
+    /** 같은 글자 · 언어 쌍의 최근 번역 결과. 같은 화면을 다시 번역하거나 반복되는 UI 글자를 건너뛴다 (#19). */
+    private val cache = object : LinkedHashMap<Triple<String, String, String>, String>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Triple<String, String, String>, String>?) =
+            size > CACHE_SIZE
+    }
+
     override fun supports(language: String): Boolean =
         LanguagePlan.normalize(language) in backend.supportedLanguages()
 
@@ -44,7 +50,10 @@ class MlKitTranslationEngine(
             if (!autoDownload) return@guard EngineResult.Err(TranslationError.ModelNotDownloaded(missing))
             missing.forEach { backend.download(it, downloadPolicy.wifiOnly) }
         }
-        EngineResult.Ok(TranslationResult(backend.translate(request.text, source, target), source, target, id))
+        val key = Triple(request.text, source, target)
+        val translated = synchronized(cache) { cache[key] }
+            ?: backend.translate(request.text, source, target).also { synchronized(cache) { cache[key] = it } }
+        EngineResult.Ok(TranslationResult(translated, source, target, id))
     }
 
     override suspend fun isLanguageAvailable(language: String): EngineResult<Boolean> = guard {
@@ -83,6 +92,7 @@ class MlKitTranslationEngine(
 
     companion object {
         private const val PIVOT = "en"
+        private const val CACHE_SIZE = 128
 
         /** 번역에 필요한 모델. 영어가 끼지 않은 쌍은 영어 모델이 중간에 필요하다. 순수 함수. */
         fun requiredModels(source: String, target: String): List<String> =

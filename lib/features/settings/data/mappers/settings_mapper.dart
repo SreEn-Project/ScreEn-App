@@ -10,6 +10,7 @@ extension AppSettingsMapper on pigeon.AppSettings {
     captureMode: captureMode.toEntity(),
     displayMode: displayMode.toEntity(),
     onboardingCompleted: onboardingCompleted,
+    quickLanguages: List.of(quickLanguages),
   );
 }
 

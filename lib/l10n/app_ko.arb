@@ -113,6 +113,10 @@
   "displayModeOverlay": "원문 위에 덮기",
   "settingsButtonSize": "플로팅 버튼 크기",
   "settingsButtonOpacity": "플로팅 버튼 투명도",
+  "settingsQuickLanguages": "빠른 언어",
+  "settingsQuickLanguagesDetail": "플로팅 버튼 길게 누르기 메뉴에 보일 언어",
+  "quickLanguagesTitle": "빠른 언어 편집",
+  "quickLanguagesHint": "{count}/{max}개 선택 · 최소 {min}개. 누르면 켜고 꺼요.",
   "settingsSectionEtc": "기타",
   "settingsAbout": "앱 정보",
 

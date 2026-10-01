@@ -2,6 +2,20 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 번역 속도 · 정확도 개선 (이슈 #19, 브랜치 `feat/19-speed-accuracy`, NA-09 · NA-10 · NA-11)
+- (이슈 #17 브랜치를 base로 포함: 아직 develop에 없었음.) 설계는 D-030.
+- 속도: ① 자동 모드에서 인식기 3개를 항상 돌리던 것을 **직전에 잘 읽은 인식기 1개**로 먼저 읽고, 결과가 미덥지 않을 때(글자 12자 미만 · 평균 신뢰도 0.8 미만)만 나머지 둘을 병렬로 추가. ② 직전과 같은 화면(이미지 해시 동일)이면 인식 결과 재사용. ③ 같은 글자 · 언어 쌍 번역 결과 LRU 캐시(128개). ④ 쪼개진 블록을 문단으로 묶어 번역 호출 수 감소.
+- 정확도: ① 인접 OCR 블록 문단 묶기(`OcrBlockMerger`: 간격 ≤0.6줄 · 글자 크기 ±25% · 왼쪽 정렬 · 가로 겹침 · 앞 블록이 문장부호로 안 끝날 때만). ② 글자 없는 줄(기호 · 숫자뿐) 제거 · 공백 정리(`OcrCleaner`). ③ 줄 끝 하이픈 낱말 이어 붙임. ④ 언어 감지: 한글 · 가나가 글자의 30% 이상이면 Language ID 결과보다 우선(ko · ja) — 한자 많은 일본어가 zh로 읽히는 문제 보정. 감지에 줄바꿈 없는 한 문단 글자를 사용.
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트(OcrCleanAndMergeTest · ScriptLanguageTest · 하이픈 테스트 추가) 통과 · debug APK 빌드. **전 · 후 시간은 사용자 기기에서 측정** (logcat 태그 `TranslatorService` "번역 시간 … total=…ms"). 이전(#11) 기준 에뮬레이터 약 7~9초, 대부분 OCR.
+- 남은 일: 기기에서 시간 · 묶기 오탐(별개 UI 항목이 합쳐지는지) 확인. 필요하면 상수(`MAX_GAP_RATIO` 등) 조정.
+
+## 2026-10-01 · 빠른 언어 편집 · 원문 위에 덮기 (이슈 #17, 브랜치 `feat/17-quick-language-overlay-result`, FL-04 · NA-22)
+- (이슈 #16 버블 메뉴 · 문단형 표시 커밋을 base로 포함: 아직 develop에 없었음.) 설계는 D-029.
+- 빠른 언어: 설정 탭에 "빠른 언어" 항목 → 편집 화면(`/quick-languages`)에서 언어 목록을 눌러 켜고 끔(최소 1 · 최대 8개). 버블 옵션 메뉴는 여기서 고른 언어만 보여 준다. Pigeon `AppSettings.quickLanguages` · `setQuickLanguages` 추가(기존 네이티브 전용 → Flutter와 공유), Flutter는 엔티티 · 매퍼 · 리포지토리 · `ChangeQuickLanguages` · `QuickLanguagesViewModel` · `QuickLanguagesScreen`, `LanguageList`에 다중 선택(`selectedCodes`).
+- 원문 위에 덮기(NA-22): 인식한 글자 영역마다 반투명 검은 막(78%) + 그 위 원문 자리에 흰 번역문(막에 맞춰 22~8sp 자동 조절). 화면을 누르면 닫힘. `TranslatedItem.bounds`(화면 대비 비율, 영역 캡처 오프셋 반영) · `overlay/OverlayResult.kt`. 자리를 아는 번역 항목이 없으면 목록 시트로 대체.
+- 확인: flutter analyze 0 · flutter test 통과(QuickLanguagesViewModel 5개) · Kotlin 단위 테스트(OverlayResultTest 3개 포함) 통과 · debug APK 빌드. 기기 확인은 사용자가 직접(에뮬레이터 확인 생략).
+- 남은 일: 기기에서 막 위치 · 글자 크기 · 빠른 언어 편집 반영 확인. 설정 화면의 나머지 항목(엔진 · 캡처 모드 · 표시 방식 등)은 아직 UI만 있고 저장 연결 전(FL-06~08).
+
 ## 2026-10-01 · 버블 메뉴 · 문단형 표시 (이슈 #16, 브랜치 `feat/16-bubble-menu`, NA-18)
 - 길게 누르면 버튼 주위에 카테고리 버블 3개(캡처 범위 · 결과 표시 · 빠른 언어)가 뜨고, 버블을 누르면 그 옵션 메뉴가 열린다. 기존 모드 메뉴는 "캡처 범위" 버블의 옵션 메뉴가 됐다. 설계는 D-028.
 - 결과 표시에 **문단**(`paragraph`) 추가: 번역문을 블록 · 문장 구분 없이 한 문단으로 보여 줌. Pigeon `DisplayMode`에 추가 → Flutter 엔티티 · 매퍼 · 라벨 · ARB(ko/en)도 반영.

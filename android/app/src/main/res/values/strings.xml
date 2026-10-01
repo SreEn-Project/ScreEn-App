@@ -33,6 +33,7 @@
     <string name="result_copy_all">Copy all</string>
     <string name="result_copied">Copied</string>
     <string name="result_close">Close</string>
+    <string name="result_overlay_hint">Tap anywhere to close</string>
     <string name="result_retranslate_ai">Retranslate with AI</string>
     <string name="result_ai_coming_soon">AI translation is coming soon</string>
     <string name="result_unsupported">This language can\'t be translated yet (%1$s)</string>

@@ -3,8 +3,11 @@ package com.example.translation_poc_app.translate
 import com.example.translation_poc_app.capture.CaptureResult
 import android.graphics.Bitmap
 import com.example.translation_poc_app.data.settings.NormalizedRegion
+import com.example.translation_poc_app.data.settings.PixelRect
 import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.ocr.OcrBlock
+import com.example.translation_poc_app.ocr.OcrBlockMerger
+import com.example.translation_poc_app.ocr.OcrCleaner
 import com.example.translation_poc_app.ocr.OcrResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
@@ -27,6 +30,8 @@ data class TranslatedItem(
     val translated: String?,
     val sourceLanguage: String,
     val status: ItemStatus = ItemStatus.TRANSLATED,
+    /** 원문이 화면에 있던 자리 (화면 대비 비율). '원문 위에 덮기'(NA-22)가 쓴다. 모르면 null. */
+    val bounds: NormalizedRegion? = null,
 )
 
 /** 플로팅 버튼 한 번 누른 결과 (NA-18 → NA-19). */
@@ -102,6 +107,10 @@ class TranslationPipeline(
         }
 
         val captureMs = lap()
+        // 문자 인식 좌표(잘린 이미지 기준)를 화면 전체 대비 비율로 바꾸는 값. 비트맵은 아래에서 해제된다.
+        val screenWidth = frame.bitmap.width
+        val screenHeight = frame.bitmap.height
+        val origin = region?.toPixels(screenWidth, screenHeight)
         return try {
             val current = settings()
             val target = if (region != null) frame.cropped(region) else frame
@@ -112,18 +121,30 @@ class TranslationPipeline(
                 frame.bitmap.recycle()
             }
             val ocrMs = lap()
-            if (ocr.blocks.isEmpty()) {
+            // 잡음 줄을 빼고, 쪼개진 문단은 이어 붙여 번역 문맥을 늘린다 (#19).
+            val blocks = OcrBlockMerger.merge(OcrCleaner.clean(ocr.blocks))
+            if (blocks.isEmpty()) {
                 onTimings(PipelineTimings(captureMs, ocrMs))
                 return TranslationOutcome.NoText
             }
 
-            val detected = detect(ocr, current.targetLanguage)
+            val detected = detect(ocr.copy(blocks = blocks), current.targetLanguage)
             val detectMs = lap()
             val engine = engineFor(current)
             val requests = TranslationAssembler.requests(detected, current.targetLanguage)
             val results = translateAll(engine, requests)
-            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), ocr.blocks.size, requests.size))
-            TranslationAssembler.assemble(detected, results, engine.id, current.targetLanguage)
+            onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size))
+            TranslationAssembler.assemble(detected, results, engine.id, current.targetLanguage) { block ->
+                block.bounds?.let {
+                    val dx = origin?.left ?: 0
+                    val dy = origin?.top ?: 0
+                    NormalizedRegion.fromPixels(
+                        PixelRect(it.left + dx, it.top + dy, it.right + dx, it.bottom + dy),
+                        screenWidth,
+                        screenHeight,
+                    )
+                }
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -153,8 +174,22 @@ object TranslationAssembler {
     fun sourceText(block: OcrBlock, language: String): String {
         val lines = block.lines.map { it.text.trim() }.filter { it.isNotEmpty() }
         if (lines.isEmpty()) return block.text.trim()
-        return lines.joinToString(if (language in NO_SPACE_LANGUAGES) "" else " ")
+        val noSpace = language in NO_SPACE_LANGUAGES
+        val sb = StringBuilder(lines.first())
+        for (line in lines.drop(1)) {
+            // 줄 끝에서 잘린 낱말("trans-" + "lation")은 하이픈을 떼고 붙인다 (#19).
+            if (!noSpace && sb.length > 1 && sb.endsWith("-") && sb[sb.length - 2].isLetter() && line.first().isLowerCase()) {
+                sb.setLength(sb.length - 1)
+            } else if (!noSpace) {
+                sb.append(' ')
+            }
+            sb.append(line)
+        }
+        return sb.toString()
     }
+
+    /** 언어 감지용 한 문단 글자 (줄바꿈 없이). 언어를 아직 모르니 공백으로 잇는다. */
+    fun detectionText(block: OcrBlock): String = sourceText(block, "und")
 
     /** 엔진에 넘길 요청. [BlockAction.TRANSLATE] 블록만, 화면 순서대로. 원문 언어는 감지한 값을 넘긴다. */
     fun requests(detected: List<DetectedBlock>, targetLanguage: String): List<TranslationRequest> =
@@ -166,6 +201,8 @@ object TranslationAssembler {
         results: List<EngineResult<TranslationResult>>,
         engine: EngineId,
         targetLanguage: String,
+        /** 블록의 화면 위 자리 (비율). 안 주면 자리 정보 없음. */
+        boundsOf: (OcrBlock) -> NormalizedRegion? = { null },
     ): TranslationOutcome {
         val expected = detected.count { it.decision.action == BlockAction.TRANSLATE }
         if (results.size != expected) {
@@ -184,15 +221,16 @@ object TranslationAssembler {
             val original = sourceText(block, decision.language)
             when (decision.action) {
                 BlockAction.TRANSLATE -> when (val result = next.next()) {
-                    is EngineResult.Ok -> TranslatedItem(original, result.value.text, decision.language)
+                    is EngineResult.Ok -> TranslatedItem(original, result.value.text, decision.language, bounds = boundsOf(block))
                     is EngineResult.Err -> TranslatedItem(
                         original,
                         null,
                         decision.language,
                         if (result.error is TranslationError.UnsupportedLanguage) ItemStatus.UNSUPPORTED else ItemStatus.FAILED,
+                        boundsOf(block),
                     )
                 }
-                BlockAction.UNSUPPORTED -> TranslatedItem(original, null, decision.language, ItemStatus.UNSUPPORTED)
+                BlockAction.UNSUPPORTED -> TranslatedItem(original, null, decision.language, ItemStatus.UNSUPPORTED, boundsOf(block))
                 BlockAction.SKIP_SAME_AS_TARGET, BlockAction.UNKNOWN -> null
             }
         }

@@ -710,6 +710,30 @@ abstract class AppLocalizations {
   /// **'Floating button opacity'**
   String get settingsButtonOpacity;
 
+  /// No description provided for @settingsQuickLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick languages'**
+  String get settingsQuickLanguages;
+
+  /// No description provided for @settingsQuickLanguagesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages shown in the floating button\'s long-press menu'**
+  String get settingsQuickLanguagesDetail;
+
+  /// No description provided for @quickLanguagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit quick languages'**
+  String get quickLanguagesTitle;
+
+  /// No description provided for @quickLanguagesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/{max} selected, at least {min}. Tap to toggle.'**
+  String quickLanguagesHint(int count, int max, int min);
+
   /// No description provided for @settingsSectionEtc.
   ///
   /// In en, this message translates to:
