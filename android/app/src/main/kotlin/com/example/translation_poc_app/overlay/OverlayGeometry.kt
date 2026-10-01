@@ -73,7 +73,7 @@ object OverlayGeometry {
         val spread = 66f
         val half = (radiusDp * kotlin.math.sin(Math.toRadians(spread.toDouble()))).toFloat()
         val needAbove = half + 26f // 위 버블 중심 위로 원 반지름
-        val needBelow = half + 50f // 아래 버블 중심 아래로 원 반지름 + 이름표
+        val needBelow = half + 26f // 아래 버블 중심 아래로 원 반지름
         return when {
             spaceAboveDp < needAbove -> listOf(0f, 30f, 60f, 90f)
             spaceBelowDp < needBelow -> listOf(-90f, -60f, -30f, 0f)
