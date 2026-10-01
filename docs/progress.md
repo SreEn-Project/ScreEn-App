@@ -2,6 +2,10 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 번역 기능 문서 (이슈 #39, 브랜치 `docs/39-translation-doc`)
+- [translation.md](translation.md) 추가: 파이프라인 현황, 캐시 방침, 개선 계획. AI 번역은 API 키가 필요해 보류로 기록.
+- 다음: 단계별 시간 측정 → 점진 표시.
+
 ## 2026-10-01 · 버블 — 이름표를 아이콘 옆(화면 안쪽)으로 (NA-18, 이슈 #37, 브랜치 `feat/37-bubble-label-side`)
 - 이름표가 아이콘 아래 고정이라 버블끼리 겹침 → 이름표를 아이콘 옆에 둔다. 오른쪽 가장자리면 아이콘 왼쪽, 왼쪽 가장자리면 오른쪽.
 - `FloatingButton.kt`: `BubbleRing` 칸을 아이콘 + 이름표 가로 배치로 바꾸고, 창 안쪽 폭에 이름표 폭을 더함 (`BUBBLE_LABEL_WIDTH_DP` 등). `OverlayGeometry.bubbleAngles` 아래 여유를 아이콘 기준으로 줄임.

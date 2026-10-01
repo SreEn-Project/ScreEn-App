@@ -6,6 +6,7 @@
 |---|---|
 | [architecture.md](architecture.md) | 기술 스택 · 아키텍처 요약 (원본은 Notion) |
 | [roadmap.md](roadmap.md) | 단계별 기능 목록과 진행 상태 |
+| [translation.md](translation.md) | 번역 기능: 구현 현황 · 캐시 · 개선 계획 |
 | [progress.md](progress.md) | 작업 기록 (날짜별) |
 | [decisions.md](decisions.md) | 설계 결정 기록 |
 | [design.md](design.md) | 디자인 가이드 (색 · 글자 · 모양) |
