@@ -2,6 +2,12 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-01 · 자동 번역 설정 합치기 — "다시 번역 속도" 하나로 (NA-26, 이슈 #33, 브랜치 `feat/33-auto-speed`)
+- #32(`feat/31-bubble-hover-select`) 위에 쌓았다 (스택 #24→#28→#30→#32, 아직 merge 전).
+- 설정의 "화면 확인 간격"과 "조작이 끝난 뒤 대기 시간"이 헷갈려 **"다시 번역 속도"** 한 줄(빠르게 · 보통 · 절약 · 최대 절약)로 합쳤다. 설계는 D-035.
+- 바꾼 곳: `AutoSpeed` 열거형(도메인), `ChangeAutoSpeed` 유스케이스(기존 `ChangeAutoCheckInterval` · `ChangeAutoSettle` 대체), ViewModel `setSpeed`, 설정 화면 · 문구(ARB 한/영). Pigeon · 네이티브 · 저장 키는 그대로.
+- 확인: flutter analyze 0 · flutter test 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
+
 ## 2026-10-01 · 버블 — 손가락 올리면 앞으로 · 끌었다 놓으면 선택 · 이름표 잘림 수정 (NA-18, 이슈 #31, 브랜치 `feat/31-bubble-hover-select`)
 - #30(`feat/29-auto-translate-responsive`) 위에 쌓았다 (버블 코드가 아직 develop에 없음).
 - 길게 누른 채 손가락을 버블 위로 옮기면 그 버블이 이름표와 함께 맨 앞으로 올라오고 커진다. 그 위에서 떼면 눌린 것으로 처리 (`ButtonGestures.onHold` · `onHoldRelease`, `OverlayGeometry.bubbleHit`, 판정 반경 34dp).

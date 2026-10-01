@@ -752,17 +752,35 @@ abstract class AppLocalizations {
   /// **'After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.'**
   String get settingsAutoTranslateDetail;
 
-  /// No description provided for @settingsAutoInterval.
+  /// No description provided for @settingsAutoSpeed.
   ///
   /// In en, this message translates to:
-  /// **'Screen check interval (longer saves battery)'**
-  String get settingsAutoInterval;
+  /// **'Re-translate speed (slower saves battery)'**
+  String get settingsAutoSpeed;
 
-  /// No description provided for @settingsAutoSettle.
+  /// No description provided for @autoSpeedFast.
   ///
   /// In en, this message translates to:
-  /// **'Wait after you stop interacting'**
-  String get settingsAutoSettle;
+  /// **'Fast'**
+  String get autoSpeedFast;
+
+  /// No description provided for @autoSpeedNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get autoSpeedNormal;
+
+  /// No description provided for @autoSpeedSaver.
+  ///
+  /// In en, this message translates to:
+  /// **'Saver'**
+  String get autoSpeedSaver;
+
+  /// No description provided for @autoSpeedBatterySaver.
+  ///
+  /// In en, this message translates to:
+  /// **'Max saver'**
+  String get autoSpeedBatterySaver;
 
   /// No description provided for @settingsAutoHide.
   ///

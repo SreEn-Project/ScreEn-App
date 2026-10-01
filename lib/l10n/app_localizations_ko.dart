@@ -347,10 +347,19 @@ class AppLocalizationsKo extends AppLocalizations {
       '번역한 뒤 화면을 가볍게 지켜보다가, 글자가 바뀌거나 스크롤이 멈추면 다시 번역해요. 켜 두면 배터리를 더 쓰고 기기가 따뜻해질 수 있어요.';
 
   @override
-  String get settingsAutoInterval => '화면 확인 간격 (길수록 배터리 절약)';
+  String get settingsAutoSpeed => '다시 번역 속도 (느릴수록 배터리 절약)';
 
   @override
-  String get settingsAutoSettle => '조작이 끝난 뒤 번역까지 기다리는 시간';
+  String get autoSpeedFast => '빠르게';
+
+  @override
+  String get autoSpeedNormal => '보통';
+
+  @override
+  String get autoSpeedSaver => '절약';
+
+  @override
+  String get autoSpeedBatterySaver => '최대 절약';
 
   @override
   String get settingsAutoHide => '화면이 바뀌면 이전 번역을 숨기기까지';

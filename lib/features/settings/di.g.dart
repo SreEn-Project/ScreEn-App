@@ -418,99 +418,47 @@ final class ChangeAutoTranslateProvider
 String _$changeAutoTranslateHash() =>
     r'4de9cc03ef32ef9ed3677ad8f5465829134fe13c';
 
-@ProviderFor(changeAutoCheckInterval)
-final changeAutoCheckIntervalProvider = ChangeAutoCheckIntervalProvider._();
+@ProviderFor(changeAutoSpeed)
+final changeAutoSpeedProvider = ChangeAutoSpeedProvider._();
 
-final class ChangeAutoCheckIntervalProvider
+final class ChangeAutoSpeedProvider
     extends
-        $FunctionalProvider<
-          ChangeAutoCheckInterval,
-          ChangeAutoCheckInterval,
-          ChangeAutoCheckInterval
-        >
-    with $Provider<ChangeAutoCheckInterval> {
-  ChangeAutoCheckIntervalProvider._()
+        $FunctionalProvider<ChangeAutoSpeed, ChangeAutoSpeed, ChangeAutoSpeed>
+    with $Provider<ChangeAutoSpeed> {
+  ChangeAutoSpeedProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'changeAutoCheckIntervalProvider',
+        name: r'changeAutoSpeedProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$changeAutoCheckIntervalHash();
+  String debugGetCreateSourceHash() => _$changeAutoSpeedHash();
 
   @$internal
   @override
-  $ProviderElement<ChangeAutoCheckInterval> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
-
-  @override
-  ChangeAutoCheckInterval create(Ref ref) {
-    return changeAutoCheckInterval(ref);
-  }
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ChangeAutoCheckInterval value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<ChangeAutoCheckInterval>(value),
-    );
-  }
-}
-
-String _$changeAutoCheckIntervalHash() =>
-    r'4b37af5cdab8637723222dfdc3324f4b8719f5cd';
-
-@ProviderFor(changeAutoSettle)
-final changeAutoSettleProvider = ChangeAutoSettleProvider._();
-
-final class ChangeAutoSettleProvider
-    extends
-        $FunctionalProvider<
-          ChangeAutoSettle,
-          ChangeAutoSettle,
-          ChangeAutoSettle
-        >
-    with $Provider<ChangeAutoSettle> {
-  ChangeAutoSettleProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'changeAutoSettleProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$changeAutoSettleHash();
-
-  @$internal
-  @override
-  $ProviderElement<ChangeAutoSettle> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<ChangeAutoSpeed> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  ChangeAutoSettle create(Ref ref) {
-    return changeAutoSettle(ref);
+  ChangeAutoSpeed create(Ref ref) {
+    return changeAutoSpeed(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(ChangeAutoSettle value) {
+  Override overrideWithValue(ChangeAutoSpeed value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<ChangeAutoSettle>(value),
+      providerOverride: $SyncValueProvider<ChangeAutoSpeed>(value),
     );
   }
 }
 
-String _$changeAutoSettleHash() => r'0d271e76ad8aa7626f071e2dca7cd73ed88e662e';
+String _$changeAutoSpeedHash() => r'28bc444cc0639204464ee352d66e53ff5767192e';
 
 @ProviderFor(changeAutoHide)
 final changeAutoHideProvider = ChangeAutoHideProvider._();

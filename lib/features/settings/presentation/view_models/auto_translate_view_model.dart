@@ -5,7 +5,7 @@ import '../../domain/entities/translator_settings.dart';
 
 part 'auto_translate_view_model.g.dart';
 
-/// 자동 번역 설정 (#23): 켜짐 · 화면 확인 간격 · 안정 대기 · 이전 결과 숨김. 네이티브 설정(DataStore)이 원본이라
+/// 자동 번역 설정 (#23): 켜짐 · 다시 번역 속도 · 이전 결과 숨김. 네이티브 설정(DataStore)이 원본이라
 /// 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
 @riverpod
 class AutoTranslateViewModel extends _$AutoTranslateViewModel {
@@ -18,10 +18,8 @@ class AutoTranslateViewModel extends _$AutoTranslateViewModel {
   Future<void> setEnabled(bool enabled) =>
       ref.read(changeAutoTranslateProvider)(enabled);
 
-  Future<void> setCheckInterval(int ms) =>
-      ref.read(changeAutoCheckIntervalProvider)(ms);
-
-  Future<void> setSettle(int ms) => ref.read(changeAutoSettleProvider)(ms);
+  Future<void> setSpeed(AutoSpeed speed) =>
+      ref.read(changeAutoSpeedProvider)(speed);
 
   Future<void> setHide(int ms) => ref.read(changeAutoHideProvider)(ms);
 }
@@ -30,32 +28,28 @@ class AutoTranslateViewModel extends _$AutoTranslateViewModel {
 class AutoTranslateSettings {
   const AutoTranslateSettings({
     this.enabled = false,
-    this.checkIntervalMs = defaultAutoCheckIntervalMs,
-    this.settleMs = defaultAutoSettleMs,
+    this.speed = defaultAutoSpeed,
     this.hideMs = defaultAutoHideMs,
   });
 
   factory AutoTranslateSettings.of(TranslatorSettings s) =>
       AutoTranslateSettings(
         enabled: s.autoTranslate,
-        checkIntervalMs: s.autoCheckIntervalMs,
-        settleMs: s.autoSettleMs,
+        speed: AutoSpeed.fromCheckInterval(s.autoCheckIntervalMs),
         hideMs: s.autoHideMs,
       );
 
   final bool enabled;
-  final int checkIntervalMs;
-  final int settleMs;
+  final AutoSpeed speed;
   final int hideMs;
 
   @override
   bool operator ==(Object other) =>
       other is AutoTranslateSettings &&
       other.enabled == enabled &&
-      other.checkIntervalMs == checkIntervalMs &&
-      other.settleMs == settleMs &&
+      other.speed == speed &&
       other.hideMs == hideMs;
 
   @override
-  int get hashCode => Object.hash(enabled, checkIntervalMs, settleMs, hideMs);
+  int get hashCode => Object.hash(enabled, speed, hideMs);
 }

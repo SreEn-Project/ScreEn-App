@@ -358,11 +358,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'After a translation, lightly watches the screen and translates again when the text changes or scrolling stops. Leaving it on uses more battery and may warm the device.';
 
   @override
-  String get settingsAutoInterval =>
-      'Screen check interval (longer saves battery)';
+  String get settingsAutoSpeed => 'Re-translate speed (slower saves battery)';
 
   @override
-  String get settingsAutoSettle => 'Wait after you stop interacting';
+  String get autoSpeedFast => 'Fast';
+
+  @override
+  String get autoSpeedNormal => 'Normal';
+
+  @override
+  String get autoSpeedSaver => 'Saver';
+
+  @override
+  String get autoSpeedBatterySaver => 'Max saver';
 
   @override
   String get settingsAutoHide =>

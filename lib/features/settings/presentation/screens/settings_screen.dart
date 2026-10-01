@@ -319,16 +319,13 @@ class _AutoTranslateSection extends ConsumerWidget {
             if (settings.enabled) ...[
               const AppDivider(),
               _Labeled(
-                label: l10n.settingsAutoInterval,
-                value: seconds(settings.checkIntervalMs),
-                child: AppSegmented<int>(
-                  values: autoCheckIntervalChoicesMs,
-                  selected: nearestChoice(
-                    autoCheckIntervalChoicesMs,
-                    settings.checkIntervalMs,
-                  ),
-                  label: seconds,
-                  onChanged: viewModel.setCheckInterval,
+                label: l10n.settingsAutoSpeed,
+                value: l10n.autoSpeedName(settings.speed),
+                child: AppSegmented<AutoSpeed>(
+                  values: AutoSpeed.values,
+                  selected: settings.speed,
+                  label: l10n.autoSpeedName,
+                  onChanged: viewModel.setSpeed,
                 ),
               ),
               const AppDivider(),
@@ -345,20 +342,6 @@ class _AutoTranslateSection extends ConsumerWidget {
                         ),
                   label: hideLabel,
                   onChanged: viewModel.setHide,
-                ),
-              ),
-              const AppDivider(),
-              _Labeled(
-                label: l10n.settingsAutoSettle,
-                value: instantOr(settings.settleMs),
-                child: AppSegmented<int>(
-                  values: autoSettleChoicesMs,
-                  selected: nearestChoice(
-                    autoSettleChoicesMs,
-                    settings.settleMs,
-                  ),
-                  label: instantOr,
-                  onChanged: viewModel.setSettle,
                 ),
               ),
             ],

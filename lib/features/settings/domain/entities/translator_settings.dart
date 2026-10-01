@@ -18,13 +18,33 @@ const defaultQuickLanguages = ['ko', 'en', 'ja', 'zh'];
 const minQuickLanguages = 1;
 const maxQuickLanguages = 8;
 
-/// 자동 번역(#23) 화면 확인 간격 · 안정 대기 선택지 (ms). 네이티브 `Settings`의 범위 안이다.
-const defaultAutoCheckIntervalMs = 1000;
-const autoCheckIntervalChoicesMs = [500, 1000, 2000, 3000, 5000];
+/// 자동 번역 "다시 번역 속도" (#33). 화면 확인 간격과 조작이 끝난 뒤 기다리는 시간을 한 번에 정한다.
+/// 빠를수록 바로 반응하지만 배터리를 더 쓴다. 저장은 네이티브의 두 값(ms)으로 하고, 읽을 때는
+/// 확인 간격이 가장 가까운 단계로 되돌린다.
+enum AutoSpeed {
+  fast(checkIntervalMs: 500, settleMs: 0),
+  normal(checkIntervalMs: 1000, settleMs: 0),
+  saver(checkIntervalMs: 2000, settleMs: 1000),
+  batterySaver(checkIntervalMs: 5000, settleMs: 2000);
 
-/// 0 = 조작이 끝나면 바로 번역.
+  const AutoSpeed({required this.checkIntervalMs, required this.settleMs});
+
+  final int checkIntervalMs;
+  final int settleMs;
+
+  /// 저장된 확인 간격(ms)에 가장 가까운 단계.
+  static AutoSpeed fromCheckInterval(int ms) => values.reduce(
+    (a, b) => (a.checkIntervalMs - ms).abs() <= (b.checkIntervalMs - ms).abs()
+        ? a
+        : b,
+  );
+}
+
+const defaultAutoSpeed = AutoSpeed.normal;
+
+/// [defaultAutoSpeed]의 저장값 (네이티브 `Settings` 기본값과 같게).
+const defaultAutoCheckIntervalMs = 1000;
 const defaultAutoSettleMs = 0;
-const autoSettleChoicesMs = [0, 500, 1000, 1500, 2000];
 
 /// 화면이 바뀐 뒤 이전 결과를 숨기기까지의 시간. 0 = 바로, [autoHideNever] = 새 결과가 뜰 때까지 둔다.
 const autoHideNever = -1;

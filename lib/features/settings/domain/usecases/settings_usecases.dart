@@ -85,27 +85,17 @@ final class ChangeAutoTranslate implements UseCase<void, bool> {
   Future<void> call(bool enabled) => _repository.setAutoTranslate(enabled);
 }
 
-/// 자동 번역 화면 확인 간격 변경 (#23). 선택지 밖의 값은 가장 가까운 선택지로 맞춘다.
-final class ChangeAutoCheckInterval implements UseCase<void, int> {
-  const ChangeAutoCheckInterval(this._repository);
+/// 자동 번역 "다시 번역 속도" 변경 (#33). 확인 간격과 조작 후 대기 시간을 함께 저장한다.
+final class ChangeAutoSpeed implements UseCase<void, AutoSpeed> {
+  const ChangeAutoSpeed(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<void> call(int ms) => _repository.setAutoCheckIntervalMs(
-    nearestChoice(autoCheckIntervalChoicesMs, ms),
-  );
-}
-
-/// 자동 번역 안정 대기 시간 변경 (#23). 선택지 밖의 값은 가장 가까운 선택지로 맞춘다.
-final class ChangeAutoSettle implements UseCase<void, int> {
-  const ChangeAutoSettle(this._repository);
-
-  final SettingsRepository _repository;
-
-  @override
-  Future<void> call(int ms) =>
-      _repository.setAutoSettleMs(nearestChoice(autoSettleChoicesMs, ms));
+  Future<void> call(AutoSpeed speed) async {
+    await _repository.setAutoCheckIntervalMs(speed.checkIntervalMs);
+    await _repository.setAutoSettleMs(speed.settleMs);
+  }
 }
 
 /// 자동 번역 이전 결과 숨김 시간 변경 (#29). 음수는 "숨기지 않음", 나머지는 가장 가까운 선택지로 맞춘다.
