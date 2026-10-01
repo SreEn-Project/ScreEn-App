@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 자동 번역 — 바뀐 영역만 다시 인식 (NA-11, 이슈 #43, 브랜치 `feat/43-incremental-ocr`)
+- 자동 번역(`incremental`)에서 직전에 읽은 화면과 64×128 밝기 격자를 견줘 변한 칸 주변만 잘라 읽고, 안 바뀐 블록은 이전 결과를 쓴다. 바뀐 칸이 없으면 이전 결과 그대로. 순수 로직 `ocr/ChangedRegions.kt`(+ 테스트), 연결은 `ScreenTextRecognizer`.
+- 통째로 읽는 경우: 기준이 없음 · 원문 언어 · 화면 크기가 달라짐, 40% 넘게 변함, 영역 7곳 이상 · 화면 절반 넘음, 블록 자리를 모름, 색을 뒤집어 읽은 화면. 수동 번역은 그대로 전체 인식.
+- 변경: `ocr/ChangedRegions.kt` 추가, `ScreenTextRecognizer` · `TranslationPipeline`(recognize에 incremental 인자) · `TranslatorService` · `OverlayController`(자동 번역만 incremental). 설정 · 의존성 변경 없음.
+- 확인: Android 단위 테스트 · `flutter analyze` · `flutter test` · `flutter build apk --debug` 통과. 기기 실측(번역 시간 로그의 ocr ms) 전.
+- 남은 일: 기기에서 효과 측정, 인식 후처리(별도).
+
 ## 2026-10-02 · 번역 점진 표시 (NA-11, 이슈 #41, 브랜치 `feat/41-progressive-display`)
 - 수동 번역이 모든 블록이 끝나야 뜨던 것을, 끝난 블록부터 먼저 보여 주고 마지막에 전체 결과로 바꾼다 (translation.md 개선 계획 2번).
 - `TranslationPipeline`: `run(onPartial)` 추가, `translateAll(onProgress)`가 블록이 끝날 때마다 알림, `TranslationAssembler.assemblePartial`(안 끝난 블록은 뺌). `OverlayController.translate`가 부분 결과를 시트로 띄움. 자동 번역은 표시 시점 규칙(D-036) 때문에 제외.

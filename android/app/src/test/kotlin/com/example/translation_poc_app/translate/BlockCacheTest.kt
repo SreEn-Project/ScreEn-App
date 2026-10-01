@@ -53,7 +53,7 @@ class BlockCacheTest {
 
     private val pipeline = TranslationPipeline(
         capture = { CaptureResult.Failed("unused") },
-        recognize = { error("unused") },
+        recognize = { _, _ -> error("unused") },
         detect = { ocr, _ ->
             ocr.blocks.map {
                 detected += it.text

@@ -85,7 +85,7 @@ private fun CaptureResult.Frame.cropped(region: NormalizedRegion): CaptureResult
 
 class TranslationPipeline(
     private val capture: suspend () -> CaptureResult,
-    private val recognize: suspend (CaptureResult.Frame) -> OcrResult,
+    private val recognize: suspend (CaptureResult.Frame, incremental: Boolean) -> OcrResult,
     private val detect: suspend (OcrResult, targetLanguage: String) -> List<DetectedBlock>,
     private val engineFor: (Settings) -> TranslationEngine,
     private val settings: suspend () -> Settings,
@@ -100,11 +100,13 @@ class TranslationPipeline(
      * @param region 이 영역만 번역한다 (NA-07). null이면 화면 전체.
      * @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때.
      * @param onPartial 번역이 일부만 끝났을 때 끝난 블록만 담아 부른다 (#41). 마지막 결과는 반환값으로 온다.
+     * @param incremental 자동 번역: 직전에 읽은 화면과 견줘 바뀐 영역만 다시 인식한다 (#43).
      */
     suspend fun run(
         region: NormalizedRegion? = null,
         onCaptured: () -> Unit = {},
         onPartial: (TranslationOutcome.Translated) -> Unit = {},
+        incremental: Boolean = false,
     ): TranslationOutcome {
         var mark = clock()
         fun lap(): Long = clock().let { now -> (now - mark).also { mark = now } }
@@ -128,7 +130,7 @@ class TranslationPipeline(
             val current = settings()
             val target = if (region != null) frame.cropped(region) else frame
             val ocr = try {
-                recognize(target)
+                recognize(target, incremental)
             } finally {
                 target.bitmap.recycle()
                 frame.bitmap.recycle()

@@ -299,7 +299,7 @@ class OverlayController(
         button.root.visibility = View.INVISIBLE
         // 사용자가 또 조작해서 감시가 이 번역을 취소하면 finally만 돌고 결과는 버려진다.
         val outcome = try {
-            pipeline.run(lastRegion, onCaptured = {
+            pipeline.run(lastRegion, incremental = true, onCaptured = {
                 button.root.visibility = View.VISIBLE
                 old?.root?.visibility = sheetVisibility()
                 watcher.markCaptured()

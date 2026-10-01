@@ -22,7 +22,7 @@ class TranslationPipelineTest {
 
     private fun pipeline(result: CaptureResult) = TranslationPipeline(
         capture = { result },
-        recognize = { error("인식하면 안 됨") },
+        recognize = { _, _ -> error("인식하면 안 됨") },
         detect = { _, _ -> error("감지하면 안 됨") },
         engineFor = { NoEngine },
         settings = { Settings() },
