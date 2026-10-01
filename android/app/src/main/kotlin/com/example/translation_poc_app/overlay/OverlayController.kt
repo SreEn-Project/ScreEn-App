@@ -16,7 +16,6 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
-import android.view.View
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.runtime.getValue
@@ -264,16 +263,16 @@ class OverlayController(
         lastRegion = region
         scope.launch {
             // 버튼이 캡처에 찍히지 않도록 숨긴다. 캡처 쪽이 숨긴 뒤의 새 프레임을 기다린다.
-            button.root.visibility = View.INVISIBLE
+            button.setHidden(true)
             val outcome = try {
                 pipeline.run(
                     region,
-                    onCaptured = { button.root.visibility = View.VISIBLE },
+                    onCaptured = { button.setHidden(false) },
                     // 끝난 블록부터 먼저 보여 준다 (#41). 마지막에 전체 결과로 바뀐다.
                     onPartial = { partial -> showSheet(partial) },
                 )
             } finally {
-                button.root.visibility = View.VISIBLE
+                button.setHidden(false)
                 busy = false
             }
             logOutcome(outcome)
@@ -295,18 +294,18 @@ class OverlayController(
         if (busy || menu != null || picker != null || dragging) return false
         busy = true
         val old = sheet
-        old?.root?.visibility = View.INVISIBLE
-        button.root.visibility = View.INVISIBLE
+        old?.setHidden(true)
+        button.setHidden(true)
         // 사용자가 또 조작해서 감시가 이 번역을 취소하면 finally만 돌고 결과는 버려진다.
         val outcome = try {
             pipeline.run(lastRegion, incremental = true, onCaptured = {
-                button.root.visibility = View.VISIBLE
-                old?.root?.visibility = sheetVisibility()
+                button.setHidden(false)
+                old?.setHidden(staleHidden)
                 watcher.markCaptured()
             })
         } finally {
-            button.root.visibility = View.VISIBLE
-            old?.root?.visibility = sheetVisibility()
+            button.setHidden(false)
+            old?.setHidden(staleHidden)
             busy = false
         }
         logOutcome(outcome)
@@ -323,7 +322,7 @@ class OverlayController(
             } else {
                 // 같은 결과가 다시 맞는다: 숨겼던 것을 다시 보인다.
                 staleHidden = false
-                sheet?.root?.visibility = View.VISIBLE
+                sheet?.setHidden(false)
             }
             // 번역할 글이 없어졌다: 낡은 결과를 걷는다. 감시는 계속한다.
             TranslationOutcome.NoText, is TranslationOutcome.AlreadyInTarget -> removeSheet()
@@ -333,14 +332,12 @@ class OverlayController(
         return true
     }
 
-    private fun sheetVisibility() = if (staleHidden) View.INVISIBLE else View.VISIBLE
-
     /** 자동 번역 감시가 부른다: 화면이 바뀌어 낡은 결과를 숨기거나(true), 바뀐 화면이 번역한 화면으로 돌아와 다시 보인다(false). */
     private fun setStaleHidden(hidden: Boolean) {
         if (staleHidden == hidden) return
         staleHidden = hidden
         // 번역 중이면 번역이 끝날 때 이 상태로 맞춘다 (캡처에 안 찍히게 이미 숨겨 둔 상태일 수 있다).
-        if (!busy) sheet?.root?.visibility = sheetVisibility()
+        if (!busy) sheet?.setHidden(staleHidden)
     }
 
     private fun onDragStart() {
