@@ -10,9 +10,9 @@ object OverlayFontPlan {
     /** 줄 높이(상자 높이) 대비 글자 크기. 줄 상자는 글자보다 약간 크다. */
     const val FONT_PER_LINE_HEIGHT = 0.8f
 
-    /** 공통 기준 대비 허용 범위. 제목은 조금 크게, 작은 글자는 조금 작게 남기되 크게 벗어나진 않는다. */
-    const val MIN_RATIO = 0.85f
-    const val MAX_RATIO = 1.25f
+    /** 공통 기준 대비 허용 범위. 제목 · 작은 글자는 원문 크기를 따르되, 인식이 튄 값만 걸러 낸다. */
+    const val MIN_RATIO = 0.6f
+    const val MAX_RATIO = 1.8f
 
     /** 줄여서 맞춰 볼 수 있는 한계 (목표 크기 대비). 이보다 작아지면 줄이지 않고 막을 키운다. */
     const val SHRINK_FLOOR = 0.8f

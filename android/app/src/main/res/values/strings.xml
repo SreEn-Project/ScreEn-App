@@ -21,7 +21,8 @@
     <string name="overlay_bubble_language">Quick language</string>
     <string name="overlay_bubble_settings">Settings</string>
     <string name="overlay_source_auto">Auto</string>
-    <string name="overlay_setting_source">Recognize: %1$s</string>
+    <string name="overlay_lang_source">Language to translate</string>
+    <string name="overlay_lang_target">Translate into</string>
     <string name="overlay_setting_auto_translate">Auto translate: %1$s</string>
     <string name="overlay_on">On</string>
     <string name="overlay_off">Off</string>

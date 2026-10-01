@@ -10,6 +10,9 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -154,43 +157,84 @@ internal fun CloseTarget(active: Boolean) {
 /** 옵션 메뉴 한 줄. 고른 줄은 연한 초록. */
 internal data class MenuOption(val symbol: Symbol, val label: String, val selected: Boolean, val onSelect: () -> Unit)
 
-/** O-02 옵션 메뉴 (캡처 범위 · 결과 표시 · 빠른 언어 공용): 버튼 옆에 펼쳐지는 흰 카드. */
+/** O-02 옵션 메뉴 (캡처 범위 · 결과 표시 · 설정 공용): 버튼 옆에 펼쳐지는 흰 카드. */
 @Composable
 internal fun OptionMenu(options: List<MenuOption>) {
+    MenuCard {
+        Column(Modifier.width(IntrinsicSize.Max), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            options.forEach { OptionRow(it) }
+        }
+    }
+}
+
+/**
+ * 빠른 언어 메뉴: 왼쪽 "번역할 언어"(원문 인식), 오른쪽 "번역될 언어"(결과). 고른 뒤에도 열려 있어 둘을 이어서 고른다.
+ * 목록은 고른 값이 바뀌면 다시 읽도록 람다로 받는다.
+ */
+@Composable
+internal fun LanguageMenu(
+    sourceTitle: String,
+    targetTitle: String,
+    source: () -> List<MenuOption>,
+    target: () -> List<MenuOption>,
+) {
+    MenuCard {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            LanguageColumn(sourceTitle, source())
+            LanguageColumn(targetTitle, target())
+        }
+    }
+}
+
+@Composable
+private fun LanguageColumn(title: String, options: List<MenuOption>) {
+    val colors = OverlayTheme.colors
+    Column(Modifier.width(IntrinsicSize.Max), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        BasicText(
+            title,
+            style = OverlayTheme.badge.copy(color = colors.onSurfaceVariant),
+            modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp),
+        )
+        options.forEach { OptionRow(it) }
+    }
+}
+
+@Composable
+private fun MenuCard(content: @Composable () -> Unit) {
     val colors = OverlayTheme.colors
     val shape = RoundedCornerShape(24.dp)
     // 그림자가 잘리지 않도록 창 안에 여백을 둔다.
     Box(Modifier.padding(12.dp)) {
-        Column(
-            modifier = Modifier
-                .width(IntrinsicSize.Max)
+        Box(
+            Modifier
                 .overlayShadow(12.dp, shape, colors.primary)
                 .clip(shape)
                 .background(colors.surface)
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-        ) {
-            options.forEach { option ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(if (option.selected) colors.primaryContainer else colors.surface)
-                        .pressable { option.onSelect() }
-                        .padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SymbolBadge(option.symbol, size = 36.dp, filled = !option.selected)
-                    Spacer(Modifier.width(12.dp))
-                    BasicText(
-                        option.label,
-                        style = OverlayTheme.body.copy(
-                            color = if (option.selected) colors.onPrimaryContainer else colors.onSurface,
-                        ),
-                    )
-                }
-            }
-        }
+        ) { content() }
+    }
+}
+
+@Composable
+private fun OptionRow(option: MenuOption) {
+    val colors = OverlayTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (option.selected) colors.primaryContainer else colors.surface)
+            .pressable { option.onSelect() }
+            .padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SymbolBadge(option.symbol, size = 36.dp, filled = !option.selected)
+        Spacer(Modifier.width(12.dp))
+        BasicText(
+            option.label,
+            style = OverlayTheme.body.copy(
+                color = if (option.selected) colors.onPrimaryContainer else colors.onSurface,
+            ),
+        )
     }
 }
 
@@ -204,18 +248,29 @@ internal const val BUBBLE_CELL_WIDTH_DP = 76
 internal const val BUBBLE_CELL_HEIGHT_DP = BUBBLE_DIAMETER_DP + 24
 
 /**
- * 버블 창 크기 (dp). 버튼 가운데가 바깥쪽 가장자리 · 세로 가운데에 걸린다.
- * 화면 위 · 아래 끝에서는 [OverlayGeometry.bubbleAngles]가 버블을 안쪽으로 몰아 주므로 높이는 반지름 + 이름표까지 양쪽으로 잡는다.
+ * 버블 창 크기 (dp). 버튼 가운데에서 바깥쪽으로 [BUBBLE_RING_OUTER_DP], 안쪽으로 [BUBBLE_RING_INNER_DP]를 잡는다.
+ * 바깥쪽에도 버블 반 칸 + 여백을 두어 위 · 아래 끝에서 90°로 몰린 버블이 잘리지 않게 하고,
+ * 눌림 · 튀어나오는 애니메이션 · 그림자가 창 밖으로 나가 잘리지 않게 [BUBBLE_RING_PAD_DP] 여백을 둔다.
+ * 높이는 반지름 + 이름표까지 양쪽으로 잡는다 ([OverlayGeometry.bubbleAngles]가 위 · 아래 끝에서 버블을 안쪽으로 몰아 준다).
  */
-internal const val BUBBLE_RING_WIDTH_DP = BUBBLE_RADIUS_DP + BUBBLE_CELL_WIDTH_DP / 2 + 8
-internal const val BUBBLE_RING_HEIGHT_DP = 2 * (BUBBLE_RADIUS_DP + BUBBLE_DIAMETER_DP / 2 + 24)
+internal const val BUBBLE_RING_PAD_DP = 20
+internal const val BUBBLE_RING_OUTER_DP = BUBBLE_CELL_WIDTH_DP / 2 + BUBBLE_RING_PAD_DP
+internal const val BUBBLE_RING_INNER_DP = BUBBLE_RADIUS_DP + BUBBLE_CELL_WIDTH_DP / 2 + BUBBLE_RING_PAD_DP
+internal const val BUBBLE_RING_WIDTH_DP = BUBBLE_RING_OUTER_DP + BUBBLE_RING_INNER_DP
+internal const val BUBBLE_RING_HEIGHT_DP = 2 * (BUBBLE_RADIUS_DP + BUBBLE_DIAMETER_DP / 2 + 24 + BUBBLE_RING_PAD_DP)
 
 /**
  * O-02 버블 메뉴: 길게 누르면 버튼 주위(화면 안쪽 호)에 뜨는 카테고리 버블. 아이콘 원 + 아래 이름표.
- * [anchorYDp]는 창 위쪽에서 버튼 가운데까지의 거리, [inwardRight]는 버튼이 왼쪽 가장자리일 때 true (안쪽이 오른쪽).
+ * [anchorXDp] · [anchorYDp]는 창 왼쪽 · 위쪽에서 버튼 가운데까지의 거리, [inwardRight]는 버튼이 왼쪽 가장자리일 때 true (안쪽이 오른쪽).
  */
 @Composable
-internal fun BubbleRing(bubbles: List<BubbleSpec>, inwardRight: Boolean, anchorYDp: Float, onBackgroundTap: () -> Unit) {
+internal fun BubbleRing(
+    bubbles: List<BubbleSpec>,
+    inwardRight: Boolean,
+    anchorXDp: Float,
+    anchorYDp: Float,
+    onBackgroundTap: () -> Unit,
+) {
     val colors = OverlayTheme.colors
     var shown by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { shown = true }
@@ -225,12 +280,13 @@ internal fun BubbleRing(bubbles: List<BubbleSpec>, inwardRight: Boolean, anchorY
         label = "bubble-grow",
     )
     Box(Modifier.size(BUBBLE_RING_WIDTH_DP.dp, BUBBLE_RING_HEIGHT_DP.dp).pressable(onClick = onBackgroundTap)) {
-        bubbles.forEach { bubble ->
+        bubbles.forEachIndexed { index, bubble ->
+            val pressSource = remember { MutableInteractionSource() }
+            val pressed by pressSource.collectIsPressedAsState()
             val rad = Math.toRadians(bubble.angleDeg.toDouble())
             val dx = (BUBBLE_RADIUS_DP * kotlin.math.cos(rad)).toFloat() * grow
             val dy = (BUBBLE_RADIUS_DP * kotlin.math.sin(rad)).toFloat() * grow
-            val anchorX = if (inwardRight) 0f else BUBBLE_RING_WIDTH_DP.toFloat()
-            val centerX = anchorX + if (inwardRight) dx else -dx
+            val centerX = anchorXDp + if (inwardRight) dx else -dx
             val centerY = anchorYDp + dy
             val visible = grow.coerceIn(0f, 1f)
             Column(
@@ -242,7 +298,9 @@ internal fun BubbleRing(bubbles: List<BubbleSpec>, inwardRight: Boolean, anchorY
                     .width(BUBBLE_CELL_WIDTH_DP.dp)
                     .scale(0.4f + 0.6f * visible)
                     .alpha(visible)
-                    .pressable { bubble.onClick() },
+                    // 위 버블이 먼저 그려지면 아래 버블에 이름표가 가려진다: 위쪽이 앞, 누르고 있는 버블은 맨 앞.
+                    .zIndex(if (pressed) bubbles.size.toFloat() + 1f else (bubbles.size - index).toFloat())
+                    .pressable(interactionSource = pressSource) { bubble.onClick() },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(

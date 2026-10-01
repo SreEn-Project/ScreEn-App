@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -42,8 +44,8 @@ internal fun overlayItems(items: List<TranslatedItem>): List<TranslatedItem> =
 
 /** 막 색: 반투명 검정 (NA-22). */
 private val BoxColor = Color.Black.copy(alpha = 0.78f)
-private const val MAX_SP = 20
-private const val MIN_SP = 11
+private const val MAX_SP = 40
+private const val MIN_SP = 10
 
 /**
  * 원문 위에 덮기 (NA-22): 인식한 글자 영역마다 반투명 검은 막을 깔고 그 위, 원문 자리에 번역문을 흰 글자로 보여 준다.
@@ -89,11 +91,12 @@ internal fun OverlayResult(items: List<TranslatedItem>, onDismiss: () -> Unit) {
                     .clip(RoundedCornerShape(6.dp))
                     .background(BoxColor)
                     .padding(horizontal = 4.dp, vertical = 2.dp),
-                contentAlignment = Alignment.CenterStart,
+                contentAlignment = Alignment.Center,
             ) {
                 BasicText(
                     text,
-                    style = style.copy(fontSize = fontSp.sp, lineHeight = (fontSp * 1.2f).sp),
+                    style = style.copy(fontSize = fontSp.sp, lineHeight = (fontSp * 1.2f).sp, textAlign = TextAlign.Center),
+                    modifier = Modifier.fillMaxWidth(),
                     overflow = TextOverflow.Clip,
                 )
             }
@@ -147,7 +150,7 @@ private fun fitText(
     for (i in 0..steps) {
         val px = target * (1f - (1f - OverlayFontPlan.SHRINK_FLOOR) * i / steps)
         val sp = with(density) { px.toSp() }
-        val layout = measurer.measure(text, style.copy(fontSize = sp, lineHeight = sp * 1.2f), constraints = Constraints(maxWidth = innerW))
+        val layout = measurer.measure(text, style.copy(fontSize = sp, lineHeight = sp * 1.2f, textAlign = TextAlign.Center), constraints = Constraints(maxWidth = innerW))
         needed = layout.size.height.toFloat()
         if (needed <= innerH) return Fit(box, sp.value)
     }

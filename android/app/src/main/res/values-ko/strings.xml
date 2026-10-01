@@ -20,7 +20,8 @@
     <string name="overlay_bubble_language">빠른 언어</string>
     <string name="overlay_bubble_settings">설정</string>
     <string name="overlay_source_auto">자동</string>
-    <string name="overlay_setting_source">인식 언어: %1$s</string>
+    <string name="overlay_lang_source">번역할 언어</string>
+    <string name="overlay_lang_target">번역될 언어</string>
     <string name="overlay_setting_auto_translate">자동 번역: %1$s</string>
     <string name="overlay_on">켜짐</string>
     <string name="overlay_off">꺼짐</string>

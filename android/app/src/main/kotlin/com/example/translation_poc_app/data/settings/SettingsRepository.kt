@@ -75,9 +75,7 @@ class SettingsRepository(context: Context) {
                 .coerceIn(Settings.AUTO_CHECK_INTERVAL_RANGE_MS),
             autoSettleMs = (this[Keys.AUTO_SETTLE] ?: defaults.autoSettleMs)
                 .coerceIn(Settings.AUTO_SETTLE_RANGE_MS),
-            sourceLanguage = this[Keys.SOURCE_LANGUAGE]
-                ?.takeIf { it == Settings.SOURCE_LANGUAGE_AUTO || it in Settings.SOURCE_LANGUAGES }
-                ?: defaults.sourceLanguage,
+            sourceLanguage = this[Keys.SOURCE_LANGUAGE]?.takeIf { it.isNotBlank() } ?: defaults.sourceLanguage,
         )
     }
 
