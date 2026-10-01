@@ -10,12 +10,21 @@
 - 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
 - 남은 일: 기기에서 ① 버블 4개가 겹치지 않는지(화면 위 · 아래 끝 포함) ② 인식 언어를 고정했을 때 인식이 나아지는지 ③ 앱 설정 화면에도 인식 언어를 노출할지 결정.
 
+
 ## 2026-10-01 · 자동 번역 (이슈 #23, 브랜치 `feat/23-auto-translate`, NA-26)
 - (먼저 #20 · #22를 develop에 merge하고 그 위에서 땄다.) 설계는 D-032.
 - 설정 탭에 "자동 번역"(기본 꺼짐 · 확인 간격 · 멈춘 뒤 대기 시간). Pigeon `AppSettings`에 `autoTranslate` · `autoCheckIntervalMs` · `autoSettleMs`와 setter 3개 추가 → Flutter 엔티티 · 매퍼 · 리포지토리 · 유스케이스 3개 · `AutoTranslateViewModel` · 설정 화면 섹션 · ARB(ko/en).
 - 네이티브: `autotranslate/`(`FrameSignature` · `AutoTranslateTracker`(판단) · `AutoTranslateWatcher`(루프)), `ScreenCapturer.captureSignature`, `OverlayController`(자동 번역 호출 · 결과 창 숨김/교체 · 터치 통과 덮기 · 화면 꺼짐/절전 모드 시 중지), `Settings`/`SettingsRepository`(범위 보정).
 - 확인: flutter analyze 0 · flutter test 통과(AutoTranslateViewModel 5개 추가) · Kotlin 단위 테스트(Tracker 12 · Watcher 5 추가) 통과 · debug APK 빌드. 기기 확인은 사용자 몫.
 - 남은 일: 기기에서 ① 변화 감지 임계(`FrameSignature.CHANGE_RATIO`)가 알맞은지(헛번역 · 놓침) ② 덮기 막 터치 통과(Android 12+ 알파 보정)와 옅어지는 정도 ③ 열 · 배터리 체감 확인.
+
+
+## 2026-10-01 · 글자 인식 실패 진단 · 보안 화면 판별 (이슈 #25, 브랜치 `fix/25-ocr-diagnostics`, NA-09 · NA-05)
+- 증상: 구글 로그인 화면(영어 본문이 뚜렷)에서 고정 영역 모드(핀 아이콘)로 눌렀더니 '글자를 찾지 못했어요'. 설계는 D-033b.
+- 코드로 확인한 것: 오버레이(시트 · 버튼)는 캡처 전에 숨기고 새 프레임을 기다려 찍는다 / 인식 · 정리 · 합치기 · 언어 판별 경로는 영어 본문을 버리지 않는다. 구글 로그인 · 결제 화면은 보안 창(FLAG_SECURE)이라, 시스템이 그 창만 검게 칠하고 상태 표시줄 등은 그대로 준다 → 기존 `isBlank`(표본 전부 검정)에 안 걸려 '글자 없음'으로 나왔을 가능성이 가장 높다. 기기 로그로 확정은 못 함.
+- 고침: 글자를 못 읽었는데 인식 대상의 70% 이상이 검정이면 보안 화면 안내(`FrameStats`). 영역 모드에서 글자가 없으면 '영역을 옮기거나 키우세요' 안내(`NoTextInRegion`).
+- 진단 로그(태그 `TranslatorService`, `ScreenCapturer`, `ScreenTextRecognizer`): 프레임 크기 · 나이 · 밝기 · 검정 비율, 인식 대상 크기 · 영역, 인식기별 글자 수 · 신뢰도 · 남은 글자, 블록 수, 언어 판별 결과.
+- 확인: flutter analyze 0 · flutter test 통과 · Kotlin 단위 테스트 · 디버그 빌드. 기기 확인은 사용자 몫.
 
 ## 2026-10-01 · 글자 크기 일관화 · 인식 누락 개선 (이슈 #21, 브랜치 `feat/21-font-recall`, NA-09 · NA-10 · NA-22)
 - (PR #20이 develop에 아직 없어 그 브랜치에서 땄다.) 설계는 D-031.

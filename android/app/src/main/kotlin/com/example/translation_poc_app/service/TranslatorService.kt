@@ -64,6 +64,7 @@ class TranslatorService : LifecycleService() {
             engineFor = { translationEngine() },
             settings = { AppGraph.settingsRepository(this).current() },
             onTimings = { Log.i(TAG, "번역 시간 $it total=${it.total}ms") },
+            log = { Log.i(TAG, it) },
         )
     }
 

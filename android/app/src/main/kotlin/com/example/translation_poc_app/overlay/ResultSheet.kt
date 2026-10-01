@@ -88,6 +88,12 @@ internal fun ResultSheet(
                     stringResource(R.string.result_no_text_body),
                     onDismiss,
                 )
+                TranslationOutcome.NoTextInRegion -> Message(
+                    Symbol.CROP,
+                    stringResource(R.string.result_no_text_title),
+                    stringResource(R.string.result_no_text_region_body),
+                    onDismiss,
+                )
                 is TranslationOutcome.AlreadyInTarget -> Message(
                     Symbol.CHECK,
                     stringResource(R.string.result_already_target_title),
