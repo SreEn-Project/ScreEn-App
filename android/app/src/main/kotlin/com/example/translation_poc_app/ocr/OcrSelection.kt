@@ -16,6 +16,18 @@ object OcrSelection {
     fun charCount(blocks: List<OcrBlock>): Int =
         blocks.sumOf { b -> b.lines.sumOf { l -> l.text.count { !it.isWhitespace() } } }
 
+    /** 진단 로그용: 읽은 글자 수와 글자 가중 평균 신뢰도 (#25). */
+    fun describe(raw: List<OcrBlock>): String {
+        var chars = 0
+        var weighted = 0.0
+        for (block in raw) for (line in block.lines) {
+            val n = line.text.count { !it.isWhitespace() }
+            chars += n
+            weighted += n * line.confidence
+        }
+        return if (chars == 0) "0자" else "${chars}자 신뢰도 %.2f".format(weighted / chars)
+    }
+
     private fun minConfidenceFor(line: OcrLine, minConfidence: Float): Float =
         if (line.text.count { !it.isWhitespace() } >= LONG_LINE_CHARS) minOf(minConfidence, MIN_LONG_LINE_CONFIDENCE) else minConfidence
 

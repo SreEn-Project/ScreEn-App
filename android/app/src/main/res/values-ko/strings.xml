@@ -38,9 +38,10 @@
     <string name="result_unsupported">아직 번역할 수 없는 언어예요 (%1$s)</string>
     <string name="result_skipped">이미 %2$s인 글 %1$d개는 건너뛰었어요</string>
     <string name="result_secure_title">이 화면은 읽을 수 없어요</string>
-    <string name="result_secure_body">은행 · 동영상 앱처럼 화면 캡처를 막는 앱이에요.</string>
+    <string name="result_secure_body">로그인 · 결제 · 은행 · 동영상처럼 화면 캡처를 막는 화면이에요.</string>
     <string name="result_no_text_title">글자를 찾지 못했어요</string>
     <string name="result_no_text_body">글자가 잘 보이는 화면에서 다시 눌러 주세요.</string>
+    <string name="result_no_text_region_body">고른 영역에 글자가 없어요. 영역을 옮기거나 키우거나 전체 화면으로 바꿔 보세요.</string>
     <string name="result_already_target_title">번역할 글이 없어요</string>
     <string name="result_already_target_body">화면의 글이 이미 대상 언어(%1$s)예요.</string>
     <string name="result_failed_title">번역하지 못했어요</string>

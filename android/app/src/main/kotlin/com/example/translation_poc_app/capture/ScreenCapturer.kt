@@ -12,6 +12,7 @@ import android.media.projection.MediaProjection
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.SystemClock
 import android.util.Log
 import android.view.WindowManager
 import kotlinx.coroutines.CompletableDeferred
@@ -55,6 +56,9 @@ class ScreenCapturer(
 
     /** 가장 최근 프레임. [lock]으로 보호한다. 새 프레임이 오면 이전 것은 닫는다. */
     private var latest: Image? = null
+
+    /** [latest]가 들어온 시각 (진단 로그용, #25). [lock]으로 보호한다. */
+    private var latestAt = 0L
     private var firstFrame = CompletableDeferred<Unit>()
 
     /** [awaitFreshFrame]가 기다리는 다음 프레임. [lock]으로 보호한다. */
@@ -96,13 +100,19 @@ class ScreenCapturer(
         withTimeoutOrNull(timeoutMs) { firstFrame.await() }
             ?: return CaptureResult.Failed("프레임을 받지 못함")
 
+        var frameAgeMs = 0L
         val bitmap = try {
-            synchronized(lock) { latest?.toBitmap() }
+            synchronized(lock) {
+                frameAgeMs = SystemClock.elapsedRealtime() - latestAt
+                latest?.toBitmap()
+            }
         } catch (e: Exception) {
             Log.e(TAG, "프레임 변환 실패", e)
             return CaptureResult.Failed(e.message ?: "변환 실패")
         } ?: return CaptureResult.Failed("프레임을 받지 못함")
 
+        // 진단: 오래된 프레임이면(화면이 안 바뀌어 새 프레임이 없었던 것) 나이가 크게 나온다.
+        Log.i(TAG, "프레임 ${bitmap.width}x${bitmap.height} 나이=${frameAgeMs}ms ${FrameStats.of(bitmap)}")
         if (bitmap.isBlank()) {
             bitmap.recycle()
             return CaptureResult.Blank
@@ -179,6 +189,7 @@ class ScreenCapturer(
                 synchronized(lock) {
                     latest?.close()
                     latest = image
+                    latestAt = SystemClock.elapsedRealtime()
                     nextFrame?.complete(Unit)
                     nextFrame = null
                 }

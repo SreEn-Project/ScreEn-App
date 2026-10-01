@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.translate
 
 import com.example.translation_poc_app.capture.CaptureResult
+import com.example.translation_poc_app.capture.FrameStats
 import android.graphics.Bitmap
 import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.PixelRect
@@ -52,6 +53,9 @@ sealed interface TranslationOutcome {
     /** 읽은 글자가 없거나 언어를 알 수 없는 것뿐. */
     data object NoText : TranslationOutcome
 
+    /** 고른 영역(드래그 · 고정)에 글자가 없다. 영역이 어긋났을 수 있어 따로 안내한다 (#25). */
+    data object NoTextInRegion : TranslationOutcome
+
     /** 읽은 글이 모두 이미 대상 언어. */
     data class AlreadyInTarget(val targetLanguage: String) : TranslationOutcome
 
@@ -88,6 +92,8 @@ class TranslationPipeline(
     private val engineFor: (Settings) -> TranslationEngine,
     private val settings: suspend () -> Settings,
     private val onTimings: (PipelineTimings) -> Unit = {},
+    /** 진단 로그 (#25). 캡처 크기 · 밝기, 영역, 단계별 결과 수. */
+    private val log: (String) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     /**
@@ -113,10 +119,17 @@ class TranslationPipeline(
         val screenWidth = frame.bitmap.width
         val screenHeight = frame.bitmap.height
         val origin = region?.toPixels(screenWidth, screenHeight)
+        var stats: FrameStats? = null
         return try {
             val current = settings()
             val target = if (region != null) frame.cropped(region) else frame
             val ocr = try {
+                stats = runCatching { FrameStats.of(target.bitmap) }.getOrNull()
+                log(
+                    "캡처 ${screenWidth}x$screenHeight, 인식 대상 ${target.bitmap.width}x${target.bitmap.height}" +
+                        (origin?.let { " (영역 ${it.left},${it.top}-${it.right},${it.bottom})" } ?: " (전체)") +
+                        " ${stats ?: ""}",
+                )
                 recognize(target)
             } finally {
                 target.bitmap.recycle()
@@ -125,18 +138,24 @@ class TranslationPipeline(
             val ocrMs = lap()
             // 잡음 줄을 빼고, 쪼개진 문단은 이어 붙여 번역 문맥을 늘린다 (#19).
             val blocks = OcrBlockMerger.merge(OcrCleaner.clean(ocr.blocks))
+            log("인식 블록 ${ocr.blocks.size}개 → 정리 후 ${blocks.size}개")
             if (blocks.isEmpty()) {
                 onTimings(PipelineTimings(captureMs, ocrMs))
-                return TranslationOutcome.NoText
+                return noText(stats, region != null)
             }
 
             val detected = detect(ocr.copy(blocks = blocks), current.targetLanguage)
+            log(
+                "언어 감지: " + detected.groupBy { it.decision.action }
+                    .map { (action, list) -> "$action ${list.size}개(${list.map { it.decision.language }.distinct().joinToString(",")})" }
+                    .joinToString(" / "),
+            )
             val detectMs = lap()
             val engine = engineFor(current)
             val requests = TranslationAssembler.requests(detected, current.targetLanguage)
             val results = translateAll(engine, requests)
             onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size))
-            TranslationAssembler.assemble(
+            val assembled = TranslationAssembler.assemble(
                 detected, results, engine.id, current.targetLanguage,
                 lineHeightOf = { block -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } },
                 boundsOf = { block ->
@@ -151,12 +170,16 @@ class TranslationPipeline(
                 }
                 },
             )
+            if (assembled == TranslationOutcome.NoText) noText(stats, region != null) else assembled
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             TranslationOutcome.Failed(e.message ?: e::class.java.simpleName)
         }
     }
+
+    private fun noText(stats: FrameStats?, inRegion: Boolean): TranslationOutcome =
+        noTextOutcome(stats, inRegion).also { log("글자 없음 → $it") }
 
     /** 블록마다 따로 요청하고 동시에 기다린다. ML Kit은 블록 하나씩, AI 엔진(3단계)은 묶음 호출로 바꿀 수 있다. */
     private suspend fun translateAll(
@@ -165,6 +188,15 @@ class TranslationPipeline(
     ): List<EngineResult<TranslationResult>> = coroutineScope {
         requests.map { async { engine.translate(it) } }.awaitAll()
     }
+}
+
+/**
+ * 글자를 못 읽었을 때 왜인지 고른다 (#25): 대부분 검은 화면이면 보안 화면, 영역을 골랐으면 영역 안내, 아니면 일반 안내.
+ */
+internal fun noTextOutcome(stats: FrameStats?, inRegion: Boolean): TranslationOutcome = when {
+    stats?.looksSecure == true -> TranslationOutcome.SecureScreen
+    inRegion -> TranslationOutcome.NoTextInRegion
+    else -> TranslationOutcome.NoText
 }
 
 /** 언어 감지 결과 + 엔진 결과 → 결과 시트 목록. Android 의존 없는 순수 로직. */
