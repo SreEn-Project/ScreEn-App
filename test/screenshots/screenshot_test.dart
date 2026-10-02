@@ -15,8 +15,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/app/router.dart';
 import 'package:translation_poc_app/features/service/domain/entities/service_status.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
-import 'package:translation_poc_app/features/about/presentation/screens/about_screen.dart';
-import 'package:translation_poc_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:translation_poc_app/l10n/app_localizations.dart';
 
 import '../fakes.dart';
@@ -48,17 +46,6 @@ String _pubCacheIconFont() {
         ..sort((a, b) => a.path.compareTo(b.path));
   return '${dir.last.path}/lib/fonts/MaterialSymbolsRounded.ttf';
 }
-
-Widget _wrap(Widget child, {ThemeMode mode = ThemeMode.light}) => MaterialApp(
-  debugShowCheckedModeBanner: false,
-  theme: AppTheme.light,
-  darkTheme: AppTheme.dark,
-  themeMode: mode,
-  locale: const Locale('ko'),
-  localizationsDelegates: AppLocalizations.localizationsDelegates,
-  supportedLocales: AppLocalizations.supportedLocales,
-  home: child,
-);
 
 /// 실제 라우터(하단 탭 포함)로 [location] 화면을 연다.
 Widget _route(
@@ -120,7 +107,7 @@ void main() {
     debugDisableShadows = false;
 
     await _setSize(tester, _phone);
-    await tester.pumpWidget(_wrap(const OnboardingScreen()));
+    await tester.pumpWidget(_route(AppRoutes.onboarding));
     await _shoot(tester, '01_onboarding_intro');
 
     await tester.tap(find.text('건너뛰기'));
@@ -163,7 +150,7 @@ void main() {
     await _shoot(tester, '09_target_language');
 
     await tester.pumpWidget(const SizedBox());
-    await tester.pumpWidget(_wrap(const AboutScreen()));
+    await tester.pumpWidget(_route(AppRoutes.about));
     await _shoot(tester, '10_about');
 
     debugDisableShadows = true;

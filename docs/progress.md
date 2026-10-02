@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 온보딩 첫 실행 연결 · 정보 화면 실제 값 (FL-01, FL-14, 이슈 #55, 브랜치 `feat/55-onboarding-about`)
+- 온보딩이 첫 실행에만 뜬다. `startLocationProvider`(router.dart)가 저장된 설정의 `onboardingCompleted`를 읽어 시작 화면(온보딩 / 홈)을 정하고, 앱은 그 값이 나올 때까지 빈 화면을 둔다. 설정을 못 읽으면 온보딩부터 보여 준다.
+- 온보딩 마지막 페이지에서 고른 대상 언어는 `TargetLanguageViewModel`로 바로 저장(기본은 저장된 값 · ko), 시작하기를 누르면 `CompleteOnboarding`으로 완료 표시 후 권한 안내(FL-02, 이미 실제 권한 확인에 연결됨)로 간다. 권한 안내를 끝내기 전에 앱을 닫아도 온보딩은 다시 안 나오며, 권한이 없으면 홈이 권한 안내로 가는 버튼을 보여 준다.
+- 정보 화면: 버전은 `package_info_plus`(about 기능에 domain/data/di 추가, `GetAppInfo`), 오픈소스 라이선스는 `showLicensePage`(버전 표시). 개인정보처리방침은 주소 미정이라 그대로 "준비 중".
+- 변경: pubspec에 `package_info_plus` 추가. Gradle · Manifest · 네이티브 변경 없음. 온보딩 · 정보 화면 위젯 테스트 추가, 스크린샷 테스트는 실제 라우터로 열도록 정리.
+- 확인: `flutter analyze` 0 · `flutter test` · `flutter build apk --debug` 통과. 기기 확인 전 (첫 실행 온보딩 → 재실행 시 홈 직행, 정보 화면 버전 확인).
+- 남은 일: NA-23 로컬 DB + FL-13 번역 기록.
+
 ## 2026-10-02 · 표시 · 캡처 모드 설정 연결 (FL-07, FL-08, 이슈 #53, 브랜치 `feat/53-display-capture-settings`)
 - 설정 화면의 기본 캡처 모드 · 표시 방식 · 버튼 크기 · 투명도 · 고정 영역 초기화가 화면 안 가짜 값이었다. `CaptureSettingsViewModel` · `DisplaySettingsViewModel`이 네이티브 설정(DataStore)을 읽고 쓴다. 캡처 모드 · 표시 방식은 플로팅 버튼 메뉴가 쓰는 값과 같아서 어느 쪽에서 바꿔도 서로 반영된다.
 - 새 설정: 버튼 크기(40~72dp, 4단위, 기본 52) · 불투명도(30~100%, 10단위, 기본 100). 실행 중인 플로팅 버튼에 바로 반영: 크기가 바뀌면 `OverlayController.resizeButton`이 버튼 가운데를 유지한 채 창을 다시 키워 가장자리에 붙이고, 투명도는 컴포즈 알파(창 알파는 D-037대로 숨김 전용).

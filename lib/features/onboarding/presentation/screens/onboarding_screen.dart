@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -6,23 +7,24 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../language/presentation/view_models/target_language_view_model.dart';
 import '../../../language/presentation/widgets/language_list.dart';
+import '../../../settings/di.dart';
 
 /// 온보딩 (S-01, FL-01): 소개 3장 + 대상 언어 선택 → 권한 안내.
-/// UI 퍼블리싱 단계라 선택한 언어 · 완료 여부는 아직 저장하지 않는다.
-class OnboardingScreen extends StatefulWidget {
+/// 고른 대상 언어는 바로 저장하고, 시작하면 완료 표시를 남겨 다음부터 건너뛴다.
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const _pageCount = 4;
 
   final _controller = PageController();
   int _page = 0;
-  String _targetLanguage = 'ko';
 
   bool get _isLanguagePage => _page == _pageCount - 1;
 
@@ -32,9 +34,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void _next() {
+  Future<void> _next() async {
     if (_isLanguagePage) {
-      context.go(AppRoutes.permission);
+      await ref.read(completeOnboardingProvider)();
+      if (mounted) context.go(AppRoutes.permission);
       return;
     }
     _controller.nextPage(
@@ -52,6 +55,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final targetLanguage =
+        ref.watch(targetLanguageViewModelProvider).value ?? 'ko';
 
     return Scaffold(
       body: SafeArea(
@@ -96,9 +101,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     body: l10n.onboardingIntro3Body,
                   ),
                   _LanguagePage(
-                    selectedCode: _targetLanguage,
-                    onSelected: (code) =>
-                        setState(() => _targetLanguage = code),
+                    selectedCode: targetLanguage,
+                    onSelected: (code) => ref
+                        .read(targetLanguageViewModelProvider.notifier)
+                        .select(code),
                   ),
                 ],
               ),

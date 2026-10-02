@@ -10,6 +10,9 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 저장된 설정을 읽어 시작 화면이 정해질 때까지 빈 화면을 둔다 (네이티브 응답은 곧바로 온다).
+    final start = ref.watch(startLocationProvider);
+    if (start.isLoading) return const ColoredBox(color: Colors.transparent);
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light,
