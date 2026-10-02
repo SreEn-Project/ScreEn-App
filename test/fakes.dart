@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:translation_poc_app/features/about/di.dart';
+import 'package:translation_poc_app/features/about/domain/entities/app_info.dart';
+import 'package:translation_poc_app/features/about/domain/repositories/app_info_repository.dart';
 import 'package:translation_poc_app/features/settings/di.dart';
 import 'package:translation_poc_app/features/settings/domain/entities/translator_settings.dart';
 import 'package:translation_poc_app/features/settings/domain/repositories/settings_repository.dart';
@@ -132,13 +135,30 @@ class FakeModelRepository implements ModelRepository {
       installed.remove(languageCode);
 }
 
+/// 고정된 앱 버전을 돌려주는 가짜 앱 정보.
+class FakeAppInfoRepository implements AppInfoRepository {
+  const FakeAppInfoRepository();
+
+  @override
+  Future<AppInfo> load() async =>
+      const AppInfo(version: '1.2.3', buildNumber: '45');
+}
+
 /// 네이티브 연결 provider를 가짜로 바꾼다.
 List<Override> fakeNativeOverrides({
   ServiceStatus service = ServiceStatus.stopped,
   bool permissionsGranted = false,
+  bool onboardingCompleted = false,
+  FakeSettingsRepository? settings,
 }) => [
   serviceRepositoryProvider.overrideWithValue(FakeServiceRepository(service)),
-  settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository()),
+  settingsRepositoryProvider.overrideWithValue(
+    settings ??
+        FakeSettingsRepository(
+          TranslatorSettings(onboardingCompleted: onboardingCompleted),
+        ),
+  ),
+  appInfoRepositoryProvider.overrideWithValue(const FakeAppInfoRepository()),
   modelRepositoryProvider.overrideWithValue(FakeModelRepository()),
   permissionRepositoryProvider.overrideWithValue(
     FakePermissionRepository(

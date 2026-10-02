@@ -45,6 +45,7 @@ dependencies:
   material_symbols_icons: ^4.2815.1
   flutter_localizations:
     sdk: flutter
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:
