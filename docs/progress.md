@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 자동 번역 영역 변경 반영 · 버튼 '자동' 배지 (NA-26, NA-18, 이슈 #69, 브랜치 `fix/69-auto-area-change-badge`)
+- 버그: 자동 번역을 켠 뒤 캡처 영역 종류(전체 · 드래그 · 고정)를 바꿔도 켤 때 쓰던 영역(`lastRegion`)으로 계속 번역됐다. 이제 영역 종류나 고정 영역이 바뀌면 이전 영역의 감시 · 결과를 걷고 영역을 비운다. 다음 버튼 탭이 새 영역 종류로 시작한다.
+- 버튼: 자동 번역이 켜져 있으면 현재 영역 종류 아이콘 오른쪽 아래에 작고 둥근 "자동/Auto" 배지를 띄운다 (색은 오버레이 테마 primary · onPrimary).
+- 변경: `overlay/OverlayController` · `overlay/FloatingButton` · `strings.xml` 영어 · 한국어 1줄. pubspec · Gradle · Manifest 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · `gradlew testDebugUnitTest` · `flutter build apk --debug` 통과. 에뮬레이터 · 기기 확인 전.
+- 참고: 열려 있는 옛 PR #9 · #30–#44는 develop과 충돌이 많아(30여 파일) 합치지 않았다. 사용자 결정 대기.
+
 ## 2026-10-02 · 빠른 언어 메뉴 재디자인 (NA-18, 이슈 #67, 브랜치 `feat/67-quick-language-header`)
 - 플로팅 버튼 버블의 "빠른 언어"를 번역기 앱 모양으로 바꿨다: 위에 "원문 ▾ ⇄ 번역 ▾" 막대, 아래에 고정 높이 스크롤 목록(작고 둥근 알약 모양). 막대 한쪽을 누르면 그쪽이 선택 상태가 되고 목록에서 고르면 그쪽이 바뀐다. ⇄는 두 언어를 맞바꾼다(원문이 자동이면 비활성). 설계는 D-041.
 - 변경: `overlay/FloatingButton`(`LanguageMenu` 새로 작성) · `overlay/OverlayController` · `strings.xml` 영어 · 한국어 1줄(맞바꾸기 설명). pubspec · Gradle · Manifest 변경 없음.

@@ -25,6 +25,7 @@
     <string name="overlay_lang_target">Translate into</string>
     <string name="overlay_lang_swap">Swap languages</string>
     <string name="overlay_setting_auto_translate">Auto translate: %1$s</string>
+    <string name="overlay_button_auto_badge">Auto</string>
     <string name="overlay_on">On</string>
     <string name="overlay_off">Off</string>
     <string name="overlay_display_list">List</string>
