@@ -24,6 +24,7 @@
     <string name="overlay_lang_target">번역될 언어</string>
     <string name="overlay_lang_swap">언어 맞바꾸기</string>
     <string name="overlay_setting_auto_translate">자동 번역: %1$s</string>
+    <string name="overlay_setting_auto_translate_drag">자동 번역: 드래그 영역에선 사용 불가</string>
     <string name="overlay_button_auto_badge">자동</string>
     <string name="overlay_on">켜짐</string>
     <string name="overlay_off">꺼짐</string>

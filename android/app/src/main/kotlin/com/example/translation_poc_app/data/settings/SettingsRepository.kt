@@ -33,7 +33,11 @@ class SettingsRepository(context: Context) {
 
     suspend fun setEngine(engine: Engine) = edit { it[Keys.ENGINE] = engine.name }
 
-    suspend fun setCaptureRange(range: CaptureRange) = edit { it[Keys.CAPTURE_RANGE] = range.name }
+    // 드래그 영역에서는 자동 번역을 쓸 수 없다: 드래그로 바뀌면 자동 번역도 함께 끈다 (#71).
+    suspend fun setCaptureRange(range: CaptureRange) = edit {
+        it[Keys.CAPTURE_RANGE] = range.name
+        if (range == CaptureRange.DRAG_REGION) it[Keys.AUTO_TRANSLATE] = false
+    }
 
     suspend fun setResultDisplay(display: ResultDisplay) = edit { it[Keys.RESULT_DISPLAY] = display.name }
 
@@ -49,7 +53,10 @@ class SettingsRepository(context: Context) {
 
     suspend fun setQuickLanguages(codes: List<String>) = edit { it[Keys.QUICK_LANGUAGES] = codes.joinToString(",") }
 
-    suspend fun setAutoTranslate(enabled: Boolean) = edit { it[Keys.AUTO_TRANSLATE] = enabled }
+    suspend fun setAutoTranslate(enabled: Boolean) = edit {
+        val range = enumOrDefault(it[Keys.CAPTURE_RANGE], Settings().captureRange)
+        it[Keys.AUTO_TRANSLATE] = enabled && range != CaptureRange.DRAG_REGION
+    }
 
     suspend fun setAutoShowDelayMs(ms: Long) =
         edit { it[Keys.AUTO_SHOW_DELAY] = ms.coerceIn(Settings.AUTO_SHOW_DELAY_RANGE_MS) }
@@ -70,10 +77,11 @@ class SettingsRepository(context: Context) {
 
     private fun Preferences.toSettings(): Settings {
         val defaults = Settings()
+        val range = enumOrDefault(this[Keys.CAPTURE_RANGE], defaults.captureRange)
         return Settings(
             targetLanguage = this[Keys.TARGET_LANGUAGE] ?: defaults.targetLanguage,
             engine = enumOrDefault(this[Keys.ENGINE], defaults.engine),
-            captureRange = enumOrDefault(this[Keys.CAPTURE_RANGE], defaults.captureRange),
+            captureRange = range,
             resultDisplay = enumOrDefault(this[Keys.RESULT_DISPLAY], defaults.resultDisplay),
             onboardingCompleted = this[Keys.ONBOARDING_COMPLETED] ?: defaults.onboardingCompleted,
             fixedRegion = NormalizedRegion.decode(this[Keys.FIXED_REGION]),
@@ -81,7 +89,7 @@ class SettingsRepository(context: Context) {
                 ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
                 ?.takeIf { it.isNotEmpty() }
                 ?: defaults.quickLanguages,
-            autoTranslate = this[Keys.AUTO_TRANSLATE] ?: defaults.autoTranslate,
+            autoTranslate = (this[Keys.AUTO_TRANSLATE] ?: defaults.autoTranslate) && range != CaptureRange.DRAG_REGION,
             autoShowDelayMs = (this[Keys.AUTO_SHOW_DELAY] ?: defaults.autoShowDelayMs)
                 .coerceIn(Settings.AUTO_SHOW_DELAY_RANGE_MS),
             hideAfterInteractionMs = Settings.normalizeHideAfterInteraction(

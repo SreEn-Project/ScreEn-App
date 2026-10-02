@@ -135,6 +135,7 @@
   "settingsSectionAuto": "Auto translate",
   "settingsAutoTranslate": "Translate automatically when the screen changes",
   "settingsAutoTranslateDetail": "After a translation, lightly watches the screen and starts translating as soon as the text changes or scrolling stops. Unchanged text is skipped. Leaving it on uses more battery and may warm the device.",
+  "settingsAutoTranslateDragUnavailable": "Not available while the capture area is a drag area. Switch to full screen or a fixed area to use it.",
   "settingsAutoShowDelay": "Show the new translation (after you stop)",
   "settingsHideAfterInteraction": "Hide the old translation after you touch the screen",
   "settingsAutoInstant": "Now",

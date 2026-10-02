@@ -553,12 +553,18 @@ class OverlayController(
 
     /** '설정' 버블: 지금은 자동 번역 켜기 · 끄기만. 항목은 나중에 늘린다. 저장은 앱 설정과 같은 DataStore. */
     private fun settingsOptions(): List<MenuOption> {
-        val autoLabel = context.getString(
-            R.string.overlay_setting_auto_translate,
-            context.getString(if (autoTranslate) R.string.overlay_on else R.string.overlay_off),
-        )
+        // 드래그 영역에서는 자동 번역을 쓸 수 없다: 끈 채로 비활성으로 보인다 (#71).
+        val available = mode != CaptureRange.DRAG_REGION
+        val autoLabel = if (available) {
+            context.getString(
+                R.string.overlay_setting_auto_translate,
+                context.getString(if (autoTranslate) R.string.overlay_on else R.string.overlay_off),
+            )
+        } else {
+            context.getString(R.string.overlay_setting_auto_translate_drag)
+        }
         return listOf(
-            MenuOption(Symbol.AUTO_AWESOME, autoLabel, autoTranslate) {
+            MenuOption(Symbol.AUTO_AWESOME, autoLabel, autoTranslate, enabled = available) {
                 val enable = !autoTranslate
                 // 저장된 설정이 돌아오기 전에 바로 번역을 시작하므로 켜진 상태를 먼저 반영한다 (끝난 번역이 감시를 시작하도록).
                 autoTranslate = enable

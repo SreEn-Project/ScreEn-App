@@ -189,7 +189,13 @@ internal fun CloseTarget(active: Boolean) {
 }
 
 /** 옵션 메뉴 한 줄. 고른 줄은 연한 초록. */
-internal data class MenuOption(val symbol: Symbol, val label: String, val selected: Boolean, val onSelect: () -> Unit)
+internal data class MenuOption(
+    val symbol: Symbol,
+    val label: String,
+    val selected: Boolean,
+    val enabled: Boolean = true,
+    val onSelect: () -> Unit,
+)
 
 /** O-02 옵션 메뉴 (캡처 범위 · 결과 표시 · 설정 공용): 버튼 옆에 펼쳐지는 흰 카드. */
 @Composable
@@ -358,7 +364,8 @@ private fun OptionRow(option: MenuOption) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(if (option.selected) colors.primaryContainer else colors.surface)
-            .pressable { option.onSelect() }
+            .alpha(if (option.enabled) 1f else 0.4f)
+            .then(if (option.enabled) Modifier.pressable { option.onSelect() } else Modifier)
             .padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

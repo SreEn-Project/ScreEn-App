@@ -61,6 +61,17 @@ void main() {
     verify(() => repository.setAutoTranslate(true)).called(1);
   });
 
+  test('드래그 영역이면 자동 번역을 쓸 수 없다고 알린다', () async {
+    final drag = await ready(
+      const TranslatorSettings(captureMode: CaptureMode.dragRegion),
+    );
+    expect(drag.available, isFalse);
+  });
+
+  test('전체 화면 · 고정 영역에서는 쓸 수 있다', () async {
+    expect((await ready()).available, isTrue);
+  });
+
   test('표시 시점은 가장 가까운 선택지로 맞춰 저장한다', () async {
     await ready();
     final viewModel = container.read(autoTranslateViewModelProvider.notifier);
