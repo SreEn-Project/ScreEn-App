@@ -61,4 +61,7 @@
     <string name="result_no_model_title">언어 모델이 필요해요</string>
     <string name="result_no_model_body">앱의 언어 탭에서 언어를 받아 주세요.</string>
     <string name="engine_ml_kit">ML Kit</string>
+    <!-- 텍스트 선택 번역 (NA-24) -->
+    <string name="selection_translating">번역하는 중…</string>
+    <string name="selection_languages">%1$s → %2$s</string>
 </resources>

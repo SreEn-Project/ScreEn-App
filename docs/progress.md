@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 텍스트 선택 번역 (NA-24, 이슈 #61, 브랜치 `feat/61-text-selection-translate`)
+- 다른 앱에서 글자를 고르고 메뉴의 "화면 번역"을 누르면 작은 팝업이 떠서 번역문을 보여 주고 복사할 수 있다. 캡처 권한 · 서비스 없이 혼자 돌고, 원문 언어는 ML Kit이 감지, 대상 언어는 앱 설정을 따른다. 번역에 성공하면 번역 기록(NA-23)에 남는다. 이미 대상 언어인 글 · 모델 없음 · 네트워크 실패는 결과 시트와 같은 문구로 안내한다.
+- 네이티브: `selection/ProcessTextActivity`(뷰로 그린 팝업, 바깥 탭 · 닫기로 원래 앱 복귀) · `selection/SelectionTranslator`(엔진 호출 · 결과 분류, 안드로이드 무관). `ResultSheet`의 실패 문구 함수를 `translationFailureText`로 공개해 재사용.
+- 변경: Manifest(`ProcessTextActivity` 추가, PROCESS_TEXT 인텐트 필터), `values/styles.xml`(`SelectionTheme` 투명 창), `strings.xml` 영어 · 한국어 2줄. pubspec · Gradle 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · Android 단위 테스트(`SelectionTranslatorTest` 5개) · `gradlew assembleDebug` 통과. 기기 확인 전 (다른 앱에서 글자 선택 → 메뉴 "화면 번역").
+- 남은 일: NA-25 빠른 설정 타일.
+
 ## 2026-10-02 · 앱 UI 다국어 점검 (FL-15, 이슈 #59, 브랜치 `feat/59-app-localization`)
 - 점검 결과 Flutter 화면 문구(ARB 한국어 · 영어, `flutter gen-l10n`)와 네이티브 문구(`values/strings.xml` 영어 + `values-ko`)는 앞선 작업에서 이미 모두 옮겨져 있었다. 화면에 남은 한글 · 영어 하드코딩 없음 (남은 한글은 로그 · 개발자용 오류뿐). 언어 이름은 데이터라서 D-014대로 `SupportedLanguage`에 두고 화면 언어에 맞춰 보여 주며, 오버레이는 기기 로케일로 언어 이름을 만든다.
 - 앱 화면 언어는 기기 언어를 따르고(한국어 · 영어 외에는 한국어), 명세에 없어 앱 안 언어 선택은 만들지 않았다.

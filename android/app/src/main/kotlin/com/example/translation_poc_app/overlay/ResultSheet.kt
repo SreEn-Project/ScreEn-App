@@ -101,7 +101,7 @@ internal fun ResultSheet(
                     onDismiss,
                 )
                 is TranslationOutcome.Failed -> {
-                    val (title, body) = failureText(outcome.error)
+                    val (title, body) = translationFailureText(outcome.error)
                     Message(Symbol.ERROR, stringResource(title), stringResource(body), onDismiss)
                 }
             }
@@ -340,7 +340,7 @@ private fun engineName(engine: EngineId): String = stringResource(
 )
 
 /** 엔진이 알려 준 실패 이유 → 제목 · 설명. 언어 모델 문제는 사용자가 할 수 있는 일을 알려 준다. */
-private fun failureText(error: TranslationError?): Pair<Int, Int> = when (error) {
+internal fun translationFailureText(error: TranslationError?): Pair<Int, Int> = when (error) {
     TranslationError.Network -> R.string.result_network_title to R.string.result_network_body
     TranslationError.NotEnoughSpace -> R.string.result_no_space_title to R.string.result_no_space_body
     is TranslationError.ModelNotDownloaded -> R.string.result_no_model_title to R.string.result_no_model_body
