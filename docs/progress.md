@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 앱 UI 다국어 점검 (FL-15, 이슈 #59, 브랜치 `feat/59-app-localization`)
+- 점검 결과 Flutter 화면 문구(ARB 한국어 · 영어, `flutter gen-l10n`)와 네이티브 문구(`values/strings.xml` 영어 + `values-ko`)는 앞선 작업에서 이미 모두 옮겨져 있었다. 화면에 남은 한글 · 영어 하드코딩 없음 (남은 한글은 로그 · 개발자용 오류뿐). 언어 이름은 데이터라서 D-014대로 `SupportedLanguage`에 두고 화면 언어에 맞춰 보여 주며, 오버레이는 기기 로케일로 언어 이름을 만든다.
+- 앱 화면 언어는 기기 언어를 따르고(한국어 · 영어 외에는 한국어), 명세에 없어 앱 안 언어 선택은 만들지 않았다.
+- 새로 추가: `test/l10n_parity_test.dart` — ARB 영어 · 한국어 키 · 자리표시자, strings.xml 영어 · 한국어 이름 · 서식 자리표시자가 어긋나면 실패한다.
+- 변경: 테스트 1개만. pubspec · Gradle · Manifest · 앱 코드 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · `flutter build apk --debug` 통과. 기기 언어를 영어로 바꿔 보는 확인은 안 함.
+- 남은 일: NA-24 텍스트 선택 번역 · NA-25 빠른 설정 타일.
+
 ## 2026-10-02 · 로컬 DB · 번역 기록 (NA-23, FL-13, 이슈 #57, 브랜치 `feat/57-translation-history`)
 - 번역 결과가 기기의 Room DB에 저장되고, 기록 화면에서 목록 · 검색 · 한 줄 삭제 · 전체 삭제를 한다. 홈 "최근 기록"도 실제 기록(기간 필터 전체 · 오늘 · 이번 주, 최신 3개), "전체 보기"는 기록 화면(`/history`)으로 간다.
 - 네이티브: `data/history`(`AppDatabase` · `HistoryDao` · `HistoryRepository`), `AppGraph.historyRepository`, Pigeon `HistoryHostApi` + `TranslationRecord`. `OverlayController`가 번역이 화면에 오를 때 `onTranslated`로 알리고 서비스가 저장한다. 설계는 D-039.
