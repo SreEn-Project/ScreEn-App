@@ -74,6 +74,7 @@ class TranslatorService : LifecycleService() {
     private val projectionCallback = object : MediaProjection.Callback() {
         // 사용자가 시스템 UI(상태 표시줄 칩 등)에서 공유를 끄면 서비스도 멈춘다 (NA-04).
         override fun onStop() {
+            Log.i(TAG, "시스템이 화면 공유를 끝냈다 → 서비스 종료")
             stopSelf()
         }
 
@@ -89,8 +90,8 @@ class TranslatorService : LifecycleService() {
             ACTION_START -> handleStart(intent)
             ACTION_STOP -> stopSelf()
             ACTION_DEBUG_CAPTURE -> debugCapture()
-            // 시스템이 다시 살린 경우(동의 토큰 없음)는 이어갈 수 없으니 멈춘다.
-            else -> stopSelf()
+            // 시스템이 다시 살린 경우(동의 토큰 없음)는 이어갈 수 없으니 멈춘다. 이미 도는 중이면 모르는 명령은 무시한다.
+            else -> if (TranslatorServiceState.state.value != RunState.RUNNING) stopSelf()
         }
         // 동의 토큰은 한 번만 쓸 수 있어 재시작해도 이어갈 수 없다.
         return START_NOT_STICKY

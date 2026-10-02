@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 플로팅 버튼 자리 · 서비스 꺼짐 (NA-18, 이슈 #65, 브랜치 `fix/65-floating-button-placement`)
+- 증상: 버튼이 놓은 자리에 안 머물고 알림(서비스)이 꺼진다. 기기 재현은 못 했고(에뮬레이터 확인 안 함) 코드에서 찾은 원인 후보를 막았다.
+- 고침: (1) 놓은 자리(가장자리 · 높이 비율)를 SharedPreferences에 저장해 서비스가 다시 켜지거나 프로세스가 새로 떠도 같은 자리에 뜬다 (전엔 프로세스 메모리에만 있어 초기 위치로 돌아갔다). (2) 끌기가 시스템에 의해 취소(ACTION_CANCEL)되면 닫기 영역 위여도 서비스를 끄지 않는다. (3) 이미 도는 중에 모르는 명령이 오면 서비스를 끄지 않는다. (4) 화면 공유가 시스템에 의해 끝나 서비스가 꺼질 때 로그를 남긴다 (기기에서 원인 확인용: logcat `TranslatorService`).
+- 가장자리에 붙는 동작은 설계(D-0xx)대로 그대로다.
+- 변경: `overlay/OverlayController` · `overlay/OverlayWindow`(ButtonGestures 취소 구분) · `service/TranslatorService`. pubspec · Gradle · Manifest 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · `flutter build apk --debug` 통과. 기기 확인 전: 계속 꺼지면 logcat에서 "시스템이 화면 공유를 끝냈다"가 보이는지 알려 달라.
+
 ## 2026-10-02 · 빠른 설정 타일 (NA-25, 이슈 #63, 브랜치 `feat/63-quick-settings-tile`)
 - 알림 패널의 "화면 번역" 타일로 번역을 켜고 끈다. 켜짐이면 타일이 활성, 꺼짐이면 비활성이며 부제가 켜짐 · 꺼짐 · 시작 중으로 바뀐다. 꺼진 상태에서 누르면 캡처 동의 창이 뜨고 동의하면 서비스가 시작된다(앱 화면과 같은 경로). 오버레이 권한이 없으면 앱을 열어 권한 안내로 보낸다. 실행 중에 누르면 서비스를 끈다.
 - 네이티브: `service/TranslateTileService`(타일 갱신 · 탭 처리) · `service/TileAction`(탭 동작 결정, 안드로이드 무관). 설계는 D-040.
