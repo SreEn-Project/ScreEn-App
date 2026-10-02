@@ -75,7 +75,9 @@ class OverlayController(
     private val closeRadius = dp(64)
 
     private var area = OverlayWindow.screenArea(context, windowManager)
+    private val placementPrefs = context.getSharedPreferences(PLACEMENT_PREFS, Context.MODE_PRIVATE)
     private var placement = lastPlacement?.takeIf { it.second == area }?.first
+        ?: restorePlacement()
         ?: OverlayGeometry.initial(area, buttonSize)
 
     // Compose가 읽는 상태
@@ -368,16 +370,33 @@ class OverlayController(
         overClose = OverlayGeometry.isOverCloseZone(x, y, buttonSize, area, closeBottomMargin, closeRadius)
     }
 
-    private fun onDragEnd() {
+    private fun onDragEnd(cancelled: Boolean = false) {
         dragging = false
         closeZone.hide()
-        if (overClose) {
+        // 시스템이 터치를 가져간 경우(취소)는 놓은 것이 아니다: 닫기 영역 위여도 서비스를 끄지 않는다.
+        if (overClose && !cancelled) {
             overClose = false
             placement = dragStart
             onStopRequested()
             return
         }
-        animateTo(OverlayGeometry.snap(placement.x, placement.y, buttonSize, area))
+        overClose = false
+        val target = OverlayGeometry.snap(placement.x, placement.y, buttonSize, area)
+        savePlacement(target)
+        animateTo(target)
+    }
+
+    /** 놓은 자리를 저장한다: 서비스가 다시 시작되거나 프로세스가 새로 떠도 같은 자리(가장자리 · 높이 비율)에 뜬다. */
+    private fun savePlacement(target: ButtonPlacement) {
+        val ratio = if (area.height > 0) target.y.toFloat() / area.height else 0.35f
+        placementPrefs.edit().putBoolean(KEY_EDGE_LEFT, target.edge == Edge.LEFT).putFloat(KEY_Y_RATIO, ratio).apply()
+    }
+
+    private fun restorePlacement(): ButtonPlacement? {
+        if (!placementPrefs.contains(KEY_Y_RATIO)) return null
+        val left = placementPrefs.getBoolean(KEY_EDGE_LEFT, false)
+        val ratio = placementPrefs.getFloat(KEY_Y_RATIO, 0.35f)
+        return OverlayGeometry.snap(if (left) 0 else area.width, (area.height * ratio).toInt(), buttonSize, area)
     }
 
     private fun animateTo(target: ButtonPlacement) {
@@ -409,6 +428,7 @@ class OverlayController(
         buttonSize = newSize
         buttonDiameterDp = diameterDp
         placement = OverlayGeometry.snap(centerX - newSize / 2, centerY - newSize / 2, newSize, area)
+        savePlacement(placement)
         button.params.width = newSize
         button.params.height = newSize
         applyPlacement()
@@ -739,6 +759,9 @@ class OverlayController(
     private companion object {
         const val TAG = "OverlayController"
         const val MENU_CLOSE_GRACE_MS = 300L
+        const val PLACEMENT_PREFS = "overlay_button"
+        const val KEY_EDGE_LEFT = "edge_left"
+        const val KEY_Y_RATIO = "y_ratio"
 
         /** 서비스를 다시 켜도 버튼이 마지막 자리에 뜨도록 (같은 화면 크기일 때만). 프로세스 안에서만 기억한다. */
         var lastPlacement: Pair<ButtonPlacement, ScreenArea>? = null
