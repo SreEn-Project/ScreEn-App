@@ -1,0 +1,66 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:translation_poc_app/features/settings/di.dart';
+import 'package:translation_poc_app/features/settings/domain/entities/translator_settings.dart';
+import 'package:translation_poc_app/features/settings/domain/repositories/settings_repository.dart';
+import 'package:translation_poc_app/features/settings/presentation/view_models/engine_view_model.dart';
+
+class _MockSettingsRepository extends Mock implements SettingsRepository {}
+
+void main() {
+  late _MockSettingsRepository repository;
+  late ProviderContainer container;
+
+  setUpAll(() => registerFallbackValue(EngineType.mlKit));
+
+  setUp(() {
+    repository = _MockSettingsRepository();
+    when(() => repository.watch()).thenAnswer((_) => const Stream.empty());
+    when(() => repository.setEngine(any())).thenAnswer((_) async {});
+    container = ProviderContainer(
+      overrides: [settingsRepositoryProvider.overrideWithValue(repository)],
+    );
+  });
+
+  tearDown(() => container.dispose());
+
+  Future<EngineType> ready([
+    TranslatorSettings saved = const TranslatorSettings(),
+  ]) {
+    when(() => repository.load()).thenAnswer((_) async => saved);
+    container.listen(engineViewModelProvider, (_, _) {});
+    return container.read(engineViewModelProvider.future);
+  }
+
+  test('기본값은 ML Kit', () async {
+    expect(await ready(), EngineType.mlKit);
+  });
+
+  test('저장된 엔진을 보여 준다', () async {
+    expect(
+      await ready(const TranslatorSettings(engine: EngineType.gemini)),
+      EngineType.gemini,
+    );
+  });
+
+  test('ML Kit 선택은 저장소로 전달된다', () async {
+    await ready();
+
+    await container
+        .read(engineViewModelProvider.notifier)
+        .select(EngineType.mlKit);
+
+    verify(() => repository.setEngine(EngineType.mlKit)).called(1);
+  });
+
+  test('AI 엔진은 보류라 선택해도 저장하지 않는다', () async {
+    await ready();
+    final viewModel = container.read(engineViewModelProvider.notifier);
+
+    await viewModel.select(EngineType.gemini);
+    await viewModel.select(EngineType.firebaseAi);
+
+    verifyNever(() => repository.setEngine(any()));
+  });
+}

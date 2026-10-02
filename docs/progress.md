@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 번역 엔진 선택 저장 연결 (FL-06, 이슈 #51, 브랜치 `feat/51-engine-selection`)
+- 설정 화면의 엔진 선택이 화면 안 가짜 값이었다. 새 `EngineViewModel`(`features/settings/presentation/view_models`)이 저장된 엔진(DataStore)을 읽고 쓴다. 홈의 엔진 표시도 같은 값.
+- AI 엔진(Gemini · Firebase)은 보류라 비활성 유지. ViewModel `select`도 ML Kit 외에는 저장하지 않는다 (`selectable`).
+- 네이티브: `TranslatorService.translationEngine(settings)`가 번역 때마다 저장된 엔진을 본다. 지금 구현된 엔진은 ML Kit뿐이라 AI 값이 저장돼 있어도 로그를 남기고 ML Kit으로 대체한다. 엔진이 추가되면 분기만 늘리면 된다.
+- 변경: Kotlin `TranslatorService.kt`, Flutter 화면 2개 · ViewModel · 테스트 추가. pubspec · Gradle · Manifest · Pigeon 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · `flutter build apk --debug` 통과. 기기 확인 전.
+- 남은 일: FL-07 · FL-08 → FL-01 · FL-14 → NA-23 · FL-13.
+
 ## 2026-10-02 · 대상 언어 · 언어 모델 관리 실제 연결 (FL-04, FL-05, 이슈 #49, 브랜치 `feat/49-language-models`)
 - 대상 언어: 선택 화면 · 홈 · 언어 탭이 `TargetLanguageViewModel`로 같은 값(DataStore)을 읽고 쓴다. 고르면 바로 저장하고 닫는다 (이전엔 화면 안 가짜 값).
 - 언어 모델: 새 Pigeon `ModelHostApi`(받은 목록 · 받기 · 삭제). 네이티브 `LanguageModelManager`가 ML Kit `RemoteModelManager`로 처리. Flutter는 `features/models`(domain · data · di · `LanguageModelsViewModel`) 신설. 홈의 "모델 N개 준비됨"도 실제 값.

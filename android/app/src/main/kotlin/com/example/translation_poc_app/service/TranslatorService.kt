@@ -21,6 +21,7 @@ import com.example.translation_poc_app.capture.ScreenCapturer
 import com.example.translation_poc_app.ocr.OcrResult
 import com.example.translation_poc_app.ocr.ScreenTextRecognizer
 import com.example.translation_poc_app.AppGraph
+import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.overlay.OverlayController
 import com.example.translation_poc_app.translate.DetectedBlock
@@ -62,7 +63,7 @@ class TranslatorService : LifecycleService() {
                 recognizeText(frame, source.takeIf { it != Settings.SOURCE_LANGUAGE_AUTO }, incremental)
             },
             detect = { ocr, target -> languageDetector.detect(ocr.blocks, target) },
-            engineFor = { translationEngine() },
+            engineFor = { translationEngine(it) },
             settings = { AppGraph.settingsRepository(this).current() },
             onTimings = { Log.i(TAG, "번역 시간 $it total=${it.total}ms") },
             log = { Log.i(TAG, it) },
@@ -146,15 +147,21 @@ class TranslatorService : LifecycleService() {
     }
 
     /**
-     * 번역 엔진 (NA-11). 지금은 ML Kit(NA-12)뿐이라 설정의 엔진과 상관없이 ML Kit을 쓴다.
-     * AI 엔진(NA-13 · NA-14)이 생기면 설정으로 고르고, 실패하면 ML Kit으로 대체한다.
+     * 설정(FL-06)에서 고른 번역 엔진 (NA-11). 지금 구현된 엔진은 ML Kit(NA-12)뿐이다.
+     * AI 엔진(NA-13 · NA-14)은 아직 없어, 저장된 값이 AI여도 ML Kit으로 대체한다.
+     * 엔진이 추가되면 [Engine]별 분기만 늘리면 된다.
      */
-    private fun translationEngine(): TranslationEngine =
-        mlKitEngine ?: MlKitTranslationEngine(
+    private fun translationEngine(settings: Settings): TranslationEngine {
+        when (settings.engine) {
+            Engine.ML_KIT -> Unit
+            Engine.GEMINI, Engine.FIREBASE_AI -> Log.w(TAG, "${settings.engine} 엔진은 아직 없어 ML Kit으로 번역한다")
+        }
+        return mlKitEngine ?: MlKitTranslationEngine(
             downloadPolicyProvider = {
                 ModelDownloadPolicy(AppGraph.settingsRepository(this).current().wifiOnlyModelDownload)
             },
         ).also { mlKitEngine = it }
+    }
 
     /** 첫 번역이 느리지 않도록 문자 인식기를 미리 불러 둔다 (#11). 실패해도 번역 때 다시 시도한다. */
     private fun warmUp() {
