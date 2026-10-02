@@ -6,6 +6,7 @@ import com.example.translation_poc_app.service.CaptureConsentActivity
 import com.example.translation_poc_app.service.RunState
 import com.example.translation_poc_app.service.TranslatorService
 import com.example.translation_poc_app.service.TranslatorServiceState
+import com.example.translation_poc_app.translate.LanguageModelManager
 
 /** Flutter → 네이티브 설정 호출 (NA-01, NA-16). */
 class SettingsHostApiImpl(private val repository: SettingsRepository) : SettingsHostApi {
@@ -29,8 +30,21 @@ class SettingsHostApiImpl(private val repository: SettingsRepository) : Settings
 
     override suspend fun setHideAfterInteractionMs(ms: Long) = repository.setHideAfterInteractionMs(ms)
 
+    override suspend fun setWifiOnlyModelDownload(enabled: Boolean) =
+        repository.setWifiOnlyModelDownload(enabled)
+
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)
+}
+
+/** 언어 모델 조회 · 받기 · 삭제 (FL-05). 실패는 예외로 던져 Flutter에 오류로 전해진다. */
+class ModelHostApiImpl(private val models: LanguageModelManager = LanguageModelManager()) : ModelHostApi {
+    override suspend fun getDownloadedLanguages(): List<String> = models.downloaded().sorted()
+
+    override suspend fun downloadLanguage(languageCode: String, wifiOnly: Boolean) =
+        models.download(languageCode, wifiOnly)
+
+    override suspend fun deleteLanguage(languageCode: String) = models.delete(languageCode)
 }
 
 /** 서비스 상태 조회 · 시작 · 중지 (NA-01, NA-02). */

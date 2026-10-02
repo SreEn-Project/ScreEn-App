@@ -13,6 +13,8 @@ class MlKitTranslationEngine(
     private val backend: OnDeviceBackend = MlKitOnDeviceBackend(),
     private val autoDownload: Boolean = true,
     private val downloadPolicy: ModelDownloadPolicy = ModelDownloadPolicy(),
+    /** 있으면 [downloadPolicy] 대신 받을 때마다 이걸로 정책을 얻는다 (설정이 바뀌면 바로 반영). */
+    private val downloadPolicyProvider: (suspend () -> ModelDownloadPolicy)? = null,
 ) : TranslationEngine {
 
     override val id = EngineId.ML_KIT
@@ -42,7 +44,8 @@ class MlKitTranslationEngine(
         val missing = requiredModels(source, target).filterNot { backend.isDownloaded(it) }
         if (missing.isNotEmpty()) {
             if (!autoDownload) return@guard EngineResult.Err(TranslationError.ModelNotDownloaded(missing))
-            missing.forEach { backend.download(it, downloadPolicy.wifiOnly) }
+            val policy = downloadPolicyProvider?.invoke() ?: downloadPolicy
+            missing.forEach { backend.download(it, policy.wifiOnly) }
         }
         val translated = backend.translate(request.text, source, target)
         EngineResult.Ok(TranslationResult(translated, source, target, id))

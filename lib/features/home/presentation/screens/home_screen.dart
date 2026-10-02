@@ -11,12 +11,14 @@ import '../../../../core/l10n/labels.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../language/domain/entities/supported_language.dart';
+import '../../../language/presentation/view_models/target_language_view_model.dart';
+import '../../../models/presentation/view_models/language_models_view_model.dart';
 import '../../../permission/presentation/view_models/permission_view_model.dart';
 import '../view_models/service_view_model.dart';
 
 /// 홈 (S-03, FL-03).
 /// 캡처 범위는 플로팅 버튼 메뉴에서 고르므로 홈에는 두지 않고, 언어 · 모델 설정을 둔다 (D-016).
-/// 시작/중지는 네이티브 서비스와 연결됨(FL-03). 언어 · 모델 값은 아직 자리 표시 (FL-04 · FL-05에서 연결).
+/// 시작/중지는 네이티브 서비스와 연결됨(FL-03). 대상 언어(FL-04) · 모델 수(FL-05)도 실제 값.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -42,27 +44,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  String _targetLanguage = 'ko';
   final EngineType _engine = EngineType.mlKit;
-
-  // 언어 모델 화면의 자리 표시 값과 맞춘다 (한국어 · 영어 받음, 일본어 받는 중).
-  static const _modelsReady = 2;
-  static const _modelsDownloading = 1;
-
-  Future<void> _pickLanguage() async {
-    final code = await context.push<String>(
-      AppRoutes.targetLanguage,
-      extra: _targetLanguage,
-    );
-    if (code != null) setState(() => _targetLanguage = code);
-  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context);
-    final targetName = SupportedLanguage.byCode(_targetLanguage)
-        .displayName(locale.languageCode);
+    final targetName = SupportedLanguage.byCode(
+      ref.watch(targetLanguageViewModelProvider).value ?? 'ko',
+    ).displayName(locale.languageCode);
+    final models =
+        ref.watch(languageModelsViewModelProvider).value ??
+        const LanguageModelsState();
     final service =
         ref.watch(serviceViewModelProvider).value ?? ServiceStatus.stopped;
     final running = service == ServiceStatus.running;
@@ -124,7 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: Symbols.translate_rounded,
                   label: l10n.homeTargetLanguage,
                   value: targetName,
-                  onTap: _pickLanguage,
+                  onTap: () => context.push(AppRoutes.targetLanguage),
                 ),
               ),
               const SizedBox(width: 12),
@@ -132,9 +125,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: _SetupTile(
                   icon: Symbols.download_rounded,
                   label: l10n.homeModels,
-                  value: l10n.homeModelsReady(_modelsReady),
-                  footer: l10n.homeModelsDownloading(_modelsDownloading),
-                  progress: _modelsReady / (_modelsReady + _modelsDownloading),
+                  value: l10n.homeModelsReady(models.installed.length),
+                  footer: models.downloading.isEmpty
+                      ? null
+                      : l10n.homeModelsDownloading(models.downloading.length),
+                  busy: models.downloading.isNotEmpty,
                   onTap: () => context.go(AppRoutes.languages),
                 ),
               ),
@@ -291,14 +286,14 @@ class _SetupTile extends StatelessWidget {
     required this.value,
     required this.onTap,
     this.footer,
-    this.progress,
+    this.busy = false,
   });
 
   final IconData icon;
   final String label;
   final String value;
   final String? footer;
-  final double? progress;
+  final bool busy;
   final VoidCallback onTap;
 
   @override
@@ -321,9 +316,9 @@ class _SetupTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleLarge,
           ),
-          if (progress != null) ...[
+          if (busy) ...[
             const SizedBox(height: 12),
-            AppProgressBar(value: progress!, height: 5),
+            const AppProgressBar(height: 5),
           ],
           if (footer != null) ...[
             const SizedBox(height: 6),

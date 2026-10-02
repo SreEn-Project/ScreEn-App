@@ -845,8 +845,14 @@ abstract class AppLocalizations {
   /// No description provided for @modelsDownloading.
   ///
   /// In en, this message translates to:
-  /// **'Downloading {percent}%'**
-  String modelsDownloading(int percent);
+  /// **'Downloading'**
+  String get modelsDownloading;
+
+  /// No description provided for @modelsDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed. Check your connection'**
+  String get modelsDownloadFailed;
 
   /// No description provided for @modelsSize.
   ///

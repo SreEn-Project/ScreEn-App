@@ -34,6 +34,9 @@ class SettingsNativeDataSource {
   Future<void> setHideAfterInteractionMs(int ms) =>
       _api.setHideAfterInteractionMs(ms);
 
+  Future<void> setWifiOnlyModelDownload(bool enabled) =>
+      _api.setWifiOnlyModelDownload(enabled);
+
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);
 }

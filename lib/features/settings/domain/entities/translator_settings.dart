@@ -55,5 +55,8 @@ abstract class TranslatorSettings with _$TranslatorSettings {
 
     /// 조작 뒤 이전 번역을 숨기기까지의 시간 (ms). [hideNever] = 숨기지 않음.
     @Default(defaultHideAfterInteractionMs) int hideAfterInteractionMs,
+
+    /// 언어 모델을 Wi-Fi에서만 받는다 (FL-05).
+    @Default(true) bool wifiOnlyModelDownload,
   }) = _TranslatorSettings;
 }

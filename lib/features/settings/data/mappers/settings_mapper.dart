@@ -14,6 +14,7 @@ extension AppSettingsMapper on pigeon.AppSettings {
     autoTranslate: autoTranslate,
     autoShowDelayMs: autoShowDelayMs,
     hideAfterInteractionMs: hideAfterInteractionMs,
+    wifiOnlyModelDownload: wifiOnlyModelDownload,
   );
 }
 

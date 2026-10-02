@@ -394,9 +394,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modelsNotInstalled => '받지 않음';
 
   @override
-  String modelsDownloading(int percent) {
-    return '받는 중 $percent%';
-  }
+  String get modelsDownloading => '받는 중';
+
+  @override
+  String get modelsDownloadFailed => '받지 못했어요. 인터넷 연결을 확인해 주세요';
 
   @override
   String modelsSize(int size) {

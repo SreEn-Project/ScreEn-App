@@ -515,6 +515,55 @@ final class ChangeHideAfterInteractionProvider
 String _$changeHideAfterInteractionHash() =>
     r'3dc75206567d2be8ac5ea28c83f15df369c83f47';
 
+@ProviderFor(changeWifiOnlyModelDownload)
+final changeWifiOnlyModelDownloadProvider =
+    ChangeWifiOnlyModelDownloadProvider._();
+
+final class ChangeWifiOnlyModelDownloadProvider
+    extends
+        $FunctionalProvider<
+          ChangeWifiOnlyModelDownload,
+          ChangeWifiOnlyModelDownload,
+          ChangeWifiOnlyModelDownload
+        >
+    with $Provider<ChangeWifiOnlyModelDownload> {
+  ChangeWifiOnlyModelDownloadProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeWifiOnlyModelDownloadProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeWifiOnlyModelDownloadHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeWifiOnlyModelDownload> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeWifiOnlyModelDownload create(Ref ref) {
+    return changeWifiOnlyModelDownload(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeWifiOnlyModelDownload value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeWifiOnlyModelDownload>(value),
+    );
+  }
+}
+
+String _$changeWifiOnlyModelDownloadHash() =>
+    r'45061ee76189705e10557806ddfe4968d843ca89';
+
 @ProviderFor(completeOnboarding)
 final completeOnboardingProvider = CompleteOnboardingProvider._();
 

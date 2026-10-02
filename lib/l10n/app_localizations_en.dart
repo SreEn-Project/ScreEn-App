@@ -408,9 +408,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modelsNotInstalled => 'Not downloaded';
 
   @override
-  String modelsDownloading(int percent) {
-    return 'Downloading $percent%';
-  }
+  String get modelsDownloading => 'Downloading';
+
+  @override
+  String get modelsDownloadFailed => 'Download failed. Check your connection';
 
   @override
   String modelsSize(int size) {

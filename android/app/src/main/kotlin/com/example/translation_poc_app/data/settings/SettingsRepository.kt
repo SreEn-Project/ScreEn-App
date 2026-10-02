@@ -50,6 +50,8 @@ class SettingsRepository(context: Context) {
 
     suspend fun setSourceLanguage(code: String) = edit { it[Keys.SOURCE_LANGUAGE] = code }
 
+    suspend fun setWifiOnlyModelDownload(enabled: Boolean) = edit { it[Keys.WIFI_ONLY_MODEL_DOWNLOAD] = enabled }
+
     suspend fun setOnboardingCompleted(completed: Boolean) =
         edit { it[Keys.ONBOARDING_COMPLETED] = completed }
 
@@ -77,6 +79,7 @@ class SettingsRepository(context: Context) {
                 this[Keys.HIDE_AFTER_INTERACTION] ?: defaults.hideAfterInteractionMs,
             ),
             sourceLanguage = this[Keys.SOURCE_LANGUAGE]?.takeIf { it.isNotBlank() } ?: defaults.sourceLanguage,
+            wifiOnlyModelDownload = this[Keys.WIFI_ONLY_MODEL_DOWNLOAD] ?: defaults.wifiOnlyModelDownload,
         )
     }
 
@@ -98,5 +101,6 @@ class SettingsRepository(context: Context) {
         // 이름은 자동 번역 전용이던 때(#29) 그대로 둔다: 저장된 값을 이어 받는다.
         val HIDE_AFTER_INTERACTION = longPreferencesKey("auto_hide_ms")
         val SOURCE_LANGUAGE = stringPreferencesKey("source_language")
+        val WIFI_ONLY_MODEL_DOWNLOAD = booleanPreferencesKey("wifi_only_model_download")
     }
 }

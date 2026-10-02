@@ -26,6 +26,7 @@ import com.example.translation_poc_app.overlay.OverlayController
 import com.example.translation_poc_app.translate.DetectedBlock
 import com.example.translation_poc_app.translate.LanguageDetector
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
+import com.example.translation_poc_app.translate.ModelDownloadPolicy
 import com.example.translation_poc_app.translate.TranslationEngine
 import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.Dispatchers
@@ -149,7 +150,11 @@ class TranslatorService : LifecycleService() {
      * AI 엔진(NA-13 · NA-14)이 생기면 설정으로 고르고, 실패하면 ML Kit으로 대체한다.
      */
     private fun translationEngine(): TranslationEngine =
-        mlKitEngine ?: MlKitTranslationEngine().also { mlKitEngine = it }
+        mlKitEngine ?: MlKitTranslationEngine(
+            downloadPolicyProvider = {
+                ModelDownloadPolicy(AppGraph.settingsRepository(this).current().wifiOnlyModelDownload)
+            },
+        ).also { mlKitEngine = it }
 
     /** 첫 번역이 느리지 않도록 문자 인식기를 미리 불러 둔다 (#11). 실패해도 번역 때 다시 시도한다. */
     private fun warmUp() {

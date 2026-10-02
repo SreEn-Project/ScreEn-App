@@ -48,6 +48,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _dataSource.setHideAfterInteractionMs(ms);
 
   @override
+  Future<void> setWifiOnlyModelDownload(bool enabled) =>
+      _dataSource.setWifiOnlyModelDownload(enabled);
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) =>
       _dataSource.setOnboardingCompleted(completed);
 }

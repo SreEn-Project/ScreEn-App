@@ -92,6 +92,47 @@ final class ServiceHostApiProvider
 
 String _$serviceHostApiHash() => r'b0e69ee2648a9a1235f2ed157cc50404cfce58f8';
 
+@ProviderFor(modelHostApi)
+final modelHostApiProvider = ModelHostApiProvider._();
+
+final class ModelHostApiProvider
+    extends $FunctionalProvider<ModelHostApi, ModelHostApi, ModelHostApi>
+    with $Provider<ModelHostApi> {
+  ModelHostApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'modelHostApiProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$modelHostApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<ModelHostApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ModelHostApi create(Ref ref) {
+    return modelHostApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ModelHostApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ModelHostApi>(value),
+    );
+  }
+}
+
+String _$modelHostApiHash() => r'834639a0370a81aea455e8560e851aced4b40de2';
+
 @ProviderFor(translatorEventBus)
 final translatorEventBusProvider = TranslatorEventBusProvider._();
 

@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:translation_poc_app/features/settings/di.dart';
 import 'package:translation_poc_app/features/settings/domain/entities/translator_settings.dart';
 import 'package:translation_poc_app/features/settings/domain/repositories/settings_repository.dart';
+import 'package:translation_poc_app/features/models/di.dart';
+import 'package:translation_poc_app/features/models/domain/repositories/model_repository.dart';
 import 'package:translation_poc_app/features/permission/di.dart';
 import 'package:translation_poc_app/features/permission/domain/entities/app_permissions.dart';
 import 'package:translation_poc_app/features/permission/domain/repositories/permission_repository.dart';
@@ -91,8 +93,31 @@ class FakeSettingsRepository implements SettingsRepository {
       settings = settings.copyWith(hideAfterInteractionMs: ms);
 
   @override
+  Future<void> setWifiOnlyModelDownload(bool enabled) async =>
+      settings = settings.copyWith(wifiOnlyModelDownload: enabled);
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) async =>
       settings = settings.copyWith(onboardingCompleted: completed);
+}
+
+/// 받은 모델을 기억만 하는 가짜 모델 저장소.
+class FakeModelRepository implements ModelRepository {
+  FakeModelRepository([Set<String> installed = const {'ko', 'en'}])
+    : installed = {...installed};
+
+  final Set<String> installed;
+
+  @override
+  Future<Set<String>> downloaded() async => {...installed};
+
+  @override
+  Future<void> download(String languageCode, {required bool wifiOnly}) async =>
+      installed.add(languageCode);
+
+  @override
+  Future<void> delete(String languageCode) async =>
+      installed.remove(languageCode);
 }
 
 /// 네이티브 연결 provider를 가짜로 바꾼다.
@@ -102,6 +127,7 @@ List<Override> fakeNativeOverrides({
 }) => [
   serviceRepositoryProvider.overrideWithValue(FakeServiceRepository(service)),
   settingsRepositoryProvider.overrideWithValue(FakeSettingsRepository()),
+  modelRepositoryProvider.overrideWithValue(FakeModelRepository()),
   permissionRepositoryProvider.overrideWithValue(
     FakePermissionRepository(
       overlay: permissionsGranted,

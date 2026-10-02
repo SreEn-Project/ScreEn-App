@@ -14,5 +14,6 @@ abstract interface class SettingsRepository {
   Future<void> setAutoTranslate(bool enabled);
   Future<void> setAutoShowDelayMs(int ms);
   Future<void> setHideAfterInteractionMs(int ms);
+  Future<void> setWifiOnlyModelDownload(bool enabled);
   Future<void> setOnboardingCompleted(bool completed);
 }

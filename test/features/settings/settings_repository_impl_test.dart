@@ -21,6 +21,7 @@ pigeon.AppSettings _pigeonSettings({String targetLanguage = 'ko'}) =>
       autoTranslate: true,
       autoShowDelayMs: 2000,
       hideAfterInteractionMs: -1,
+      wifiOnlyModelDownload: false,
     );
 
 void main() {
@@ -54,6 +55,7 @@ void main() {
         autoTranslate: true,
         autoShowDelayMs: 2000,
         hideAfterInteractionMs: -1,
+        wifiOnlyModelDownload: false,
       ),
     );
   });

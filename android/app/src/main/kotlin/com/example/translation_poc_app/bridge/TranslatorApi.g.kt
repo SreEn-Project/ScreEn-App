@@ -276,7 +276,9 @@ data class AppSettings (
    * 사용자가 화면을 조작한 뒤 이전 번역(덮어쓰기)을 숨기기까지의 시간 (ms). 자동 번역과 무관하게 적용된다.
    * 0 = 바로, -1 = 숨기지 않고 새 번역이 뜰 때까지 둔다.
    */
-  val hideAfterInteractionMs: Long
+  val hideAfterInteractionMs: Long,
+  /** 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 같다. */
+  val wifiOnlyModelDownload: Boolean
 )
  {
   companion object {
@@ -290,7 +292,8 @@ data class AppSettings (
       val autoTranslate = pigeonVar_list[6] as Boolean
       val autoShowDelayMs = pigeonVar_list[7] as Long
       val hideAfterInteractionMs = pigeonVar_list[8] as Long
-      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs)
+      val wifiOnlyModelDownload = pigeonVar_list[9] as Boolean
+      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs, wifiOnlyModelDownload)
     }
   }
   fun toList(): List<Any?> {
@@ -304,6 +307,7 @@ data class AppSettings (
       autoTranslate,
       autoShowDelayMs,
       hideAfterInteractionMs,
+      wifiOnlyModelDownload,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -314,7 +318,7 @@ data class AppSettings (
       return true
     }
     val other = other as AppSettings
-    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs)
+    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs) && TranslatorApiPigeonUtils.deepEquals(this.wifiOnlyModelDownload, other.wifiOnlyModelDownload)
   }
 
   override fun hashCode(): Int {
@@ -328,10 +332,11 @@ data class AppSettings (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.autoTranslate)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.autoShowDelayMs)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.hideAfterInteractionMs)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wifiOnlyModelDownload)
     return result
   }
   override fun toString(): String {
-    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs)"
+    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload)"
   }
 }
 
@@ -505,6 +510,7 @@ interface SettingsHostApi {
   suspend fun setAutoTranslate(enabled: Boolean)
   suspend fun setAutoShowDelayMs(ms: Long)
   suspend fun setHideAfterInteractionMs(ms: Long)
+  suspend fun setWifiOnlyModelDownload(enabled: Boolean)
   suspend fun setOnboardingCompleted(completed: Boolean)
 
   companion object {
@@ -694,6 +700,26 @@ interface SettingsHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setWifiOnlyModelDownload$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val enabledArg = args[0] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setWifiOnlyModelDownload(enabledArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setOnboardingCompleted$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -702,6 +728,91 @@ interface SettingsHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.setOnboardingCompleted(completedArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * 언어 모델 관리 (FL-05, NA-12). 모델의 원본은 ML Kit이 기기에 받아 둔 파일이다.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface ModelHostApi {
+  /** 기기에 받아 둔 언어 모델의 언어 코드들. */
+  suspend fun getDownloadedLanguages(): List<String>
+  /**
+   * 언어 모델을 받는다. 끝나면 돌아온다 (이미 있으면 바로). Wi-Fi 전용이라 조건이 안 맞으면 실패한다.
+   * ML Kit이 진행률을 알려 주지 않아 중간 값은 없다.
+   */
+  suspend fun downloadLanguage(languageCode: String, wifiOnly: Boolean)
+  suspend fun deleteLanguage(languageCode: String)
+
+  companion object {
+    /** The codec used by ModelHostApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      TranslatorApiPigeonCodec()
+    }
+    /** Sets up an instance of `ModelHostApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: ModelHostApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.ModelHostApi.getDownloadedLanguages$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getDownloadedLanguages())
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.ModelHostApi.downloadLanguage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val languageCodeArg = args[0] as String
+            val wifiOnlyArg = args[1] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.downloadLanguage(languageCodeArg, wifiOnlyArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.ModelHostApi.deleteLanguage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val languageCodeArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deleteLanguage(languageCodeArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

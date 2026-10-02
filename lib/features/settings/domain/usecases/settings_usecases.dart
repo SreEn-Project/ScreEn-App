@@ -110,6 +110,17 @@ final class ChangeHideAfterInteraction implements UseCase<void, int> {
   );
 }
 
+/// 언어 모델 Wi-Fi 전용 받기 켜고 끄기 (FL-05).
+final class ChangeWifiOnlyModelDownload implements UseCase<void, bool> {
+  const ChangeWifiOnlyModelDownload(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(bool enabled) =>
+      _repository.setWifiOnlyModelDownload(enabled);
+}
+
 /// 온보딩을 마쳤다고 기록 (FL-01). 다음 실행부터 온보딩을 건너뛴다.
 final class CompleteOnboarding implements NoParamsUseCase<void> {
   const CompleteOnboarding(this._repository);
