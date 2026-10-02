@@ -98,6 +98,7 @@ internal fun FloatingButton(
     dragging: Boolean,
     diameterDp: Int,
     opacity: Float,
+    auto: Boolean = false,
 ) {
     val colors = OverlayTheme.colors
     val scale by animateFloatAsState(if (dragging) 1.08f else 1f, label = "drag-scale")
@@ -116,7 +117,22 @@ internal fun FloatingButton(
             SymbolIcon(mode.symbol(), colors.primary, size = (diameterDp / 2).dp)
             if (busy) BusyRing()
         }
+        if (auto) AutoBadge(diameterDp, Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 6.dp))
     }
+}
+
+/** 자동 번역이 켜져 있다는 작고 둥근 표시. 탭하면 자동 번역이 시작된다. */
+@Composable
+private fun AutoBadge(diameterDp: Int, modifier: Modifier) {
+    val colors = OverlayTheme.colors
+    BasicText(
+        text = stringResource(R.string.overlay_button_auto_badge),
+        style = OverlayTheme.badge.copy(fontSize = (diameterDp / 5).coerceIn(8, 11).sp, color = colors.onPrimary),
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(colors.primary)
+            .padding(horizontal = 5.dp, vertical = 1.dp),
+    )
 }
 
 @Composable

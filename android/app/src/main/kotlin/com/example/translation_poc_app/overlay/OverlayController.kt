@@ -91,7 +91,8 @@ class OverlayController(
         hideMs = AppSettings.DEFAULT_HIDE_AFTER_INTERACTION_MS,
         retranslate = false,
     )
-    private var autoTranslate = false
+    private var autoTranslate by mutableStateOf(false)
+    private var settingsSeen = false
     private var sourceLanguage by mutableStateOf(AppSettings.SOURCE_LANGUAGE_AUTO)
 
     /** 마지막으로 번역한 영역 (자동 번역이 같은 영역을 다시 번역한다). null = 화면 전체. */
@@ -146,7 +147,7 @@ class OverlayController(
             buttonSize,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
         ),
-    ) { FloatingButton(mode, busy, dragging, buttonDiameterDp, buttonOpacity) }.apply { root.touchHandler = gestures::onTouch }
+    ) { FloatingButton(mode, busy, dragging, buttonDiameterDp, buttonOpacity, autoTranslate) }.apply { root.touchHandler = gestures::onTouch }
 
     private val closeZone = OverlayWindow(
         context,
@@ -182,6 +183,9 @@ class OverlayController(
         button.show()
         settingsJob = scope.launch {
             settingsRepository.settings.collect {
+                // 캡처 영역 종류 · 고정 영역이 바뀌면 이전 영역으로 이어 가던 자동 번역을 끝낸다. 다음 탭이 새 영역으로 시작한다 (#69).
+                if (settingsSeen && (it.captureRange != mode || it.fixedRegion != fixedRegion)) resetAutoArea()
+                settingsSeen = true
                 mode = it.captureRange
                 fixedRegion = it.fixedRegion
                 display = it.resultDisplay
@@ -342,6 +346,13 @@ class OverlayController(
             else -> Unit
         }
         return true
+    }
+
+    /** 영역 종류가 바뀌었다: 이전 영역의 감시 · 결과를 걷고 다음 번역이 새 영역을 쓰게 한다. */
+    private fun resetAutoArea() {
+        watcher.stop()
+        removeSheet()
+        lastRegion = null
     }
 
     /** 자동 번역 감시가 부른다: 화면이 바뀌어 낡은 결과를 숨기거나(true), 바뀐 화면이 번역한 화면으로 돌아와 다시 보인다(false). */
