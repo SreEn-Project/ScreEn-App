@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 드래그 영역에서는 자동 번역 끄기 · 선택 불가 (NA-26, NA-16, 이슈 #71, 브랜치 `feat/71-auto-off-on-drag`)
+- 규칙: 캡처 영역 종류가 드래그가 되면 자동 번역이 꺼진다. 드래그인 동안은 켤 수 없다 (버블 '설정' 메뉴와 앱 설정 화면 모두 비활성). 전체 화면 · 고정 영역은 그대로.
+- 네이티브(`SettingsRepository`): `setCaptureRange(DRAG_REGION)`이 같은 편집에서 자동 번역을 끈다. `setAutoTranslate(true)`는 드래그면 무시. 읽을 때도 드래그면 자동 번역을 꺼짐으로 본다(이미 저장된 조합 보정). 오버레이는 설정 흐름을 그대로 받으므로 감시가 멈추고 버튼의 '자동' 배지도 함께 사라진다.
+- 버블 메뉴: `MenuOption.enabled` 추가, 비활성 줄은 흐리게 하고 누를 수 없다. 문구 "자동 번역: 드래그 영역에선 사용 불가"(`overlay_setting_auto_translate_drag`).
+- 앱 설정: `AutoTranslateSettings.available`(드래그면 false) → 스위치 · 항목 비활성, 설명이 안내 문구(`settingsAutoTranslateDragUnavailable`)로 바뀐다. 단위 테스트 2건 추가.
+- 변경: `SettingsRepository.kt` · `FloatingButton.kt` · `OverlayController.kt` · `strings.xml`(영·한) · ARB(영·한) · 설정 화면 · 자동 번역 ViewModel. pubspec · Gradle · Manifest 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · `flutter build apk --debug` 통과. 에뮬레이터 · 기기 확인 전.
+
 ## 2026-10-02 · 자동 번역 영역 변경 반영 · 버튼 '자동' 배지 (NA-26, NA-18, 이슈 #69, 브랜치 `fix/69-auto-area-change-badge`)
 - 버그: 자동 번역을 켠 뒤 캡처 영역 종류(전체 · 드래그 · 고정)를 바꿔도 켤 때 쓰던 영역(`lastRegion`)으로 계속 번역됐다. 이제 영역 종류나 고정 영역이 바뀌면 이전 영역의 감시 · 결과를 걷고 영역을 비운다. 다음 버튼 탭이 새 영역 종류로 시작한다.
 - 버튼: 자동 번역이 켜져 있으면 현재 영역 종류 아이콘 오른쪽 아래에 작고 둥근 "자동/Auto" 배지를 띄운다 (색은 오버레이 테마 primary · onPrimary).

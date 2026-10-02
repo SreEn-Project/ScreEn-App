@@ -794,6 +794,12 @@ abstract class AppLocalizations {
   /// **'After a translation, lightly watches the screen and starts translating as soon as the text changes or scrolling stops. Unchanged text is skipped. Leaving it on uses more battery and may warm the device.'**
   String get settingsAutoTranslateDetail;
 
+  /// No description provided for @settingsAutoTranslateDragUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available while the capture area is a drag area. Switch to full screen or a fixed area to use it.'**
+  String get settingsAutoTranslateDragUnavailable;
+
   /// No description provided for @settingsAutoShowDelay.
   ///
   /// In en, this message translates to:

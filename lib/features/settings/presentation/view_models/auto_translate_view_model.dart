@@ -27,23 +27,29 @@ class AutoTranslateSettings {
   const AutoTranslateSettings({
     this.enabled = false,
     this.showDelayMs = defaultAutoShowDelayMs,
+    this.available = true,
   });
 
   factory AutoTranslateSettings.of(TranslatorSettings s) =>
       AutoTranslateSettings(
         enabled: s.autoTranslate,
         showDelayMs: s.autoShowDelayMs,
+        available: s.captureMode != CaptureMode.dragRegion,
       );
 
   final bool enabled;
   final int showDelayMs;
 
+  /// 드래그 영역에서는 자동 번역을 쓸 수 없다 (#71).
+  final bool available;
+
   @override
   bool operator ==(Object other) =>
       other is AutoTranslateSettings &&
       other.enabled == enabled &&
-      other.showDelayMs == showDelayMs;
+      other.showDelayMs == showDelayMs &&
+      other.available == available;
 
   @override
-  int get hashCode => Object.hash(enabled, showDelayMs);
+  int get hashCode => Object.hash(enabled, showDelayMs, available);
 }

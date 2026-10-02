@@ -398,11 +398,14 @@ class _AutoTranslateSection extends ConsumerWidget {
             AppListTile(
               icon: Symbols.autorenew_rounded,
               title: l10n.settingsAutoTranslate,
-              subtitle: l10n.settingsAutoTranslateDetail,
+              subtitle: settings.available
+                  ? l10n.settingsAutoTranslateDetail
+                  : l10n.settingsAutoTranslateDragUnavailable,
+              enabled: settings.available,
               onTap: () => viewModel.setEnabled(!settings.enabled),
               trailing: AppSwitch(
                 value: settings.enabled,
-                onChanged: viewModel.setEnabled,
+                onChanged: settings.available ? viewModel.setEnabled : null,
               ),
             ),
             if (settings.enabled) ...[
