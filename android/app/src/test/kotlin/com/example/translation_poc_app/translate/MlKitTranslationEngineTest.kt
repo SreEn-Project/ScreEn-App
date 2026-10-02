@@ -51,6 +51,15 @@ class MlKitTranslationEngineTest {
     }
 
     @Test
+    fun `내려받는 조건은 받을 때마다 설정에서 다시 얻는다`() {
+        val backend = FakeBackend()
+        var wifiOnly = false
+        val engine = MlKitTranslationEngine(backend, downloadPolicyProvider = { ModelDownloadPolicy(wifiOnly) })
+        assertTrue(run(engine, "ja") is EngineResult.Ok)
+        assertEquals(listOf("ja" to false, "ko" to false, "en" to false), backend.downloads)
+    }
+
+    @Test
     fun `자동 내려받기를 끄면 없는 모델을 알려 준다`() {
         val engine = MlKitTranslationEngine(FakeBackend(mutableSetOf("ko")), autoDownload = false)
         val r = run(engine, "ja") as EngineResult.Err

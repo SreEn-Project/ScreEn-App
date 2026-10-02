@@ -49,26 +49,55 @@ class AppSearchField extends StatelessWidget {
   }
 }
 
-/// 가는 알약 진행 막대.
-class AppProgressBar extends StatelessWidget {
-  const AppProgressBar({super.key, required this.value, this.height = 6});
+/// 가는 알약 진행 막대. [value]가 null이면 얼마나 걸릴지 모르는 진행 중 표시(좌우로 오가는 막대)다.
+class AppProgressBar extends StatefulWidget {
+  const AppProgressBar({super.key, this.value, this.height = 6});
 
-  final double value;
+  final double? value;
   final double height;
+
+  @override
+  State<AppProgressBar> createState() => _AppProgressBarState();
+}
+
+class _AppProgressBarState extends State<AppProgressBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.value == null) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(AppProgressBar old) {
+    super.didUpdateWidget(old);
+    if (widget.value == null && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (widget.value != null && _controller.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    const indeterminateWidth = 0.3;
 
-    return Container(
-      height: height,
-      decoration: ShapeDecoration(
-        shape: const StadiumBorder(),
-        color: colors.primaryContainer,
-      ),
-      alignment: Alignment.centerLeft,
+    Widget fill(double factor, double align) => Align(
+      alignment: Alignment(align, 0),
       child: FractionallySizedBox(
-        widthFactor: value.clamp(0.0, 1.0),
+        widthFactor: factor,
         child: Container(
           decoration: ShapeDecoration(
             shape: const StadiumBorder(),
@@ -76,6 +105,24 @@ class AppProgressBar extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return Container(
+      height: widget.height,
+      clipBehavior: Clip.antiAlias,
+      decoration: ShapeDecoration(
+        shape: const StadiumBorder(),
+        color: colors.primaryContainer,
+      ),
+      child: widget.value == null
+          ? AnimatedBuilder(
+              animation: _controller,
+              builder: (_, _) => fill(
+                indeterminateWidth,
+                -1 + 2 * Curves.easeInOut.transform(_controller.value),
+              ),
+            )
+          : fill(widget.value!.clamp(0.0, 1.0), -1),
     );
   }
 }

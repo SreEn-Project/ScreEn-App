@@ -122,6 +122,7 @@ class AppSettings {
     required this.autoTranslate,
     required this.autoShowDelayMs,
     required this.hideAfterInteractionMs,
+    required this.wifiOnlyModelDownload,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -148,6 +149,9 @@ class AppSettings {
   /// 0 = 바로, -1 = 숨기지 않고 새 번역이 뜰 때까지 둔다.
   int hideAfterInteractionMs;
 
+  /// 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 같다.
+  bool wifiOnlyModelDownload;
+
   List<Object?> _toList() {
     return <Object?>[
       targetLanguage,
@@ -159,6 +163,7 @@ class AppSettings {
       autoTranslate,
       autoShowDelayMs,
       hideAfterInteractionMs,
+      wifiOnlyModelDownload,
     ];
   }
 
@@ -178,6 +183,7 @@ class AppSettings {
       autoTranslate: result[6]! as bool,
       autoShowDelayMs: result[7]! as int,
       hideAfterInteractionMs: result[8]! as int,
+      wifiOnlyModelDownload: result[9]! as bool,
     );
   }
 
@@ -198,7 +204,8 @@ class AppSettings {
         _deepEquals(quickLanguages, other.quickLanguages) &&
         _deepEquals(autoTranslate, other.autoTranslate) &&
         _deepEquals(autoShowDelayMs, other.autoShowDelayMs) &&
-        _deepEquals(hideAfterInteractionMs, other.hideAfterInteractionMs);
+        _deepEquals(hideAfterInteractionMs, other.hideAfterInteractionMs) &&
+        _deepEquals(wifiOnlyModelDownload, other.wifiOnlyModelDownload);
   }
 
   @override
@@ -207,7 +214,7 @@ class AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs)';
+    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload)';
   }
 }
 
@@ -554,6 +561,26 @@ class SettingsHostApi {
     );
   }
 
+  Future<void> setWifiOnlyModelDownload(bool enabled) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setWifiOnlyModelDownload$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[enabled],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   Future<void> setOnboardingCompleted(bool completed) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setOnboardingCompleted$pigeonVar_messageChannelSuffix';
@@ -564,6 +591,87 @@ class SettingsHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[completed],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+}
+
+/// 언어 모델 관리 (FL-05, NA-12). 모델의 원본은 ML Kit이 기기에 받아 둔 파일이다.
+class ModelHostApi {
+  /// Constructor for [ModelHostApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  ModelHostApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// 기기에 받아 둔 언어 모델의 언어 코드들.
+  Future<List<String>> getDownloadedLanguages() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.ModelHostApi.getDownloadedLanguages$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
+  /// 언어 모델을 받는다. 끝나면 돌아온다 (이미 있으면 바로). Wi-Fi 전용이라 조건이 안 맞으면 실패한다.
+  /// ML Kit이 진행률을 알려 주지 않아 중간 값은 없다.
+  Future<void> downloadLanguage(String languageCode, bool wifiOnly) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.ModelHostApi.downloadLanguage$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[languageCode, wifiOnly],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> deleteLanguage(String languageCode) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.ModelHostApi.deleteLanguage$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[languageCode],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

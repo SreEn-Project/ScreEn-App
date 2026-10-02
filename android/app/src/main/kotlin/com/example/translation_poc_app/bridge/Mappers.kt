@@ -18,6 +18,7 @@ fun Settings.toPigeon() = AppSettings(
     autoTranslate = autoTranslate,
     autoShowDelayMs = autoShowDelayMs,
     hideAfterInteractionMs = hideAfterInteractionMs,
+    wifiOnlyModelDownload = wifiOnlyModelDownload,
 )
 
 fun Engine.toPigeon() = when (this) {

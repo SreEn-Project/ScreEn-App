@@ -38,6 +38,7 @@ class AppSettings {
     required this.autoTranslate,
     required this.autoShowDelayMs,
     required this.hideAfterInteractionMs,
+    required this.wifiOnlyModelDownload,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -59,6 +60,9 @@ class AppSettings {
   /// 사용자가 화면을 조작한 뒤 이전 번역(덮어쓰기)을 숨기기까지의 시간 (ms). 자동 번역과 무관하게 적용된다.
   /// 0 = 바로, -1 = 숨기지 않고 새 번역이 뜰 때까지 둔다.
   int hideAfterInteractionMs;
+
+  /// 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 같다.
+  bool wifiOnlyModelDownload;
 }
 
 @HostApi()
@@ -91,7 +95,26 @@ abstract class SettingsHostApi {
   void setHideAfterInteractionMs(int ms);
 
   @async
+  void setWifiOnlyModelDownload(bool enabled);
+
+  @async
   void setOnboardingCompleted(bool completed);
+}
+
+/// 언어 모델 관리 (FL-05, NA-12). 모델의 원본은 ML Kit이 기기에 받아 둔 파일이다.
+@HostApi()
+abstract class ModelHostApi {
+  /// 기기에 받아 둔 언어 모델의 언어 코드들.
+  @async
+  List<String> getDownloadedLanguages();
+
+  /// 언어 모델을 받는다. 끝나면 돌아온다 (이미 있으면 바로). Wi-Fi 전용이라 조건이 안 맞으면 실패한다.
+  /// ML Kit이 진행률을 알려 주지 않아 중간 값은 없다.
+  @async
+  void downloadLanguage(String languageCode, bool wifiOnly);
+
+  @async
+  void deleteLanguage(String languageCode);
 }
 
 @HostApi()

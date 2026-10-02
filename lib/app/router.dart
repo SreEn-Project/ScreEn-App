@@ -59,8 +59,7 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
       ),
       GoRoute(
         path: AppRoutes.targetLanguage,
-        builder: (context, state) =>
-            LanguagePickerScreen(selectedCode: state.extra as String? ?? 'ko'),
+        builder: (context, state) => const LanguagePickerScreen(),
       ),
       GoRoute(
         path: AppRoutes.quickLanguages,

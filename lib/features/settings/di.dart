@@ -59,5 +59,9 @@ ChangeHideAfterInteraction changeHideAfterInteraction(Ref ref) =>
     ChangeHideAfterInteraction(ref.watch(settingsRepositoryProvider));
 
 @riverpod
+ChangeWifiOnlyModelDownload changeWifiOnlyModelDownload(Ref ref) =>
+    ChangeWifiOnlyModelDownload(ref.watch(settingsRepositoryProvider));
+
+@riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));

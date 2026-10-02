@@ -1,6 +1,8 @@
 package com.example.translation_poc_app
 
 import com.example.translation_poc_app.bridge.EventsStreamHandler
+import com.example.translation_poc_app.bridge.ModelHostApi
+import com.example.translation_poc_app.bridge.ModelHostApiImpl
 import com.example.translation_poc_app.bridge.ServiceHostApi
 import com.example.translation_poc_app.bridge.ServiceHostApiImpl
 import com.example.translation_poc_app.bridge.SettingsHostApi
@@ -20,6 +22,7 @@ class MainActivity : FlutterActivity() {
 
         SettingsHostApi.setUp(messenger, SettingsHostApiImpl(settingsRepository))
         ServiceHostApi.setUp(messenger, ServiceHostApiImpl(applicationContext))
+        ModelHostApi.setUp(messenger, ModelHostApiImpl())
         eventHandler = TranslatorEventHandler(settingsRepository).also {
             EventsStreamHandler.register(messenger, it)
         }
@@ -29,6 +32,7 @@ class MainActivity : FlutterActivity() {
         val messenger = flutterEngine.dartExecutor.binaryMessenger
         SettingsHostApi.setUp(messenger, null)
         ServiceHostApi.setUp(messenger, null)
+        ModelHostApi.setUp(messenger, null)
         eventHandler?.dispose()
         eventHandler = null
         super.cleanUpFlutterEngine(flutterEngine)

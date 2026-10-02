@@ -2,6 +2,15 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 대상 언어 · 언어 모델 관리 실제 연결 (FL-04, FL-05, 이슈 #49, 브랜치 `feat/49-language-models`)
+- 대상 언어: 선택 화면 · 홈 · 언어 탭이 `TargetLanguageViewModel`로 같은 값(DataStore)을 읽고 쓴다. 고르면 바로 저장하고 닫는다 (이전엔 화면 안 가짜 값).
+- 언어 모델: 새 Pigeon `ModelHostApi`(받은 목록 · 받기 · 삭제). 네이티브 `LanguageModelManager`가 ML Kit `RemoteModelManager`로 처리. Flutter는 `features/models`(domain · data · di · `LanguageModelsViewModel`) 신설. 홈의 "모델 N개 준비됨"도 실제 값.
+- Wi-Fi 전용: 설정 `wifiOnlyModelDownload`(기본 켬, DataStore 키 `wifi_only_model_download`)를 Pigeon `AppSettings` · 엔티티 · 유스케이스까지 추가. 번역 중 자동 내려받기(`MlKitTranslationEngine`)도 이 값을 받을 때마다 읽는다(`downloadPolicyProvider`).
+- 진행률: ML Kit이 진행률 · 취소를 주지 않아 "받는 중"은 진행 중 표시(좌우로 오가는 막대)만 나온다. `AppProgressBar`의 `value`를 null 허용(진행 중)으로 확장. 실패하면 "받지 못했어요" 표시 후 다시 받을 수 있다.
+- 변경: `pigeons/translator_api.dart`(+ 생성 코드 재생성), ARB(`modelsDownloading` 퍼센트 제거, `modelsDownloadFailed` 추가). 의존성 · Manifest 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · Android 단위 테스트 · `flutter build apk --debug` 통과. 기기 확인 전 (실제 받기 · 삭제 · Wi-Fi 전용에서 모바일 데이터 실패).
+- 남은 일: FL-06 엔진 선택 → FL-07 · FL-08 → FL-01 · FL-14 → NA-23 · FL-13.
+
 ## 2026-10-02 · 플로팅 버튼 자리 검은 네모 수정 (NA-18, 이슈 #47, 브랜치 `fix/47-black-square-flash`)
 - 증상: 오른쪽 가장자리 버튼 자리에 버튼 대신 검은 네모가 순간 보인다.
 - 원인: 캡처 때 버튼 창의 루트 뷰를 `INVISIBLE` ↔ `VISIBLE`로 바꿨다. 루트 뷰가 보이지 않으면 창의 서피스가 해제되고 다시 보일 때 새로 만들어져, 첫 프레임이 그려지기 전 버퍼가 검게 비친다 (버튼 창 크기 = 정사각형). 결과 창도 같은 방식이라 같은 위험.

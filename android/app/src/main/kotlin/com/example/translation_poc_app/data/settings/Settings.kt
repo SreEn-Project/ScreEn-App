@@ -34,6 +34,8 @@ data class Settings(
     val hideAfterInteractionMs: Long = DEFAULT_HIDE_AFTER_INTERACTION_MS,
     /** 문자 인식 언어 ([SOURCE_LANGUAGE_AUTO] = 자동 판별). 플로팅 버튼 '빠른 언어' 버블에서 바꾼다. 네이티브 전용 (Pigeon 없음). */
     val sourceLanguage: String = SOURCE_LANGUAGE_AUTO,
+    /** 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 적용된다. */
+    val wifiOnlyModelDownload: Boolean = true,
 ) {
     companion object {
         const val DEFAULT_TARGET_LANGUAGE = "ko"

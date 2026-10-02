@@ -1,6 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -8,80 +7,34 @@ import '../../../../app/router.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../language/domain/entities/supported_language.dart';
+import '../../../language/presentation/view_models/target_language_view_model.dart';
+import '../view_models/language_models_view_model.dart';
 
 /// 언어 탭: 대상 언어(FL-04) + 언어 모델 관리(S-05, FL-05).
-/// UI 퍼블리싱 단계: 설치 상태 · 진행률은 가짜 값이다. 받기를 누르면 진행률이 흉내로 올라간다.
-/// 실제 다운로드 · 삭제 · 진행률 이벤트는 NA-12와 함께 연결한다.
-class LanguageModelsScreen extends StatefulWidget {
+/// 받은 모델은 ML Kit이 기기에 둔 것을 그대로 보여 주고, 받기 · 삭제는 바로 ML Kit에 요청한다.
+/// ML Kit이 진행률을 주지 않아 받는 중에는 진행 중 표시만 나온다 (취소도 못 한다).
+class LanguageModelsScreen extends ConsumerWidget {
   const LanguageModelsScreen({super.key});
 
-  @override
-  State<LanguageModelsScreen> createState() => _LanguageModelsScreenState();
-}
-
-class _LanguageModelsScreenState extends State<LanguageModelsScreen> {
   static const _modelSizeMb = 30;
 
-  String _targetLanguage = 'ko';
-  bool _wifiOnly = true;
-
-  /// 언어 코드 → 진행률. 1 = 설치됨, 0~1 = 받는 중, 없음 = 받지 않음.
-  final Map<String, double> _progress = {'ko': 1, 'en': 1, 'ja': 0.42};
-  final Map<String, Timer> _timers = {};
-
   @override
-  void initState() {
-    super.initState();
-    _simulateDownload('ja');
-  }
-
-  @override
-  void dispose() {
-    for (final timer in _timers.values) {
-      timer.cancel();
-    }
-    super.dispose();
-  }
-
-  void _simulateDownload(String code) {
-    _progress[code] ??= 0;
-    _timers[code]?.cancel();
-    _timers[code] = Timer.periodic(const Duration(milliseconds: 400), (timer) {
-      setState(() {
-        final next = (_progress[code]! + 0.08).clamp(0.0, 1.0);
-        _progress[code] = next;
-        if (next >= 1) {
-          timer.cancel();
-          _timers.remove(code);
-        }
-      });
-    });
-  }
-
-  void _remove(String code) {
-    _timers.remove(code)?.cancel();
-    setState(() => _progress.remove(code));
-  }
-
-  Future<void> _pickLanguage() async {
-    final code = await context.push<String>(
-      AppRoutes.targetLanguage,
-      extra: _targetLanguage,
-    );
-    if (code != null) setState(() => _targetLanguage = code);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context);
+    final target = ref.watch(targetLanguageViewModelProvider).value ?? 'ko';
+    final wifiOnly = ref.watch(wifiOnlyDownloadViewModelProvider).value ?? true;
+    final models =
+        ref.watch(languageModelsViewModelProvider).value ??
+        const LanguageModelsState();
+    final viewModel = ref.read(languageModelsViewModelProvider.notifier);
 
     final installed = SupportedLanguage.all
-        .where((l) => _progress.containsKey(l.code))
+        .where((l) => models.installed.contains(l.code))
         .toList();
     final available = SupportedLanguage.all
-        .where((l) => !_progress.containsKey(l.code))
+        .where((l) => !models.installed.contains(l.code))
         .toList();
 
     Widget group(List<SupportedLanguage> languages) => AppCard(
@@ -93,11 +46,12 @@ class _LanguageModelsScreenState extends State<LanguageModelsScreen> {
             _ModelRow(
               name: languages[i].displayName(locale.languageCode),
               language: languages[i],
-              progress: _progress[languages[i].code],
+              installed: models.installed.contains(languages[i].code),
+              downloading: models.downloading.contains(languages[i].code),
+              failed: models.failed.contains(languages[i].code),
               sizeMb: _modelSizeMb,
-              onDownload: () =>
-                  setState(() => _simulateDownload(languages[i].code)),
-              onRemove: () => _remove(languages[i].code),
+              onDownload: () => viewModel.download(languages[i].code),
+              onRemove: () => viewModel.delete(languages[i].code),
             ),
           ],
         ],
@@ -115,9 +69,9 @@ class _LanguageModelsScreenState extends State<LanguageModelsScreen> {
             child: AppListTile(
               icon: Symbols.translate_rounded,
               title: l10n.homeTargetLanguage,
-              value: SupportedLanguage.byCode(_targetLanguage)
+              value: SupportedLanguage.byCode(target)
                   .displayName(locale.languageCode),
-              onTap: _pickLanguage,
+              onTap: () => context.push(AppRoutes.targetLanguage),
             ),
           ),
         ),
@@ -133,8 +87,10 @@ class _LanguageModelsScreenState extends State<LanguageModelsScreen> {
                   title: l10n.modelsWifiOnly,
                   subtitle: l10n.modelsWifiOnlyDetail,
                   trailing: AppSwitch(
-                    value: _wifiOnly,
-                    onChanged: (v) => setState(() => _wifiOnly = v),
+                    value: wifiOnly,
+                    onChanged: (v) => ref
+                        .read(wifiOnlyDownloadViewModelProvider.notifier)
+                        .setEnabled(v),
                   ),
                 ),
               ),
@@ -157,7 +113,9 @@ class _ModelRow extends StatelessWidget {
   const _ModelRow({
     required this.name,
     required this.language,
-    required this.progress,
+    required this.installed,
+    required this.downloading,
+    required this.failed,
     required this.sizeMb,
     required this.onDownload,
     required this.onRemove,
@@ -165,13 +123,12 @@ class _ModelRow extends StatelessWidget {
 
   final String name;
   final SupportedLanguage language;
-  final double? progress;
+  final bool installed;
+  final bool downloading;
+  final bool failed;
   final int sizeMb;
   final VoidCallback onDownload;
   final VoidCallback onRemove;
-
-  bool get _installed => progress != null && progress! >= 1;
-  bool get _downloading => progress != null && progress! < 1;
 
   @override
   Widget build(BuildContext context) {
@@ -179,10 +136,12 @@ class _ModelRow extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    final status = _installed
+    final status = installed
         ? l10n.modelsInstalled
-        : _downloading
-        ? l10n.modelsDownloading((progress! * 100).round())
+        : downloading
+        ? l10n.modelsDownloading
+        : failed
+        ? l10n.modelsDownloadFailed
         : l10n.modelsSize(sizeMb);
 
     return Padding(
@@ -209,13 +168,17 @@ class _ModelRow extends StatelessWidget {
                     Text(
                       '${language.nativeName} · $status',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: _installed ? colors.primary : null,
+                        color: installed
+                            ? colors.primary
+                            : failed
+                            ? colors.error
+                            : null,
                       ),
                     ),
                   ],
                 ),
               ),
-              if (_installed)
+              if (installed)
                 AppIconButton(
                   icon: Symbols.delete_rounded,
                   tooltip: l10n.modelsDelete,
@@ -223,15 +186,7 @@ class _ModelRow extends StatelessWidget {
                   size: 40,
                   onPressed: onRemove,
                 )
-              else if (_downloading)
-                AppIconButton(
-                  icon: Symbols.close_rounded,
-                  tooltip: l10n.modelsCancel,
-                  plain: true,
-                  size: 40,
-                  onPressed: onRemove,
-                )
-              else
+              else if (!downloading)
                 AppIconButton(
                   icon: Symbols.download_rounded,
                   tooltip: l10n.modelsDownload,
@@ -240,11 +195,11 @@ class _ModelRow extends StatelessWidget {
                 ),
             ],
           ),
-          if (_downloading) ...[
+          if (downloading) ...[
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.only(right: 8),
-              child: AppProgressBar(value: progress!),
+              child: AppProgressBar(),
             ),
           ],
         ],
