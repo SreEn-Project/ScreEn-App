@@ -10,6 +10,11 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -53,6 +58,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.data.settings.ResultDisplay
@@ -179,35 +185,136 @@ internal fun OptionMenu(options: List<MenuOption>) {
     }
 }
 
+/** 빠른 언어 목록의 한 줄. */
+internal data class LanguageEntry(val label: String, val selected: Boolean, val onSelect: () -> Unit)
+
+private enum class LanguageSide { SOURCE, TARGET }
+
+private const val LANGUAGE_LIST_HEIGHT_DP = 172
+
 /**
- * 빠른 언어 메뉴: 왼쪽 "번역할 언어"(원문 인식), 오른쪽 "번역될 언어"(결과). 고른 뒤에도 열려 있어 둘을 이어서 고른다.
- * 목록은 고른 값이 바뀌면 다시 읽도록 람다로 받는다.
+ * 빠른 언어 메뉴: 번역기 앱처럼 위쪽에 "원문 언어 ▾ ⇄ 번역 언어 ▾" 막대, 아래에 고정 높이 스크롤 목록.
+ * 막대의 한쪽을 누르면 그쪽이 선택 상태(초록 테두리)가 되고, 목록에서 고르면 그쪽 언어가 바뀐다. ⇄는 두 언어를 맞바꾼다.
+ * 고른 뒤에도 열려 있다. 값은 바뀌면 다시 읽도록 람다로 받는다.
  */
 @Composable
 internal fun LanguageMenu(
-    sourceTitle: String,
-    targetTitle: String,
-    source: () -> List<MenuOption>,
-    target: () -> List<MenuOption>,
+    sourceName: () -> String,
+    targetName: () -> String,
+    swapEnabled: () -> Boolean,
+    swapDescription: String,
+    onSwap: () -> Unit,
+    source: () -> List<LanguageEntry>,
+    target: () -> List<LanguageEntry>,
 ) {
+    var side by remember { mutableStateOf(LanguageSide.TARGET) }
     MenuCard {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            LanguageColumn(sourceTitle, source())
-            LanguageColumn(targetTitle, target())
+        Column(Modifier.width(224.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                LanguageTab(sourceName(), side == LanguageSide.SOURCE, Modifier.weight(1f)) { side = LanguageSide.SOURCE }
+                SwapButton(swapEnabled(), swapDescription, onSwap)
+                LanguageTab(targetName(), side == LanguageSide.TARGET, Modifier.weight(1f)) { side = LanguageSide.TARGET }
+            }
+            val entries = if (side == LanguageSide.SOURCE) source() else target()
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .height(LANGUAGE_LIST_HEIGHT_DP.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                entries.forEach { LanguageRow(it) }
+            }
         }
     }
 }
 
 @Composable
-private fun LanguageColumn(title: String, options: List<MenuOption>) {
+private fun LanguageTab(name: String, focused: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val colors = OverlayTheme.colors
-    Column(Modifier.width(IntrinsicSize.Max), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    val shape = CircleShape
+    val textColor = if (focused) colors.onPrimaryContainer else colors.onSurface
+    Row(
+        modifier = modifier
+            .height(34.dp)
+            .clip(shape)
+            .background(if (focused) colors.primaryContainer else colors.surface)
+            .border(if (focused) 1.5.dp else 1.dp, if (focused) colors.primary else colors.outline, shape)
+            .pressable(onClick = onClick)
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         BasicText(
-            title,
-            style = OverlayTheme.badge.copy(color = colors.onSurfaceVariant),
-            modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp),
+            name,
+            style = OverlayTheme.caption.copy(color = textColor, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
         )
-        options.forEach { OptionRow(it) }
+        Spacer(Modifier.width(4.dp))
+        Canvas(Modifier.size(10.dp)) {
+            val stroke = 1.6.dp.toPx()
+            val w = size.width
+            val h = size.height
+            drawLine(textColor, Offset(w * 0.1f, h * 0.35f), Offset(w * 0.5f, h * 0.7f), stroke, StrokeCap.Round)
+            drawLine(textColor, Offset(w * 0.5f, h * 0.7f), Offset(w * 0.9f, h * 0.35f), stroke, StrokeCap.Round)
+        }
+    }
+}
+
+/** ⇄ 맞바꾸기. 원문이 "자동"이면 바꿀 수 없어 흐리게 둔다. */
+@Composable
+private fun SwapButton(enabled: Boolean, description: String, onClick: () -> Unit) {
+    val colors = OverlayTheme.colors
+    val color = if (enabled) colors.onSurface else colors.outline
+    Box(
+        Modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .pressable(enabled = enabled, onClick = onClick)
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(Modifier.size(16.dp)) {
+            val stroke = 1.8.dp.toPx()
+            val w = size.width
+            val h = size.height
+            val top = h * 0.3f
+            val bottom = h * 0.7f
+            val head = w * 0.18f
+            // 위: 오른쪽 화살표, 아래: 왼쪽 화살표.
+            drawLine(color, Offset(w * 0.08f, top), Offset(w * 0.92f, top), stroke, StrokeCap.Round)
+            drawLine(color, Offset(w * 0.92f - head, top - head), Offset(w * 0.92f, top), stroke, StrokeCap.Round)
+            drawLine(color, Offset(w * 0.92f - head, top + head), Offset(w * 0.92f, top), stroke, StrokeCap.Round)
+            drawLine(color, Offset(w * 0.08f, bottom), Offset(w * 0.92f, bottom), stroke, StrokeCap.Round)
+            drawLine(color, Offset(w * 0.08f + head, bottom - head), Offset(w * 0.08f, bottom), stroke, StrokeCap.Round)
+            drawLine(color, Offset(w * 0.08f + head, bottom + head), Offset(w * 0.08f, bottom), stroke, StrokeCap.Round)
+        }
+    }
+}
+
+@Composable
+private fun LanguageRow(entry: LanguageEntry) {
+    val colors = OverlayTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .clip(CircleShape)
+            .background(if (entry.selected) colors.primaryContainer else colors.surface)
+            .pressable { entry.onSelect() }
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BasicText(
+            entry.label,
+            style = OverlayTheme.caption.copy(fontSize = 14.sp, color = if (entry.selected) colors.onPrimaryContainer else colors.onSurface),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        if (entry.selected) SymbolIcon(Symbol.CHECK, colors.onPrimaryContainer, size = 18.dp)
     }
 }
 
