@@ -23,6 +23,8 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.4.0" apply false
     // 오버레이 UI (NA-18, NA-19)
     id("org.jetbrains.kotlin.plugin.compose") version "2.4.0" apply false
+    // 번역 기록 DB(Room)의 코드 생성 (NA-23)
+    id("com.google.devtools.ksp") version "2.3.12" apply false
 }
 
 include(":app")

@@ -236,6 +236,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeRecentEmpty => '아직 번역 기록이 없어요';
 
   @override
+  String get historyTitle => '번역 기록';
+
+  @override
+  String get historySearchHint => '원문 · 번역 검색';
+
+  @override
+  String get historyNoResult => '찾는 기록이 없어요';
+
+  @override
+  String get historyDelete => '삭제';
+
+  @override
+  String get historyClearAll => '전체 삭제';
+
+  @override
+  String get historyClearConfirm => '정말 삭제';
+
+  @override
   String get captureModeFull => '전체 화면';
 
   @override

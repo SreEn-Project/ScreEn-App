@@ -60,6 +60,8 @@ class OverlayController(
     /** 자동 번역(#23)이 화면이 바뀌었는지 볼 때 쓰는 가벼운 화면 지문. [region]만 본다. 프레임이 없으면 null. */
     private val sampleSignature: suspend (region: NormalizedRegion?) -> IntArray?,
     private val onStopRequested: () -> Unit,
+    /** 번역이 화면에 올랐다: 번역 기록(NA-23)에 남긴다. 번역이 모두 끝난 결과만 온다 (일부만 끝난 것 제외). */
+    private val onTranslated: (TranslationOutcome.Translated) -> Unit = {},
 ) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -283,6 +285,7 @@ class OverlayController(
             }
             logOutcome(outcome)
             showSheet(outcome)
+            if (outcome is TranslationOutcome.Translated) onTranslated(outcome)
             // 번역이 화면에 올랐으면 이제부터 화면 변화를 지켜본다: 자동 번역은 다시 번역하고 (#23),
             // 조작 뒤 숨김이 켜진 덮어쓰기 결과(passthrough)는 숨김만 한다 (#35).
             if ((autoTranslate || passthrough) && !powerManager.isPowerSaveMode && outcome is TranslationOutcome.Translated) {
@@ -325,6 +328,7 @@ class OverlayController(
         when (outcome) {
             is TranslationOutcome.Translated -> if (outcome.items != shownItems) {
                 showSheet(outcome)
+                onTranslated(outcome)
             } else {
                 // 같은 결과가 다시 맞는다: 숨겼던 것을 다시 보인다.
                 staleHidden = false

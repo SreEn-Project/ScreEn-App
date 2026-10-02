@@ -15,6 +15,9 @@ import '../../../language/presentation/view_models/target_language_view_model.da
 import '../../../models/presentation/view_models/language_models_view_model.dart';
 import '../../../permission/presentation/view_models/permission_view_model.dart';
 import '../../../settings/presentation/view_models/engine_view_model.dart';
+import '../../../history/domain/entities/history_entry.dart';
+import '../../../history/presentation/view_models/history_view_model.dart';
+import '../../../history/presentation/widgets/history_card.dart';
 import '../view_models/service_view_model.dart';
 
 /// 홈 (S-03, FL-03).
@@ -149,8 +152,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const SizedBox(height: 28),
         SectionTitle(
           l10n.homeRecent,
-          // 기록 화면은 FL-13(4단계).
-          action: AppButton.text(label: l10n.homeRecentSeeAll, onPressed: null),
+          action: AppButton.text(
+            label: l10n.homeRecentSeeAll,
+            onPressed: () async {
+              await context.push(AppRoutes.history);
+              // 기록 화면에서 지웠을 수 있다.
+              ref.invalidate(recentHistoryProvider);
+            },
+          ),
         ),
         const SizedBox(height: 12),
         const _RecentSection(),
@@ -330,26 +339,49 @@ class _SetupTile extends StatelessWidget {
   }
 }
 
-class _RecentSection extends StatefulWidget {
+class _RecentSection extends ConsumerStatefulWidget {
   const _RecentSection();
 
   @override
-  State<_RecentSection> createState() => _RecentSectionState();
+  ConsumerState<_RecentSection> createState() => _RecentSectionState();
 }
 
-class _RecentSectionState extends State<_RecentSection> {
-  // 기록 조회는 FL-13(4단계). 지금은 필터 칩과 빈 상태만 보여 준다.
-  int _filter = 0;
+class _RecentSectionState extends ConsumerState<_RecentSection>
+    with WidgetsBindingObserver {
+  HistoryPeriod _period = HistoryPeriod.all;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // 번역은 다른 앱 위에서 이루어지므로, 앱으로 돌아올 때 새 기록을 다시 읽는다.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(recentHistoryProvider);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final filters = [
-      l10n.homeRecentFilterAll,
-      l10n.homeRecentFilterToday,
-      l10n.homeRecentFilterWeek,
-    ];
+    final periods = {
+      HistoryPeriod.all: l10n.homeRecentFilterAll,
+      HistoryPeriod.today: l10n.homeRecentFilterToday,
+      HistoryPeriod.week: l10n.homeRecentFilterWeek,
+    };
+    final entries =
+        ref.watch(recentHistoryProvider(_period)).value ??
+        const <HistoryEntry>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -357,25 +389,31 @@ class _RecentSectionState extends State<_RecentSection> {
         Wrap(
           spacing: 8,
           children: [
-            for (var i = 0; i < filters.length; i++)
+            for (final period in HistoryPeriod.values)
               AppChip(
-                label: filters[i],
-                selected: _filter == i,
-                onTap: () => setState(() => _filter = i),
+                label: periods[period]!,
+                selected: _period == period,
+                onTap: () => setState(() => _period = period),
               ),
           ],
         ),
         const SizedBox(height: 14),
-        AppCard(
-          padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-          child: Column(
-            children: [
-              const IconBadge(icon: Symbols.history_rounded, size: 48),
-              const SizedBox(height: 12),
-              Text(l10n.homeRecentEmpty, style: theme.textTheme.bodySmall),
-            ],
-          ),
-        ),
+        if (entries.isEmpty)
+          AppCard(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+            child: Column(
+              children: [
+                const IconBadge(icon: Symbols.history_rounded, size: 48),
+                const SizedBox(height: 12),
+                Text(l10n.homeRecentEmpty, style: theme.textTheme.bodySmall),
+              ],
+            ),
+          )
+        else
+          for (final entry in entries) ...[
+            HistoryCard(entry: entry),
+            const SizedBox(height: 12),
+          ],
       ],
     );
   }

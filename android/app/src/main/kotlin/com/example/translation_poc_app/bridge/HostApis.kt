@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.bridge
 
 import android.content.Context
+import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.service.CaptureConsentActivity
 import com.example.translation_poc_app.service.RunState
@@ -51,6 +52,16 @@ class ModelHostApiImpl(private val models: LanguageModelManager = LanguageModelM
         models.download(languageCode, wifiOnly)
 
     override suspend fun deleteLanguage(languageCode: String) = models.delete(languageCode)
+}
+
+/** 번역 기록 조회 · 삭제 (FL-13). */
+class HistoryHostApiImpl(private val repository: HistoryRepository) : HistoryHostApi {
+    override suspend fun getHistory(query: String, sinceMs: Long, limit: Long): List<TranslationRecord> =
+        repository.search(query, sinceMs, limit.toInt()).map { it.toPigeon() }
+
+    override suspend fun deleteHistory(id: Long) = repository.delete(id)
+
+    override suspend fun clearHistory() = repository.clear()
 }
 
 /** 서비스 상태 조회 · 시작 · 중지 (NA-01, NA-02). */

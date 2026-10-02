@@ -82,6 +82,12 @@
   "homeRecentFilterToday": "Today",
   "homeRecentFilterWeek": "This week",
   "homeRecentEmpty": "No translations yet",
+  "historyTitle": "History",
+  "historySearchHint": "Search original or translation",
+  "historyNoResult": "No matching translations",
+  "historyDelete": "Delete",
+  "historyClearAll": "Clear all",
+  "historyClearConfirm": "Delete all?",
 
   "captureModeFull": "Full screen",
   "captureModeRegion": "Select area",

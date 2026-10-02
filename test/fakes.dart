@@ -5,6 +5,9 @@ import 'package:translation_poc_app/features/about/domain/repositories/app_info_
 import 'package:translation_poc_app/features/settings/di.dart';
 import 'package:translation_poc_app/features/settings/domain/entities/translator_settings.dart';
 import 'package:translation_poc_app/features/settings/domain/repositories/settings_repository.dart';
+import 'package:translation_poc_app/features/history/di.dart';
+import 'package:translation_poc_app/features/history/domain/entities/history_entry.dart';
+import 'package:translation_poc_app/features/history/domain/repositories/history_repository.dart';
 import 'package:translation_poc_app/features/models/di.dart';
 import 'package:translation_poc_app/features/models/domain/repositories/model_repository.dart';
 import 'package:translation_poc_app/features/permission/di.dart';
@@ -135,6 +138,39 @@ class FakeModelRepository implements ModelRepository {
       installed.remove(languageCode);
 }
 
+/// 기록을 메모리에 들고 있는 가짜 번역 기록 저장소 (최신순).
+class FakeHistoryRepository implements HistoryRepository {
+  FakeHistoryRepository([List<HistoryEntry> entries = const []])
+    : entries = [...entries];
+
+  final List<HistoryEntry> entries;
+
+  @override
+  Future<List<HistoryEntry>> search({
+    String query = '',
+    DateTime? since,
+    required int limit,
+  }) async {
+    final q = query.toLowerCase();
+    return entries
+        .where(
+          (e) =>
+              (since == null || !e.translatedAt.isBefore(since)) &&
+              (q.isEmpty ||
+                  e.original.toLowerCase().contains(q) ||
+                  e.translated.toLowerCase().contains(q)),
+        )
+        .take(limit)
+        .toList();
+  }
+
+  @override
+  Future<void> delete(int id) async => entries.removeWhere((e) => e.id == id);
+
+  @override
+  Future<void> clear() async => entries.clear();
+}
+
 /// 고정된 앱 버전을 돌려주는 가짜 앱 정보.
 class FakeAppInfoRepository implements AppInfoRepository {
   const FakeAppInfoRepository();
@@ -160,6 +196,7 @@ List<Override> fakeNativeOverrides({
   ),
   appInfoRepositoryProvider.overrideWithValue(const FakeAppInfoRepository()),
   modelRepositoryProvider.overrideWithValue(FakeModelRepository()),
+  historyRepositoryProvider.overrideWithValue(FakeHistoryRepository()),
   permissionRepositoryProvider.overrideWithValue(
     FakePermissionRepository(
       overlay: permissionsGranted,

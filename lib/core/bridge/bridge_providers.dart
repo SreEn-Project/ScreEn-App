@@ -17,6 +17,9 @@ ServiceHostApi serviceHostApi(Ref ref) => ServiceHostApi();
 ModelHostApi modelHostApi(Ref ref) => ModelHostApi();
 
 @Riverpod(keepAlive: true)
+HistoryHostApi historyHostApi(Ref ref) => HistoryHostApi();
+
+@Riverpod(keepAlive: true)
 TranslatorEventBus translatorEventBus(Ref ref) => TranslatorEventBus(events());
 
 /// 네이티브 이벤트 채널은 리스너가 하나뿐이라, 한 번만 구독하고 앱 안에서 나눠 쓴다.

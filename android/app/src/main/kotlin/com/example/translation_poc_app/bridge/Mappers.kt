@@ -24,6 +24,16 @@ fun Settings.toPigeon() = AppSettings(
     hasFixedRegion = fixedRegion != null,
 )
 
+fun com.example.translation_poc_app.data.history.TranslationRecord.toPigeon() = TranslationRecord(
+    id = id,
+    original = original,
+    translated = translated,
+    sourceLanguage = sourceLanguage,
+    targetLanguage = targetLanguage,
+    engine = runCatching { Engine.valueOf(engine) }.getOrDefault(Engine.ML_KIT).toPigeon(),
+    createdAtMs = createdAt,
+)
+
 fun Engine.toPigeon() = when (this) {
     Engine.ML_KIT -> EngineType.ML_KIT
     Engine.GEMINI -> EngineType.GEMINI

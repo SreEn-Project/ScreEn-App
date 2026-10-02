@@ -536,6 +536,42 @@ abstract class AppLocalizations {
   /// **'No translations yet'**
   String get homeRecentEmpty;
 
+  /// No description provided for @historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get historyTitle;
+
+  /// No description provided for @historySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search original or translation'**
+  String get historySearchHint;
+
+  /// No description provided for @historyNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching translations'**
+  String get historyNoResult;
+
+  /// No description provided for @historyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get historyDelete;
+
+  /// No description provided for @historyClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get historyClearAll;
+
+  /// No description provided for @historyClearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all?'**
+  String get historyClearConfirm;
+
   /// No description provided for @captureModeFull.
   ///
   /// In en, this message translates to:

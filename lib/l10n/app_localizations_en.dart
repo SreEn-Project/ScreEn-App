@@ -243,6 +243,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeRecentEmpty => 'No translations yet';
 
   @override
+  String get historyTitle => 'History';
+
+  @override
+  String get historySearchHint => 'Search original or translation';
+
+  @override
+  String get historyNoResult => 'No matching translations';
+
+  @override
+  String get historyDelete => 'Delete';
+
+  @override
+  String get historyClearAll => 'Clear all';
+
+  @override
+  String get historyClearConfirm => 'Delete all?';
+
+  @override
   String get captureModeFull => 'Full screen';
 
   @override

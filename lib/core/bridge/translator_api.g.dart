@@ -239,6 +239,90 @@ class AppSettings {
   }
 }
 
+/// 번역 기록 한 줄 (NA-23, FL-13): 번역된 블록 하나.
+class TranslationRecord {
+  TranslationRecord({
+    required this.id,
+    required this.original,
+    required this.translated,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+    required this.engine,
+    required this.createdAtMs,
+  });
+
+  int id;
+
+  String original;
+
+  String translated;
+
+  String sourceLanguage;
+
+  String targetLanguage;
+
+  EngineType engine;
+
+  /// 마지막으로 번역한 시각 (epoch ms).
+  int createdAtMs;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      id,
+      original,
+      translated,
+      sourceLanguage,
+      targetLanguage,
+      engine,
+      createdAtMs,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static TranslationRecord decode(Object result) {
+    result as List<Object?>;
+    return TranslationRecord(
+      id: result[0]! as int,
+      original: result[1]! as String,
+      translated: result[2]! as String,
+      sourceLanguage: result[3]! as String,
+      targetLanguage: result[4]! as String,
+      engine: result[5]! as EngineType,
+      createdAtMs: result[6]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TranslationRecord || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(id, other.id) &&
+        _deepEquals(original, other.original) &&
+        _deepEquals(translated, other.translated) &&
+        _deepEquals(sourceLanguage, other.sourceLanguage) &&
+        _deepEquals(targetLanguage, other.targetLanguage) &&
+        _deepEquals(engine, other.engine) &&
+        _deepEquals(createdAtMs, other.createdAtMs);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TranslationRecord(id: $id, original: $original, translated: $translated, sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage, engine: $engine, createdAtMs: $createdAtMs)';
+  }
+}
+
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
 sealed class TranslatorEvent {}
 
@@ -344,11 +428,14 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is AppSettings) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is ServiceStateChanged) {
+    } else if (value is TranslationRecord) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is SettingsChanged) {
+    } else if (value is ServiceStateChanged) {
       buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    } else if (value is SettingsChanged) {
+      buffer.putUint8(136);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -373,8 +460,10 @@ class _PigeonCodec extends StandardMessageCodec {
       case 133:
         return AppSettings.decode(readValue(buffer)!);
       case 134:
-        return ServiceStateChanged.decode(readValue(buffer)!);
+        return TranslationRecord.decode(readValue(buffer)!);
       case 135:
+        return ServiceStateChanged.decode(readValue(buffer)!);
+      case 136:
         return SettingsChanged.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -823,6 +912,89 @@ class ServiceHostApi {
   Future<void> stopService() async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.ServiceHostApi.stopService$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+}
+
+/// 번역 기록 (NA-23, FL-13). 저장은 네이티브가 번역할 때 알아서 하고, Flutter는 조회 · 삭제만 한다.
+class HistoryHostApi {
+  /// Constructor for [HistoryHostApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  HistoryHostApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// 최신순. [query]는 원문 · 번역에서 찾을 글자(빈 문자열 = 전부), [sinceMs] 이후(epoch ms, 0 = 전체)만.
+  Future<List<TranslationRecord>> getHistory(
+    String query,
+    int sinceMs,
+    int limit,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.HistoryHostApi.getHistory$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[query, sinceMs, limit],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<TranslationRecord>();
+  }
+
+  Future<void> deleteHistory(int id) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.HistoryHostApi.deleteHistory$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> clearHistory() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.HistoryHostApi.clearHistory$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

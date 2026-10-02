@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../features/about/presentation/screens/about_screen.dart';
+import '../features/history/presentation/screens/history_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/language/presentation/screens/language_picker_screen.dart';
 import '../features/models/presentation/screens/language_models_screen.dart';
@@ -28,6 +29,7 @@ abstract final class AppRoutes {
   static const targetLanguage = '/target-language';
   static const quickLanguages = '/quick-languages';
   static const about = '/about';
+  static const history = '/history';
 }
 
 /// 첫 실행이면 온보딩, 이미 마쳤으면 홈에서 시작한다 (FL-01). 저장된 설정을 한 번 읽는다.
@@ -76,6 +78,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
       GoRoute(
         path: AppRoutes.quickLanguages,
         builder: (context, state) => const QuickLanguagesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.history,
+        builder: (context, state) => const HistoryScreen(),
       ),
       GoRoute(
         path: AppRoutes.about,
