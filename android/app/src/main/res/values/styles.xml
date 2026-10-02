@@ -15,4 +15,6 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <!-- 텍스트 선택 번역 팝업 (NA-24): 뒤 앱이 비치는 투명 창 -->
+    <style name="SelectionTheme" parent="@android:style/Theme.Translucent.NoTitleBar" />
 </resources>
