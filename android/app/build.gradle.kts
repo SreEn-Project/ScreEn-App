@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
     // 오버레이 UI를 Compose로 그린다 (NA-18, NA-19)
     id("org.jetbrains.kotlin.plugin.compose")
+    // Room 코드 생성 (NA-23)
+    id("com.google.devtools.ksp")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -47,6 +49,11 @@ android {
     }
 }
 
+// Room 스키마 파일: DB 구조가 바뀔 때 마이그레이션을 검증하는 기준 (NA-23)
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
@@ -63,6 +70,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     // 설정 저장소 (NA-16)
     implementation("androidx.datastore:datastore-preferences:1.1.7")
+    // 번역 기록 로컬 DB (NA-23)
+    implementation("androidx.room:room-runtime:2.8.5")
+    implementation("androidx.room:room-ktx:2.8.5")
+    ksp("androidx.room:room-compiler:2.8.5")
     // 문자 인식 · 언어 감지 · 온디바이스 번역 (NA-09, NA-10, NA-12)
     implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("com.google.mlkit:text-recognition-korean:16.0.1")

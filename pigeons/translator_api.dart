@@ -151,6 +151,43 @@ abstract class ServiceHostApi {
   void stopService();
 }
 
+/// 번역 기록 한 줄 (NA-23, FL-13): 번역된 블록 하나.
+class TranslationRecord {
+  TranslationRecord({
+    required this.id,
+    required this.original,
+    required this.translated,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+    required this.engine,
+    required this.createdAtMs,
+  });
+
+  int id;
+  String original;
+  String translated;
+  String sourceLanguage;
+  String targetLanguage;
+  EngineType engine;
+
+  /// 마지막으로 번역한 시각 (epoch ms).
+  int createdAtMs;
+}
+
+/// 번역 기록 (NA-23, FL-13). 저장은 네이티브가 번역할 때 알아서 하고, Flutter는 조회 · 삭제만 한다.
+@HostApi()
+abstract class HistoryHostApi {
+  /// 최신순. [query]는 원문 · 번역에서 찾을 글자(빈 문자열 = 전부), [sinceMs] 이후(epoch ms, 0 = 전체)만.
+  @async
+  List<TranslationRecord> getHistory(String query, int sinceMs, int limit);
+
+  @async
+  void deleteHistory(int id);
+
+  @async
+  void clearHistory();
+}
+
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
 sealed class TranslatorEvent {}
 

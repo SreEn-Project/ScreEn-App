@@ -356,6 +356,72 @@ data class AppSettings (
 }
 
 /**
+ * 번역 기록 한 줄 (NA-23, FL-13): 번역된 블록 하나.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TranslationRecord (
+  val id: Long,
+  val original: String,
+  val translated: String,
+  val sourceLanguage: String,
+  val targetLanguage: String,
+  val engine: EngineType,
+  /** 마지막으로 번역한 시각 (epoch ms). */
+  val createdAtMs: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TranslationRecord {
+      val id = pigeonVar_list[0] as Long
+      val original = pigeonVar_list[1] as String
+      val translated = pigeonVar_list[2] as String
+      val sourceLanguage = pigeonVar_list[3] as String
+      val targetLanguage = pigeonVar_list[4] as String
+      val engine = pigeonVar_list[5] as EngineType
+      val createdAtMs = pigeonVar_list[6] as Long
+      return TranslationRecord(id, original, translated, sourceLanguage, targetLanguage, engine, createdAtMs)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      original,
+      translated,
+      sourceLanguage,
+      targetLanguage,
+      engine,
+      createdAtMs,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as TranslationRecord
+    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.original, other.original) && TranslatorApiPigeonUtils.deepEquals(this.translated, other.translated) && TranslatorApiPigeonUtils.deepEquals(this.sourceLanguage, other.sourceLanguage) && TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.id)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.original)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.translated)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.sourceLanguage)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.targetLanguage)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.engine)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.createdAtMs)
+    return result
+  }
+  override fun toString(): String {
+    return "TranslationRecord(id=$id, original=$original, translated=$translated, sourceLanguage=$sourceLanguage, targetLanguage=$targetLanguage, engine=$engine, createdAtMs=$createdAtMs)"
+  }
+}
+
+/**
  * 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
  *
  * Generated class from Pigeon that represents data sent in messages.
@@ -465,10 +531,15 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ServiceStateChanged.fromList(it)
+          TranslationRecord.fromList(it)
         }
       }
       135.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ServiceStateChanged.fromList(it)
+        }
+      }
+      136.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SettingsChanged.fromList(it)
         }
@@ -498,12 +569,16 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is ServiceStateChanged -> {
+      is TranslationRecord -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is SettingsChanged -> {
+      is ServiceStateChanged -> {
         stream.write(135)
+        writeValue(stream, value.toList())
+      }
+      is SettingsChanged -> {
+        stream.write(136)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -966,6 +1041,88 @@ interface ServiceHostApi {
               TranslatorApiPigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * 번역 기록 (NA-23, FL-13). 저장은 네이티브가 번역할 때 알아서 하고, Flutter는 조회 · 삭제만 한다.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface HistoryHostApi {
+  /** 최신순. [query]는 원문 · 번역에서 찾을 글자(빈 문자열 = 전부), [sinceMs] 이후(epoch ms, 0 = 전체)만. */
+  suspend fun getHistory(query: String, sinceMs: Long, limit: Long): List<TranslationRecord>
+  suspend fun deleteHistory(id: Long)
+  suspend fun clearHistory()
+
+  companion object {
+    /** The codec used by HistoryHostApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      TranslatorApiPigeonCodec()
+    }
+    /** Sets up an instance of `HistoryHostApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: HistoryHostApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.HistoryHostApi.getHistory$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val queryArg = args[0] as String
+            val sinceMsArg = args[1] as Long
+            val limitArg = args[2] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getHistory(queryArg, sinceMsArg, limitArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.HistoryHostApi.deleteHistory$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deleteHistory(idArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.HistoryHostApi.clearHistory$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.clearHistory()
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
           }
         } else {
           channel.setMessageHandler(null)

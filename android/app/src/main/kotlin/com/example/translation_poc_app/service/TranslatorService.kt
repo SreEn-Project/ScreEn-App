@@ -29,6 +29,7 @@ import com.example.translation_poc_app.translate.LanguageDetector
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
 import com.example.translation_poc_app.translate.ModelDownloadPolicy
 import com.example.translation_poc_app.translate.TranslationEngine
+import com.example.translation_poc_app.translate.TranslationOutcome
 import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -163,6 +164,17 @@ class TranslatorService : LifecycleService() {
         ).also { mlKitEngine = it }
     }
 
+    /** 번역 결과를 기록에 남긴다 (NA-23). 실패해도 번역에는 영향이 없다. */
+    private fun recordHistory(outcome: TranslationOutcome.Translated) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                AppGraph.historyRepository(this@TranslatorService).record(outcome)
+            } catch (e: Exception) {
+                Log.w(TAG, "번역 기록 저장 실패", e)
+            }
+        }
+    }
+
     /** 첫 번역이 느리지 않도록 문자 인식기를 미리 불러 둔다 (#11). 실패해도 번역 때 다시 시도한다. */
     private fun warmUp() {
         lifecycleScope.launch(Dispatchers.Default) {
@@ -184,6 +196,7 @@ class TranslatorService : LifecycleService() {
             pipeline = pipeline,
             sampleSignature = { region -> capturer?.captureSignature(region) },
             onStopRequested = { stopSelf() },
+            onTranslated = ::recordHistory,
         ).takeIf { it.show() }
     }
 

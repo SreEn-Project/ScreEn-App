@@ -81,6 +81,12 @@
   "homeRecentFilterToday": "오늘",
   "homeRecentFilterWeek": "이번 주",
   "homeRecentEmpty": "아직 번역 기록이 없어요",
+  "historyTitle": "번역 기록",
+  "historySearchHint": "원문 · 번역 검색",
+  "historyNoResult": "찾는 기록이 없어요",
+  "historyDelete": "삭제",
+  "historyClearAll": "전체 삭제",
+  "historyClearConfirm": "정말 삭제",
 
   "captureModeFull": "전체 화면",
   "captureModeRegion": "영역 선택",

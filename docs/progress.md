@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 로컬 DB · 번역 기록 (NA-23, FL-13, 이슈 #57, 브랜치 `feat/57-translation-history`)
+- 번역 결과가 기기의 Room DB에 저장되고, 기록 화면에서 목록 · 검색 · 한 줄 삭제 · 전체 삭제를 한다. 홈 "최근 기록"도 실제 기록(기간 필터 전체 · 오늘 · 이번 주, 최신 3개), "전체 보기"는 기록 화면(`/history`)으로 간다.
+- 네이티브: `data/history`(`AppDatabase` · `HistoryDao` · `HistoryRepository`), `AppGraph.historyRepository`, Pigeon `HistoryHostApi` + `TranslationRecord`. `OverlayController`가 번역이 화면에 오를 때 `onTranslated`로 알리고 서비스가 저장한다. 설계는 D-039.
+- Flutter: `features/history`(domain · data · di · `HistoryViewModel` · `HistoryScreen` · `HistoryCard`), 홈 최근 기록 연결, ARB 6줄, 테스트 `history_view_model_test`.
+- 변경: Gradle(KSP 플러그인 · Room 2.8.5 의존성 · 스키마 내보내기), `android/settings.gradle.kts`, Pigeon 재생성. Manifest · pubspec 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · Android 단위 테스트(`HistoryRepositoryTest`) · `flutter build apk --debug` 통과. 기기 확인 전 (번역 후 기록에 쌓이는지, 검색 · 삭제).
+- 남은 일: FL-15 앱 UI 다국어 · NA-24 텍스트 선택 번역 · NA-25 빠른 설정 타일.
+
 ## 2026-10-02 · 온보딩 첫 실행 연결 · 정보 화면 실제 값 (FL-01, FL-14, 이슈 #55, 브랜치 `feat/55-onboarding-about`)
 - 온보딩이 첫 실행에만 뜬다. `startLocationProvider`(router.dart)가 저장된 설정의 `onboardingCompleted`를 읽어 시작 화면(온보딩 / 홈)을 정하고, 앱은 그 값이 나올 때까지 빈 화면을 둔다. 설정을 못 읽으면 온보딩부터 보여 준다.
 - 온보딩 마지막 페이지에서 고른 대상 언어는 `TargetLanguageViewModel`로 바로 저장(기본은 저장된 값 · ko), 시작하기를 누르면 `CompleteOnboarding`으로 완료 표시 후 권한 안내(FL-02, 이미 실제 권한 확인에 연결됨)로 간다. 권한 안내를 끝내기 전에 앱을 닫아도 온보딩은 다시 안 나오며, 권한이 없으면 홈이 권한 안내로 가는 버튼을 보여 준다.
