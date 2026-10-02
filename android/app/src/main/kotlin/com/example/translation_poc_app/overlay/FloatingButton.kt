@@ -58,6 +58,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.data.settings.ResultDisplay
@@ -189,7 +190,7 @@ internal data class LanguageEntry(val label: String, val selected: Boolean, val 
 
 private enum class LanguageSide { SOURCE, TARGET }
 
-private const val LANGUAGE_LIST_HEIGHT_DP = 224
+private const val LANGUAGE_LIST_HEIGHT_DP = 172
 
 /**
  * 빠른 언어 메뉴: 번역기 앱처럼 위쪽에 "원문 언어 ▾ ⇄ 번역 언어 ▾" 막대, 아래에 고정 높이 스크롤 목록.
@@ -208,7 +209,7 @@ internal fun LanguageMenu(
 ) {
     var side by remember { mutableStateOf(LanguageSide.TARGET) }
     MenuCard {
-        Column(Modifier.width(288.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.width(224.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LanguageTab(sourceName(), side == LanguageSide.SOURCE, Modifier.weight(1f)) { side = LanguageSide.SOURCE }
                 SwapButton(swapEnabled(), swapDescription, onSwap)
@@ -231,28 +232,28 @@ internal fun LanguageMenu(
 @Composable
 private fun LanguageTab(name: String, focused: Boolean, modifier: Modifier, onClick: () -> Unit) {
     val colors = OverlayTheme.colors
-    val shape = RoundedCornerShape(16.dp)
+    val shape = CircleShape
     val textColor = if (focused) colors.onPrimaryContainer else colors.onSurface
     Row(
         modifier = modifier
-            .height(44.dp)
+            .height(34.dp)
             .clip(shape)
             .background(if (focused) colors.primaryContainer else colors.surface)
             .border(if (focused) 1.5.dp else 1.dp, if (focused) colors.primary else colors.outline, shape)
             .pressable(onClick = onClick)
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BasicText(
             name,
-            style = OverlayTheme.label.copy(color = textColor),
+            style = OverlayTheme.caption.copy(color = textColor, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false),
         )
         Spacer(Modifier.width(4.dp))
-        Canvas(Modifier.size(12.dp)) {
+        Canvas(Modifier.size(10.dp)) {
             val stroke = 1.6.dp.toPx()
             val w = size.width
             val h = size.height
@@ -269,13 +270,13 @@ private fun SwapButton(enabled: Boolean, description: String, onClick: () -> Uni
     val color = if (enabled) colors.onSurface else colors.outline
     Box(
         Modifier
-            .size(40.dp)
+            .size(32.dp)
             .clip(CircleShape)
             .pressable(enabled = enabled, onClick = onClick)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(Modifier.size(20.dp)) {
+        Canvas(Modifier.size(16.dp)) {
             val stroke = 1.8.dp.toPx()
             val w = size.width
             val h = size.height
@@ -299,8 +300,8 @@ private fun LanguageRow(entry: LanguageEntry) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(44.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .height(36.dp)
+            .clip(CircleShape)
             .background(if (entry.selected) colors.primaryContainer else colors.surface)
             .pressable { entry.onSelect() }
             .padding(horizontal = 14.dp),
@@ -308,12 +309,12 @@ private fun LanguageRow(entry: LanguageEntry) {
     ) {
         BasicText(
             entry.label,
-            style = OverlayTheme.body.copy(color = if (entry.selected) colors.onPrimaryContainer else colors.onSurface),
+            style = OverlayTheme.caption.copy(fontSize = 14.sp, color = if (entry.selected) colors.onPrimaryContainer else colors.onSurface),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
-        if (entry.selected) SymbolIcon(Symbol.CHECK, colors.onPrimaryContainer, size = 20.dp)
+        if (entry.selected) SymbolIcon(Symbol.CHECK, colors.onPrimaryContainer, size = 18.dp)
     }
 }
 
