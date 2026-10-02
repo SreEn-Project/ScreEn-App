@@ -232,4 +232,4 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 ## D-040 · 2026-10-02 · 빠른 설정 타일은 앱과 같은 시작 경로를 쓴다 (NA-25, 이슈 #63)
 - `TranslateTileService`(TileService)가 `TranslatorServiceState`를 구독해 타일을 갱신한다: 실행 중 = 켜짐(ACTIVE), 그 외 = 꺼짐(INACTIVE), 부제는 켜짐 · 꺼짐 · 시작 중(동의 대기).
 - 탭 동작은 `decideTileAction`(안드로이드 무관, 단위 테스트): 실행 중이면 서비스 중지 / 오버레이 권한이 없으면 앱을 열어 권한 안내 흐름으로 / 그 외에는 `CaptureConsentActivity`로 캡처 동의를 받아 시작(대기 중 재탭이면 동의 창을 되찾음). 시작 경로를 따로 만들지 않아 앱 화면 · 알림과 동작이 같다.
-- Android 14+는 `startActivityAndCollapse`에 PendingIntent만 받아 분기한다. 알림 권한이 없어도 서비스는 돈다(D-005 이전 결정 유지).
+- Android 14+는 `startActivityAndCollapse`에 PendingIntent만 받아 분기한다. 알림 권한이 없어도 서비스는 돈다.
