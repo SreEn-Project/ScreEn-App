@@ -7,6 +7,7 @@ import '../../../../app/router.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
 import '../view_models/auto_translate_view_model.dart';
+import '../view_models/engine_view_model.dart';
 import '../view_models/hide_after_interaction_view_model.dart';
 import '../view_models/quick_languages_view_model.dart';
 import '../../../../core/l10n/labels.dart';
@@ -24,7 +25,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  EngineType _engine = EngineType.mlKit;
   CaptureMode _captureMode = CaptureMode.fullScreen;
   DisplayMode _displayMode = DisplayMode.list;
   double _buttonSize = 56;
@@ -37,37 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: l10n.settingsTitle,
       withBottomNav: true,
       children: [
-        AppSection(
-          title: l10n.settingsSectionEngine,
-          child: AppCard(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Column(
-              children: [
-                for (final engine in EngineType.values) ...[
-                  _EngineTile(
-                    engine: engine,
-                    selected: engine == _engine,
-                    // AI 엔진은 3단계. 조건(키 · 로그인 · 연령)이 없으면 비활성.
-                    disabledReason: switch (engine) {
-                      EngineType.mlKit => null,
-                      EngineType.gemini => l10n.engineNeedsKey,
-                      EngineType.firebaseAi => l10n.engineNeedsLogin,
-                    },
-                    onTap: () => setState(() => _engine = engine),
-                  ),
-                  const AppDivider(),
-                ],
-                AppListTile(
-                  icon: Symbols.tune_rounded,
-                  title: l10n.settingsAiSetup,
-                  subtitle: l10n.settingsAiSetupDetail,
-                  enabled: false,
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-        ),
+        const _EngineSection(),
         AppSection(
           title: l10n.settingsSectionCapture,
           child: AppCard(
@@ -155,6 +125,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _EngineSection extends ConsumerWidget {
+  const _EngineSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final selected =
+        ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
+    final viewModel = ref.read(engineViewModelProvider.notifier);
+    return AppSection(
+      title: l10n.settingsSectionEngine,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          children: [
+            for (final engine in EngineType.values) ...[
+              _EngineTile(
+                engine: engine,
+                selected: engine == selected,
+                // AI 엔진은 3단계. 조건(키 · 로그인 · 연령)이 없으면 비활성.
+                disabledReason: switch (engine) {
+                  EngineType.mlKit => null,
+                  EngineType.gemini => l10n.engineNeedsKey,
+                  EngineType.firebaseAi => l10n.engineNeedsLogin,
+                },
+                onTap: () => viewModel.select(engine),
+              ),
+              const AppDivider(),
+            ],
+            AppListTile(
+              icon: Symbols.tune_rounded,
+              title: l10n.settingsAiSetup,
+              subtitle: l10n.settingsAiSetupDetail,
+              enabled: false,
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

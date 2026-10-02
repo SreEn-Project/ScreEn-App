@@ -14,6 +14,7 @@ import '../../../language/domain/entities/supported_language.dart';
 import '../../../language/presentation/view_models/target_language_view_model.dart';
 import '../../../models/presentation/view_models/language_models_view_model.dart';
 import '../../../permission/presentation/view_models/permission_view_model.dart';
+import '../../../settings/presentation/view_models/engine_view_model.dart';
 import '../view_models/service_view_model.dart';
 
 /// 홈 (S-03, FL-03).
@@ -44,11 +45,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  final EngineType _engine = EngineType.mlKit;
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final engine = ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
     final locale = Localizations.localeOf(context);
     final targetName = SupportedLanguage.byCode(
       ref.watch(targetLanguageViewModelProvider).value ?? 'ko',
@@ -71,7 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         _StatusCard(
           state: service,
           targetLanguage: targetName,
-          engine: l10n.engineName(_engine),
+          engine: l10n.engineName(engine),
         ),
         const SizedBox(height: 20),
         AppButton(
@@ -140,9 +140,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         AppCard(
           padding: EdgeInsets.zero,
           child: AppListTile(
-            icon: engineIcon(_engine),
+            icon: engineIcon(engine),
             title: l10n.homeEngine,
-            value: l10n.engineName(_engine),
+            value: l10n.engineName(engine),
             onTap: () => context.go(AppRoutes.settings),
           ),
         ),
