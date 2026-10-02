@@ -302,6 +302,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsResetFixedRegion => '고정 영역 초기화';
 
   @override
+  String get settingsResetFixedRegionEmpty => '저장된 고정 영역이 없어요';
+
+  @override
   String get settingsSectionDisplay => '표시';
 
   @override

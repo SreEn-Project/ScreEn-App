@@ -22,6 +22,9 @@ pigeon.AppSettings _pigeonSettings({String targetLanguage = 'ko'}) =>
       autoShowDelayMs: 2000,
       hideAfterInteractionMs: -1,
       wifiOnlyModelDownload: false,
+      buttonSizeDp: 60,
+      buttonOpacityPercent: 70,
+      hasFixedRegion: true,
     );
 
 void main() {
@@ -56,6 +59,9 @@ void main() {
         autoShowDelayMs: 2000,
         hideAfterInteractionMs: -1,
         wifiOnlyModelDownload: false,
+        buttonSizeDp: 60,
+        buttonOpacityPercent: 70,
+        hasFixedRegion: true,
       ),
     );
   });

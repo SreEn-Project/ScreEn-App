@@ -33,6 +33,12 @@ class SettingsHostApiImpl(private val repository: SettingsRepository) : Settings
     override suspend fun setWifiOnlyModelDownload(enabled: Boolean) =
         repository.setWifiOnlyModelDownload(enabled)
 
+    override suspend fun setButtonSizeDp(dp: Long) = repository.setButtonSizeDp(dp.toInt())
+
+    override suspend fun setButtonOpacityPercent(percent: Long) = repository.setButtonOpacityPercent(percent.toInt())
+
+    override suspend fun resetFixedRegion() = repository.clearFixedRegion()
+
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)
 }

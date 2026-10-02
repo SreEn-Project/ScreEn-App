@@ -36,6 +36,10 @@ data class Settings(
     val sourceLanguage: String = SOURCE_LANGUAGE_AUTO,
     /** 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 적용된다. */
     val wifiOnlyModelDownload: Boolean = true,
+    /** 플로팅 버튼 원 지름 (dp, FL-07). 창은 여기에 그림자 여백을 더한 크기. */
+    val buttonSizeDp: Int = DEFAULT_BUTTON_SIZE_DP,
+    /** 플로팅 버튼 불투명도 (%, FL-07). */
+    val buttonOpacityPercent: Int = DEFAULT_BUTTON_OPACITY_PERCENT,
 ) {
     companion object {
         const val DEFAULT_TARGET_LANGUAGE = "ko"
@@ -44,6 +48,10 @@ data class Settings(
         const val DEFAULT_AUTO_SHOW_DELAY_MS = 0L
         const val DEFAULT_HIDE_AFTER_INTERACTION_MS = 0L
         const val HIDE_NEVER = -1L
+        const val DEFAULT_BUTTON_SIZE_DP = 52
+        const val DEFAULT_BUTTON_OPACITY_PERCENT = 100
+        val BUTTON_SIZE_RANGE_DP = 40..72
+        val BUTTON_OPACITY_RANGE_PERCENT = 30..100
 
         /** 설정 화면이 고르게 하는 값의 범위. 저장된 값이 벗어나면 이 안으로 맞춘다. */
         val AUTO_SHOW_DELAY_RANGE_MS = 0L..5_000L

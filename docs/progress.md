@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 표시 · 캡처 모드 설정 연결 (FL-07, FL-08, 이슈 #53, 브랜치 `feat/53-display-capture-settings`)
+- 설정 화면의 기본 캡처 모드 · 표시 방식 · 버튼 크기 · 투명도 · 고정 영역 초기화가 화면 안 가짜 값이었다. `CaptureSettingsViewModel` · `DisplaySettingsViewModel`이 네이티브 설정(DataStore)을 읽고 쓴다. 캡처 모드 · 표시 방식은 플로팅 버튼 메뉴가 쓰는 값과 같아서 어느 쪽에서 바꿔도 서로 반영된다.
+- 새 설정: 버튼 크기(40~72dp, 4단위, 기본 52) · 불투명도(30~100%, 10단위, 기본 100). 실행 중인 플로팅 버튼에 바로 반영: 크기가 바뀌면 `OverlayController.resizeButton`이 버튼 가운데를 유지한 채 창을 다시 키워 가장자리에 붙이고, 투명도는 컴포즈 알파(창 알파는 D-037대로 숨김 전용).
+- 고정 영역 초기화: Pigeon `resetFixedRegion`이 저장된 영역을 지운다. `AppSettings.hasFixedRegion`으로 저장 여부만 알려 주고(영역 값은 네이티브 전용 유지), 없으면 버튼이 비활성이다. 지운 뒤 고정 영역 번역을 시작하면 영역을 새로 고르게 된다(NA-21).
+- 변경: Pigeon `AppSettings`(buttonSizeDp · buttonOpacityPercent · hasFixedRegion) · `SettingsHostApi`(setButtonSizeDp · setButtonOpacityPercent · resetFixedRegion) + 재생성, Kotlin `Settings` · `SettingsRepository` · `OverlayController` · `FloatingButton`, Flutter 엔티티 · 유스케이스 3개 · ViewModel 2개 · 화면 · ARB 1줄 · 테스트. pubspec · Gradle · Manifest 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · `flutter build apk --debug` 통과. 기기 확인 전 (버튼 크기 · 투명도가 실제로 바뀌는지 보면 된다).
+- 남은 일: FL-01 · FL-14 → NA-23 · FL-13.
+
 ## 2026-10-02 · 번역 엔진 선택 저장 연결 (FL-06, 이슈 #51, 브랜치 `feat/51-engine-selection`)
 - 설정 화면의 엔진 선택이 화면 안 가짜 값이었다. 새 `EngineViewModel`(`features/settings/presentation/view_models`)이 저장된 엔진(DataStore)을 읽고 쓴다. 홈의 엔진 표시도 같은 값.
 - AI 엔진(Gemini · Firebase)은 보류라 비활성 유지. ViewModel `select`도 ML Kit 외에는 저장하지 않는다 (`selectable`).

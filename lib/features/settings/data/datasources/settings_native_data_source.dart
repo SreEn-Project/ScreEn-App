@@ -37,6 +37,13 @@ class SettingsNativeDataSource {
   Future<void> setWifiOnlyModelDownload(bool enabled) =>
       _api.setWifiOnlyModelDownload(enabled);
 
+  Future<void> setButtonSizeDp(int dp) => _api.setButtonSizeDp(dp);
+
+  Future<void> setButtonOpacityPercent(int percent) =>
+      _api.setButtonOpacityPercent(percent);
+
+  Future<void> resetFixedRegion() => _api.resetFixedRegion();
+
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);
 }

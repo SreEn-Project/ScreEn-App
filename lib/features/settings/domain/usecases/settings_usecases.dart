@@ -121,6 +121,54 @@ final class ChangeWifiOnlyModelDownload implements UseCase<void, bool> {
       _repository.setWifiOnlyModelDownload(enabled);
 }
 
+/// 플로팅 버튼 크기 변경 (FL-07). 범위 안으로 맞추고 [buttonSizeStepDp] 단위로 반올림한다.
+final class ChangeButtonSize implements UseCase<void, int> {
+  const ChangeButtonSize(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(int dp) {
+    final steps = ((dp - minButtonSizeDp) / buttonSizeStepDp).round();
+    return _repository.setButtonSizeDp(
+      (minButtonSizeDp + steps * buttonSizeStepDp).clamp(
+        minButtonSizeDp,
+        maxButtonSizeDp,
+      ),
+    );
+  }
+}
+
+/// 플로팅 버튼 불투명도 변경 (FL-07). 범위 안으로 맞추고 [buttonOpacityStepPercent] 단위로 반올림한다.
+final class ChangeButtonOpacity implements UseCase<void, int> {
+  const ChangeButtonOpacity(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(int percent) {
+    final steps =
+        ((percent - minButtonOpacityPercent) / buttonOpacityStepPercent)
+            .round();
+    return _repository.setButtonOpacityPercent(
+      (minButtonOpacityPercent + steps * buttonOpacityStepPercent).clamp(
+        minButtonOpacityPercent,
+        maxButtonOpacityPercent,
+      ),
+    );
+  }
+}
+
+/// 저장된 고정 영역 지우기 (FL-08).
+final class ResetFixedRegion implements NoParamsUseCase<void> {
+  const ResetFixedRegion(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call() => _repository.resetFixedRegion();
+}
+
 /// 온보딩을 마쳤다고 기록 (FL-01). 다음 실행부터 온보딩을 건너뛴다.
 final class CompleteOnboarding implements NoParamsUseCase<void> {
   const CompleteOnboarding(this._repository);

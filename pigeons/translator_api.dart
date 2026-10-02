@@ -39,6 +39,9 @@ class AppSettings {
     required this.autoShowDelayMs,
     required this.hideAfterInteractionMs,
     required this.wifiOnlyModelDownload,
+    required this.buttonSizeDp,
+    required this.buttonOpacityPercent,
+    required this.hasFixedRegion,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -63,6 +66,15 @@ class AppSettings {
 
   /// 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 같다.
   bool wifiOnlyModelDownload;
+
+  /// 플로팅 버튼 원 지름 (dp, FL-07).
+  int buttonSizeDp;
+
+  /// 플로팅 버튼 불투명도 (%, FL-07). 100 = 불투명.
+  int buttonOpacityPercent;
+
+  /// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용이다.
+  bool hasFixedRegion;
 }
 
 @HostApi()
@@ -96,6 +108,16 @@ abstract class SettingsHostApi {
 
   @async
   void setWifiOnlyModelDownload(bool enabled);
+
+  @async
+  void setButtonSizeDp(int dp);
+
+  @async
+  void setButtonOpacityPercent(int percent);
+
+  /// 저장된 고정 영역을 지운다 (FL-08). 다음에 고정 영역 번역을 시작하면 영역을 새로 고른다.
+  @async
+  void resetFixedRegion();
 
   @async
   void setOnboardingCompleted(bool completed);

@@ -123,6 +123,9 @@ class AppSettings {
     required this.autoShowDelayMs,
     required this.hideAfterInteractionMs,
     required this.wifiOnlyModelDownload,
+    required this.buttonSizeDp,
+    required this.buttonOpacityPercent,
+    required this.hasFixedRegion,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -152,6 +155,15 @@ class AppSettings {
   /// 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 같다.
   bool wifiOnlyModelDownload;
 
+  /// 플로팅 버튼 원 지름 (dp, FL-07).
+  int buttonSizeDp;
+
+  /// 플로팅 버튼 불투명도 (%, FL-07). 100 = 불투명.
+  int buttonOpacityPercent;
+
+  /// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용이다.
+  bool hasFixedRegion;
+
   List<Object?> _toList() {
     return <Object?>[
       targetLanguage,
@@ -164,6 +176,9 @@ class AppSettings {
       autoShowDelayMs,
       hideAfterInteractionMs,
       wifiOnlyModelDownload,
+      buttonSizeDp,
+      buttonOpacityPercent,
+      hasFixedRegion,
     ];
   }
 
@@ -184,6 +199,9 @@ class AppSettings {
       autoShowDelayMs: result[7]! as int,
       hideAfterInteractionMs: result[8]! as int,
       wifiOnlyModelDownload: result[9]! as bool,
+      buttonSizeDp: result[10]! as int,
+      buttonOpacityPercent: result[11]! as int,
+      hasFixedRegion: result[12]! as bool,
     );
   }
 
@@ -205,7 +223,10 @@ class AppSettings {
         _deepEquals(autoTranslate, other.autoTranslate) &&
         _deepEquals(autoShowDelayMs, other.autoShowDelayMs) &&
         _deepEquals(hideAfterInteractionMs, other.hideAfterInteractionMs) &&
-        _deepEquals(wifiOnlyModelDownload, other.wifiOnlyModelDownload);
+        _deepEquals(wifiOnlyModelDownload, other.wifiOnlyModelDownload) &&
+        _deepEquals(buttonSizeDp, other.buttonSizeDp) &&
+        _deepEquals(buttonOpacityPercent, other.buttonOpacityPercent) &&
+        _deepEquals(hasFixedRegion, other.hasFixedRegion);
   }
 
   @override
@@ -214,7 +235,7 @@ class AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload)';
+    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion)';
   }
 }
 
@@ -572,6 +593,65 @@ class SettingsHostApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[enabled],
     );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> setButtonSizeDp(int dp) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setButtonSizeDp$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[dp],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> setButtonOpacityPercent(int percent) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setButtonOpacityPercent$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[percent],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 저장된 고정 영역을 지운다 (FL-08). 다음에 고정 영역 번역을 시작하면 영역을 새로 고른다.
+  Future<void> resetFixedRegion() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.resetFixedRegion$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

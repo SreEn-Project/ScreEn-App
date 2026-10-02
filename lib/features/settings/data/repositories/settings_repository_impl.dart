@@ -52,6 +52,16 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _dataSource.setWifiOnlyModelDownload(enabled);
 
   @override
+  Future<void> setButtonSizeDp(int dp) => _dataSource.setButtonSizeDp(dp);
+
+  @override
+  Future<void> setButtonOpacityPercent(int percent) =>
+      _dataSource.setButtonOpacityPercent(percent);
+
+  @override
+  Future<void> resetFixedRegion() => _dataSource.resetFixedRegion();
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) =>
       _dataSource.setOnboardingCompleted(completed);
 }

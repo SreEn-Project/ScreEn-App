@@ -107,6 +107,7 @@
   "settingsSectionCapture": "Capture",
   "settingsDefaultCaptureMode": "Default capture mode",
   "settingsResetFixedRegion": "Reset fixed area",
+  "settingsResetFixedRegionEmpty": "No fixed area saved",
   "settingsSectionDisplay": "Display",
   "settingsDisplayMode": "Show results as",
   "displayModeList": "List",
