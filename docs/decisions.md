@@ -228,3 +228,8 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 - **저장 시점**: 번역이 모두 끝난 결과가 화면에 오를 때 `OverlayController.onTranslated` → `TranslatorService`가 IO에서 저장 (일부만 끝난 중간 결과 제외, 자동 번역은 결과가 바뀐 때만). 저장 실패는 번역에 영향이 없다. 최대 2000줄, 넘으면 오래된 것부터 삭제.
 - **조회**: Flutter는 Pigeon `HistoryHostApi`(검색 · 기간 · 삭제 · 전체 삭제)로만 접근한다. 검색은 원문 · 번역 LIKE(특수문자 이스케이프), 기간은 앱이 계산한 시작 시각(epoch ms). 실시간 이벤트는 없고, 화면을 열 때 · 홈이 앱 복귀(resume) 때 다시 읽는다.
 - **전체 삭제 확인**: 대화상자 컴포넌트가 아직 없어, 버튼을 한 번 눌러 "정말 삭제"로 바뀐 뒤 다시 눌러야 지운다.
+
+## D-040 · 2026-10-02 · 빠른 설정 타일은 앱과 같은 시작 경로를 쓴다 (NA-25, 이슈 #63)
+- `TranslateTileService`(TileService)가 `TranslatorServiceState`를 구독해 타일을 갱신한다: 실행 중 = 켜짐(ACTIVE), 그 외 = 꺼짐(INACTIVE), 부제는 켜짐 · 꺼짐 · 시작 중(동의 대기).
+- 탭 동작은 `decideTileAction`(안드로이드 무관, 단위 테스트): 실행 중이면 서비스 중지 / 오버레이 권한이 없으면 앱을 열어 권한 안내 흐름으로 / 그 외에는 `CaptureConsentActivity`로 캡처 동의를 받아 시작(대기 중 재탭이면 동의 창을 되찾음). 시작 경로를 따로 만들지 않아 앱 화면 · 알림과 동작이 같다.
+- Android 14+는 `startActivityAndCollapse`에 PendingIntent만 받아 분기한다. 알림 권한이 없어도 서비스는 돈다.

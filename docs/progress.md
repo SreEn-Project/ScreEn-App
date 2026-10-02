@@ -2,6 +2,14 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-02 · 빠른 설정 타일 (NA-25, 이슈 #63, 브랜치 `feat/63-quick-settings-tile`)
+- 알림 패널의 "화면 번역" 타일로 번역을 켜고 끈다. 켜짐이면 타일이 활성, 꺼짐이면 비활성이며 부제가 켜짐 · 꺼짐 · 시작 중으로 바뀐다. 꺼진 상태에서 누르면 캡처 동의 창이 뜨고 동의하면 서비스가 시작된다(앱 화면과 같은 경로). 오버레이 권한이 없으면 앱을 열어 권한 안내로 보낸다. 실행 중에 누르면 서비스를 끈다.
+- 네이티브: `service/TranslateTileService`(타일 갱신 · 탭 처리) · `service/TileAction`(탭 동작 결정, 안드로이드 무관). 설계는 D-040.
+- 변경: Manifest(`TranslateTileService` 추가, BIND_QUICK_SETTINGS_TILE), `strings.xml` 영어 · 한국어 4줄. pubspec · Gradle 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · Android 단위 테스트(`TileActionTest` 4개) · `gradlew assembleDebug` 통과. 기기 확인 전 (알림 패널 편집에서 타일 추가 → 탭).
+- 남은 일: 보류 중인 AI 번역(3단계) · 단어장 · 서버를 제외한 명세 기능은 모두 구현됨.
+
+
 ## 2026-10-02 · 텍스트 선택 번역 (NA-24, 이슈 #61, 브랜치 `feat/61-text-selection-translate`)
 - 다른 앱에서 글자를 고르고 메뉴의 "화면 번역"을 누르면 작은 팝업이 떠서 번역문을 보여 주고 복사할 수 있다. 캡처 권한 · 서비스 없이 혼자 돌고, 원문 언어는 ML Kit이 감지, 대상 언어는 앱 설정을 따른다. 번역에 성공하면 번역 기록(NA-23)에 남는다. 이미 대상 언어인 글 · 모델 없음 · 네트워크 실패는 결과 시트와 같은 문구로 안내한다.
 - 네이티브: `selection/ProcessTextActivity`(뷰로 그린 팝업, 바깥 탭 · 닫기로 원래 앱 복귀) · `selection/SelectionTranslator`(엔진 호출 · 결과 분류, 안드로이드 무관). `ResultSheet`의 실패 문구 함수를 `translationFailureText`로 공개해 재사용.

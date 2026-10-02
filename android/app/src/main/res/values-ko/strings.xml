@@ -64,4 +64,9 @@
     <!-- 텍스트 선택 번역 (NA-24) -->
     <string name="selection_translating">번역하는 중…</string>
     <string name="selection_languages">%1$s → %2$s</string>
+    <!-- 빠른 설정 타일 (NA-25) -->
+    <string name="tile_label">화면 번역</string>
+    <string name="tile_on">켜짐</string>
+    <string name="tile_off">꺼짐</string>
+    <string name="tile_starting">시작 중…</string>
 </resources>
