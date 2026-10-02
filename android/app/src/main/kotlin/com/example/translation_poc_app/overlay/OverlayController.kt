@@ -560,7 +560,7 @@ class OverlayController(
     }
 
     /**
-     * 빠른 언어 메뉴: "번역할 언어"(원문 인식, 자동 포함)와 "번역될 언어"를 한 카드에서 고른다.
+     * 빠른 언어 메뉴: 위 막대에서 원문(자동 포함) · 번역 언어 쪽을 고르고 아래 목록에서 정한다.
      * 고른 뒤에도 열려 있어 이어서 다른 쪽을 고를 수 있다. 바깥을 누르면 닫는다.
      */
     private fun openLanguageWindow() {
@@ -576,18 +576,29 @@ class OverlayController(
             y = anchor.y
         }
         val sourceCodes = listOf(AppSettings.SOURCE_LANGUAGE_AUTO) + quickLanguages
+        fun sourceLabel(code: String) =
+            if (code == AppSettings.SOURCE_LANGUAGE_AUTO) context.getString(R.string.overlay_source_auto) else languageDisplayName(code, locale)
         menu = OverlayWindow(context, windowManager, params) {
             LanguageMenu(
-                sourceTitle = context.getString(R.string.overlay_lang_source),
-                targetTitle = context.getString(R.string.overlay_lang_target),
+                sourceName = { sourceLabel(sourceLanguage) },
+                targetName = { languageDisplayName(targetLanguage, locale) },
+                swapEnabled = { sourceLanguage != AppSettings.SOURCE_LANGUAGE_AUTO },
+                swapDescription = context.getString(R.string.overlay_lang_swap),
+                onSwap = {
+                    val newSource = targetLanguage
+                    val newTarget = sourceLanguage
+                    if (newTarget != AppSettings.SOURCE_LANGUAGE_AUTO) {
+                        sourceLanguage = newSource
+                        targetLanguage = newTarget
+                        scope.launch {
+                            settingsRepository.setSourceLanguage(newSource)
+                            settingsRepository.setTargetLanguage(newTarget)
+                        }
+                    }
+                },
                 source = {
                     sourceCodes.map { code ->
-                        val name = if (code == AppSettings.SOURCE_LANGUAGE_AUTO) {
-                            context.getString(R.string.overlay_source_auto)
-                        } else {
-                            languageDisplayName(code, locale)
-                        }
-                        MenuOption(Symbol.TRANSLATE, name, code == sourceLanguage) {
+                        LanguageEntry(sourceLabel(code), code == sourceLanguage) {
                             sourceLanguage = code
                             scope.launch { settingsRepository.setSourceLanguage(code) }
                         }
@@ -595,7 +606,7 @@ class OverlayController(
                 },
                 target = {
                     quickLanguages.map { code ->
-                        MenuOption(Symbol.TRANSLATE, languageDisplayName(code, locale), code == targetLanguage) {
+                        LanguageEntry(languageDisplayName(code, locale), code == targetLanguage) {
                             targetLanguage = code
                             scope.launch { settingsRepository.setTargetLanguage(code) }
                         }
