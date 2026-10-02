@@ -97,6 +97,18 @@ class FakeSettingsRepository implements SettingsRepository {
       settings = settings.copyWith(wifiOnlyModelDownload: enabled);
 
   @override
+  Future<void> setButtonSizeDp(int dp) async =>
+      settings = settings.copyWith(buttonSizeDp: dp);
+
+  @override
+  Future<void> setButtonOpacityPercent(int percent) async =>
+      settings = settings.copyWith(buttonOpacityPercent: percent);
+
+  @override
+  Future<void> resetFixedRegion() async =>
+      settings = settings.copyWith(hasFixedRegion: false);
+
+  @override
   Future<void> setOnboardingCompleted(bool completed) async =>
       settings = settings.copyWith(onboardingCompleted: completed);
 }

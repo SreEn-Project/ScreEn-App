@@ -15,6 +15,9 @@ extension AppSettingsMapper on pigeon.AppSettings {
     autoShowDelayMs: autoShowDelayMs,
     hideAfterInteractionMs: hideAfterInteractionMs,
     wifiOnlyModelDownload: wifiOnlyModelDownload,
+    buttonSizeDp: buttonSizeDp,
+    buttonOpacityPercent: buttonOpacityPercent,
+    hasFixedRegion: hasFixedRegion,
   );
 }
 

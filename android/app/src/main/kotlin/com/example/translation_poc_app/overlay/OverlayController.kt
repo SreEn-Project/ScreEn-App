@@ -19,6 +19,7 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -65,7 +66,8 @@ class OverlayController(
     private val density = context.resources.displayMetrics.density
     private fun dp(value: Int) = (value * density).toInt()
 
-    private val buttonSize = dp(BUTTON_WINDOW_DP)
+    /** 버튼 창 크기 (px). 설정(FL-07)의 버튼 크기가 바뀌면 [resizeButton]이 갱신한다. */
+    private var buttonSize = dp(buttonWindowDp(AppSettings.DEFAULT_BUTTON_SIZE_DP))
     private val closeWindowSize = dp(CLOSE_WINDOW_DP)
     private val closeBottomMargin = dp(72)
     private val closeRadius = dp(64)
@@ -114,6 +116,8 @@ class OverlayController(
         }
     }
     private val powerManager = context.getSystemService(PowerManager::class.java)
+    private var buttonDiameterDp by mutableIntStateOf(AppSettings.DEFAULT_BUTTON_SIZE_DP)
+    private var buttonOpacity by mutableFloatStateOf(AppSettings.DEFAULT_BUTTON_OPACITY_PERCENT / 100f)
     private var busy by mutableStateOf(false)
     private var dragging by mutableStateOf(false)
     private var overClose by mutableStateOf(false)
@@ -138,7 +142,7 @@ class OverlayController(
             buttonSize,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
         ),
-    ) { FloatingButton(mode, busy, dragging) }.apply { root.touchHandler = gestures::onTouch }
+    ) { FloatingButton(mode, busy, dragging, buttonDiameterDp, buttonOpacity) }.apply { root.touchHandler = gestures::onTouch }
 
     private val closeZone = OverlayWindow(
         context,
@@ -181,6 +185,8 @@ class OverlayController(
                 quickLanguages = it.quickLanguages
                 autoTranslate = it.autoTranslate
                 sourceLanguage = it.sourceLanguage
+                buttonOpacity = it.buttonOpacityPercent / 100f
+                if (it.buttonSizeDp != buttonDiameterDp) resizeButton(it.buttonSizeDp)
                 autoConfig = AutoTranslateConfig(
                     showDelayMs = it.autoShowDelayMs,
                     hideMs = it.hideAfterInteractionMs,
@@ -387,6 +393,21 @@ class OverlayController(
             }
             start()
         }
+    }
+
+    /** 설정에서 버튼 크기가 바뀌었다 (FL-07): 가운데는 그대로 두고 창 크기를 바꾼 뒤 가장자리에 다시 붙인다. */
+    private fun resizeButton(diameterDp: Int) {
+        snapAnimator?.cancel()
+        dismissMenu()
+        val newSize = dp(buttonWindowDp(diameterDp))
+        val centerX = placement.x + buttonSize / 2
+        val centerY = placement.y + buttonSize / 2
+        buttonSize = newSize
+        buttonDiameterDp = diameterDp
+        placement = OverlayGeometry.snap(centerX - newSize / 2, centerY - newSize / 2, newSize, area)
+        button.params.width = newSize
+        button.params.height = newSize
+        applyPlacement()
     }
 
     private fun applyPlacement() {

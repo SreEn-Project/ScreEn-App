@@ -311,6 +311,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsResetFixedRegion => 'Reset fixed area';
 
   @override
+  String get settingsResetFixedRegionEmpty => 'No fixed area saved';
+
+  @override
   String get settingsSectionDisplay => 'Display';
 
   @override

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -37,6 +38,14 @@ class SettingsRepository(context: Context) {
     suspend fun setResultDisplay(display: ResultDisplay) = edit { it[Keys.RESULT_DISPLAY] = display.name }
 
     suspend fun setFixedRegion(region: NormalizedRegion) = edit { it[Keys.FIXED_REGION] = region.encode() }
+
+    suspend fun clearFixedRegion() = edit { it.remove(Keys.FIXED_REGION) }
+
+    suspend fun setButtonSizeDp(dp: Int) =
+        edit { it[Keys.BUTTON_SIZE_DP] = dp.coerceIn(Settings.BUTTON_SIZE_RANGE_DP) }
+
+    suspend fun setButtonOpacityPercent(percent: Int) =
+        edit { it[Keys.BUTTON_OPACITY_PERCENT] = percent.coerceIn(Settings.BUTTON_OPACITY_RANGE_PERCENT) }
 
     suspend fun setQuickLanguages(codes: List<String>) = edit { it[Keys.QUICK_LANGUAGES] = codes.joinToString(",") }
 
@@ -80,6 +89,10 @@ class SettingsRepository(context: Context) {
             ),
             sourceLanguage = this[Keys.SOURCE_LANGUAGE]?.takeIf { it.isNotBlank() } ?: defaults.sourceLanguage,
             wifiOnlyModelDownload = this[Keys.WIFI_ONLY_MODEL_DOWNLOAD] ?: defaults.wifiOnlyModelDownload,
+            buttonSizeDp = (this[Keys.BUTTON_SIZE_DP] ?: defaults.buttonSizeDp)
+                .coerceIn(Settings.BUTTON_SIZE_RANGE_DP),
+            buttonOpacityPercent = (this[Keys.BUTTON_OPACITY_PERCENT] ?: defaults.buttonOpacityPercent)
+                .coerceIn(Settings.BUTTON_OPACITY_RANGE_PERCENT),
         )
     }
 
@@ -102,5 +115,7 @@ class SettingsRepository(context: Context) {
         val HIDE_AFTER_INTERACTION = longPreferencesKey("auto_hide_ms")
         val SOURCE_LANGUAGE = stringPreferencesKey("source_language")
         val WIFI_ONLY_MODEL_DOWNLOAD = booleanPreferencesKey("wifi_only_model_download")
+        val BUTTON_SIZE_DP = intPreferencesKey("button_size_dp")
+        val BUTTON_OPACITY_PERCENT = intPreferencesKey("button_opacity_percent")
     }
 }

@@ -7,6 +7,8 @@ import '../../../../app/router.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
 import '../view_models/auto_translate_view_model.dart';
+import '../view_models/capture_settings_view_model.dart';
+import '../view_models/display_settings_view_model.dart';
 import '../view_models/engine_view_model.dart';
 import '../view_models/hide_after_interaction_view_model.dart';
 import '../view_models/quick_languages_view_model.dart';
@@ -16,19 +18,9 @@ import '../../../../l10n/app_localizations.dart';
 
 /// 설정 탭 (S-04, FL-06). FL-07 표시, FL-08 캡처 모드 항목도 여기 있다.
 /// 대상 언어 · 언어 모델은 "언어" 탭으로 옮겼다 (D-016).
-/// UI 퍼블리싱 단계: 값은 화면 안에서만 바뀐다. 저장은 SettingsRepository + ViewModel로 연결한다.
-class SettingsScreen extends StatefulWidget {
+/// 값은 네이티브 설정(DataStore)에 바로 저장되고 실행 중인 오버레이에 반영된다.
+class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
-
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-  CaptureMode _captureMode = CaptureMode.fullScreen;
-  DisplayMode _displayMode = DisplayMode.list;
-  double _buttonSize = 56;
-  double _buttonOpacity = 0.9;
 
   @override
   Widget build(BuildContext context) {
@@ -38,79 +30,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       withBottomNav: true,
       children: [
         const _EngineSection(),
-        AppSection(
-          title: l10n.settingsSectionCapture,
-          child: AppCard(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Labeled(
-                  label: l10n.settingsDefaultCaptureMode,
-                  child: AppSegmented<CaptureMode>(
-                    values: CaptureMode.values,
-                    selected: _captureMode,
-                    label: l10n.captureModeName,
-                    onChanged: (mode) => setState(() => _captureMode = mode),
-                  ),
-                ),
-                const AppDivider(),
-                AppListTile(
-                  icon: Symbols.restart_alt_rounded,
-                  title: l10n.settingsResetFixedRegion,
-                  enabled: false,
-                  onTap: () {},
-                ),
-              ],
-            ),
-          ),
-        ),
-        AppSection(
-          title: l10n.settingsSectionDisplay,
-          child: AppCard(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Labeled(
-                  label: l10n.settingsDisplayMode,
-                  child: AppSegmented<DisplayMode>(
-                    values: DisplayMode.values,
-                    selected: _displayMode,
-                    label: l10n.displayModeName,
-                    onChanged: (mode) => setState(() => _displayMode = mode),
-                  ),
-                ),
-                const AppDivider(),
-                const _HideAfterInteraction(),
-                const AppDivider(),
-                _Labeled(
-                  label: l10n.settingsButtonSize,
-                  value: '${_buttonSize.round()}dp',
-                  child: AppSlider(
-                    value: _buttonSize,
-                    min: 40,
-                    max: 72,
-                    divisions: 8,
-                    onChanged: (v) => setState(() => _buttonSize = v),
-                  ),
-                ),
-                const AppDivider(),
-                _Labeled(
-                  label: l10n.settingsButtonOpacity,
-                  value: '${(_buttonOpacity * 100).round()}%',
-                  child: AppSlider(
-                    value: _buttonOpacity,
-                    min: 0.3,
-                    max: 1,
-                    divisions: 7,
-                    onChanged: (v) => setState(() => _buttonOpacity = v),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        const _CaptureSection(),
+        const _DisplaySection(),
         const _QuickLanguagesSection(),
         const _AutoTranslateSection(),
         AppSection(
@@ -259,6 +180,123 @@ class _Labeled extends StatelessWidget {
           const SizedBox(height: 12),
           child,
         ],
+      ),
+    );
+  }
+}
+
+/// 캡처 모드 (FL-08): 기본 캡처 모드 · 고정 영역 초기화. 플로팅 버튼 메뉴에서 고른 모드와 같은 값이다.
+class _CaptureSection extends ConsumerWidget {
+  const _CaptureSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final settings =
+        ref.watch(captureSettingsViewModelProvider).value ??
+        const CaptureSettings();
+    final viewModel = ref.read(captureSettingsViewModelProvider.notifier);
+
+    return AppSection(
+      title: l10n.settingsSectionCapture,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Labeled(
+              label: l10n.settingsDefaultCaptureMode,
+              child: AppSegmented<CaptureMode>(
+                values: CaptureMode.values,
+                selected: settings.mode,
+                label: l10n.captureModeName,
+                onChanged: viewModel.setMode,
+              ),
+            ),
+            const AppDivider(),
+            AppListTile(
+              icon: Symbols.restart_alt_rounded,
+              title: l10n.settingsResetFixedRegion,
+              subtitle: settings.hasFixedRegion
+                  ? null
+                  : l10n.settingsResetFixedRegionEmpty,
+              enabled: settings.hasFixedRegion,
+              onTap: viewModel.resetFixedRegion,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 표시 (FL-07): 결과 표시 방식 · 조작 뒤 숨김 · 플로팅 버튼 크기 · 투명도.
+class _DisplaySection extends ConsumerWidget {
+  const _DisplaySection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final settings =
+        ref.watch(displaySettingsViewModelProvider).value ??
+        const DisplaySettings();
+    final viewModel = ref.read(displaySettingsViewModelProvider.notifier);
+
+    return AppSection(
+      title: l10n.settingsSectionDisplay,
+      child: AppCard(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Labeled(
+              label: l10n.settingsDisplayMode,
+              child: AppSegmented<DisplayMode>(
+                values: DisplayMode.values,
+                selected: settings.mode,
+                label: l10n.displayModeName,
+                onChanged: viewModel.setMode,
+              ),
+            ),
+            const AppDivider(),
+            const _HideAfterInteraction(),
+            const AppDivider(),
+            _Labeled(
+              label: l10n.settingsButtonSize,
+              value: '${settings.buttonSizeDp}dp',
+              child: AppSlider(
+                value: settings.buttonSizeDp.toDouble(),
+                min: minButtonSizeDp.toDouble(),
+                max: maxButtonSizeDp.toDouble(),
+                divisions:
+                    (maxButtonSizeDp - minButtonSizeDp) ~/ buttonSizeStepDp,
+                onChanged: (v) {
+                  if (v.round() != settings.buttonSizeDp) {
+                    viewModel.setButtonSize(v.round());
+                  }
+                },
+              ),
+            ),
+            const AppDivider(),
+            _Labeled(
+              label: l10n.settingsButtonOpacity,
+              value: '${settings.buttonOpacityPercent}%',
+              child: AppSlider(
+                value: settings.buttonOpacityPercent.toDouble(),
+                min: minButtonOpacityPercent.toDouble(),
+                max: maxButtonOpacityPercent.toDouble(),
+                divisions:
+                    (maxButtonOpacityPercent - minButtonOpacityPercent) ~/
+                    buttonOpacityStepPercent,
+                onChanged: (v) {
+                  if (v.round() != settings.buttonOpacityPercent) {
+                    viewModel.setButtonOpacity(v.round());
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

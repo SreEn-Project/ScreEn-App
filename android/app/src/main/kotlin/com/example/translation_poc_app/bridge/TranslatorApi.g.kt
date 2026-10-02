@@ -278,7 +278,13 @@ data class AppSettings (
    */
   val hideAfterInteractionMs: Long,
   /** 언어 모델을 Wi-Fi에서만 받는다 (FL-05). 번역 중 자동으로 받을 때도 같다. */
-  val wifiOnlyModelDownload: Boolean
+  val wifiOnlyModelDownload: Boolean,
+  /** 플로팅 버튼 원 지름 (dp, FL-07). */
+  val buttonSizeDp: Long,
+  /** 플로팅 버튼 불투명도 (%, FL-07). 100 = 불투명. */
+  val buttonOpacityPercent: Long,
+  /** 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용이다. */
+  val hasFixedRegion: Boolean
 )
  {
   companion object {
@@ -293,7 +299,10 @@ data class AppSettings (
       val autoShowDelayMs = pigeonVar_list[7] as Long
       val hideAfterInteractionMs = pigeonVar_list[8] as Long
       val wifiOnlyModelDownload = pigeonVar_list[9] as Boolean
-      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs, wifiOnlyModelDownload)
+      val buttonSizeDp = pigeonVar_list[10] as Long
+      val buttonOpacityPercent = pigeonVar_list[11] as Long
+      val hasFixedRegion = pigeonVar_list[12] as Boolean
+      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs, wifiOnlyModelDownload, buttonSizeDp, buttonOpacityPercent, hasFixedRegion)
     }
   }
   fun toList(): List<Any?> {
@@ -308,6 +317,9 @@ data class AppSettings (
       autoShowDelayMs,
       hideAfterInteractionMs,
       wifiOnlyModelDownload,
+      buttonSizeDp,
+      buttonOpacityPercent,
+      hasFixedRegion,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -318,7 +330,7 @@ data class AppSettings (
       return true
     }
     val other = other as AppSettings
-    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs) && TranslatorApiPigeonUtils.deepEquals(this.wifiOnlyModelDownload, other.wifiOnlyModelDownload)
+    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs) && TranslatorApiPigeonUtils.deepEquals(this.wifiOnlyModelDownload, other.wifiOnlyModelDownload) && TranslatorApiPigeonUtils.deepEquals(this.buttonSizeDp, other.buttonSizeDp) && TranslatorApiPigeonUtils.deepEquals(this.buttonOpacityPercent, other.buttonOpacityPercent) && TranslatorApiPigeonUtils.deepEquals(this.hasFixedRegion, other.hasFixedRegion)
   }
 
   override fun hashCode(): Int {
@@ -333,10 +345,13 @@ data class AppSettings (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.autoShowDelayMs)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.hideAfterInteractionMs)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wifiOnlyModelDownload)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.buttonSizeDp)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.buttonOpacityPercent)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.hasFixedRegion)
     return result
   }
   override fun toString(): String {
-    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload)"
+    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload, buttonSizeDp=$buttonSizeDp, buttonOpacityPercent=$buttonOpacityPercent, hasFixedRegion=$hasFixedRegion)"
   }
 }
 
@@ -511,6 +526,10 @@ interface SettingsHostApi {
   suspend fun setAutoShowDelayMs(ms: Long)
   suspend fun setHideAfterInteractionMs(ms: Long)
   suspend fun setWifiOnlyModelDownload(enabled: Boolean)
+  suspend fun setButtonSizeDp(dp: Long)
+  suspend fun setButtonOpacityPercent(percent: Long)
+  /** 저장된 고정 영역을 지운다 (FL-08). 다음에 고정 영역 번역을 시작하면 영역을 새로 고른다. */
+  suspend fun resetFixedRegion()
   suspend fun setOnboardingCompleted(completed: Boolean)
 
   companion object {
@@ -708,6 +727,64 @@ interface SettingsHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.setWifiOnlyModelDownload(enabledArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setButtonSizeDp$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val dpArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setButtonSizeDp(dpArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setButtonOpacityPercent$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val percentArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setButtonOpacityPercent(percentArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.resetFixedRegion$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.resetFixedRegion()
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

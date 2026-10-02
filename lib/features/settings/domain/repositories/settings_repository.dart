@@ -15,5 +15,8 @@ abstract interface class SettingsRepository {
   Future<void> setAutoShowDelayMs(int ms);
   Future<void> setHideAfterInteractionMs(int ms);
   Future<void> setWifiOnlyModelDownload(bool enabled);
+  Future<void> setButtonSizeDp(int dp);
+  Future<void> setButtonOpacityPercent(int percent);
+  Future<void> resetFixedRegion();
   Future<void> setOnboardingCompleted(bool completed);
 }

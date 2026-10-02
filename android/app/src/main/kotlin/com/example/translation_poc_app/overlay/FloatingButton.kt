@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -56,9 +57,10 @@ import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.data.settings.ResultDisplay
 
-/** 버튼 창 크기 = 원 52dp + 그림자 여백 사방 8dp. */
-internal const val BUTTON_DIAMETER_DP = 52
-internal const val BUTTON_WINDOW_DP = BUTTON_DIAMETER_DP + 16
+/** 버튼 창 크기 = 원 지름(설정 FL-07, 기본 52dp) + 그림자 여백 사방 8dp. */
+internal const val BUTTON_SHADOW_MARGIN_DP = 16
+
+internal fun buttonWindowDp(diameterDp: Int) = diameterDp + BUTTON_SHADOW_MARGIN_DP
 
 /** 캡처 범위 옵션 (O-02). 고르면 그 캡처 범위가 된다. 고정 영역은 고르는 즉시 영역 편집 화면이 열린다. */
 internal enum class ModeMenuItem(val symbol: Symbol, val label: Int, val range: CaptureRange) {
@@ -84,22 +86,28 @@ internal fun CaptureRange.symbol(): Symbol = when (this) {
 
 /** O-01 플로팅 버튼: 흰 원 + 초록 그림자, 현재 모드 아이콘. 번역 중에는 둘레에 도는 호. */
 @Composable
-internal fun FloatingButton(mode: CaptureRange, busy: Boolean, dragging: Boolean) {
+internal fun FloatingButton(
+    mode: CaptureRange,
+    busy: Boolean,
+    dragging: Boolean,
+    diameterDp: Int,
+    opacity: Float,
+) {
     val colors = OverlayTheme.colors
     val scale by animateFloatAsState(if (dragging) 1.08f else 1f, label = "drag-scale")
     val description = stringResource(R.string.overlay_button_description)
-    Box(Modifier.size(BUTTON_WINDOW_DP.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(buttonWindowDp(diameterDp).dp).alpha(opacity), contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier
                 .scale(scale)
-                .size(BUTTON_DIAMETER_DP.dp)
+                .size(diameterDp.dp)
                 .overlayShadow(8.dp, CircleShape, colors.primary)
                 .clip(CircleShape)
                 .background(colors.surface)
                 .semantics { contentDescription = description },
             contentAlignment = Alignment.Center,
         ) {
-            SymbolIcon(mode.symbol(), colors.primary, size = 26.dp)
+            SymbolIcon(mode.symbol(), colors.primary, size = (diameterDp / 2).dp)
             if (busy) BusyRing()
         }
     }

@@ -63,5 +63,17 @@ ChangeWifiOnlyModelDownload changeWifiOnlyModelDownload(Ref ref) =>
     ChangeWifiOnlyModelDownload(ref.watch(settingsRepositoryProvider));
 
 @riverpod
+ChangeButtonSize changeButtonSize(Ref ref) =>
+    ChangeButtonSize(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ChangeButtonOpacity changeButtonOpacity(Ref ref) =>
+    ChangeButtonOpacity(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ResetFixedRegion resetFixedRegion(Ref ref) =>
+    ResetFixedRegion(ref.watch(settingsRepositoryProvider));
+
+@riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));

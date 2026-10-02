@@ -668,6 +668,12 @@ abstract class AppLocalizations {
   /// **'Reset fixed area'**
   String get settingsResetFixedRegion;
 
+  /// No description provided for @settingsResetFixedRegionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No fixed area saved'**
+  String get settingsResetFixedRegionEmpty;
+
   /// No description provided for @settingsSectionDisplay.
   ///
   /// In en, this message translates to:

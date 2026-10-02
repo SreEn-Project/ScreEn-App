@@ -564,6 +564,146 @@ final class ChangeWifiOnlyModelDownloadProvider
 String _$changeWifiOnlyModelDownloadHash() =>
     r'45061ee76189705e10557806ddfe4968d843ca89';
 
+@ProviderFor(changeButtonSize)
+final changeButtonSizeProvider = ChangeButtonSizeProvider._();
+
+final class ChangeButtonSizeProvider
+    extends
+        $FunctionalProvider<
+          ChangeButtonSize,
+          ChangeButtonSize,
+          ChangeButtonSize
+        >
+    with $Provider<ChangeButtonSize> {
+  ChangeButtonSizeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeButtonSizeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeButtonSizeHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeButtonSize> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChangeButtonSize create(Ref ref) {
+    return changeButtonSize(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeButtonSize value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeButtonSize>(value),
+    );
+  }
+}
+
+String _$changeButtonSizeHash() => r'f69779f5aaa4ff0c642e75671dde45c0830b130f';
+
+@ProviderFor(changeButtonOpacity)
+final changeButtonOpacityProvider = ChangeButtonOpacityProvider._();
+
+final class ChangeButtonOpacityProvider
+    extends
+        $FunctionalProvider<
+          ChangeButtonOpacity,
+          ChangeButtonOpacity,
+          ChangeButtonOpacity
+        >
+    with $Provider<ChangeButtonOpacity> {
+  ChangeButtonOpacityProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeButtonOpacityProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeButtonOpacityHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeButtonOpacity> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeButtonOpacity create(Ref ref) {
+    return changeButtonOpacity(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeButtonOpacity value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeButtonOpacity>(value),
+    );
+  }
+}
+
+String _$changeButtonOpacityHash() =>
+    r'c705b5824b4cd57596331908a92f6fa7e6182b5d';
+
+@ProviderFor(resetFixedRegion)
+final resetFixedRegionProvider = ResetFixedRegionProvider._();
+
+final class ResetFixedRegionProvider
+    extends
+        $FunctionalProvider<
+          ResetFixedRegion,
+          ResetFixedRegion,
+          ResetFixedRegion
+        >
+    with $Provider<ResetFixedRegion> {
+  ResetFixedRegionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'resetFixedRegionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$resetFixedRegionHash();
+
+  @$internal
+  @override
+  $ProviderElement<ResetFixedRegion> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ResetFixedRegion create(Ref ref) {
+    return resetFixedRegion(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ResetFixedRegion value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ResetFixedRegion>(value),
+    );
+  }
+}
+
+String _$resetFixedRegionHash() => r'760edf4187d76541bb648465dd3763e5d5f28992';
+
 @ProviderFor(completeOnboarding)
 final completeOnboardingProvider = CompleteOnboardingProvider._();
 

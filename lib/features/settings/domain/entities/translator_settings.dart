@@ -29,6 +29,18 @@ const hideNever = -1;
 const defaultHideAfterInteractionMs = 0;
 const hideAfterInteractionChoicesMs = [0, 500, 1000, 2000, hideNever];
 
+/// 플로팅 버튼 원 지름 (dp, FL-07). 네이티브 `Settings.BUTTON_SIZE_RANGE_DP` · 기본값과 같게.
+const minButtonSizeDp = 40;
+const maxButtonSizeDp = 72;
+const buttonSizeStepDp = 4;
+const defaultButtonSizeDp = 52;
+
+/// 플로팅 버튼 불투명도 (%, FL-07). 100 = 불투명.
+const minButtonOpacityPercent = 30;
+const maxButtonOpacityPercent = 100;
+const buttonOpacityStepPercent = 10;
+const defaultButtonOpacityPercent = 100;
+
 /// [choices] 중 [value]에 가장 가까운 값.
 int nearestChoice(List<int> choices, int value) =>
     choices.reduce((a, b) => (a - value).abs() <= (b - value).abs() ? a : b);
@@ -58,5 +70,14 @@ abstract class TranslatorSettings with _$TranslatorSettings {
 
     /// 언어 모델을 Wi-Fi에서만 받는다 (FL-05).
     @Default(true) bool wifiOnlyModelDownload,
+
+    /// 플로팅 버튼 원 지름 (dp, FL-07).
+    @Default(defaultButtonSizeDp) int buttonSizeDp,
+
+    /// 플로팅 버튼 불투명도 (%, FL-07).
+    @Default(defaultButtonOpacityPercent) int buttonOpacityPercent,
+
+    /// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용.
+    @Default(false) bool hasFixedRegion,
   }) = _TranslatorSettings;
 }

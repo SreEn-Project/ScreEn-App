@@ -19,6 +19,9 @@ fun Settings.toPigeon() = AppSettings(
     autoShowDelayMs = autoShowDelayMs,
     hideAfterInteractionMs = hideAfterInteractionMs,
     wifiOnlyModelDownload = wifiOnlyModelDownload,
+    buttonSizeDp = buttonSizeDp.toLong(),
+    buttonOpacityPercent = buttonOpacityPercent.toLong(),
+    hasFixedRegion = fixedRegion != null,
 )
 
 fun Engine.toPigeon() = when (this) {

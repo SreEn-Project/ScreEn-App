@@ -106,6 +106,7 @@
   "settingsSectionCapture": "캡처",
   "settingsDefaultCaptureMode": "기본 캡처 모드",
   "settingsResetFixedRegion": "고정 영역 초기화",
+  "settingsResetFixedRegionEmpty": "저장된 고정 영역이 없어요",
   "settingsSectionDisplay": "표시",
   "settingsDisplayMode": "결과 표시 방식",
   "displayModeList": "목록",
