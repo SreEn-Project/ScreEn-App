@@ -2,6 +2,13 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-03 · 번역이 끝나지 않는 문제 · 자동 번역 하단 시트 깜빡임 (NA-12, NA-26, 이슈 #74, 브랜치 `fix/74-translate-hang-sheet-flicker`)
+- 증상 1: 번역이 안 끝나고 버튼의 도는 호(번역 중)가 계속 남는다. 원인(코드로 찾음, 기기 재현 전): 언어 모델이 없으면 Wi-Fi 전용(기본값)으로 내려받는데, Wi-Fi가 아니면 ML Kit 받기가 끝나지 않고 기다리기만 해 파이프라인이 영원히 멈춘다. 고침: `MlKitTranslationEngine`이 60초 안에 모델을 못 받으면 네트워크 실패(`TranslationError.Network`)로 알린다 → 결과 시트가 안내를 보여 주고 버튼이 풀린다. 받기는 ML Kit이 이어 가므로 다시 시도하면 이어서 받는다. 단위 테스트 1건 추가.
+- 증상 2: 하단 시트로 결과를 볼 때 자동 번역 주기마다 깜빡임. 원인: 결과가 바뀌면 시트 창을 지우고 새로 만들어 올라오는 애니메이션이 다시 돈다. 고침: 하단 시트(목록)가 떠 있으면 창은 두고 내용만 바꾼다(`sheetOutcome` 상태). 번역 순간 캡처를 위해 잠깐 숨기는 것은 그대로다.
+- 변경: `translate/MlKitTranslationEngine` · `overlay/OverlayController`. pubspec · Gradle · Manifest 변경 없음.
+- 확인: `flutter analyze` 0 · `flutter test` · `gradlew testDebugUnitTest` · `flutter build apk --debug` 통과. 에뮬레이터 · 기기 확인 전.
+- 남은 일: 기기에서 Wi-Fi 연결 상태로 모델을 받은 뒤에도 안 끝나면 logcat(`TranslationPipeline` · `ScreenTextRecognizer`)로 단계별 시간을 다시 본다.
+
 ## 2026-10-02 · 드래그 영역에서는 자동 번역 끄기 · 선택 불가 (NA-26, NA-16, 이슈 #71, 브랜치 `feat/71-auto-off-on-drag`)
 - 규칙: 캡처 영역 종류가 드래그가 되면 자동 번역이 꺼진다. 드래그인 동안은 켤 수 없다 (버블 '설정' 메뉴와 앱 설정 화면 모두 비활성). 전체 화면 · 고정 영역은 그대로.
 - 네이티브(`SettingsRepository`): `setCaptureRange(DRAG_REGION)`이 같은 편집에서 자동 번역을 끈다. `setAutoTranslate(true)`는 드래그면 무시. 읽을 때도 드래그면 자동 번역을 꺼짐으로 본다(이미 저장된 조합 보정). 오버레이는 설정 흐름을 그대로 받으므로 감시가 멈추고 버튼의 '자동' 배지도 함께 사라진다.

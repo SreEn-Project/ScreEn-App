@@ -9,12 +9,15 @@ private class FakeBackend(
     val downloaded: MutableSet<String> = mutableSetOf(),
     var identified: String? = "ja",
     val failure: Exception? = null,
+    /** true면 내려받기가 끝나지 않고 기다린다 (Wi-Fi 조건이 안 맞을 때). */
+    val hangDownload: Boolean = false,
 ) : OnDeviceBackend {
     val downloads = mutableListOf<Pair<String, Boolean>>()
     override fun supportedLanguages() = setOf("en", "ko", "ja", "he")
     override suspend fun isDownloaded(language: String) = language in downloaded
     override suspend fun download(language: String, wifiOnly: Boolean) {
         failure?.let { throw it }
+        if (hangDownload) kotlinx.coroutines.awaitCancellation()
         downloads += language to wifiOnly
         downloaded += language
     }
@@ -48,6 +51,12 @@ class MlKitTranslationEngineTest {
         val engine = MlKitTranslationEngine(backend, downloadPolicy = ModelDownloadPolicy(wifiOnly = true))
         assertTrue(run(engine, "ja") is EngineResult.Ok)
         assertEquals(listOf("ja" to true, "ko" to true, "en" to true), backend.downloads)
+    }
+
+    @Test
+    fun `모델 받기가 끝나지 않으면 시간 뒤 네트워크 실패로 알린다`() {
+        val engine = MlKitTranslationEngine(FakeBackend(hangDownload = true), downloadTimeoutMs = 50)
+        assertEquals(EngineResult.Err(TranslationError.Network), run(engine, "ja"))
     }
 
     @Test
