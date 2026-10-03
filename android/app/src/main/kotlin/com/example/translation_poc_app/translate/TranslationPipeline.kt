@@ -106,12 +106,14 @@ class TranslationPipeline(
     /**
      * @param region 이 영역만 번역한다 (NA-07). null이면 화면 전체.
      * @param onCaptured 화면을 찍은 직후 — 캡처 동안 숨긴 오버레이를 다시 보여 줄 때.
+     * @param onPending 번역할 글자의 자리가 정해졌을 때(번역 전) 그 자리들을 알린다. 오버레이가 로딩 표시를 그린다.
      * @param onPartial 번역이 일부만 끝났을 때 끝난 블록만 담아 부른다 (#41). 마지막 결과는 반환값으로 온다.
      * @param incremental 자동 번역: 직전에 읽은 화면과 견줘 바뀐 영역만 다시 인식한다 (#43).
      */
     suspend fun run(
         region: NormalizedRegion? = null,
         onCaptured: () -> Unit = {},
+        onPending: (List<NormalizedRegion>) -> Unit = {},
         onPartial: (TranslationOutcome.Translated) -> Unit = {},
         incremental: Boolean = false,
     ): TranslationOutcome {
@@ -180,6 +182,7 @@ class TranslationPipeline(
                     )
                 }
             }
+            onPending(detected.filter { it.decision.action == BlockAction.TRANSLATE }.mapNotNull { bounds(it.block) })
             val results = translateAll(engine, requests, onProgress = { partial ->
                 TranslationAssembler.assemblePartial(detected, partial, engine.id, current.targetLanguage, lineHeight, bounds)
                     ?.let(onPartial)

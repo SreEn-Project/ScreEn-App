@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.translation_poc_app.autotranslate.AutoTranslateConfig
 import com.example.translation_poc_app.autotranslate.AutoTranslateWatcher
+import com.example.translation_poc_app.autotranslate.FrameSignature
 import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.NormalizedRegion
@@ -37,6 +38,7 @@ import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -177,6 +179,19 @@ class OverlayController(
     private var sheetOutcome by mutableStateOf<TranslationOutcome?>(null)
     private var sheetIsList = false
     private var picker: OverlayWindow? = null
+
+    /** 번역 중인 작업 (버튼 탭 · 화면 이동으로 취소한다). 자동 번역의 다시 번역은 감시가 따로 가진다. */
+    private var translateJob: Job? = null
+
+    /** 번역 중에 아직 번역이 안 끝난 글자 자리. 덮어쓰기 막이 로딩 표시로 그린다. */
+    private var pendingRegions: List<NormalizedRegion> = emptyList()
+
+    /** 덮어쓰기 막 창이 떠 있다 (목록 시트가 아님). 같은 창에서 내용만 바꿔 깜빡임을 막는다. */
+    private var sheetIsLayer = false
+    private var layerTouchless = false
+    private var layerItems by mutableStateOf<List<TranslatedItem>>(emptyList())
+    private var layerPending by mutableStateOf<List<NormalizedRegion>>(emptyList())
+    private var overlayQuietUntil = 0L
     private var settingsJob: Job? = null
     private var snapAnimator: ValueAnimator? = null
     private var dragStart = placement
@@ -267,6 +282,11 @@ class OverlayController(
             dismissMenu()
             return
         }
+        if (busy) {
+            // 번역 중에 버튼을 누르면 번역을 취소한다. 자동 번역이 다시 번역하는 중이면 결과 · 감시를 걷는다.
+            if (translateJob?.isActive == true) translateJob?.cancel() else dismissSheet()
+            return
+        }
         if (passthrough && !staleHidden) {
             // 터치를 통과시키는 막은 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (감시도 멈춘다).
             // 낡아서 숨겨진 막은 보이는 게 없으니 이 탭은 닫기가 아니라 다시 번역이다.
@@ -291,27 +311,74 @@ class OverlayController(
         dismissSheet()
         busy = true
         lastRegion = region
-        scope.launch {
+        pendingRegions = emptyList()
+        translateJob = scope.launch {
             // 버튼이 캡처에 찍히지 않도록 숨긴다. 캡처 쪽이 숨긴 뒤의 새 프레임을 기다린다.
             button.setHidden(true)
-            val outcome = try {
-                pipeline.run(
+            var moveWatch: Job? = null
+            var outcome: TranslationOutcome? = null
+            try {
+                outcome = pipeline.run(
                     region,
-                    onCaptured = { button.setHidden(false) },
+                    onCaptured = {
+                        button.setHidden(false)
+                        // 번역하는 동안 화면이 움직이면 그 번역은 버린다 (자동 번역과 같은 규칙).
+                        moveWatch = watchForMovement()
+                    },
+                    // 글자 자리를 먼저 보여 주고 번역이 끝날 때까지 로딩 표시를 건다 (덮어쓰기 표시일 때).
+                    onPending = { regions ->
+                        if (display == ResultDisplay.OVERLAY && regions.isNotEmpty()) {
+                            pendingRegions = regions
+                            showSheet(null, regions, final = false)
+                        }
+                    },
                     // 끝난 블록부터 먼저 보여 준다 (#41). 마지막에 전체 결과로 바뀐다.
-                    onPartial = { partial -> showSheet(partial) },
+                    onPartial = { partial ->
+                        val done = partial.items.mapNotNull { it.bounds }.toSet()
+                        pendingRegions = pendingRegions.filter { it !in done }
+                        showSheet(partial, pendingRegions, final = false)
+                    },
                 )
             } finally {
+                moveWatch?.cancel()
                 button.setHidden(false)
                 busy = false
+                translateJob = null
+                pendingRegions = emptyList()
+                // 취소 · 예외로 끝났다: 번역 중에 올린 로딩 · 일부 결과를 걷는다.
+                if (outcome == null) removeSheet()
             }
-            logOutcome(outcome)
-            showSheet(outcome)
-            if (outcome is TranslationOutcome.Translated) onTranslated(outcome)
+            val result = outcome ?: return@launch
+            logOutcome(result)
+            showSheet(result)
+            if (result is TranslationOutcome.Translated) onTranslated(result)
             // 번역이 화면에 올랐으면 이제부터 화면 변화를 지켜본다: 자동 번역은 다시 번역하고 (#23),
             // 조작 뒤 숨김이 켜진 덮어쓰기 결과(passthrough)는 숨김만 한다 (#35).
-            if (shouldWatch() && outcome is TranslationOutcome.Translated) {
+            if (shouldWatch() && result is TranslationOutcome.Translated) {
                 watcher.arm()
+            }
+        }
+    }
+
+    /**
+     * 번역하는 동안 화면이 움직이는지 지켜보고, 움직이면 번역을 취소한다 (일반 번역도 자동 번역처럼).
+     * 우리 로딩 표시 · 일부 결과가 화면에 올라오면 지문이 달라지므로, 올릴 때마다 [overlayQuietUntil]까지 쉬고 기준을 다시 잡는다.
+     * 버튼의 도는 호가 지문에 조금 잡히므로 자동 번역 감시보다 넉넉한 기준을 쓴다.
+     */
+    private fun watchForMovement(): Job = scope.launch {
+        overlayQuietUntil = SystemClock.uptimeMillis() + MOVE_SETTLE_MS
+        var base: IntArray? = null
+        while (isActive) {
+            delay(MOVE_CHECK_MS)
+            val signature = withContext(Dispatchers.Default) { sampleSignature(lastRegion) } ?: continue
+            if (SystemClock.uptimeMillis() < overlayQuietUntil) {
+                base = null
+            } else if (base == null) {
+                base = signature
+            } else if (FrameSignature.changedRatio(base, signature) >= MOVE_CHANGE_RATIO) {
+                Log.i(TAG, "번역 중 화면이 움직여 번역을 취소")
+                translateJob?.cancel()
+                return@launch
             }
         }
     }
@@ -733,21 +800,36 @@ class OverlayController(
 
     // ── 결과 시트 (NA-19) ───────────────────────────────
 
-    private fun showSheet(outcome: TranslationOutcome) {
+    /**
+     * 결과를 올린다. [outcome]이 null이면 아직 결과 없이 로딩 표시([pending])만. [final]이 false면 번역 중의 중간 상태라
+     * 막은 항상 터치를 통과시킨다 (번역하는 동안 뒤 앱을 막지 않고, 끝날 때 한 번만 창을 바꾼다).
+     */
+    private fun showSheet(outcome: TranslationOutcome?, pending: List<NormalizedRegion> = emptyList(), final: Boolean = true) {
         // 원문 위에 덮기(NA-22): 자리를 아는 번역 항목이 하나라도 있으면 막으로, 없으면 목록 시트로.
         val overItems = if (display == ResultDisplay.OVERLAY && outcome is TranslationOutcome.Translated) {
             overlayItems(outcome.items)
         } else {
             emptyList()
         }
+        val layerPendingNow = if (display == ResultDisplay.OVERLAY) pending else emptyList()
+        val isLayer = overItems.isNotEmpty() || layerPendingNow.isNotEmpty()
         // 자동 번역 중이거나 닫힘 시간이 정해져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
         // (#23, #35). '직접 닫기'(자동 번역 꺼짐)는 화면 전체를 막고 사용자가 닫을 때까지 둔다. 목록 · 문장 시트는 항상 막는다.
         val newPassthrough = (autoTranslate || autoConfig.hideMs >= 0) && overItems.isNotEmpty()
+        val touchless = isLayer && (!final || newPassthrough)
         shownItems = (outcome as? TranslationOutcome.Translated)?.items
-        // 하단 시트가 떠 있으면 창을 다시 만들지 않고 내용만 바꾼다. 자동 번역이 결과를 바꿀 때마다 시트가
-        // 사라졌다 다시 미끄러져 올라오며 깜빡이는 것을 막는다.
-        if (sheet != null && sheetIsList && overItems.isEmpty() && !newPassthrough) {
-            sheetOutcome = outcome
+        // 우리가 올린 표시가 바뀌면 화면 지문도 바뀐다: 번역 중 이동 감시가 이를 이동으로 보지 않게 잠시 쉰다.
+        overlayQuietUntil = SystemClock.uptimeMillis() + MOVE_SETTLE_MS
+        // 같은 종류의 창이 떠 있으면 창을 다시 만들지 않고 내용만 바꾼다. 결과가 바뀔 때마다 창이 사라졌다 다시 생기며
+        // 깜빡이는 것(새 창의 첫 프레임이 검게 비침 · 하단 시트가 다시 올라옴)을 막는다.
+        if (sheet != null && ((isLayer && sheetIsLayer && layerTouchless == touchless) || (!isLayer && sheetIsList))) {
+            if (isLayer) {
+                layerItems = overItems
+                layerPending = layerPendingNow
+            } else {
+                sheetOutcome = outcome
+            }
+            passthrough = newPassthrough
             staleHidden = false
             sheet?.setHidden(false)
             return
@@ -755,27 +837,31 @@ class OverlayController(
         removeSheet()
         staleHidden = false
         passthrough = newPassthrough
-        sheetIsList = overItems.isEmpty()
+        sheetIsLayer = isLayer
+        sheetIsList = !isLayer
+        layerTouchless = touchless
+        layerItems = overItems
+        layerPending = layerPendingNow
         sheetOutcome = outcome
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             // 뒤로 가기를 받으려고 포커스를 받는다. 시트가 떠 있는 동안만.
-            if (passthrough) WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE else 0,
+            if (touchless) WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE else 0,
         ).apply {
             // Android 12+는 불투명한 오버레이 뒤의 앱이 터치를 못 받게 막는다. 시스템이 허용하는 최대 불투명도로 맞춘다.
-            if (passthrough && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (touchless && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 alpha = context.getSystemService(InputManager::class.java).maximumObscuringOpacityForTouch
             }
         }
         sheet = OverlayWindow(context, windowManager, params) {
-            if (overItems.isNotEmpty()) {
-                OverlayResult(overItems, onDismiss = { post(::dismissSheet) })
+            if (isLayer) {
+                OverlayResult(layerItems, layerPending, onDismiss = { post(::dismissSheet) })
             } else {
-                ResultSheet(sheetOutcome ?: outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
+                sheetOutcome?.let { ResultSheet(it, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy) }
             }
         }.apply {
-            if (!passthrough) root.onBack = { post(::dismissSheet) }
+            if (!touchless) root.onBack = { post(::dismissSheet) }
             show()
         }
     }
@@ -792,6 +878,7 @@ class OverlayController(
         staleHidden = false
         shownItems = null
         sheetIsList = false
+        sheetIsLayer = false
         sheetOutcome = null
         val current = sheet ?: return
         sheet = null
@@ -819,6 +906,11 @@ class OverlayController(
     private companion object {
         const val TAG = "OverlayController"
         const val MENU_CLOSE_GRACE_MS = 300L
+        const val MOVE_CHECK_MS = 250L
+        const val MOVE_SETTLE_MS = 700L
+
+        /** 번역 중 화면 이동으로 보는 바뀐 칸 비율. 스크롤 · 화면 전환은 이보다 훨씬 크다. */
+        const val MOVE_CHANGE_RATIO = 0.04f
         const val PLACEMENT_PREFS = "overlay_button"
         const val KEY_EDGE_LEFT = "edge_left"
         const val KEY_Y_RATIO = "y_ratio"
