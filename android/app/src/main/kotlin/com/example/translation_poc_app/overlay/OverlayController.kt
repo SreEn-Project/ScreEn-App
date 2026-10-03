@@ -284,13 +284,13 @@ class OverlayController(
         }
         if (busy) {
             // 번역 중에 버튼을 누르면 번역을 취소한다. 자동 번역이 다시 번역하는 중이면 결과 · 감시를 걷는다.
-            if (translateJob?.isActive == true) translateJob?.cancel() else dismissSheet()
+            if (translateJob?.isActive == true) translateJob?.cancel() else closeByUser()
             return
         }
         if (passthrough && !staleHidden) {
-            // 터치를 통과시키는 막은 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (감시도 멈춘다).
+            // 터치를 통과시키는 막은 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (자동 번역이 꺼져 있으면 감시도 멈춘다).
             // 낡아서 숨겨진 막은 보이는 게 없으니 이 탭은 닫기가 아니라 다시 번역이다.
-            dismissSheet()
+            closeByUser()
             return
         }
         startTranslation()
@@ -856,17 +856,26 @@ class OverlayController(
         }
         sheet = OverlayWindow(context, windowManager, params) {
             if (isLayer) {
-                OverlayResult(layerItems, layerPending, onDismiss = { post(::dismissSheet) })
+                OverlayResult(layerItems, layerPending, onDismiss = { post(::closeByUser) })
             } else {
-                sheetOutcome?.let { ResultSheet(it, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy) }
+                sheetOutcome?.let { ResultSheet(it, display, onDismiss = { post(::closeByUser) }, onCopy = ::copy) }
             }
         }.apply {
-            if (!touchless) root.onBack = { post(::dismissSheet) }
+            if (!touchless) root.onBack = { post(::closeByUser) }
             show()
         }
     }
 
-    /** 사용자가 결과를 닫았다: 자동 번역 감시도 멈춘다. */
+    /**
+     * 사용자가 결과를 닫았다. 자동 번역이 켜져 있으면 감시는 이어간다: 닫은 화면(막이 걷힌 화면)을 새 기준으로 다시 잡아,
+     * 이후 화면이 바뀌면 다시 번역한다 (닫는 것은 지금 결과만 걷는 것, 끄는 것은 메뉴). 꺼져 있으면 감시도 멈춘다.
+     */
+    private fun closeByUser() {
+        removeSheet()
+        if (autoTranslate && !powerManager.isPowerSaveMode) watcher.arm() else watcher.stop()
+    }
+
+    /** 결과를 걷고 감시도 멈춘다 (새 번역 · 영역 선택을 시작할 때). */
     private fun dismissSheet() {
         watcher.stop()
         removeSheet()
