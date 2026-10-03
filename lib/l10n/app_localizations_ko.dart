@@ -368,8 +368,11 @@ class AppLocalizationsKo extends AppLocalizations {
       '번역한 뒤 화면을 가볍게 지켜보다가, 글자가 바뀌거나 스크롤이 멈추면 바로 번역을 준비해요. 안 바뀐 글자는 건너뛰어요. 켜 두면 배터리를 더 쓰고 기기가 따뜻해질 수 있어요.';
 
   @override
-  String get settingsAutoTranslateDragUnavailable =>
-      '캡처 영역이 드래그일 때는 쓸 수 없어요. 전체 화면이나 고정 영역으로 바꾸면 켤 수 있어요.';
+  String get settingsAutoTranslateUnavailable =>
+      '결과 표시가 \'본문 위에 표시\'이고 캡처 영역이 전체 화면이나 고정 영역일 때만 쓸 수 있어요.';
+
+  @override
+  String get settingsHideOverlayOnly => '본문 위에 표시에서만';
 
   @override
   String get settingsAutoShowDelay => '새 번역을 보여 줄 시점 (조작이 끝난 뒤)';

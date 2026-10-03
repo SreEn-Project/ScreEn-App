@@ -11,6 +11,7 @@ class AppSegmented<T> extends StatelessWidget {
     required this.selected,
     required this.label,
     required this.onChanged,
+    this.enabled = true,
   });
 
   final List<T> values;
@@ -18,56 +19,62 @@ class AppSegmented<T> extends StatelessWidget {
   final String Function(T) label;
   final ValueChanged<T> onChanged;
 
+  /// false면 흐리게 보이고 누를 수 없다 (선택값은 그대로 보인다).
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: ShapeDecoration(
-        shape: const StadiumBorder(),
-        color: colors.surfaceContainer,
-      ),
-      child: Row(
-        children: [
-          for (final value in values)
-            Expanded(
-              child: Pressable(
-                onTap: () => onChanged(value),
-                scale: 0.97,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: ShapeDecoration(
-                    shape: const StadiumBorder(),
-                    color: value == selected ? colors.surface : null,
-                    shadows: value == selected
-                        ? [
-                            BoxShadow(
-                              color: colors.shadow.withValues(alpha: 0.06),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    label(value),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontSize: 14,
-                      color: value == selected
-                          ? colors.primary
-                          : colors.onSurfaceVariant,
+    return Opacity(
+      opacity: enabled ? 1 : 0.4,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: ShapeDecoration(
+          shape: const StadiumBorder(),
+          color: colors.surfaceContainer,
+        ),
+        child: Row(
+          children: [
+            for (final value in values)
+              Expanded(
+                child: Pressable(
+                  onTap: enabled ? () => onChanged(value) : null,
+                  scale: 0.97,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: ShapeDecoration(
+                      shape: const StadiumBorder(),
+                      color: value == selected ? colors.surface : null,
+                      shadows: value == selected
+                          ? [
+                              BoxShadow(
+                                color: colors.shadow.withValues(alpha: 0.06),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Text(
+                      label(value),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontSize: 14,
+                        color: value == selected
+                            ? colors.primary
+                            : colors.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

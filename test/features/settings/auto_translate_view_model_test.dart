@@ -68,8 +68,22 @@ void main() {
     expect(drag.available, isFalse);
   });
 
-  test('전체 화면 · 고정 영역에서는 쓸 수 있다', () async {
-    expect((await ready()).available, isTrue);
+  test('덮어쓰기 표시가 아니면 자동 번역을 쓸 수 없다', () async {
+    final list = await ready(
+      const TranslatorSettings(displayMode: DisplayMode.list),
+    );
+    expect(list.available, isFalse);
+    final paragraph = await ready(
+      const TranslatorSettings(displayMode: DisplayMode.paragraph),
+    );
+    expect(paragraph.available, isFalse);
+  });
+
+  test('덮어쓰기 표시의 전체 화면 · 고정 영역에서는 쓸 수 있다', () async {
+    final overlay = await ready(
+      const TranslatorSettings(displayMode: DisplayMode.overlay),
+    );
+    expect(overlay.available, isTrue);
   });
 
   test('표시 시점은 가장 가까운 선택지로 맞춰 저장한다', () async {

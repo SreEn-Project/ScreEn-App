@@ -34,13 +34,15 @@ class AutoTranslateSettings {
       AutoTranslateSettings(
         enabled: s.autoTranslate,
         showDelayMs: s.autoShowDelayMs,
-        available: s.captureMode != CaptureMode.dragRegion,
+        available:
+            s.captureMode != CaptureMode.dragRegion &&
+            s.displayMode == DisplayMode.overlay,
       );
 
   final bool enabled;
   final int showDelayMs;
 
-  /// 드래그 영역에서는 자동 번역을 쓸 수 없다 (#71).
+  /// 드래그 영역이거나 결과 표시가 '본문 위에 표시'가 아니면 자동 번역을 쓸 수 없다 (#71).
   final bool available;
 
   @override

@@ -101,21 +101,18 @@ class OverlayController(
     /** 지금 떠 있는 결과의 항목. 자동 번역 결과가 같으면 시트를 바꾸지 않는다. */
     private var shownItems: List<TranslatedItem>? = null
 
-    /** 결과가 터치를 통과시키는 '원문 위에 덮기'로 떠 있다 (자동 번역 중이거나 조작 뒤 숨김이 켜져 있을 때). 버튼을 누르면 닫는다. */
-    private var passthrough = false
-
     /**
-     * 결과 목록 시트가 뒤 앱의 터치를 막지 않는 '떠 있는 시트'로 떠 있다 (조작 뒤 숨김이 켜져 있을 때).
-     * 시트 밖 터치는 아래 앱으로 가고, 화면이 움직이면 숨긴다. 닫기는 시트의 X · 플로팅 버튼.
+     * 결과가 터치를 통과시키는 '원문 위에 덮기'로 떠 있다 (자동 번역 중이거나 닫힘 시간이 정해져 있을 때). 버튼을 누르면 닫는다.
+     * 목록 · 문장 시트와 '직접 닫기'의 덮기는 뒤 앱을 막고, 사용자가 닫을 때까지 둔다.
      */
-    private var floatingSheet = false
+    private var passthrough = false
 
     /** 화면이 바뀌어서 낡은 결과를 숨기는 중이다 (#29, #35). 새 결과가 뜨면 풀린다. */
     private var staleHidden = false
 
     private val watcher = AutoTranslateWatcher(
         scope = scope,
-        sample = { withContext(Dispatchers.Default) { sampleSignature(watchRegion()) } },
+        sample = { withContext(Dispatchers.Default) { sampleSignature(lastRegion) } },
         config = { autoConfig },
         translate = ::autoTranslateOnce,
         setStale = ::setStaleHidden,
@@ -123,7 +120,10 @@ class OverlayController(
     private val screenOffReceiver = object : BroadcastReceiver() {
         // 화면이 꺼지거나 절전 모드가 켜지면 감시를 멈춘다 (배터리). 다음 번역 때 다시 시작한다.
         override fun onReceive(context: Context, intent: Intent) {
-            watcher.stop()
+            // 화면이 켜지거나 절전 모드가 바뀌면 다시 판단한다: 떠 있는 결과가 아직 지켜볼 대상이면 이어서 지켜본다
+            // (화면을 껐다 켜도 닫힘이 멈추지 않게).
+            val resume = intent.action != Intent.ACTION_SCREEN_OFF && sheet != null && !staleHidden && !busy && shouldWatch()
+            if (resume) watcher.arm() else watcher.stop()
         }
     }
     private val powerManager = context.getSystemService(PowerManager::class.java)
@@ -201,17 +201,20 @@ class OverlayController(
                 display = it.resultDisplay
                 targetLanguage = it.targetLanguage
                 quickLanguages = it.quickLanguages
-                autoTranslate = it.autoTranslate
+                // 자동 번역은 결과가 '본문 위에 표시'일 때만 쓴다. 설정 값은 그대로 두어, 다시 덮어쓰기로 바꾸면 이어진다.
+                autoTranslate = it.autoTranslate && it.resultDisplay == ResultDisplay.OVERLAY
                 sourceLanguage = it.sourceLanguage
                 buttonOpacity = it.buttonOpacityPercent / 100f
                 if (it.buttonSizeDp != buttonDiameterDp) resizeButton(it.buttonSizeDp)
                 autoConfig = AutoTranslateConfig(
                     showDelayMs = it.autoShowDelayMs,
                     hideMs = it.hideAfterInteractionMs,
-                    retranslate = it.autoTranslate,
+                    retranslate = autoTranslate,
+                    // 닫힘 시간만 쓸 때는 반응이 빠르도록 더 자주 본다 (다시 번역하지 않으니 비용은 지문 읽기뿐).
+                    checkIntervalMs = if (autoTranslate) AutoTranslateConfig.CHECK_INTERVAL_MS else AutoTranslateConfig.HIDE_ONLY_CHECK_INTERVAL_MS,
                 )
                 // 자동 번역을 꺼도 조작 뒤 숨김이 켜진 채 덮어쓰기 결과가 떠 있으면 숨김 감시는 이어간다 (다시 번역만 멈춘다).
-                if (!autoTranslate && !((passthrough || floatingSheet) && autoConfig.hideMs >= 0)) {
+                if (!autoTranslate && !(passthrough && autoConfig.hideMs >= 0)) {
                     watcher.stop()
                     setStaleHidden(false)
                 }
@@ -219,7 +222,10 @@ class OverlayController(
         }
         context.registerReceiver(
             screenOffReceiver,
-            IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED) },
+            IntentFilter(Intent.ACTION_SCREEN_OFF).apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+            },
         )
         return true
     }
@@ -261,7 +267,7 @@ class OverlayController(
             dismissMenu()
             return
         }
-        if ((passthrough || floatingSheet) && !staleHidden) {
+        if (passthrough && !staleHidden) {
             // 터치를 통과시키는 막은 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (감시도 멈춘다).
             // 낡아서 숨겨진 막은 보이는 게 없으니 이 탭은 닫기가 아니라 다시 번역이다.
             dismissSheet()
@@ -304,7 +310,7 @@ class OverlayController(
             if (outcome is TranslationOutcome.Translated) onTranslated(outcome)
             // 번역이 화면에 올랐으면 이제부터 화면 변화를 지켜본다: 자동 번역은 다시 번역하고 (#23),
             // 조작 뒤 숨김이 켜진 덮어쓰기 결과(passthrough)는 숨김만 한다 (#35).
-            if ((autoTranslate || passthrough || floatingSheet) && !powerManager.isPowerSaveMode && outcome is TranslationOutcome.Translated) {
+            if (shouldWatch() && outcome is TranslationOutcome.Translated) {
                 watcher.arm()
             }
         }
@@ -366,11 +372,11 @@ class OverlayController(
     }
 
     /**
-     * 화면 변화를 볼 영역. 떠 있는 하단 시트는 안에서 스크롤해도 화면이 바뀐 것으로 보이지 않도록
-     * (영역을 정하지 않았을 때) 시트가 덮지 않는 위쪽만 본다.
+     * 번역한 화면의 변화를 지켜볼지: 자동 번역은 절전 모드가 아닐 때만 (배터리), 닫힘 시간만 쓰는 덮기는 절전이어도 지켜본다
+     * (지켜보지 않으면 결과가 닫히지 않는다).
      */
-    private fun watchRegion(): NormalizedRegion? =
-        lastRegion ?: if (floatingSheet) NormalizedRegion(0f, 0.06f, 1f, 0.24f) else null
+    private fun shouldWatch(): Boolean =
+        (autoTranslate && !powerManager.isPowerSaveMode) || (passthrough && autoConfig.hideMs >= 0)
 
     /** 자동 번역 감시가 부른다: 화면이 바뀌어 낡은 결과를 숨기거나(true), 바뀐 화면이 번역한 화면으로 돌아와 다시 보인다(false). */
     private fun setStaleHidden(hidden: Boolean) {
@@ -570,8 +576,8 @@ class OverlayController(
 
     /** '설정' 버블: 지금은 자동 번역 켜기 · 끄기만. 항목은 나중에 늘린다. 저장은 앱 설정과 같은 DataStore. */
     private fun settingsOptions(): List<MenuOption> {
-        // 드래그 영역에서는 자동 번역을 쓸 수 없다: 끈 채로 비활성으로 보인다 (#71).
-        val available = mode != CaptureRange.DRAG_REGION
+        // 드래그 영역이나 덮어쓰기가 아닌 표시에서는 자동 번역을 쓸 수 없다: 끈 채로 비활성으로 보인다 (#71).
+        val available = mode != CaptureRange.DRAG_REGION && display == ResultDisplay.OVERLAY
         val autoLabel = if (available) {
             context.getString(
                 R.string.overlay_setting_auto_translate,
@@ -695,7 +701,7 @@ class OverlayController(
         dismissSheet()
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.MATCH_PARENT,
-            if (floatingSheet) WindowManager.LayoutParams.WRAP_CONTENT else WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
             // 뒤로 가기를 받으려고 포커스를 받는다.
             0,
         )
@@ -734,15 +740,13 @@ class OverlayController(
         } else {
             emptyList()
         }
-        // 자동 번역 중이거나 조작 뒤 숨김이 켜져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
-        // (#23, #35). 닫기는 플로팅 버튼.
+        // 자동 번역 중이거나 닫힘 시간이 정해져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
+        // (#23, #35). '직접 닫기'(자동 번역 꺼짐)는 화면 전체를 막고 사용자가 닫을 때까지 둔다. 목록 · 문장 시트는 항상 막는다.
         val newPassthrough = (autoTranslate || autoConfig.hideMs >= 0) && overItems.isNotEmpty()
-        // 목록 시트도 조작 뒤 숨김이 켜져 있으면 뒤 앱을 막지 않는 떠 있는 시트로 띄운다.
-        val newFloating = autoConfig.hideMs >= 0 && overItems.isEmpty()
         shownItems = (outcome as? TranslationOutcome.Translated)?.items
         // 하단 시트가 떠 있으면 창을 다시 만들지 않고 내용만 바꾼다. 자동 번역이 결과를 바꿀 때마다 시트가
         // 사라졌다 다시 미끄러져 올라오며 깜빡이는 것을 막는다.
-        if (sheet != null && sheetIsList && overItems.isEmpty() && !newPassthrough && floatingSheet == newFloating) {
+        if (sheet != null && sheetIsList && overItems.isEmpty() && !newPassthrough) {
             sheetOutcome = outcome
             staleHidden = false
             sheet?.setHidden(false)
@@ -751,23 +755,14 @@ class OverlayController(
         removeSheet()
         staleHidden = false
         passthrough = newPassthrough
-        floatingSheet = newFloating
         sheetIsList = overItems.isEmpty()
         sheetOutcome = outcome
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             // 뒤로 가기를 받으려고 포커스를 받는다. 시트가 떠 있는 동안만.
-            if (passthrough) {
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-            } else if (floatingSheet) {
-                // 시트 밖 터치는 아래 앱으로 보낸다.
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-            } else {
-                0
-            },
+            if (passthrough) WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE else 0,
         ).apply {
-            if (floatingSheet) gravity = Gravity.BOTTOM or Gravity.START
             // Android 12+는 불투명한 오버레이 뒤의 앱이 터치를 못 받게 막는다. 시스템이 허용하는 최대 불투명도로 맞춘다.
             if (passthrough && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 alpha = context.getSystemService(InputManager::class.java).maximumObscuringOpacityForTouch
@@ -777,10 +772,10 @@ class OverlayController(
             if (overItems.isNotEmpty()) {
                 OverlayResult(overItems, onDismiss = { post(::dismissSheet) })
             } else {
-                ResultSheet(sheetOutcome ?: outcome, display, floating = newFloating, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
+                ResultSheet(sheetOutcome ?: outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
             }
         }.apply {
-            if (!passthrough && !floatingSheet) root.onBack = { post(::dismissSheet) }
+            if (!passthrough) root.onBack = { post(::dismissSheet) }
             show()
         }
     }
@@ -794,7 +789,6 @@ class OverlayController(
     /** 결과 창만 걷는다. 자동 번역이 결과를 바꿀 때는 감시를 멈추지 않는다. */
     private fun removeSheet() {
         passthrough = false
-        floatingSheet = false
         staleHidden = false
         shownItems = null
         sheetIsList = false

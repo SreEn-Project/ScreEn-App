@@ -379,8 +379,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'After a translation, lightly watches the screen and starts translating as soon as the text changes or scrolling stops. Unchanged text is skipped. Leaving it on uses more battery and may warm the device.';
 
   @override
-  String get settingsAutoTranslateDragUnavailable =>
-      'Not available while the capture area is a drag area. Switch to full screen or a fixed area to use it.';
+  String get settingsAutoTranslateUnavailable =>
+      'Only available when results are shown over the text and the capture area is full screen or a fixed area.';
+
+  @override
+  String get settingsHideOverlayOnly => 'Over-text display only';
 
   @override
   String get settingsAutoShowDelay =>
