@@ -389,7 +389,11 @@ class OverlayController(
      * 번역은 바로 하되, 화면에 올리는 것은 [showNotBefore](조작이 끝난 시각 + 표시 시점 설정)까지 기다린다 (#35).
      */
     private suspend fun autoTranslateOnce(showNotBefore: Long): Boolean {
-        if (busy || menu != null || picker != null || dragging) return false
+        if (busy || menu != null || picker != null || dragging) {
+            Log.i(TAG, "자동 번역 보류: busy=$busy menu=${menu != null} picker=${picker != null} dragging=$dragging")
+            return false
+        }
+        Log.i(TAG, "자동 번역 시작")
         busy = true
         val old = sheet
         old?.setHidden(true)
@@ -872,7 +876,9 @@ class OverlayController(
      */
     private fun closeByUser() {
         removeSheet()
-        if (autoTranslate && !powerManager.isPowerSaveMode) watcher.arm() else watcher.stop()
+        val resume = autoTranslate && !powerManager.isPowerSaveMode
+        Log.i(TAG, "결과를 닫음: 자동 번역=$autoTranslate 절전=${powerManager.isPowerSaveMode} → ${if (resume) "감시 이어감" else "감시 중지"}")
+        if (resume) watcher.arm() else watcher.stop()
     }
 
     /** 결과를 걷고 감시도 멈춘다 (새 번역 · 영역 선택을 시작할 때). */
