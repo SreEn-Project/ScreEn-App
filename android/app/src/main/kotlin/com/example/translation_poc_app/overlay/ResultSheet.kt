@@ -55,24 +55,28 @@ private const val ALL = -1
 
 /**
  * O-05 번역 결과 목록 (NA-19): 흰 하단 시트(상단 28dp)에 원문 · 번역문 카드.
- * 바깥(어두운 부분)을 누르거나 뒤로 가기로 닫는다. 결과가 없으면 같은 시트에 안내를 보여 준다.
+ * 바깥(어두운 부분)을 누르거나 뒤로 가기로 닫는다. [floating]이면 막 없이 뒤 앱을 그대로 쓰고, 화면이 움직이면 숨는다. 결과가 없으면 같은 시트에 안내를 보여 준다.
  */
 @Composable
 internal fun ResultSheet(
     outcome: TranslationOutcome,
     display: ResultDisplay,
+    floating: Boolean,
     onDismiss: () -> Unit,
     onCopy: (String) -> Unit,
 ) {
     val colors = OverlayTheme.colors
     val noRipple = remember { MutableInteractionSource() }
-    Box(
-        modifier = Modifier
+    // 떠 있는 시트(floating): 어두운 막 없이 시트 크기만 차지해 뒤 앱을 막지 않는다. 닫기는 시트의 X.
+    val frame = if (floating) {
+        Modifier.fillMaxWidth()
+    } else {
+        Modifier
             .fillMaxSize()
             .background(colors.scrim)
-            .clickable(interactionSource = noRipple, indication = null, onClick = onDismiss),
-        contentAlignment = Alignment.BottomCenter,
-    ) {
+            .clickable(interactionSource = noRipple, indication = null, onClick = onDismiss)
+    }
+    Box(modifier = frame, contentAlignment = Alignment.BottomCenter) {
         SheetSurface {
             when (outcome) {
                 is TranslationOutcome.Translated -> ResultList(outcome, display, onDismiss, onCopy)
