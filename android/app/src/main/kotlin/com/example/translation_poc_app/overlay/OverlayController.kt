@@ -166,6 +166,10 @@ class OverlayController(
     private var bubbleAnglesNow: List<Float> = emptyList()
     private var bubbleActions: List<() -> Unit> = emptyList()
     private var sheet: OverlayWindow? = null
+
+    /** 떠 있는 하단 시트(목록)가 보여 주는 결과. 바뀌면 시트 안에서 내용만 바뀐다. */
+    private var sheetOutcome by mutableStateOf<TranslationOutcome?>(null)
+    private var sheetIsList = false
     private var picker: OverlayWindow? = null
     private var settingsJob: Job? = null
     private var snapAnimator: ValueAnimator? = null
@@ -711,8 +715,6 @@ class OverlayController(
     // ── 결과 시트 (NA-19) ───────────────────────────────
 
     private fun showSheet(outcome: TranslationOutcome) {
-        removeSheet()
-        staleHidden = false
         // 원문 위에 덮기(NA-22): 자리를 아는 번역 항목이 하나라도 있으면 막으로, 없으면 목록 시트로.
         val overItems = if (display == ResultDisplay.OVERLAY && outcome is TranslationOutcome.Translated) {
             overlayItems(outcome.items)
@@ -721,8 +723,21 @@ class OverlayController(
         }
         // 자동 번역 중이거나 조작 뒤 숨김이 켜져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
         // (#23, #35). 닫기는 플로팅 버튼.
-        passthrough = (autoTranslate || autoConfig.hideMs >= 0) && overItems.isNotEmpty()
+        val newPassthrough = (autoTranslate || autoConfig.hideMs >= 0) && overItems.isNotEmpty()
         shownItems = (outcome as? TranslationOutcome.Translated)?.items
+        // 하단 시트가 떠 있으면 창을 다시 만들지 않고 내용만 바꾼다. 자동 번역이 결과를 바꿀 때마다 시트가
+        // 사라졌다 다시 미끄러져 올라오며 깜빡이는 것을 막는다.
+        if (sheet != null && sheetIsList && overItems.isEmpty() && !newPassthrough) {
+            sheetOutcome = outcome
+            staleHidden = false
+            sheet?.setHidden(false)
+            return
+        }
+        removeSheet()
+        staleHidden = false
+        passthrough = newPassthrough
+        sheetIsList = overItems.isEmpty()
+        sheetOutcome = outcome
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -742,7 +757,7 @@ class OverlayController(
             if (overItems.isNotEmpty()) {
                 OverlayResult(overItems, onDismiss = { post(::dismissSheet) })
             } else {
-                ResultSheet(outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
+                ResultSheet(sheetOutcome ?: outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
             }
         }.apply {
             if (!passthrough) root.onBack = { post(::dismissSheet) }
@@ -761,6 +776,8 @@ class OverlayController(
         passthrough = false
         staleHidden = false
         shownItems = null
+        sheetIsList = false
+        sheetOutcome = null
         val current = sheet ?: return
         sheet = null
         current.destroy()

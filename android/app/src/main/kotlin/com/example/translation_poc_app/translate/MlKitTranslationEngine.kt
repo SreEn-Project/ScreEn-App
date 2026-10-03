@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.translate
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * ML Kit 온디바이스 번역 엔진 (NA-12). 기기 안에서만 처리하고, 언어 모델은 처음 쓸 때 내려받는다.
@@ -15,6 +16,8 @@ class MlKitTranslationEngine(
     private val downloadPolicy: ModelDownloadPolicy = ModelDownloadPolicy(),
     /** 있으면 [downloadPolicy] 대신 받을 때마다 이걸로 정책을 얻는다 (설정이 바뀌면 바로 반영). */
     private val downloadPolicyProvider: (suspend () -> ModelDownloadPolicy)? = null,
+    /** 이 시간 안에 모델을 못 받으면 번역 실패로 알린다 (조건이 안 맞아 받기가 끝없이 기다리는 경우). */
+    private val downloadTimeoutMs: Long = DOWNLOAD_TIMEOUT_MS,
 ) : TranslationEngine {
 
     override val id = EngineId.ML_KIT
@@ -45,7 +48,12 @@ class MlKitTranslationEngine(
         if (missing.isNotEmpty()) {
             if (!autoDownload) return@guard EngineResult.Err(TranslationError.ModelNotDownloaded(missing))
             val policy = downloadPolicyProvider?.invoke() ?: downloadPolicy
-            missing.forEach { backend.download(it, policy.wifiOnly) }
+            // 조건(Wi-Fi만 등)이 안 맞으면 내려받기가 끝나지 않고 기다리기만 한다 → 번역이 영원히 로딩 중이 된다.
+            // 시간 안에 못 받으면 실패로 알린다 (받기는 ML Kit이 이어 가므로 다시 시도하면 이어서 받는다).
+            val downloaded = withTimeoutOrNull(downloadTimeoutMs) {
+                missing.forEach { backend.download(it, policy.wifiOnly) }
+            }
+            if (downloaded == null) return@guard EngineResult.Err(TranslationError.Network)
         }
         val translated = backend.translate(request.text, source, target)
         EngineResult.Ok(TranslationResult(translated, source, target, id))
@@ -87,6 +95,7 @@ class MlKitTranslationEngine(
 
     companion object {
         private const val PIVOT = "en"
+        private const val DOWNLOAD_TIMEOUT_MS = 60_000L
 
         /** 번역에 필요한 모델. 영어가 끼지 않은 쌍은 영어 모델이 중간에 필요하다. 순수 함수. */
         fun requiredModels(source: String, target: String): List<String> =
