@@ -1,6 +1,14 @@
 package com.example.translation_poc_app.overlay
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -52,7 +60,7 @@ private const val MIN_SP = 10
  * 화면 아무 곳이나 누르면 닫힌다. 창이 화면 전체라서 비율 좌표를 그대로 창 크기에 곱한다.
  */
 @Composable
-internal fun OverlayResult(items: List<TranslatedItem>, onDismiss: () -> Unit) {
+internal fun OverlayResult(items: List<TranslatedItem>, pending: List<NormalizedRegion>, onDismiss: () -> Unit) {
     val colors = OverlayTheme.colors
     val noRipple = remember { MutableInteractionSource() }
     val measurer = rememberTextMeasurer()
@@ -101,19 +109,44 @@ internal fun OverlayResult(items: List<TranslatedItem>, onDismiss: () -> Unit) {
                 )
             }
         }
-        BasicText(
-            stringResource(R.string.result_overlay_hint),
-            style = OverlayTheme.caption.copy(color = Color.White),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = 24.dp)
-                .clip(RoundedCornerShape(50))
-                .background(colors.onSurface.copy(alpha = 0.8f))
-                .padding(horizontal = 14.dp, vertical = 6.dp),
-        )
+        // 아직 번역 중인 글자: 자리만 먼저 보여 주고 숨 쉬듯 깜빡여 불러오는 중임을 알린다.
+        if (pending.isNotEmpty()) {
+            val pulse by rememberInfiniteTransition(label = "pending").animateFloat(
+                // 진폭을 작게 둔다: 번역 중 화면 이동 감시(지문)가 이 깜빡임을 화면 변화로 보지 않게 (OverlayController).
+                initialValue = 0.2f,
+                targetValue = 0.34f,
+                animationSpec = infiniteRepeatable(tween(PULSE_MS, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+                label = "pendingPulse",
+            )
+            for (region in pending) {
+                val box = paddedBox(region, widthPx, heightPx, with(density) { 2.dp.toPx() })
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(box.left.roundToInt(), box.top.roundToInt()) }
+                        .size(with(density) { box.width.toDp() }, with(density) { box.height.toDp() })
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(colors.primary.copy(alpha = pulse))
+                        .border(1.dp, colors.primary.copy(alpha = 0.6f), RoundedCornerShape(6.dp)),
+                )
+            }
+        }
+        if (pending.isEmpty() && items.isNotEmpty()) {
+            BasicText(
+                stringResource(R.string.result_overlay_hint),
+                style = OverlayTheme.caption.copy(color = Color.White),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(bottom = 24.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(colors.onSurface.copy(alpha = 0.8f))
+                    .padding(horizontal = 14.dp, vertical = 6.dp),
+            )
+        }
     }
 }
+
+private const val PULSE_MS = 700
 
 internal data class PxBox(val left: Float, val top: Float, val width: Float, val height: Float)
 
