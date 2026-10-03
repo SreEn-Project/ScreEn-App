@@ -345,6 +345,10 @@ class _HideAfterInteraction extends ConsumerWidget {
         ref.watch(hideAfterInteractionViewModelProvider).value ??
         defaultHideAfterInteractionMs;
     final viewModel = ref.read(hideAfterInteractionViewModelProvider.notifier);
+    // 닫힘 시간은 덮어쓰기('본문 위에 표시')에서만 쓴다. 단어장 · 문장 시트는 항상 직접 닫는다.
+    final overlay =
+        ref.watch(displaySettingsViewModelProvider).value?.mode ==
+        DisplayMode.overlay;
     String label(int ms) => ms == hideNever
         ? l10n.settingsAutoNever
         : ms == 0
@@ -355,8 +359,9 @@ class _HideAfterInteraction extends ConsumerWidget {
 
     return _Labeled(
       label: l10n.settingsHideAfterInteraction,
-      value: label(hideMs),
+      value: overlay ? label(hideMs) : l10n.settingsHideOverlayOnly,
       child: AppSegmented<int>(
+        enabled: overlay,
         values: hideAfterInteractionChoicesMs,
         selected: hideMs < 0
             ? hideNever
@@ -400,15 +405,15 @@ class _AutoTranslateSection extends ConsumerWidget {
               title: l10n.settingsAutoTranslate,
               subtitle: settings.available
                   ? l10n.settingsAutoTranslateDetail
-                  : l10n.settingsAutoTranslateDragUnavailable,
+                  : l10n.settingsAutoTranslateUnavailable,
               enabled: settings.available,
               onTap: () => viewModel.setEnabled(!settings.enabled),
               trailing: AppSwitch(
-                value: settings.enabled,
+                value: settings.enabled && settings.available,
                 onChanged: settings.available ? viewModel.setEnabled : null,
               ),
             ),
-            if (settings.enabled) ...[
+            if (settings.enabled && settings.available) ...[
               const AppDivider(),
               _Labeled(
                 label: l10n.settingsAutoShowDelay,

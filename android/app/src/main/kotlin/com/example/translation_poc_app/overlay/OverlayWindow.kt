@@ -59,13 +59,16 @@ internal class OverlayWindow(
 
     private val baseFlags = params.flags
 
+    /** 보일 때의 창 알파. 터치를 통과시키는 막은 Android 12+ 최대 불투명도로 낮춰 둔다 (다시 보일 때 1로 돌아가면 뒤 앱이 터치를 못 받는다). */
+    private val shownAlpha = params.alpha
+
     /**
      * 창을 잠깐 안 보이게 한다 (캡처에 안 찍히게). 루트 뷰를 INVISIBLE로 바꾸면 창의 서피스가 해제됐다가 다시 만들어져
      * 첫 프레임이 그려지기 전에 검은 네모가 비친다 (#47). 창은 그대로 두고 창 알파만 0으로 하고, 터치도 받지 않는다.
      */
     fun setHidden(hidden: Boolean) {
         val flags = if (hidden) baseFlags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE else baseFlags
-        val alpha = if (hidden) 0f else 1f
+        val alpha = if (hidden) 0f else shownAlpha
         if (params.alpha == alpha && params.flags == flags) return
         params.alpha = alpha
         params.flags = flags

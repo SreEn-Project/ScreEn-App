@@ -68,7 +68,7 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 | `AppCard` · `AppSection` | 24dp 흰 카드 + 초록 그림자 / 작은 회색 섹션 제목 + 카드 |
 | `AppListTile` · `AppDivider` | 아이콘 원 + 제목 + 회색 설명 + 오른쪽 값(primary) · › / 가는 구분선 |
 | `AppSwitch` | 알약 트랙(켜짐 primary) + 흰 손잡이 |
-| `AppSegmented` · `AppChip` | 회색 트랙 안에서 고른 칸만 흰 알약으로 / 선택 시 primary 알약 |
+| `AppSegmented` · `AppChip` | 회색 트랙 안에서 고른 칸만 흰 알약으로(`enabled: false`면 흐리게 · 누를 수 없음) / 선택 시 primary 알약 |
 | `AppSlider` · `AppProgressBar` | 가는 알약 트랙 + 흰 원 손잡이(primary 테두리) |
 | `AppSearchField` | 테두리 없는 흰 알약 + 그림자 |
 | `AppBadge` · `AppStatusPill` · `StatusDot` | 작은 연두 배지 / 점 + 글자 알약 / 켜짐 점(accent) |

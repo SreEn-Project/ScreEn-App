@@ -21,6 +21,7 @@ data class AutoTranslateConfig(
 ) {
     companion object {
         const val CHECK_INTERVAL_MS = 500L
+        const val HIDE_ONLY_CHECK_INTERVAL_MS = 250L
         const val MIN_TRANSLATE_GAP_MS = 1_000L
         const val HIDE_NEVER = -1L
     }
