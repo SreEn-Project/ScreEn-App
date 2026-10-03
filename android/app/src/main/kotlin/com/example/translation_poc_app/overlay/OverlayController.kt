@@ -223,7 +223,8 @@ class OverlayController(
                 if (it.buttonSizeDp != buttonDiameterDp) resizeButton(it.buttonSizeDp)
                 autoConfig = AutoTranslateConfig(
                     showDelayMs = it.autoShowDelayMs,
-                    hideMs = it.hideAfterInteractionMs,
+                    // 자동 번역이 켜져 있으면 직접 닫기는 쓰지 않는다 (#86): 저장된 값이 직접 닫기여도 기본 시간으로 다룬다.
+                    hideMs = if (autoTranslate && it.hideAfterInteractionMs < 0) AppSettings.DEFAULT_HIDE_AFTER_INTERACTION_MS else it.hideAfterInteractionMs,
                     retranslate = autoTranslate,
                     // 닫힘 시간만 쓸 때는 반응이 빠르도록 더 자주 본다 (다시 번역하지 않으니 비용은 지문 읽기뿐).
                     checkIntervalMs = if (autoTranslate) AutoTranslateConfig.CHECK_INTERVAL_MS else AutoTranslateConfig.HIDE_ONLY_CHECK_INTERVAL_MS,

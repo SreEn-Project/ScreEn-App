@@ -349,6 +349,12 @@ class _HideAfterInteraction extends ConsumerWidget {
     final overlay =
         ref.watch(displaySettingsViewModelProvider).value?.mode ==
         DisplayMode.overlay;
+    // 자동 번역이 켜져 있으면 직접 닫기는 쓸 수 없다 (#86): 선택지에서 빼고, 저장된 값은 그대로 두되 네이티브가 즉시로 다룬다.
+    final auto = ref.watch(autoTranslateViewModelProvider).value;
+    final autoOn = (auto?.enabled ?? false) && (auto?.available ?? false);
+    final choices = autoOn
+        ? hideAfterInteractionChoicesMs.sublist(0, 4)
+        : hideAfterInteractionChoicesMs;
     String label(int ms) => ms == hideNever
         ? l10n.settingsAutoNever
         : ms == 0
@@ -359,11 +365,13 @@ class _HideAfterInteraction extends ConsumerWidget {
 
     return _Labeled(
       label: l10n.settingsHideAfterInteraction,
-      value: overlay ? label(hideMs) : l10n.settingsHideOverlayOnly,
+      value: overlay
+          ? label(autoOn && hideMs < 0 ? 0 : hideMs)
+          : l10n.settingsHideOverlayOnly,
       child: AppSegmented<int>(
         enabled: overlay,
-        values: hideAfterInteractionChoicesMs,
-        selected: hideMs < 0
+        values: choices,
+        selected: hideMs < 0 && !autoOn
             ? hideNever
             : nearestChoice(
                 hideAfterInteractionChoicesMs.sublist(0, 4),
