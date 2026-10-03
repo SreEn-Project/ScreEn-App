@@ -375,13 +375,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAutoShowDelay => '새 번역을 보여 줄 시점 (조작이 끝난 뒤)';
 
   @override
-  String get settingsHideAfterInteraction => '화면을 조작하면 이전 번역을 숨기기까지';
+  String get settingsHideAfterInteraction => '화면을 조작하면 번역 결과를 닫기까지';
 
   @override
   String get settingsAutoInstant => '바로';
 
   @override
-  String get settingsAutoNever => '안 숨김';
+  String get settingsAutoNever => '직접 닫기';
 
   @override
   String secondsShort(String value) {

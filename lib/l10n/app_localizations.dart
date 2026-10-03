@@ -809,7 +809,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsHideAfterInteraction.
   ///
   /// In en, this message translates to:
-  /// **'Hide the old translation after you touch the screen'**
+  /// **'Close the result after you touch the screen'**
   String get settingsHideAfterInteraction;
 
   /// No description provided for @settingsAutoInstant.
@@ -821,7 +821,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAutoNever.
   ///
   /// In en, this message translates to:
-  /// **'Never'**
+  /// **'Close manually'**
   String get settingsAutoNever;
 
   /// No description provided for @secondsShort.

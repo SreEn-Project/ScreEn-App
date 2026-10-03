@@ -96,7 +96,7 @@ final class ChangeAutoShowDelay implements UseCase<void, int> {
       _repository.setAutoShowDelayMs(nearestChoice(autoShowDelayChoicesMs, ms));
 }
 
-/// 조작 뒤 이전 번역 숨김 시간 변경 (#29, #35). 음수는 "숨기지 않음", 나머지는 가장 가까운 선택지로 맞춘다.
+/// 조작 뒤 번역 결과 닫힘 시간 변경 (#29, #35, #76). 음수는 "직접 닫기", 나머지는 가장 가까운 선택지로 맞춘다.
 final class ChangeHideAfterInteraction implements UseCase<void, int> {
   const ChangeHideAfterInteraction(this._repository);
 

@@ -104,12 +104,18 @@ class OverlayController(
     /** 결과가 터치를 통과시키는 '원문 위에 덮기'로 떠 있다 (자동 번역 중이거나 조작 뒤 숨김이 켜져 있을 때). 버튼을 누르면 닫는다. */
     private var passthrough = false
 
+    /**
+     * 결과 목록 시트가 뒤 앱의 터치를 막지 않는 '떠 있는 시트'로 떠 있다 (조작 뒤 숨김이 켜져 있을 때).
+     * 시트 밖 터치는 아래 앱으로 가고, 화면이 움직이면 숨긴다. 닫기는 시트의 X · 플로팅 버튼.
+     */
+    private var floatingSheet = false
+
     /** 화면이 바뀌어서 낡은 결과를 숨기는 중이다 (#29, #35). 새 결과가 뜨면 풀린다. */
     private var staleHidden = false
 
     private val watcher = AutoTranslateWatcher(
         scope = scope,
-        sample = { withContext(Dispatchers.Default) { sampleSignature(lastRegion) } },
+        sample = { withContext(Dispatchers.Default) { sampleSignature(watchRegion()) } },
         config = { autoConfig },
         translate = ::autoTranslateOnce,
         setStale = ::setStaleHidden,
@@ -205,7 +211,7 @@ class OverlayController(
                     retranslate = it.autoTranslate,
                 )
                 // 자동 번역을 꺼도 조작 뒤 숨김이 켜진 채 덮어쓰기 결과가 떠 있으면 숨김 감시는 이어간다 (다시 번역만 멈춘다).
-                if (!autoTranslate && !(passthrough && autoConfig.hideMs >= 0)) {
+                if (!autoTranslate && !((passthrough || floatingSheet) && autoConfig.hideMs >= 0)) {
                     watcher.stop()
                     setStaleHidden(false)
                 }
@@ -255,7 +261,7 @@ class OverlayController(
             dismissMenu()
             return
         }
-        if (passthrough && !staleHidden) {
+        if ((passthrough || floatingSheet) && !staleHidden) {
             // 터치를 통과시키는 막은 화면에서 바로 닫을 수 없다. 버튼으로 닫는다 (감시도 멈춘다).
             // 낡아서 숨겨진 막은 보이는 게 없으니 이 탭은 닫기가 아니라 다시 번역이다.
             dismissSheet()
@@ -298,7 +304,7 @@ class OverlayController(
             if (outcome is TranslationOutcome.Translated) onTranslated(outcome)
             // 번역이 화면에 올랐으면 이제부터 화면 변화를 지켜본다: 자동 번역은 다시 번역하고 (#23),
             // 조작 뒤 숨김이 켜진 덮어쓰기 결과(passthrough)는 숨김만 한다 (#35).
-            if ((autoTranslate || passthrough) && !powerManager.isPowerSaveMode && outcome is TranslationOutcome.Translated) {
+            if ((autoTranslate || passthrough || floatingSheet) && !powerManager.isPowerSaveMode && outcome is TranslationOutcome.Translated) {
                 watcher.arm()
             }
         }
@@ -358,6 +364,13 @@ class OverlayController(
         removeSheet()
         lastRegion = null
     }
+
+    /**
+     * 화면 변화를 볼 영역. 떠 있는 하단 시트는 안에서 스크롤해도 화면이 바뀐 것으로 보이지 않도록
+     * (영역을 정하지 않았을 때) 시트가 덮지 않는 위쪽만 본다.
+     */
+    private fun watchRegion(): NormalizedRegion? =
+        lastRegion ?: if (floatingSheet) NormalizedRegion(0f, 0.06f, 1f, 0.24f) else null
 
     /** 자동 번역 감시가 부른다: 화면이 바뀌어 낡은 결과를 숨기거나(true), 바뀐 화면이 번역한 화면으로 돌아와 다시 보인다(false). */
     private fun setStaleHidden(hidden: Boolean) {
@@ -682,7 +695,7 @@ class OverlayController(
         dismissSheet()
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
+            if (floatingSheet) WindowManager.LayoutParams.WRAP_CONTENT else WindowManager.LayoutParams.MATCH_PARENT,
             // 뒤로 가기를 받으려고 포커스를 받는다.
             0,
         )
@@ -724,10 +737,12 @@ class OverlayController(
         // 자동 번역 중이거나 조작 뒤 숨김이 켜져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
         // (#23, #35). 닫기는 플로팅 버튼.
         val newPassthrough = (autoTranslate || autoConfig.hideMs >= 0) && overItems.isNotEmpty()
+        // 목록 시트도 조작 뒤 숨김이 켜져 있으면 뒤 앱을 막지 않는 떠 있는 시트로 띄운다.
+        val newFloating = autoConfig.hideMs >= 0 && overItems.isEmpty()
         shownItems = (outcome as? TranslationOutcome.Translated)?.items
         // 하단 시트가 떠 있으면 창을 다시 만들지 않고 내용만 바꾼다. 자동 번역이 결과를 바꿀 때마다 시트가
         // 사라졌다 다시 미끄러져 올라오며 깜빡이는 것을 막는다.
-        if (sheet != null && sheetIsList && overItems.isEmpty() && !newPassthrough) {
+        if (sheet != null && sheetIsList && overItems.isEmpty() && !newPassthrough && floatingSheet == newFloating) {
             sheetOutcome = outcome
             staleHidden = false
             sheet?.setHidden(false)
@@ -736,6 +751,7 @@ class OverlayController(
         removeSheet()
         staleHidden = false
         passthrough = newPassthrough
+        floatingSheet = newFloating
         sheetIsList = overItems.isEmpty()
         sheetOutcome = outcome
         val params = OverlayWindow.params(
@@ -744,10 +760,14 @@ class OverlayController(
             // 뒤로 가기를 받으려고 포커스를 받는다. 시트가 떠 있는 동안만.
             if (passthrough) {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            } else if (floatingSheet) {
+                // 시트 밖 터치는 아래 앱으로 보낸다.
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
             } else {
                 0
             },
         ).apply {
+            if (floatingSheet) gravity = Gravity.BOTTOM or Gravity.START
             // Android 12+는 불투명한 오버레이 뒤의 앱이 터치를 못 받게 막는다. 시스템이 허용하는 최대 불투명도로 맞춘다.
             if (passthrough && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 alpha = context.getSystemService(InputManager::class.java).maximumObscuringOpacityForTouch
@@ -757,10 +777,10 @@ class OverlayController(
             if (overItems.isNotEmpty()) {
                 OverlayResult(overItems, onDismiss = { post(::dismissSheet) })
             } else {
-                ResultSheet(sheetOutcome ?: outcome, display, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
+                ResultSheet(sheetOutcome ?: outcome, display, floating = newFloating, onDismiss = { post(::dismissSheet) }, onCopy = ::copy)
             }
         }.apply {
-            if (!passthrough) root.onBack = { post(::dismissSheet) }
+            if (!passthrough && !floatingSheet) root.onBack = { post(::dismissSheet) }
             show()
         }
     }
@@ -774,6 +794,7 @@ class OverlayController(
     /** 결과 창만 걷는다. 자동 번역이 결과를 바꿀 때는 감시를 멈추지 않는다. */
     private fun removeSheet() {
         passthrough = false
+        floatingSheet = false
         staleHidden = false
         shownItems = null
         sheetIsList = false

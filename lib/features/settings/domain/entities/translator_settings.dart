@@ -23,8 +23,8 @@ const maxQuickLanguages = 8;
 const defaultAutoShowDelayMs = 0;
 const autoShowDelayChoicesMs = [0, 1000, 2000, 3000];
 
-/// 사용자가 화면을 조작한 뒤 이전 번역(덮어쓰기)을 숨기기까지의 시간. 자동 번역과 무관하게 적용된다 (#35).
-/// 0 = 바로, [hideNever] = 숨기지 않고 새 번역이 뜰 때까지 둔다.
+/// 사용자가 화면을 조작한 뒤 번역 결과(시트 · 덮어쓰기)를 닫기까지의 시간. 자동 번역과 무관하게 적용된다 (#35, #76).
+/// 0 = 바로, [hideNever] = 직접 닫기: 결과가 뒤 앱을 막고 사용자가 닫을 때까지 둔다.
 const hideNever = -1;
 const defaultHideAfterInteractionMs = 0;
 const hideAfterInteractionChoicesMs = [0, 500, 1000, 2000, hideNever];

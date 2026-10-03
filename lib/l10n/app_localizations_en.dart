@@ -388,13 +388,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsHideAfterInteraction =>
-      'Hide the old translation after you touch the screen';
+      'Close the result after you touch the screen';
 
   @override
   String get settingsAutoInstant => 'Now';
 
   @override
-  String get settingsAutoNever => 'Never';
+  String get settingsAutoNever => 'Close manually';
 
   @override
   String secondsShort(String value) {
