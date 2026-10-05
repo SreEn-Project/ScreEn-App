@@ -345,6 +345,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get apiKeyHide => 'Hide';
 
   @override
+  String get apiKeyTest => 'Test key';
+
+  @override
+  String get apiKeyTestOk => 'The key works';
+
+  @override
+  String apiKeyTestFailed(String reason) {
+    return 'Rejected: $reason';
+  }
+
+  @override
+  String get apiKeyGet => 'Get a key from Google AI Studio';
+
+  @override
   String get settingsSectionCapture => 'Capture';
 
   @override

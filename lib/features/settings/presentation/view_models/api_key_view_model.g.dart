@@ -39,7 +39,7 @@ final class ApiKeyViewModelProvider
   ApiKeyViewModel create() => ApiKeyViewModel();
 }
 
-String _$apiKeyViewModelHash() => r'79b94b5fbcdd188544505ebf71df965f596c79c7';
+String _$apiKeyViewModelHash() => r'27306ce155035e51d15cf7db0fd8150ab5ade3db';
 
 /// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 원본은 네이티브 Keystore 저장소다.
 /// 화면은 이 값을 가려서 보여 주고, 눌러서 볼 수 있게 한다.

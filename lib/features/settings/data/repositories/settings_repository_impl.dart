@@ -73,4 +73,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<void> clearApiKey() => _dataSource.clearApiKey();
+
+  @override
+  Future<String?> testApiKey(String apiKey) => _dataSource.testApiKey(apiKey);
 }

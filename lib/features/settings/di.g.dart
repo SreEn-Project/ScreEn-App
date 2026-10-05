@@ -874,3 +874,44 @@ final class ClearApiKeyProvider
 }
 
 String _$clearApiKeyHash() => r'43276c5c97ef3c2839c5ce5c440db5c4a1723cef';
+
+@ProviderFor(testApiKey)
+final testApiKeyProvider = TestApiKeyProvider._();
+
+final class TestApiKeyProvider
+    extends $FunctionalProvider<TestApiKey, TestApiKey, TestApiKey>
+    with $Provider<TestApiKey> {
+  TestApiKeyProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'testApiKeyProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$testApiKeyHash();
+
+  @$internal
+  @override
+  $ProviderElement<TestApiKey> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TestApiKey create(Ref ref) {
+    return testApiKey(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TestApiKey value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TestApiKey>(value),
+    );
+  }
+}
+
+String _$testApiKeyHash() => r'a1a176b88b94790b83824267ed2566ce95ef6b7f';

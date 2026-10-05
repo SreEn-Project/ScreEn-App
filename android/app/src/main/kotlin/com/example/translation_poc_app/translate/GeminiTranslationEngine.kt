@@ -14,7 +14,7 @@ fun interface GeminiTransport {
     suspend fun generate(apiKey: String, model: String, body: String): String
 }
 
-class GeminiHttpException(val code: Int, message: String?) : IOException("HTTP $code: $message")
+class GeminiHttpException(val code: Int, val body: String) : IOException("HTTP $code: $body")
 
 /** 키가 없으면 null. 저장 방식(NA-13 후속)이 정해지면 구현을 연결한다. */
 fun interface ApiKeyProvider {

@@ -208,3 +208,13 @@ final class ClearApiKey implements NoParamsUseCase<void> {
   @override
   Future<void> call() => _repository.clearApiKey();
 }
+
+/// 입력한 AI 번역 API 키를 실제로 호출해 본다 (NA-13). 성공이면 null, 실패면 이유.
+final class TestApiKey implements UseCase<String?, String> {
+  const TestApiKey(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<String?> call(String apiKey) => _repository.testApiKey(apiKey.trim());
+}

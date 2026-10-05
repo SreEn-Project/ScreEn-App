@@ -64,4 +64,17 @@ void main() {
     verify(() => repository.setEngine(EngineType.mlKit)).called(1);
     expect(container.read(apiKeyViewModelProvider).value, isNull);
   });
+
+  test('키 테스트는 앞뒤 공백을 걷어 저장소에 묻고 이유를 돌려준다', () async {
+    when(() => repository.testApiKey(any()))
+        .thenAnswer((_) async => '(400) API key not valid');
+    await container.read(apiKeyViewModelProvider.future);
+
+    final reason = await container
+        .read(apiKeyViewModelProvider.notifier)
+        .test(' abc ');
+
+    expect(reason, '(400) API key not valid');
+    verify(() => repository.testApiKey('abc')).called(1);
+  });
 }

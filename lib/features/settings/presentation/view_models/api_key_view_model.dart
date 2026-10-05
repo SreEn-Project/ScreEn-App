@@ -21,6 +21,9 @@ class ApiKeyViewModel extends _$ApiKeyViewModel {
     return true;
   }
 
+  /// 입력한 키를 실제로 호출해 본다. 성공이면 null, 실패면 이유.
+  Future<String?> test(String apiKey) => ref.read(testApiKeyProvider)(apiKey);
+
   /// 키를 지우면 Gemini 엔진을 쓸 수 없으므로 ML Kit으로 되돌린다.
   Future<void> clear() async {
     await ref.read(clearApiKeyProvider)();
