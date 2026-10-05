@@ -69,7 +69,7 @@ class GeminiTranslationEngine(
         }
         return try {
             val key = keys.key()?.takeIf { it.isNotBlank() }
-                ?: return EngineResult.Err(TranslationError.Unavailable("API 키 없음"))
+                ?: return EngineResult.Err(TranslationError.NoApiKey)
             val response = transport.generate(key, model, buildBody(request))
             val translated = parse(response)
                 ?: return EngineResult.Err(TranslationError.Unknown("빈 응답"))
@@ -78,8 +78,8 @@ class GeminiTranslationEngine(
             throw e
         } catch (e: GeminiHttpException) {
             EngineResult.Err(
-                if (e.code == 429 || e.code >= 500) TranslationError.Network
-                else TranslationError.Unavailable(e.message),
+                if (e.code == 429 || e.code >= 500) TranslationError.ServiceBusy
+                else TranslationError.InvalidApiKey,
             )
         } catch (e: IOException) {
             EngineResult.Err(TranslationError.Network)

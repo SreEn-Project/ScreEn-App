@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ServiceCompat
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.LifecycleService
@@ -21,6 +22,7 @@ import com.example.translation_poc_app.capture.ScreenCapturer
 import com.example.translation_poc_app.ocr.OcrResult
 import com.example.translation_poc_app.ocr.ScreenTextRecognizer
 import com.example.translation_poc_app.AppGraph
+import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.overlay.OverlayController
@@ -32,6 +34,7 @@ import com.example.translation_poc_app.translate.GeminiTranslationEngine
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
 import com.example.translation_poc_app.translate.ModelDownloadPolicy
 import com.example.translation_poc_app.translate.TranslationEngine
+import com.example.translation_poc_app.translate.TranslationError
 import com.example.translation_poc_app.translate.TranslationOutcome
 import com.example.translation_poc_app.translate.TranslationPipeline
 import kotlinx.coroutines.Dispatchers
@@ -164,11 +167,30 @@ class TranslatorService : LifecycleService() {
         ).also { mlKitEngine = it }
         return when (settings.engine) {
             Engine.ML_KIT -> mlKit
-            Engine.GEMINI -> FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit)
+            Engine.GEMINI -> FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit, ::notifyAiFallback)
             Engine.FIREBASE_AI -> {
                 Log.w(TAG, "FIREBASE_AI 엔진은 아직 없어 ML Kit으로 번역한다")
                 mlKit
             }
+        }
+    }
+
+    private var lastFallbackNoticeMs = 0L
+
+    /** AI 번역이 실패해 ML Kit으로 대신 번역했음을 짧게 알린다 (NA-13). 블록마다 뜨지 않게 일정 시간에 한 번만. */
+    private fun notifyAiFallback(error: TranslationError) {
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastFallbackNoticeMs < FALLBACK_NOTICE_INTERVAL_MS) return
+        lastFallbackNoticeMs = now
+        val message = when (error) {
+            TranslationError.NoApiKey -> R.string.ai_fallback_no_key
+            TranslationError.InvalidApiKey -> R.string.ai_fallback_invalid_key
+            TranslationError.ServiceBusy -> R.string.ai_fallback_busy
+            TranslationError.Network -> R.string.ai_fallback_offline
+            else -> R.string.ai_fallback_failed
+        }
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -302,6 +324,7 @@ class TranslatorService : LifecycleService() {
 
     companion object {
         private const val TAG = "TranslatorService"
+        private const val FALLBACK_NOTICE_INTERVAL_MS = 20_000L
         private const val ACTION_START = "com.example.translation_poc_app.action.START"
         const val ACTION_STOP = "com.example.translation_poc_app.action.STOP"
         private const val ACTION_DEBUG_CAPTURE = "com.example.translation_poc_app.action.DEBUG_CAPTURE"

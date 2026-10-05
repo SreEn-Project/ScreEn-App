@@ -35,15 +35,15 @@ class GeminiTranslationEngineTest {
     fun `키가 없으면 호출하지 않고 Unavailable`() {
         var called = false
         val r = run({ null }, { _, _, _ -> called = true; "" })
-        assertTrue((r as EngineResult.Err).error is TranslationError.Unavailable)
+        assertEquals(TranslationError.NoApiKey, (r as EngineResult.Err).error)
         assertTrue(!called)
     }
 
     @Test
-    fun `오프라인 · 서버 오류는 Network, 잘못된 키는 Unavailable`() {
+    fun `오프라인은 Network, 한도 · 서버 오류는 ServiceBusy, 거부된 키는 InvalidApiKey`() {
         assertEquals(TranslationError.Network, (run({ "k" }, { _, _, _ -> throw IOException() }) as EngineResult.Err).error)
-        assertEquals(TranslationError.Network, (run({ "k" }, { _, _, _ -> throw GeminiHttpException(503, "") }) as EngineResult.Err).error)
-        assertTrue((run({ "k" }, { _, _, _ -> throw GeminiHttpException(400, "") }) as EngineResult.Err).error is TranslationError.Unavailable)
+        assertEquals(TranslationError.ServiceBusy, (run({ "k" }, { _, _, _ -> throw GeminiHttpException(503, "") }) as EngineResult.Err).error)
+        assertEquals(TranslationError.InvalidApiKey, (run({ "k" }, { _, _, _ -> throw GeminiHttpException(400, "") }) as EngineResult.Err).error)
     }
 
     @Test
@@ -56,7 +56,9 @@ class GeminiTranslationEngineTest {
         val ok = EngineResult.Ok(TranslationResult("x", "en", "ko", EngineId.ML_KIT))
         val ai = FakeEngine(EngineId.GEMINI, EngineResult.Err(TranslationError.Network))
         val ml = FakeEngine(EngineId.ML_KIT, ok)
-        val r = FallbackTranslationEngine(ai, ml).translate(request)
+        var reason: TranslationError? = null
+        val r = FallbackTranslationEngine(ai, ml) { reason = it }.translate(request)
+        assertEquals(TranslationError.Network, reason)
         assertEquals(EngineId.ML_KIT, (r as EngineResult.Ok).value.engine)
         assertEquals(1, ml.calls)
     }

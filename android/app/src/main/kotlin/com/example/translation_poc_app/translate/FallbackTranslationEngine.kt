@@ -7,6 +7,8 @@ package com.example.translation_poc_app.translate
 class FallbackTranslationEngine(
     private val primary: TranslationEngine,
     private val fallback: TranslationEngine,
+    /** 대체할 때 [primary]의 실패 이유를 알린다 (안내 표시용). */
+    private val onFallback: (TranslationError) -> Unit = {},
 ) : TranslationEngine {
 
     override val id = primary.id
@@ -16,6 +18,7 @@ class FallbackTranslationEngine(
     override suspend fun translate(request: TranslationRequest): EngineResult<TranslationResult> {
         val first = primary.translate(request)
         if (first is EngineResult.Ok) return first
+        onFallback((first as EngineResult.Err).error)
         return fallback.translate(request)
     }
 
