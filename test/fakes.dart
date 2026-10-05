@@ -128,6 +128,11 @@ class FakeSettingsRepository implements SettingsRepository {
 
   @override
   Future<void> clearApiKey() async => apiKey = null;
+
+  String? testResult;
+
+  @override
+  Future<String?> testApiKey(String apiKey) async => testResult;
 }
 
 /// 받은 모델을 기억만 하는 가짜 모델 저장소.

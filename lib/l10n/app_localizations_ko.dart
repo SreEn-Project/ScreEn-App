@@ -336,6 +336,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get apiKeyHide => '숨기기';
 
   @override
+  String get apiKeyTest => '키 테스트';
+
+  @override
+  String get apiKeyTestOk => '키가 정상이에요';
+
+  @override
+  String apiKeyTestFailed(String reason) {
+    return '실패: $reason';
+  }
+
+  @override
+  String get apiKeyGet => 'Google AI Studio에서 키 발급받기';
+
+  @override
   String get settingsSectionCapture => '캡처';
 
   @override

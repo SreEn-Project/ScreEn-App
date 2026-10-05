@@ -89,3 +89,7 @@ SaveApiKey saveApiKey(Ref ref) =>
 @riverpod
 ClearApiKey clearApiKey(Ref ref) =>
     ClearApiKey(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+TestApiKey testApiKey(Ref ref) =>
+    TestApiKey(ref.watch(settingsRepositoryProvider));

@@ -24,4 +24,7 @@ abstract interface class SettingsRepository {
   Future<String?> getApiKey();
   Future<void> setApiKey(String apiKey);
   Future<void> clearApiKey();
+
+  /// 키를 실제로 호출해 본다. 성공이면 null, 실패면 구글이 알려 준 이유.
+  Future<String?> testApiKey(String apiKey);
 }

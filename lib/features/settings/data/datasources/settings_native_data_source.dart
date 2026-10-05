@@ -52,4 +52,6 @@ class SettingsNativeDataSource {
   Future<void> setApiKey(String apiKey) => _api.setApiKey(apiKey);
 
   Future<void> clearApiKey() => _api.clearApiKey();
+
+  Future<String?> testApiKey(String apiKey) => _api.testApiKey(apiKey);
 }

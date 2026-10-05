@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -15,10 +16,15 @@ class AiSetupScreen extends ConsumerStatefulWidget {
   ConsumerState<AiSetupScreen> createState() => _AiSetupScreenState();
 }
 
+final _studioUrl = Uri.parse('https://aistudio.google.com/apikey');
+
 class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
   final _controller = TextEditingController();
   bool _revealed = false;
   bool _filled = false;
+  bool _testing = false;
+  String? _testMessage;
+  bool _testOk = false;
 
   @override
   void dispose() {
@@ -36,6 +42,28 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
     _controller.clear();
     if (mounted) setState(() => _revealed = false);
   }
+
+  Future<void> _test() async {
+    setState(() {
+      _testing = true;
+      _testMessage = null;
+    });
+    final l10n = AppLocalizations.of(context);
+    final reason = await ref
+        .read(apiKeyViewModelProvider.notifier)
+        .test(_controller.text);
+    if (!mounted) return;
+    setState(() {
+      _testing = false;
+      _testOk = reason == null;
+      _testMessage = reason == null
+          ? l10n.apiKeyTestOk
+          : l10n.apiKeyTestFailed(reason);
+    });
+  }
+
+  Future<void> _openStudio() =>
+      launchUrl(_studioUrl, mode: LaunchMode.externalApplication);
 
   @override
   Widget build(BuildContext context) {
@@ -81,12 +109,29 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                       onPressed: () => setState(() => _revealed = !_revealed),
                     ),
                   ),
+                  AppButton.secondary(
+                    label: l10n.apiKeyTest,
+                    expand: true,
+                    onPressed: text.isEmpty || _testing ? null : _test,
+                  ),
+                  if (_testMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _testMessage!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: _testOk
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.error,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   AppButton(
                     label: l10n.apiKeySave,
                     expand: true,
                     onPressed: text.isEmpty || text == saved ? null : _save,
                   ),
+                  AppButton.text(label: l10n.apiKeyGet, onPressed: _openStudio),
                   if (saved != null) ...[
                     const SizedBox(height: 8),
                     AppButton.secondary(

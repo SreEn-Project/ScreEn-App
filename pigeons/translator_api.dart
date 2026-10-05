@@ -132,6 +132,10 @@ abstract class SettingsHostApi {
 
   @async
   void clearApiKey();
+
+  /// 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 구글이 알려 준 이유(사람이 읽는 문장).
+  @async
+  String? testApiKey(String apiKey);
 }
 
 /// 언어 모델 관리 (FL-05, NA-12). 모델의 원본은 ML Kit이 기기에 받아 둔 파일이다.

@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.ApiKeyStore
 import com.example.translation_poc_app.data.settings.SettingsRepository
+import com.example.translation_poc_app.translate.GeminiKeyTester
 import com.example.translation_poc_app.service.CaptureConsentActivity
 import com.example.translation_poc_app.service.RunState
 import com.example.translation_poc_app.service.TranslatorService
@@ -52,6 +53,8 @@ class SettingsHostApiImpl(
     override suspend fun setApiKey(apiKey: String) = apiKeys.set(apiKey)
 
     override suspend fun clearApiKey() = apiKeys.clear()
+
+    override suspend fun testApiKey(apiKey: String): String? = GeminiKeyTester.test(apiKey)
 }
 
 /** 언어 모델 조회 · 받기 · 삭제 (FL-05). 실패는 예외로 던져 Flutter에 오류로 전해진다. */

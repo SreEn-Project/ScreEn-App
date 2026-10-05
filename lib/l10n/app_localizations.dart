@@ -734,6 +734,30 @@ abstract class AppLocalizations {
   /// **'Hide'**
   String get apiKeyHide;
 
+  /// No description provided for @apiKeyTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Test key'**
+  String get apiKeyTest;
+
+  /// No description provided for @apiKeyTestOk.
+  ///
+  /// In en, this message translates to:
+  /// **'The key works'**
+  String get apiKeyTestOk;
+
+  /// No description provided for @apiKeyTestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected: {reason}'**
+  String apiKeyTestFailed(String reason);
+
+  /// No description provided for @apiKeyGet.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a key from Google AI Studio'**
+  String get apiKeyGet;
+
   /// No description provided for @settingsSectionCapture.
   ///
   /// In en, this message translates to:

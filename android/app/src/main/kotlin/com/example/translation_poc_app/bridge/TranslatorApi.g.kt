@@ -611,6 +611,8 @@ interface SettingsHostApi {
   /** API 키를 Keystore로 암호화해 기기에만 저장한다. */
   suspend fun setApiKey(apiKey: String)
   suspend fun clearApiKey()
+  /** 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 구글이 알려 준 이유(사람이 읽는 문장). */
+  suspend fun testApiKey(apiKey: String): String?
 
   companion object {
     /** The codec used by SettingsHostApi. */
@@ -941,6 +943,25 @@ interface SettingsHostApi {
               val wrapped: List<Any?> = try {
                 api.clearApiKey()
                 listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.testApiKey$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val apiKeyArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.testApiKey(apiKeyArg))
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
               }
