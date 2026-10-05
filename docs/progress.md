@@ -398,3 +398,6 @@
 - `CLAUDE.md`, `docs/` (README, architecture, roadmap, progress, decisions) 작성.
 - Notion 세부 기능 DB에서 1단계(19개) 목록을 [roadmap.md](roadmap.md)에 순서대로 정리.
 - 남은 일: 0단계 기반 세팅 (applicationId 확정 필요) → NA-01 Pigeon 브리지부터.
+
+## AI 번역 엔진 (NA-13, #94)
+- Gemini REST 엔진 + ML Kit 대체 엔진 추가. 키 제공자는 비어 있어(키 저장 방식 결정 대기) 동작은 아직 ML Kit과 같다. 새 의존성은 테스트용 org.json뿐. 단위 테스트 6개 추가.
