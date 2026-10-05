@@ -11,7 +11,7 @@ object GeminiKeyTester {
     suspend fun test(apiKey: String, transport: GeminiTransport = GeminiHttpTransport()): String? =
         try {
             val body = GeminiTranslationEngine.buildBody(TranslationRequest("hello", "en", "ko"))
-            transport.generate(apiKey.filterNot { it.isWhitespace() }, GeminiTranslationEngine.MODEL, body)
+            generateWithFallback(transport, apiKey.filterNot { it.isWhitespace() }, GeminiTranslationEngine.MODELS, body)
             null
         } catch (e: CancellationException) {
             throw e

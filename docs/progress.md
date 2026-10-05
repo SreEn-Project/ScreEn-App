@@ -422,3 +422,6 @@
 
 ## API 키 테스트 · 발급 링크 (NA-13, #106)
 - AI 번역 설정에 "키 테스트"(실제 짧은 호출, 구글이 준 거부 이유를 화면에 표시)와 AI Studio 키 발급 링크 추가. Pigeon testApiKey. 새 의존성 없음(url_launcher는 이미 있었음).
+
+## Gemini 404 수정 (NA-13, #108)
+- 원인: 공식 모델 목록상 Gemini 2.5는 새 프로젝트에서 접근 불가라 404. 모델을 gemini-3.5-flash-lite로, 404면 gemini-3.1-flash-lite로 재시도. 모델 이름은 자주 바뀌므로 MODELS 한 곳에서 관리.

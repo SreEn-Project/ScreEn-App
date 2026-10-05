@@ -56,7 +56,7 @@ class GeminiHttpTransport(private val timeoutMs: Int = 20_000) : GeminiTransport
 class GeminiTranslationEngine(
     private val keys: ApiKeyProvider,
     private val transport: GeminiTransport = GeminiHttpTransport(),
-    private val model: String = MODEL,
+    private val models: List<String> = MODELS,
 ) : TranslationEngine {
 
     override val id = EngineId.GEMINI
@@ -70,7 +70,7 @@ class GeminiTranslationEngine(
         return try {
             val key = keys.key()?.takeIf { it.isNotBlank() }
                 ?: return EngineResult.Err(TranslationError.NoApiKey)
-            val response = transport.generate(key, model, buildBody(request))
+            val response = generateWithFallback(transport, key, models, buildBody(request))
             val translated = parse(response)
                 ?: return EngineResult.Err(TranslationError.Unknown("빈 응답"))
             EngineResult.Ok(TranslationResult(translated, request.source, request.target, id))
@@ -107,7 +107,8 @@ class GeminiTranslationEngine(
     }
 
     companion object {
-        const val MODEL = "gemini-2.5-flash"
+        /** 앞에서부터 시도한다. 모델이 없으면(404) 다음 모델로. 2.5 계열은 새 프로젝트에서 막혀 있다. */
+        val MODELS = listOf("gemini-3.5-flash-lite", "gemini-3.1-flash-lite")
 
         /** 프롬프트를 바꾸면 올린다 (캐시 키에 넣을 값). */
         const val PROMPT_VERSION = 1
@@ -129,4 +130,23 @@ class GeminiTranslationEngine(
                 ?.optJSONObject("content")?.optJSONArray("parts")?.optJSONObject(0)
                 ?.optString("text")?.trim()?.takeIf { it.isNotEmpty() }
     }
+}
+
+/** [models]를 차례로 시도한다. 404(모델 없음 · 접근 불가)일 때만 다음 모델로 넘어가고, 다른 오류는 그대로 던진다. */
+internal suspend fun generateWithFallback(
+    transport: GeminiTransport,
+    key: String,
+    models: List<String>,
+    body: String,
+): String {
+    var last: GeminiHttpException? = null
+    for (model in models) {
+        try {
+            return transport.generate(key, model, body)
+        } catch (e: GeminiHttpException) {
+            if (e.code != 404) throw e
+            last = e
+        }
+    }
+    throw last ?: IllegalArgumentException("모델 목록이 비어 있음")
 }
