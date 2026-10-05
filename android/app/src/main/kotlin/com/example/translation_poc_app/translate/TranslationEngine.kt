@@ -36,6 +36,15 @@ sealed interface TranslationError {
     data object NotEnoughSpace : TranslationError
 
     /** 엔진 자체를 쓸 수 없다 (예: 서비스 미지원 기기). */
+    /** AI 엔진인데 API 키가 없다. */
+    data object NoApiKey : TranslationError
+
+    /** API 키가 거부됐다 (잘못된 키 · 권한 없음). */
+    data object InvalidApiKey : TranslationError
+
+    /** 사용 한도 초과 또는 서버 오류. */
+    data object ServiceBusy : TranslationError
+
     data class Unavailable(val message: String?) : TranslationError
 
     data class Unknown(val message: String?) : TranslationError
