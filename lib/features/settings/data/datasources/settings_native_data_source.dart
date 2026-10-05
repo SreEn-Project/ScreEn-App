@@ -46,4 +46,10 @@ class SettingsNativeDataSource {
 
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);
+
+  Future<bool> hasApiKey() => _api.hasApiKey();
+
+  Future<void> setApiKey(String apiKey) => _api.setApiKey(apiKey);
+
+  Future<void> clearApiKey() => _api.clearApiKey();
 }

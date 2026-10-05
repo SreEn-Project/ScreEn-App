@@ -22,7 +22,7 @@ class MainActivity : FlutterActivity() {
         val messenger = flutterEngine.dartExecutor.binaryMessenger
         val settingsRepository = AppGraph.settingsRepository(this)
 
-        SettingsHostApi.setUp(messenger, SettingsHostApiImpl(settingsRepository))
+        SettingsHostApi.setUp(messenger, SettingsHostApiImpl(settingsRepository, AppGraph.apiKeyStore(this)))
         ServiceHostApi.setUp(messenger, ServiceHostApiImpl(applicationContext))
         ModelHostApi.setUp(messenger, ModelHostApiImpl())
         HistoryHostApi.setUp(messenger, HistoryHostApiImpl(AppGraph.historyRepository(this)))

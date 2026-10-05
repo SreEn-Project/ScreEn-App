@@ -2,6 +2,7 @@ package com.example.translation_poc_app.bridge
 
 import android.content.Context
 import com.example.translation_poc_app.data.history.HistoryRepository
+import com.example.translation_poc_app.data.settings.ApiKeyStore
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.service.CaptureConsentActivity
 import com.example.translation_poc_app.service.RunState
@@ -10,7 +11,10 @@ import com.example.translation_poc_app.service.TranslatorServiceState
 import com.example.translation_poc_app.translate.LanguageModelManager
 
 /** Flutter → 네이티브 설정 호출 (NA-01, NA-16). */
-class SettingsHostApiImpl(private val repository: SettingsRepository) : SettingsHostApi {
+class SettingsHostApiImpl(
+    private val repository: SettingsRepository,
+    private val apiKeys: ApiKeyStore,
+) : SettingsHostApi {
     override suspend fun getSettings(): AppSettings = repository.current().toPigeon()
 
     override suspend fun setTargetLanguage(languageCode: String) =
@@ -42,6 +46,12 @@ class SettingsHostApiImpl(private val repository: SettingsRepository) : Settings
 
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)
+
+    override suspend fun hasApiKey(): Boolean = apiKeys.has()
+
+    override suspend fun setApiKey(apiKey: String) = apiKeys.set(apiKey)
+
+    override suspend fun clearApiKey() = apiKeys.clear()
 }
 
 /** 언어 모델 조회 · 받기 · 삭제 (FL-05). 실패는 예외로 던져 Flutter에 오류로 전해진다. */

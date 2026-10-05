@@ -683,8 +683,44 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAiSetupDetail.
   ///
   /// In en, this message translates to:
-  /// **'API key · Google sign-in'**
+  /// **'Gemini API key'**
   String get settingsAiSetupDetail;
+
+  /// No description provided for @apiKeyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI translation setup'**
+  String get apiKeyTitle;
+
+  /// No description provided for @apiKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your Gemini API key'**
+  String get apiKeyHint;
+
+  /// No description provided for @apiKeyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your own key from Google AI Studio and paste it here. It is encrypted and stored only on this device. Gemini API terms require you to be 18 or older. Translated text is sent to Google; if anything fails, ML Kit takes over.'**
+  String get apiKeyIntro;
+
+  /// No description provided for @apiKeySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save key'**
+  String get apiKeySave;
+
+  /// No description provided for @apiKeyRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove key'**
+  String get apiKeyRemove;
+
+  /// No description provided for @apiKeyRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'A key is registered'**
+  String get apiKeyRegistered;
 
   /// No description provided for @settingsSectionCapture.
   ///

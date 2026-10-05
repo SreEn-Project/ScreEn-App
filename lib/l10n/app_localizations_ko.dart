@@ -308,7 +308,26 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAiSetup => 'AI 번역 설정';
 
   @override
-  String get settingsAiSetupDetail => 'API 키 등록 · 구글 로그인';
+  String get settingsAiSetupDetail => 'Gemini API 키 등록';
+
+  @override
+  String get apiKeyTitle => 'AI 번역 설정';
+
+  @override
+  String get apiKeyHint => 'Gemini API 키를 붙여 넣으세요';
+
+  @override
+  String get apiKeyIntro =>
+      'Google AI Studio에서 본인 키를 발급받아 여기에 붙여 넣으세요. 키는 암호화되어 이 기기에만 저장돼요. Gemini API 약관상 만 18세 이상만 쓸 수 있어요. 번역할 글자는 구글로 보내지고, 실패하면 ML Kit으로 대신 번역해요.';
+
+  @override
+  String get apiKeySave => '키 저장';
+
+  @override
+  String get apiKeyRemove => '키 삭제';
+
+  @override
+  String get apiKeyRegistered => '키가 등록돼 있어요';
 
   @override
   String get settingsSectionCapture => '캡처';

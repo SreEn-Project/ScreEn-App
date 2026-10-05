@@ -317,7 +317,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiSetup => 'AI translation setup';
 
   @override
-  String get settingsAiSetupDetail => 'API key · Google sign-in';
+  String get settingsAiSetupDetail => 'Gemini API key';
+
+  @override
+  String get apiKeyTitle => 'AI translation setup';
+
+  @override
+  String get apiKeyHint => 'Paste your Gemini API key';
+
+  @override
+  String get apiKeyIntro =>
+      'Get your own key from Google AI Studio and paste it here. It is encrypted and stored only on this device. Gemini API terms require you to be 18 or older. Translated text is sent to Google; if anything fails, ML Kit takes over.';
+
+  @override
+  String get apiKeySave => 'Save key';
+
+  @override
+  String get apiKeyRemove => 'Remove key';
+
+  @override
+  String get apiKeyRegistered => 'A key is registered';
 
   @override
   String get settingsSectionCapture => 'Capture';

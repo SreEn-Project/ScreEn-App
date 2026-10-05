@@ -401,3 +401,6 @@
 
 ## AI 번역 엔진 (NA-13, #94)
 - Gemini REST 엔진 + ML Kit 대체 엔진 추가. 키 제공자는 비어 있어(키 저장 방식 결정 대기) 동작은 아직 ML Kit과 같다. 새 의존성은 테스트용 org.json뿐. 단위 테스트 6개 추가.
+
+## Gemini API 키 등록 BYOK (NA-13, #96)
+- 설정에서 본인 Gemini 키 입력 → Keystore 암호화 저장, 키 값은 Flutter로 내보내지 않음(저장 여부만). 키가 있어야 Gemini 선택 가능, 키 삭제 시 ML Kit 복귀. Pigeon: hasApiKey/setApiKey/clearApiKey. 새 UI 컴포넌트 AppTextField. 기기 실측 전.

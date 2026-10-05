@@ -164,7 +164,6 @@ class TranslatorService : LifecycleService() {
         ).also { mlKitEngine = it }
         return when (settings.engine) {
             Engine.ML_KIT -> mlKit
-            // 키 저장 방식이 정해지면(BYOK / Firebase) 키 제공자를 연결한다. 그 전엔 키가 없어 ML Kit으로 대체된다.
             Engine.GEMINI -> FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit)
             Engine.FIREBASE_AI -> {
                 Log.w(TAG, "FIREBASE_AI 엔진은 아직 없어 ML Kit으로 번역한다")
@@ -173,7 +172,7 @@ class TranslatorService : LifecycleService() {
         }
     }
 
-    private val geminiKeys = ApiKeyProvider { null }
+    private val geminiKeys = ApiKeyProvider { AppGraph.apiKeyStore(this).get() }
 
     /** 번역 결과를 기록에 남긴다 (NA-23). 실패해도 번역에는 영향이 없다. */
     private fun recordHistory(outcome: TranslationOutcome.Translated) {

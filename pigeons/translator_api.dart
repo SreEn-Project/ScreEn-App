@@ -121,6 +121,17 @@ abstract class SettingsHostApi {
 
   @async
   void setOnboardingCompleted(bool completed);
+
+  /// AI 번역 API 키가 저장돼 있는가 (NA-13). 키 값은 Flutter로 내보내지 않는다.
+  @async
+  bool hasApiKey();
+
+  /// API 키를 Keystore로 암호화해 기기에만 저장한다.
+  @async
+  void setApiKey(String apiKey);
+
+  @async
+  void clearApiKey();
 }
 
 /// 언어 모델 관리 (FL-05, NA-12). 모델의 원본은 ML Kit이 기기에 받아 둔 파일이다.

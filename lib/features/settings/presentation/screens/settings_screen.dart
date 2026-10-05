@@ -7,6 +7,7 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
+import '../view_models/api_key_view_model.dart';
 import '../view_models/auto_translate_view_model.dart';
 import '../view_models/capture_settings_view_model.dart';
 import '../view_models/display_settings_view_model.dart';
@@ -62,6 +63,7 @@ class _EngineSection extends ConsumerWidget {
     final selected =
         ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
     final viewModel = ref.read(engineViewModelProvider.notifier);
+    final hasKey = ref.watch(apiKeyViewModelProvider).value ?? false;
     return AppSection(
       title: l10n.settingsSectionEngine,
       child: AppCard(
@@ -74,10 +76,10 @@ class _EngineSection extends ConsumerWidget {
               _EngineTile(
                 engine: engine,
                 selected: engine == selected,
-                // AI 엔진은 3단계. 조건(키 · 로그인 · 연령)이 없으면 비활성.
+                // Gemini는 키가 있어야, Firebase AI는 아직 보류.
                 disabledReason: switch (engine) {
                   EngineType.mlKit => null,
-                  EngineType.gemini => l10n.engineNeedsKey,
+                  EngineType.gemini => hasKey ? null : l10n.engineNeedsKey,
                   EngineType.firebaseAi => l10n.engineNeedsLogin,
                 },
                 onTap: () => viewModel.select(engine),
@@ -88,8 +90,7 @@ class _EngineSection extends ConsumerWidget {
               icon: Symbols.tune_rounded,
               title: l10n.settingsAiSetup,
               subtitle: l10n.settingsAiSetupDetail,
-              enabled: false,
-              onTap: () {},
+              onTap: () => context.push(AppRoutes.aiSetup),
             ),
           ],
         ),
