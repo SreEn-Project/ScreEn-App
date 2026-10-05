@@ -30,6 +30,10 @@
     <string name="overlay_setting_hide">Close result: %1$s</string>
     <string name="overlay_setting_hide_overlay_only">Close result: overlay display only</string>
     <string name="overlay_setting_show_delay">New translation wait: %1$s</string>
+    <string name="overlay_setting_engine">AI translation: %1$s</string>
+    <string name="overlay_engine_ml_kit">ML Kit</string>
+    <string name="overlay_engine_gemini">Gemini AI</string>
+    <string name="overlay_engine_needs_key">Gemini AI: add a key in app settings</string>
     <string name="overlay_time_instant">Instantly</string>
     <string name="overlay_time_manual">Manual</string>
     <string name="overlay_time_seconds">After %1$ss</string>

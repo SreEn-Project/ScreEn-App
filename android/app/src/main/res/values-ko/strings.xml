@@ -29,6 +29,10 @@
     <string name="overlay_setting_hide">결과 닫기: %1$s</string>
     <string name="overlay_setting_hide_overlay_only">결과 닫기: 원문 위에 덮기에서만</string>
     <string name="overlay_setting_show_delay">새 번역 대기: %1$s</string>
+    <string name="overlay_setting_engine">AI 번역: %1$s</string>
+    <string name="overlay_engine_ml_kit">ML Kit</string>
+    <string name="overlay_engine_gemini">Gemini AI</string>
+    <string name="overlay_engine_needs_key">Gemini AI: 앱 설정에서 키 등록</string>
     <string name="overlay_time_instant">바로</string>
     <string name="overlay_time_manual">직접 닫기</string>
     <string name="overlay_time_seconds">%1$s초 후</string>

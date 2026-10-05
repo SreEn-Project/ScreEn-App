@@ -28,6 +28,7 @@ import com.example.translation_poc_app.autotranslate.AutoTranslateWatcher
 import com.example.translation_poc_app.autotranslate.FrameSignature
 import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.R
+import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.ResultDisplay
 import com.example.translation_poc_app.data.settings.Settings as AppSettings
@@ -64,6 +65,8 @@ class OverlayController(
     private val onStopRequested: () -> Unit,
     /** 번역이 화면에 올랐다: 번역 기록(NA-23)에 남긴다. 번역이 모두 끝난 결과만 온다 (일부만 끝난 것 제외). */
     private val onTranslated: (TranslationOutcome.Translated) -> Unit = {},
+    /** Gemini API 키가 저장돼 있는가 (NA-13). 빠른 설정의 AI 엔진 선택이 Gemini를 고를 수 있게 할지 정한다. */
+    private val hasGeminiKey: suspend () -> Boolean = { false },
 ) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -98,6 +101,7 @@ class OverlayController(
     private var storedHideMs = AppSettings.DEFAULT_HIDE_AFTER_INTERACTION_MS
     private var storedShowDelayMs = AppSettings.DEFAULT_AUTO_SHOW_DELAY_MS
     private var settingsSeen = false
+    private var engine = Engine.ML_KIT
     private var sourceLanguage by mutableStateOf(AppSettings.SOURCE_LANGUAGE_AUTO)
 
     /** 마지막으로 번역한 영역 (자동 번역이 같은 영역을 다시 번역한다). null = 화면 전체. */
@@ -219,6 +223,7 @@ class OverlayController(
                 display = it.resultDisplay
                 targetLanguage = it.targetLanguage
                 quickLanguages = it.quickLanguages
+                engine = it.engine
                 // 자동 번역은 결과가 '본문 위에 표시'일 때만 쓴다. 설정 값은 그대로 두어, 다시 덮어쓰기로 바꾸면 이어진다.
                 autoTranslate = it.autoTranslate && it.resultDisplay == ResultDisplay.OVERLAY
                 sourceLanguage = it.sourceLanguage
@@ -699,7 +704,44 @@ class OverlayController(
                 showChoices(QuickSettingChoices.showDelay(), storedShowDelayMs, settingsRepository::setAutoShowDelayMs)
             }
         }
+        // AI 번역 엔진: 누르면 ML Kit · Gemini AI 목록이 열린다. 저장은 앱 설정과 같은 엔진 설정이라 서로 맞는다.
+        options += MenuOption(
+            Symbol.AUTO_AWESOME,
+            context.getString(R.string.overlay_setting_engine, engineLabel(engine)),
+            selected = false,
+        ) { showEngineChoices() }
         return options
+    }
+
+    /** 엔진 이름표. Gemini가 아닌 엔진은 지금 ML Kit으로 번역된다. */
+    private fun engineLabel(engine: Engine): String =
+        context.getString(if (engine == Engine.GEMINI) R.string.overlay_engine_gemini else R.string.overlay_engine_ml_kit)
+
+    /**
+     * 엔진 선택 목록을 버튼 옆에 연다. Gemini AI는 API 키가 있어야 고를 수 있어, 없으면 비활성으로 두고 앱 설정에서 등록하라고 알린다.
+     * 키는 Keystore에서 읽으므로 메인 스레드 밖에서 확인한다.
+     */
+    private fun showEngineChoices() {
+        scope.launch {
+            val keyReady = withContext(Dispatchers.IO) { runCatching { hasGeminiKey() }.getOrDefault(false) }
+            val options = QuickSettingChoices.engines().map { choice ->
+                val usable = choice != Engine.GEMINI || keyReady
+                MenuOption(
+                    Symbol.CHECK,
+                    if (usable) engineLabel(choice) else context.getString(R.string.overlay_engine_needs_key),
+                    selected = usable && choice == engine,
+                    enabled = usable,
+                ) {
+                    engine = choice
+                    scope.launch { settingsRepository.setEngine(choice) }
+                    post(::dismissMenu)
+                }
+            }
+            post {
+                dismissMenu()
+                openOptionWindow(options)
+            }
+        }
     }
 
     /** 선택지 목록을 버튼 옆에 열고, 고른 값을 저장한 뒤 닫는다. */

@@ -2,6 +2,12 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-06 · 빠른 설정에 AI 번역 엔진 선택 (FL-06, NA-18, 이슈 #100, 브랜치 `feat/100-quick-ai-engine`)
+- 플로팅 '설정' 버블에 "AI 번역: ML Kit/Gemini AI" 항목을 추가했다. 누르면 결과 닫기처럼 목록이 열려 ML Kit · Gemini AI를 바로 고른다 (탭 순환 아님). 저장은 앱 설정 화면과 같은 엔진 설정(DataStore `engine`)이라 서로 맞는다.
+- Gemini API 키가 없으면 Gemini AI 줄은 비활성이고 "Gemini AI: 앱 설정에서 키 등록"으로 안내한다. 키 확인은 `ApiKeyStore`(Keystore)를 서비스가 `hasGeminiKey`로 넘겨 IO 스레드에서 읽는다. 설정에 있는 AI 관련 옵션은 엔진 선택뿐이라 이것만 넣었다.
+- 변경: `overlay/OverlayController` · `QuickSettingChoices`(`engines()`, 단위 테스트 추가) · `service/TranslatorService` · 네이티브 strings.xml(ko/en). pubspec · Gradle · Manifest 변경 없음.
+- 확인: analyze · flutter test · 네이티브 단위 테스트 · 디버그 빌드 통과. 기기 확인은 하지 않음.
+
 ## 2026-10-06 · 빠른 설정 선택을 목록 메뉴로 (FL-06, 이슈 #92, 브랜치 `feat/92-quick-settings-choice-menu`)
 - #90의 탭 순환 방식이 불편해, 결과 닫기 · 새 번역 대기를 누르면 선택지 목록이 열려 바로 고르게 바꿨다. 현재 값이 표시된다. 자동 번역 토글은 그대로, 규칙(덮어쓰기에서만, 자동 번역 중 직접 닫기 제외)도 같다.
 - 확인: analyze · test · 네이티브 단위 테스트 · 디버그 빌드 통과. 기기 확인은 하지 않음.
