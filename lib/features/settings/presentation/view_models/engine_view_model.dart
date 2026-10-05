@@ -21,7 +21,7 @@ class EngineViewModel extends _$EngineViewModel {
       case EngineType.mlKit:
         break;
       case EngineType.gemini:
-        if (!(await ref.read(apiKeyViewModelProvider.future))) return;
+        if (await ref.read(apiKeyViewModelProvider.future) == null) return;
       case EngineType.firebaseAi:
         return;
     }

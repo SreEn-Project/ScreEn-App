@@ -20,8 +20,8 @@ abstract interface class SettingsRepository {
   Future<void> resetFixedRegion();
   Future<void> setOnboardingCompleted(bool completed);
 
-  /// AI 번역 API 키 (NA-13). 키 값은 읽을 수 없고 저장 여부만 안다.
-  Future<bool> hasApiKey();
+  /// AI 번역 API 키 (NA-13). 없으면 null.
+  Future<String?> getApiKey();
   Future<void> setApiKey(String apiKey);
   Future<void> clearApiKey();
 }

@@ -121,7 +121,7 @@ class FakeSettingsRepository implements SettingsRepository {
   String? apiKey;
 
   @override
-  Future<bool> hasApiKey() async => apiKey != null;
+  Future<String?> getApiKey() async => apiKey;
 
   @override
   Future<void> setApiKey(String apiKey) async => this.apiKey = apiKey;

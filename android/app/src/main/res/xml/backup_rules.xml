@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 키는 기기 Keystore에 묶여 있어 다른 기기로 복원하면 못 읽는다 → 백업에서 뺀다 (NA-13). -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="api_key_store.xml" />
+</full-backup-content>

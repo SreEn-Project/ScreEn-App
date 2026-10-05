@@ -404,3 +404,6 @@
 
 ## Gemini API 키 등록 BYOK (NA-13, #96)
 - 설정에서 본인 Gemini 키 입력 → Keystore 암호화 저장, 키 값은 Flutter로 내보내지 않음(저장 여부만). 키가 있어야 Gemini 선택 가능, 키 삭제 시 ML Kit 복귀. Pigeon: hasApiKey/setApiKey/clearApiKey. 새 UI 컴포넌트 AppTextField. 기기 실측 전.
+
+## API 키 보기/수정 + 등록됨 오표시 수정 (NA-13, #98)
+- 원인: 키 존재를 저장 항목 유무로만 판단해, 백업 복원된(못 읽는) 암호문도 등록됨으로 보임. 이제 복호화 성공해야 등록됨, 키 저장소를 백업에서 제외. 등록된 키는 가려서 채우고 보기 토글 · 수정 · 삭제. Pigeon hasApiKey → getApiKey(String?).

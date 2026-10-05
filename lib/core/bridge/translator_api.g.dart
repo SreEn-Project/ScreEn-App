@@ -770,10 +770,10 @@ class SettingsHostApi {
     );
   }
 
-  /// AI 번역 API 키가 저장돼 있는가 (NA-13). 키 값은 Flutter로 내보내지 않는다.
-  Future<bool> hasApiKey() async {
+  /// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다.
+  Future<String?> getApiKey() async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.hasApiKey$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.getApiKey$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -785,9 +785,9 @@ class SettingsHostApi {
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
       pigeonVar_replyList,
       pigeonVar_channelName,
-      isNullValid: false,
+      isNullValid: true,
     );
-    return pigeonVar_replyValue! as bool;
+    return pigeonVar_replyValue as String?;
   }
 
   /// API 키를 Keystore로 암호화해 기기에만 저장한다.

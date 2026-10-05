@@ -116,6 +116,8 @@
   "apiKeySave": "Save key",
   "apiKeyRemove": "Remove key",
   "apiKeyRegistered": "A key is registered",
+  "apiKeyShow": "Show",
+  "apiKeyHide": "Hide",
   "settingsSectionCapture": "Capture",
   "settingsDefaultCaptureMode": "Default capture mode",
   "settingsResetFixedRegion": "Reset fixed area",

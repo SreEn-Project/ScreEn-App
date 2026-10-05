@@ -12,12 +12,10 @@ import javax.crypto.spec.GCMParameterSpec
 
 /**
  * AI 번역 API 키 보관 (NA-13). Android Keystore의 AES 키로 암호화해 앱 전용 저장소에만 둔다.
- * 키 값은 로그 · 설정 이벤트 · Flutter로 내보내지 않는다 (있는지 여부만 알려 준다).
+ * 키 값은 로그 · 설정 이벤트로 내보내지 않는다. 설정 화면이 가려서 보여 주려고 Flutter로는 [get]으로만 준다.
  */
 class ApiKeyStore(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
-
-    fun has(): Boolean = prefs.contains(ENTRY)
 
     fun get(): String? {
         val stored = prefs.getString(ENTRY, null) ?: return null
@@ -27,7 +25,7 @@ class ApiKeyStore(context: Context) {
             cipher.init(Cipher.DECRYPT_MODE, secretKey(), GCMParameterSpec(TAG_BITS, raw.copyOfRange(0, IV_BYTES)))
             String(cipher.doFinal(raw, IV_BYTES, raw.size - IV_BYTES))
         } catch (e: Exception) {
-            // Keystore 키가 사라진 경우(백업 복원 등) 읽을 수 없다 → 키 없음으로 취급한다.
+            // Keystore 키가 사라진 경우(백업 복원 등) 읽을 수 없다 → 키 없음으로 취급한다 (등록됨으로 보이지 않게).
             null
         }
     }

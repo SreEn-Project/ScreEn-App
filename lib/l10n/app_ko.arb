@@ -115,6 +115,8 @@
   "apiKeySave": "키 저장",
   "apiKeyRemove": "키 삭제",
   "apiKeyRegistered": "키가 등록돼 있어요",
+  "apiKeyShow": "보기",
+  "apiKeyHide": "숨기기",
   "settingsSectionCapture": "캡처",
   "settingsDefaultCaptureMode": "기본 캡처 모드",
   "settingsResetFixedRegion": "고정 영역 초기화",

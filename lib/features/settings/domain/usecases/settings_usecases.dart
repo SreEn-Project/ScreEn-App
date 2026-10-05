@@ -179,14 +179,14 @@ final class CompleteOnboarding implements NoParamsUseCase<void> {
   Future<void> call() => _repository.setOnboardingCompleted(true);
 }
 
-/// AI 번역 API 키가 저장돼 있는가 (NA-13).
-final class HasApiKey implements NoParamsUseCase<bool> {
-  const HasApiKey(this._repository);
+/// 저장된 AI 번역 API 키 (NA-13). 없으면 null.
+final class GetApiKey implements NoParamsUseCase<String?> {
+  const GetApiKey(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<bool> call() => _repository.hasApiKey();
+  Future<String?> call() => _repository.getApiKey();
 }
 
 /// AI 번역 API 키 저장 (NA-13). 공백은 걷어 낸다.

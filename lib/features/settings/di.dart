@@ -79,8 +79,8 @@ CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));
 
 @riverpod
-HasApiKey hasApiKey(Ref ref) =>
-    HasApiKey(ref.watch(settingsRepositoryProvider));
+GetApiKey getApiKey(Ref ref) =>
+    GetApiKey(ref.watch(settingsRepositoryProvider));
 
 @riverpod
 SaveApiKey saveApiKey(Ref ref) =>

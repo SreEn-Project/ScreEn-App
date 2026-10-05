@@ -606,8 +606,8 @@ interface SettingsHostApi {
   /** 저장된 고정 영역을 지운다 (FL-08). 다음에 고정 영역 번역을 시작하면 영역을 새로 고른다. */
   suspend fun resetFixedRegion()
   suspend fun setOnboardingCompleted(completed: Boolean)
-  /** AI 번역 API 키가 저장돼 있는가 (NA-13). 키 값은 Flutter로 내보내지 않는다. */
-  suspend fun hasApiKey(): Boolean
+  /** 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다. */
+  suspend fun getApiKey(): String?
   /** API 키를 Keystore로 암호화해 기기에만 저장한다. */
   suspend fun setApiKey(apiKey: String)
   suspend fun clearApiKey()
@@ -897,12 +897,12 @@ interface SettingsHostApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.hasApiKey$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.getApiKey$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                listOf(api.hasApiKey())
+                listOf(api.getApiKey())
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
               }

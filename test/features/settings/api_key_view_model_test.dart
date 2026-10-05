@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     repository = _MockSettingsRepository();
-    when(() => repository.hasApiKey()).thenAnswer((_) async => false);
+    when(() => repository.getApiKey()).thenAnswer((_) async => null);
     when(() => repository.setApiKey(any())).thenAnswer((_) async {});
     when(() => repository.clearApiKey()).thenAnswer((_) async {});
     when(() => repository.setEngine(any())).thenAnswer((_) async {});
@@ -28,11 +28,11 @@ void main() {
 
   tearDown(() => container.dispose());
 
-  test('저장 여부를 보여 준다', () async {
-    expect(await container.read(apiKeyViewModelProvider.future), isFalse);
+  test('저장된 키가 없으면 null', () async {
+    expect(await container.read(apiKeyViewModelProvider.future), isNull);
   });
 
-  test('키를 저장하면 앞뒤 공백을 걷어 전달하고 등록됨이 된다', () async {
+  test('키를 저장하면 앞뒤 공백을 걷어 전달하고 그 값이 보인다', () async {
     await container.read(apiKeyViewModelProvider.future);
 
     final saved = await container
@@ -41,7 +41,7 @@ void main() {
 
     expect(saved, isTrue);
     verify(() => repository.setApiKey('abc')).called(1);
-    expect(container.read(apiKeyViewModelProvider).value, isTrue);
+    expect(container.read(apiKeyViewModelProvider).value, equals("abc"));
   });
 
   test('빈 키는 저장하지 않는다', () async {
@@ -62,6 +62,6 @@ void main() {
 
     verify(() => repository.clearApiKey()).called(1);
     verify(() => repository.setEngine(EngineType.mlKit)).called(1);
-    expect(container.read(apiKeyViewModelProvider).value, isFalse);
+    expect(container.read(apiKeyViewModelProvider).value, isNull);
   });
 }

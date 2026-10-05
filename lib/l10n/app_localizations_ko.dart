@@ -330,6 +330,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get apiKeyRegistered => '키가 등록돼 있어요';
 
   @override
+  String get apiKeyShow => '보기';
+
+  @override
+  String get apiKeyHide => '숨기기';
+
+  @override
   String get settingsSectionCapture => '캡처';
 
   @override

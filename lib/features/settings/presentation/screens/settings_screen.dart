@@ -63,7 +63,7 @@ class _EngineSection extends ConsumerWidget {
     final selected =
         ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
     final viewModel = ref.read(engineViewModelProvider.notifier);
-    final hasKey = ref.watch(apiKeyViewModelProvider).value ?? false;
+    final hasKey = ref.watch(apiKeyViewModelProvider).value != null;
     return AppSection(
       title: l10n.settingsSectionEngine,
       child: AppCard(

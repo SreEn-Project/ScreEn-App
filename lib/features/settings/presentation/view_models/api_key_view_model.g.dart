@@ -8,15 +8,18 @@ part of 'api_key_view_model.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// AI 번역 API 키 등록 상태 (NA-13). 값은 네이티브 Keystore에만 있고, 여기선 저장 여부(bool)만 다룬다.
+/// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 원본은 네이티브 Keystore 저장소다.
+/// 화면은 이 값을 가려서 보여 주고, 눌러서 볼 수 있게 한다.
 
 @ProviderFor(ApiKeyViewModel)
 final apiKeyViewModelProvider = ApiKeyViewModelProvider._();
 
-/// AI 번역 API 키 등록 상태 (NA-13). 값은 네이티브 Keystore에만 있고, 여기선 저장 여부(bool)만 다룬다.
+/// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 원본은 네이티브 Keystore 저장소다.
+/// 화면은 이 값을 가려서 보여 주고, 눌러서 볼 수 있게 한다.
 final class ApiKeyViewModelProvider
-    extends $AsyncNotifierProvider<ApiKeyViewModel, bool> {
-  /// AI 번역 API 키 등록 상태 (NA-13). 값은 네이티브 Keystore에만 있고, 여기선 저장 여부(bool)만 다룬다.
+    extends $AsyncNotifierProvider<ApiKeyViewModel, String?> {
+  /// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 원본은 네이티브 Keystore 저장소다.
+  /// 화면은 이 값을 가려서 보여 주고, 눌러서 볼 수 있게 한다.
   ApiKeyViewModelProvider._()
     : super(
         from: null,
@@ -36,21 +39,22 @@ final class ApiKeyViewModelProvider
   ApiKeyViewModel create() => ApiKeyViewModel();
 }
 
-String _$apiKeyViewModelHash() => r'368321c62044a2bbc97f30e6fa723210d7ad518f';
+String _$apiKeyViewModelHash() => r'79b94b5fbcdd188544505ebf71df965f596c79c7';
 
-/// AI 번역 API 키 등록 상태 (NA-13). 값은 네이티브 Keystore에만 있고, 여기선 저장 여부(bool)만 다룬다.
+/// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 원본은 네이티브 Keystore 저장소다.
+/// 화면은 이 값을 가려서 보여 주고, 눌러서 볼 수 있게 한다.
 
-abstract class _$ApiKeyViewModel extends $AsyncNotifier<bool> {
-  FutureOr<bool> build();
+abstract class _$ApiKeyViewModel extends $AsyncNotifier<String?> {
+  FutureOr<String?> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<bool>, bool>;
+    final ref = this.ref as $Ref<AsyncValue<String?>, String?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<AsyncValue<bool>, bool>,
-              AsyncValue<bool>,
+              AnyNotifier<AsyncValue<String?>, String?>,
+              AsyncValue<String?>,
               Object?,
               Object?
             >;

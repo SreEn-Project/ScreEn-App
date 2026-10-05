@@ -752,46 +752,46 @@ final class CompleteOnboardingProvider
 String _$completeOnboardingHash() =>
     r'7a8d915553a3367122f68b7538ecac8b8f77e58d';
 
-@ProviderFor(hasApiKey)
-final hasApiKeyProvider = HasApiKeyProvider._();
+@ProviderFor(getApiKey)
+final getApiKeyProvider = GetApiKeyProvider._();
 
-final class HasApiKeyProvider
-    extends $FunctionalProvider<HasApiKey, HasApiKey, HasApiKey>
-    with $Provider<HasApiKey> {
-  HasApiKeyProvider._()
+final class GetApiKeyProvider
+    extends $FunctionalProvider<GetApiKey, GetApiKey, GetApiKey>
+    with $Provider<GetApiKey> {
+  GetApiKeyProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'hasApiKeyProvider',
+        name: r'getApiKeyProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$hasApiKeyHash();
+  String debugGetCreateSourceHash() => _$getApiKeyHash();
 
   @$internal
   @override
-  $ProviderElement<HasApiKey> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<GetApiKey> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  HasApiKey create(Ref ref) {
-    return hasApiKey(ref);
+  GetApiKey create(Ref ref) {
+    return getApiKey(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(HasApiKey value) {
+  Override overrideWithValue(GetApiKey value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<HasApiKey>(value),
+      providerOverride: $SyncValueProvider<GetApiKey>(value),
     );
   }
 }
 
-String _$hasApiKeyHash() => r'6350ddb0a72074073cacf6b6924585c102d0ef65';
+String _$getApiKeyHash() => r'44271899c1303a075405ec754a451eb409f46c31';
 
 @ProviderFor(saveApiKey)
 final saveApiKeyProvider = SaveApiKeyProvider._();
