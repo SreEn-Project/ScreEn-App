@@ -117,6 +117,17 @@ class FakeSettingsRepository implements SettingsRepository {
   @override
   Future<void> setOnboardingCompleted(bool completed) async =>
       settings = settings.copyWith(onboardingCompleted: completed);
+
+  String? apiKey;
+
+  @override
+  Future<bool> hasApiKey() async => apiKey != null;
+
+  @override
+  Future<void> setApiKey(String apiKey) async => this.apiKey = apiKey;
+
+  @override
+  Future<void> clearApiKey() async => apiKey = null;
 }
 
 /// 받은 모델을 기억만 하는 가짜 모델 저장소.

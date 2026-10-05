@@ -64,4 +64,13 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setOnboardingCompleted(bool completed) =>
       _dataSource.setOnboardingCompleted(completed);
+
+  @override
+  Future<bool> hasApiKey() => _dataSource.hasApiKey();
+
+  @override
+  Future<void> setApiKey(String apiKey) => _dataSource.setApiKey(apiKey);
+
+  @override
+  Future<void> clearApiKey() => _dataSource.clearApiKey();
 }

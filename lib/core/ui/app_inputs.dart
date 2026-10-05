@@ -199,3 +199,56 @@ class AppSlider extends StatelessWidget {
     );
   }
 }
+
+/// 한 줄 입력창: 흰 둥근 사각형 + 옅은 그림자. [obscure]면 입력을 가린다 (API 키 등).
+class AppTextField extends StatelessWidget {
+  const AppTextField({
+    super.key,
+    required this.controller,
+    required this.hint,
+    this.obscure = false,
+    this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final bool obscure;
+  final ValueChanged<String>? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        color: colors.surface,
+        shadows: context.tokens.cardShadow,
+      ),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        obscureText: obscure,
+        autocorrect: false,
+        enableSuggestions: false,
+        style: theme.textTheme.bodyLarge,
+        cursorColor: colors.primary,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: theme.textTheme.bodyLarge?.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+          filled: false,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppTokens.rowPaddingH,
+            vertical: 16,
+          ),
+        ),
+      ),
+    );
+  }
+}

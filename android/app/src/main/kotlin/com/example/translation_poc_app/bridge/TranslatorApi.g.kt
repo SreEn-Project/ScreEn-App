@@ -606,6 +606,11 @@ interface SettingsHostApi {
   /** 저장된 고정 영역을 지운다 (FL-08). 다음에 고정 영역 번역을 시작하면 영역을 새로 고른다. */
   suspend fun resetFixedRegion()
   suspend fun setOnboardingCompleted(completed: Boolean)
+  /** AI 번역 API 키가 저장돼 있는가 (NA-13). 키 값은 Flutter로 내보내지 않는다. */
+  suspend fun hasApiKey(): Boolean
+  /** API 키를 Keystore로 암호화해 기기에만 저장한다. */
+  suspend fun setApiKey(apiKey: String)
+  suspend fun clearApiKey()
 
   companion object {
     /** The codec used by SettingsHostApi. */
@@ -880,6 +885,61 @@ interface SettingsHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.setOnboardingCompleted(completedArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.hasApiKey$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.hasApiKey())
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setApiKey$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val apiKeyArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setApiKey(apiKeyArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.clearApiKey$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.clearApiKey()
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

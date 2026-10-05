@@ -8,6 +8,7 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/language/presentation/screens/language_picker_screen.dart';
 import '../features/models/presentation/screens/language_models_screen.dart';
 import '../features/settings/di.dart';
+import '../features/settings/presentation/screens/ai_setup_screen.dart';
 import '../features/settings/presentation/screens/quick_languages_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/permission/presentation/screens/permission_screen.dart';
@@ -28,6 +29,7 @@ abstract final class AppRoutes {
   // 탭 위로 덮는 화면
   static const targetLanguage = '/target-language';
   static const quickLanguages = '/quick-languages';
+  static const aiSetup = '/ai-setup';
   static const about = '/about';
   static const history = '/history';
 }
@@ -78,6 +80,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
       GoRoute(
         path: AppRoutes.quickLanguages,
         builder: (context, state) => const QuickLanguagesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.aiSetup,
+        builder: (context, state) => const AiSetupScreen(),
       ),
       GoRoute(
         path: AppRoutes.history,

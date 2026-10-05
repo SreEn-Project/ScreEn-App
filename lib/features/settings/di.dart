@@ -77,3 +77,15 @@ ResetFixedRegion resetFixedRegion(Ref ref) =>
 @riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+HasApiKey hasApiKey(Ref ref) =>
+    HasApiKey(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+SaveApiKey saveApiKey(Ref ref) =>
+    SaveApiKey(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ClearApiKey clearApiKey(Ref ref) =>
+    ClearApiKey(ref.watch(settingsRepositoryProvider));

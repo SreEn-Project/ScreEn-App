@@ -1,6 +1,7 @@
 package com.example.translation_poc_app
 
 import android.content.Context
+import com.example.translation_poc_app.data.settings.ApiKeyStore
 import com.example.translation_poc_app.data.history.AppDatabase
 import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.SettingsRepository
@@ -29,5 +30,14 @@ object AppGraph {
             historyRepository ?: HistoryRepository(AppDatabase.create(context).history()).also {
                 historyRepository = it
             }
+        }
+
+    @Volatile
+    private var apiKeyStore: ApiKeyStore? = null
+
+    /** AI 번역 API 키 보관소 (NA-13). */
+    fun apiKeyStore(context: Context): ApiKeyStore =
+        apiKeyStore ?: synchronized(this) {
+            apiKeyStore ?: ApiKeyStore(context).also { apiKeyStore = it }
         }
 }

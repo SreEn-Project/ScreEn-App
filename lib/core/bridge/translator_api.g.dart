@@ -769,6 +769,65 @@ class SettingsHostApi {
       isNullValid: true,
     );
   }
+
+  /// AI 번역 API 키가 저장돼 있는가 (NA-13). 키 값은 Flutter로 내보내지 않는다.
+  Future<bool> hasApiKey() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.hasApiKey$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// API 키를 Keystore로 암호화해 기기에만 저장한다.
+  Future<void> setApiKey(String apiKey) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setApiKey$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[apiKey],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> clearApiKey() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.clearApiKey$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
 }
 
 /// 언어 모델 관리 (FL-05, NA-12). 모델의 원본은 ML Kit이 기기에 받아 둔 파일이다.

@@ -54,7 +54,8 @@ void main() {
     verify(() => repository.setEngine(EngineType.mlKit)).called(1);
   });
 
-  test('AI 엔진은 보류라 선택해도 저장하지 않는다', () async {
+  test('Gemini는 키가 없으면 선택해도 저장하지 않는다', () async {
+    when(() => repository.hasApiKey()).thenAnswer((_) async => false);
     await ready();
     final viewModel = container.read(engineViewModelProvider.notifier);
 
@@ -62,5 +63,16 @@ void main() {
     await viewModel.select(EngineType.firebaseAi);
 
     verifyNever(() => repository.setEngine(any()));
+  });
+
+  test('Gemini는 키가 있으면 선택된다', () async {
+    when(() => repository.hasApiKey()).thenAnswer((_) async => true);
+    await ready();
+
+    await container
+        .read(engineViewModelProvider.notifier)
+        .select(EngineType.gemini);
+
+    verify(() => repository.setEngine(EngineType.gemini)).called(1);
   });
 }
