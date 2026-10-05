@@ -6,7 +6,8 @@ import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../view_models/api_key_view_model.dart';
 
-/// AI 번역 설정 (NA-13): 본인 Gemini API 키를 붙여 넣는다. 키는 기기에만 저장되고 화면에 다시 나오지 않는다.
+/// AI 번역 설정 (NA-13): 본인 Gemini API 키를 붙여 넣는다.
+/// 등록된 키가 있으면 입력창에 가려서 채워 두고, 보기 · 수정 · 삭제를 할 수 있다.
 class AiSetupScreen extends ConsumerStatefulWidget {
   const AiSetupScreen({super.key});
 
@@ -16,6 +17,8 @@ class AiSetupScreen extends ConsumerStatefulWidget {
 
 class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
   final _controller = TextEditingController();
+  bool _revealed = false;
+  bool _filled = false;
 
   @override
   void dispose() {
@@ -24,19 +27,26 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
   }
 
   Future<void> _save() async {
-    final saved = await ref
-        .read(apiKeyViewModelProvider.notifier)
-        .save(_controller.text);
-    if (saved) _controller.clear();
+    await ref.read(apiKeyViewModelProvider.notifier).save(_controller.text);
     if (mounted) setState(() {});
+  }
+
+  Future<void> _remove() async {
+    await ref.read(apiKeyViewModelProvider.notifier).clear();
+    _controller.clear();
+    if (mounted) setState(() => _revealed = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final hasKey = ref.watch(apiKeyViewModelProvider).value ?? false;
-    final viewModel = ref.read(apiKeyViewModelProvider.notifier);
+    final saved = ref.watch(apiKeyViewModelProvider).value;
+    if (!_filled && saved != null) {
+      _controller.text = saved;
+      _filled = true;
+    }
+    final text = _controller.text.trim();
 
     return Scaffold(
       body: SafeArea(
@@ -49,7 +59,7 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                 children: [
                   Text(l10n.apiKeyIntro, style: theme.textTheme.bodyMedium),
                   const SizedBox(height: 16),
-                  if (hasKey) ...[
+                  if (saved != null) ...[
                     Text(
                       l10n.apiKeyRegistered,
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -61,21 +71,28 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                   AppTextField(
                     controller: _controller,
                     hint: l10n.apiKeyHint,
-                    obscure: true,
+                    obscure: !_revealed,
                     onChanged: (_) => setState(() {}),
                   ),
-                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: AppButton.text(
+                      label: _revealed ? l10n.apiKeyHide : l10n.apiKeyShow,
+                      onPressed: () => setState(() => _revealed = !_revealed),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   AppButton(
                     label: l10n.apiKeySave,
                     expand: true,
-                    onPressed: _controller.text.trim().isEmpty ? null : _save,
+                    onPressed: text.isEmpty || text == saved ? null : _save,
                   ),
-                  if (hasKey) ...[
+                  if (saved != null) ...[
                     const SizedBox(height: 8),
                     AppButton.secondary(
                       label: l10n.apiKeyRemove,
                       expand: true,
-                      onPressed: viewModel.clear,
+                      onPressed: _remove,
                     ),
                   ],
                 ],

@@ -722,6 +722,18 @@ abstract class AppLocalizations {
   /// **'A key is registered'**
   String get apiKeyRegistered;
 
+  /// No description provided for @apiKeyShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get apiKeyShow;
+
+  /// No description provided for @apiKeyHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get apiKeyHide;
+
   /// No description provided for @settingsSectionCapture.
   ///
   /// In en, this message translates to:

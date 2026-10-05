@@ -55,7 +55,7 @@ void main() {
   });
 
   test('Gemini는 키가 없으면 선택해도 저장하지 않는다', () async {
-    when(() => repository.hasApiKey()).thenAnswer((_) async => false);
+    when(() => repository.getApiKey()).thenAnswer((_) async => null);
     await ready();
     final viewModel = container.read(engineViewModelProvider.notifier);
 
@@ -66,7 +66,7 @@ void main() {
   });
 
   test('Gemini는 키가 있으면 선택된다', () async {
-    when(() => repository.hasApiKey()).thenAnswer((_) async => true);
+    when(() => repository.getApiKey()).thenAnswer((_) async => "k");
     await ready();
 
     await container

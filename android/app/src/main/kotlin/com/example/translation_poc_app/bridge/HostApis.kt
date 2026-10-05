@@ -47,7 +47,7 @@ class SettingsHostApiImpl(
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)
 
-    override suspend fun hasApiKey(): Boolean = apiKeys.has()
+    override suspend fun getApiKey(): String? = apiKeys.get()
 
     override suspend fun setApiKey(apiKey: String) = apiKeys.set(apiKey)
 

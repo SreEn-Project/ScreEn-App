@@ -122,9 +122,9 @@ abstract class SettingsHostApi {
   @async
   void setOnboardingCompleted(bool completed);
 
-  /// AI 번역 API 키가 저장돼 있는가 (NA-13). 키 값은 Flutter로 내보내지 않는다.
+  /// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다.
   @async
-  bool hasApiKey();
+  String? getApiKey();
 
   /// API 키를 Keystore로 암호화해 기기에만 저장한다.
   @async
