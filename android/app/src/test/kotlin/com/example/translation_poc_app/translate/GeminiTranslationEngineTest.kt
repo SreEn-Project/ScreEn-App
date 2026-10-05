@@ -40,10 +40,12 @@ class GeminiTranslationEngineTest {
     }
 
     @Test
-    fun `오프라인은 Network, 한도 · 서버 오류는 ServiceBusy, 거부된 키는 InvalidApiKey`() {
+    fun `오프라인 Network, 한도 ServiceBusy, 키 거부 InvalidApiKey, 접근 거부 AccessDenied, 그 외 Unknown`() {
         assertEquals(TranslationError.Network, (run({ "k" }, { _, _, _ -> throw IOException() }) as EngineResult.Err).error)
         assertEquals(TranslationError.ServiceBusy, (run({ "k" }, { _, _, _ -> throw GeminiHttpException(503, "") }) as EngineResult.Err).error)
-        assertEquals(TranslationError.InvalidApiKey, (run({ "k" }, { _, _, _ -> throw GeminiHttpException(400, "") }) as EngineResult.Err).error)
+        assertEquals(TranslationError.InvalidApiKey, (run({ "k" }, { _, _, _ -> throw GeminiHttpException(400, "API_KEY_INVALID") }) as EngineResult.Err).error)
+        assertEquals(TranslationError.AccessDenied, (run({ "k" }, { _, _, _ -> throw GeminiHttpException(403, "PERMISSION_DENIED") }) as EngineResult.Err).error)
+        assertTrue((run({ "k" }, { _, _, _ -> throw GeminiHttpException(404, "not found") }) as EngineResult.Err).error is TranslationError.Unknown)
     }
 
     @Test

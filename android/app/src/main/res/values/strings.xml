@@ -78,6 +78,7 @@
     <string name="engine_gemini">Gemini</string>
     <string name="ai_fallback_no_key">No AI key set. Translated with ML Kit.</string>
     <string name="ai_fallback_invalid_key">AI key was rejected. Translated with ML Kit.</string>
+    <string name="ai_fallback_denied">This key can2019t use Gemini (account, region or age limit). Translated with ML Kit.</string>
     <string name="ai_fallback_busy">AI limit reached or server error. Translated with ML Kit.</string>
     <string name="ai_fallback_offline">AI unreachable (offline). Translated with ML Kit.</string>
     <string name="ai_fallback_failed">AI translation failed. Translated with ML Kit.</string>

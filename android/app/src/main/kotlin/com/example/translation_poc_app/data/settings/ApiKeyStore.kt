@@ -33,7 +33,7 @@ class ApiKeyStore(context: Context) {
     fun set(key: String) {
         val cipher = Cipher.getInstance(TRANSFORM)
         cipher.init(Cipher.ENCRYPT_MODE, secretKey())
-        val encrypted = cipher.iv + cipher.doFinal(key.trim().toByteArray())
+        val encrypted = cipher.iv + cipher.doFinal(key.filterNot { it.isWhitespace() }.toByteArray())
         prefs.edit().putString(ENTRY, Base64.encodeToString(encrypted, Base64.NO_WRAP)).apply()
     }
 

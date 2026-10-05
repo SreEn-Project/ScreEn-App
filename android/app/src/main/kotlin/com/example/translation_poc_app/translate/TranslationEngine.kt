@@ -42,6 +42,9 @@ sealed interface TranslationError {
     /** API 키가 거부됐다 (잘못된 키 · 권한 없음). */
     data object InvalidApiKey : TranslationError
 
+    /** 키는 유효하지만 이 계정 · 지역 · 연령으로는 쓸 수 없다 (403). */
+    data object AccessDenied : TranslationError
+
     /** 사용 한도 초과 또는 서버 오류. */
     data object ServiceBusy : TranslationError
 

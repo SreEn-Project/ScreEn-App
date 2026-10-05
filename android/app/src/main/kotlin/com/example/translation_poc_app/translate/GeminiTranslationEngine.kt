@@ -37,7 +37,7 @@ class GeminiHttpTransport(private val timeoutMs: Int = 20_000) : GeminiTransport
                 val code = conn.responseCode
                 val stream = if (code in 200..299) conn.inputStream else conn.errorStream
                 val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
-                if (code !in 200..299) throw GeminiHttpException(code, text.take(200))
+                if (code !in 200..299) throw GeminiHttpException(code, text.take(300))
                 text
             } finally {
                 conn.disconnect()
@@ -79,7 +79,7 @@ class GeminiTranslationEngine(
         } catch (e: GeminiHttpException) {
             EngineResult.Err(
                 if (e.code == 429 || e.code >= 500) TranslationError.ServiceBusy
-                else TranslationError.InvalidApiKey,
+                else classifyClientError(e),
             )
         } catch (e: IOException) {
             EngineResult.Err(TranslationError.Network)
@@ -96,6 +96,15 @@ class GeminiTranslationEngine(
     override suspend fun deleteLanguage(language: String): EngineResult<Unit> = EngineResult.Ok(Unit)
 
     override fun close() = Unit
+
+    private fun classifyClientError(e: GeminiHttpException): TranslationError {
+        return when {
+            e.message?.contains("API_KEY_INVALID") == true || e.message?.contains("API key not valid") == true ->
+                TranslationError.InvalidApiKey
+            e.code == 403 -> TranslationError.AccessDenied
+            else -> TranslationError.Unknown(e.message)
+        }
+    }
 
     companion object {
         const val MODEL = "gemini-2.5-flash"
