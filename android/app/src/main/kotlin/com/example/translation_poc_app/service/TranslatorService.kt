@@ -179,12 +179,14 @@ class TranslatorService : LifecycleService() {
 
     /** AI 번역이 실패해 ML Kit으로 대신 번역했음을 짧게 알린다 (NA-13). 블록마다 뜨지 않게 일정 시간에 한 번만. */
     private fun notifyAiFallback(error: TranslationError) {
+        Log.w(TAG, "AI 번역 실패 → ML Kit: $error")
         val now = android.os.SystemClock.elapsedRealtime()
         if (now - lastFallbackNoticeMs < FALLBACK_NOTICE_INTERVAL_MS) return
         lastFallbackNoticeMs = now
         val message = when (error) {
             TranslationError.NoApiKey -> R.string.ai_fallback_no_key
             TranslationError.InvalidApiKey -> R.string.ai_fallback_invalid_key
+            TranslationError.AccessDenied -> R.string.ai_fallback_denied
             TranslationError.ServiceBusy -> R.string.ai_fallback_busy
             TranslationError.Network -> R.string.ai_fallback_offline
             else -> R.string.ai_fallback_failed

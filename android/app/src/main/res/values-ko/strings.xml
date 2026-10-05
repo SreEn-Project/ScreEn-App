@@ -77,6 +77,7 @@
     <string name="engine_gemini">Gemini</string>
     <string name="ai_fallback_no_key">AI 키가 없어 ML Kit으로 번역했어요</string>
     <string name="ai_fallback_invalid_key">AI 키가 거부돼 ML Kit으로 번역했어요</string>
+    <string name="ai_fallback_denied">이 키로는 Gemini를 쓸 수 없어요(계정 · 지역 · 연령 제한). ML Kit으로 번역했어요</string>
     <string name="ai_fallback_busy">AI 한도 초과 또는 서버 오류로 ML Kit으로 번역했어요</string>
     <string name="ai_fallback_offline">오프라인이라 AI를 못 써 ML Kit으로 번역했어요</string>
     <string name="ai_fallback_failed">AI 번역에 실패해 ML Kit으로 번역했어요</string>
