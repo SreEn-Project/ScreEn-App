@@ -82,12 +82,15 @@ class AppSection extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.only(top: AppTokens.sectionGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 6, bottom: 10),
+            padding: const EdgeInsets.only(
+              left: AppTokens.sectionTitleIndent,
+              bottom: AppTokens.sectionTitleGap,
+            ),
             child: Text(
               title,
               style: theme.textTheme.bodySmall?.copyWith(

@@ -31,6 +31,19 @@ Flutter 앱 화면과 네이티브 오버레이(Compose)가 같은 토큰을 쓴
 
 다크 모드 primary는 배경 대비를 위해 라이트의 primaryContainer 값을 쓴다. 다크 값 중 background · surface 외에는 이 문서에서 정한 값이다.
 
+## 간격 토큰 (#88)
+`AppTokens`의 상수만 쓴다. 숫자를 화면에 직접 적지 않는다.
+| 토큰 | 값 | 용도 |
+|---|---|---|
+| space4 / 8 / 12 / 16 / 24 | 4 · 8 · 12 · 16 · 24 | 일반 gap · margin |
+| pagePadding | 20 | 화면 좌우 여백 |
+| rowPaddingH / V | 20 / 14 | 카드 안 목록 한 줄 패딩 · 구분선 들여쓰기 |
+| cardListPaddingV | 6 | 목록형 카드 위아래 패딩 |
+| sectionGap | 24 | 섹션 사이 |
+| sectionTitleGap / Indent | 10 / 6 | 섹션 제목과 카드 사이 · 제목 들여쓰기 |
+
+설정 항목에서 현재 값(`_Labeled.value`)은 제목 아래 줄에 둔다 (한 줄에 두면 긴 값이 제목을 민다).
+
 ## 그라데이션
 - **홈 상단 상태 카드에만** 쓴다: `#FFFFFF → #CBF39D → #C8EFC1` (왼쪽 위 → 오른쪽 아래).
 - 다크: `#13241F → #1D3A31 → #2A4A1F`.
