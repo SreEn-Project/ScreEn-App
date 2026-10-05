@@ -27,6 +27,12 @@
     <string name="overlay_setting_auto_translate">Auto translate: %1$s</string>
     <string name="overlay_setting_auto_translate_drag">Auto translate: unavailable with current settings</string>
     <string name="overlay_button_auto_badge">Auto</string>
+    <string name="overlay_setting_hide">Close result: %1$s</string>
+    <string name="overlay_setting_hide_overlay_only">Close result: overlay display only</string>
+    <string name="overlay_setting_show_delay">New translation wait: %1$s</string>
+    <string name="overlay_time_instant">Instantly</string>
+    <string name="overlay_time_manual">Manual</string>
+    <string name="overlay_time_seconds">After %1$ss</string>
     <string name="overlay_on">On</string>
     <string name="overlay_off">Off</string>
     <string name="overlay_display_list">List</string>
