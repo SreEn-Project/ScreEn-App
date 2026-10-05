@@ -38,3 +38,21 @@ class GeminiKeyTesterTest {
         assertEquals("ab", sent)
     }
 }
+
+class GeminiModelFallbackTest {
+    @Test
+    fun `404면 다음 모델로 시도한다`() = runBlocking {
+        val tried = mutableListOf<String>()
+        val result = generateWithFallback({ _, model, _ ->
+            tried += model
+            if (model == "a") throw GeminiHttpException(404, "nf") else "ok"
+        }, "k", listOf("a", "b"), "{}")
+        assertEquals("ok", result)
+        assertEquals(listOf("a", "b"), tried)
+    }
+
+    @Test(expected = GeminiHttpException::class)
+    fun `404가 아닌 오류는 바로 던진다`() {
+        runBlocking { generateWithFallback({ _, _, _ -> throw GeminiHttpException(403, "x") }, "k", listOf("a", "b"), "{}") }
+    }
+}
