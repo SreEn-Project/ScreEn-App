@@ -33,6 +33,23 @@ class AppTokens extends ThemeExtension<AppTokens> {
   static const double radiusSheet = 28;
   static const double radiusInput = 18;
   static const double pagePadding = 20;
+
+  /// 간격 토큰 (8 배수 기준, 4 보조). margin · gap · padding은 이 값만 쓴다.
+  static const double space4 = 4;
+  static const double space8 = 8;
+  static const double space12 = 12;
+  static const double space16 = 16;
+  static const double space24 = 24;
+
+  /// 카드 안 목록 한 줄의 좌우 · 위아래 패딩, 카드 위아래 패딩, 구분선 들여쓰기.
+  static const double rowPaddingH = pagePadding;
+  static const double rowPaddingV = 14;
+  static const double cardListPaddingV = 6;
+
+  /// 섹션 사이 간격 · 섹션 제목과 카드 사이 간격 · 제목 왼쪽 들여쓰기.
+  static const double sectionGap = space24;
+  static const double sectionTitleGap = 10;
+  static const double sectionTitleIndent = 6;
   static const double largeButtonHeight = 56;
   static const double headerHeight = 56;
 

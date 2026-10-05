@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../../app/theme/app_tokens.dart';
 import 'icon_badge.dart';
 import 'pressable.dart';
 
@@ -17,7 +18,10 @@ class AppListTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.enabled = true,
-    this.padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: AppTokens.rowPaddingH,
+      vertical: AppTokens.rowPaddingV,
+    ),
   });
 
   final String title;
@@ -52,7 +56,7 @@ class AppListTile extends StatelessWidget {
         children: [
           if (icon != null) ...[
             IconBadge(icon: icon!, size: 40),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppTokens.space12),
           ],
           Expanded(
             child: Column(
@@ -61,14 +65,14 @@ class AppListTile extends StatelessWidget {
               children: [
                 Text(title, style: theme.textTheme.titleMedium),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppTokens.space4),
                   Text(subtitle!, style: theme.textTheme.bodySmall),
                 ],
               ],
             ),
           ),
           if (value != null) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: AppTokens.space8),
             Text(
               value!,
               style: theme.textTheme.labelLarge?.copyWith(
@@ -76,7 +80,7 @@ class AppListTile extends StatelessWidget {
               ),
             ),
           ],
-          if (end != null) ...[const SizedBox(width: 8), end],
+          if (end != null) ...[const SizedBox(width: AppTokens.space8), end],
         ],
       ),
     );
@@ -89,7 +93,7 @@ class AppListTile extends StatelessWidget {
 
 /// 카드 안 항목 사이 가는 구분선.
 class AppDivider extends StatelessWidget {
-  const AppDivider({super.key, this.indent = 20});
+  const AppDivider({super.key, this.indent = AppTokens.rowPaddingH});
 
   final double indent;
 

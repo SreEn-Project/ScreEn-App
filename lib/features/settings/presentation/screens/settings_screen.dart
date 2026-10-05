@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
+import '../../../../app/theme/app_tokens.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
 import '../view_models/auto_translate_view_model.dart';
@@ -37,7 +38,9 @@ class SettingsScreen extends StatelessWidget {
         AppSection(
           title: l10n.settingsSectionEtc,
           child: AppCard(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+            padding: const EdgeInsets.symmetric(
+              vertical: AppTokens.cardListPaddingV,
+            ),
             child: AppListTile(
               icon: Symbols.info_rounded,
               title: l10n.settingsAbout,
@@ -62,7 +65,9 @@ class _EngineSection extends ConsumerWidget {
     return AppSection(
       title: l10n.settingsSectionEngine,
       child: AppCard(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppTokens.cardListPaddingV,
+        ),
         child: Column(
           children: [
             for (final engine in EngineType.values) ...[
@@ -161,23 +166,25 @@ class _Labeled extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTokens.rowPaddingH,
+        vertical: AppTokens.rowPaddingV,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(child: Text(label, style: theme.textTheme.titleMedium)),
-              if (value != null)
-                Text(
-                  value!,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
+          Text(label, style: theme.textTheme.titleMedium),
+          // 현재 값은 제목과 한 줄을 나눠 쓰지 않고 아래 줄에 둔다 (긴 값이 제목을 밀지 않게).
+          if (value != null) ...[
+            const SizedBox(height: AppTokens.space4),
+            Text(
+              value!,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+          const SizedBox(height: AppTokens.space12),
           child,
         ],
       ),
@@ -200,7 +207,9 @@ class _CaptureSection extends ConsumerWidget {
     return AppSection(
       title: l10n.settingsSectionCapture,
       child: AppCard(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppTokens.cardListPaddingV,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -245,7 +254,9 @@ class _DisplaySection extends ConsumerWidget {
     return AppSection(
       title: l10n.settingsSectionDisplay,
       child: AppCard(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppTokens.cardListPaddingV,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -317,7 +328,9 @@ class _QuickLanguagesSection extends ConsumerWidget {
     return AppSection(
       title: l10n.settingsQuickLanguages,
       child: AppCard(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppTokens.cardListPaddingV,
+        ),
         child: AppListTile(
           icon: Symbols.translate_rounded,
           title: l10n.settingsQuickLanguagesDetail,
@@ -404,7 +417,9 @@ class _AutoTranslateSection extends ConsumerWidget {
     return AppSection(
       title: l10n.settingsSectionAuto,
       child: AppCard(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppTokens.cardListPaddingV,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
