@@ -26,6 +26,12 @@
     <string name="overlay_setting_auto_translate">자동 번역: %1$s</string>
     <string name="overlay_setting_auto_translate_drag">자동 번역: 지금 설정에선 사용 불가</string>
     <string name="overlay_button_auto_badge">자동</string>
+    <string name="overlay_setting_hide">결과 닫기: %1$s</string>
+    <string name="overlay_setting_hide_overlay_only">결과 닫기: 원문 위에 덮기에서만</string>
+    <string name="overlay_setting_show_delay">새 번역 대기: %1$s</string>
+    <string name="overlay_time_instant">바로</string>
+    <string name="overlay_time_manual">직접 닫기</string>
+    <string name="overlay_time_seconds">%1$s초 후</string>
     <string name="overlay_on">켜짐</string>
     <string name="overlay_off">꺼짐</string>
     <string name="overlay_display_list">목록</string>

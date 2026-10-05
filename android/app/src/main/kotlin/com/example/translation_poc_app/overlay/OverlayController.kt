@@ -94,6 +94,9 @@ class OverlayController(
         retranslate = false,
     )
     private var autoTranslate by mutableStateOf(false)
+    /** 저장된 설정 그대로의 닫기 시간 · 새 번역 대기 시간 (빠른 설정이 돌려 가며 바꾼다). */
+    private var storedHideMs = AppSettings.DEFAULT_HIDE_AFTER_INTERACTION_MS
+    private var storedShowDelayMs = AppSettings.DEFAULT_AUTO_SHOW_DELAY_MS
     private var settingsSeen = false
     private var sourceLanguage by mutableStateOf(AppSettings.SOURCE_LANGUAGE_AUTO)
 
@@ -219,6 +222,8 @@ class OverlayController(
                 // 자동 번역은 결과가 '본문 위에 표시'일 때만 쓴다. 설정 값은 그대로 두어, 다시 덮어쓰기로 바꾸면 이어진다.
                 autoTranslate = it.autoTranslate && it.resultDisplay == ResultDisplay.OVERLAY
                 sourceLanguage = it.sourceLanguage
+                storedHideMs = it.hideAfterInteractionMs
+                storedShowDelayMs = it.autoShowDelayMs
                 buttonOpacity = it.buttonOpacityPercent / 100f
                 if (it.buttonSizeDp != buttonDiameterDp) resizeButton(it.buttonSizeDp)
                 autoConfig = AutoTranslateConfig(
@@ -658,7 +663,7 @@ class OverlayController(
         } else {
             context.getString(R.string.overlay_setting_auto_translate_drag)
         }
-        return listOf(
+        val options = mutableListOf(
             MenuOption(Symbol.AUTO_AWESOME, autoLabel, autoTranslate, enabled = available) {
                 val enable = !autoTranslate
                 // 저장된 설정이 돌아오기 전에 바로 번역을 시작하므로 켜진 상태를 먼저 반영한다 (끝난 번역이 감시를 시작하도록).
@@ -669,6 +674,44 @@ class OverlayController(
                 if (enable) post(::startTranslation)
             },
         )
+        // 결과 닫기: 덮어쓰기 표시에서만 쓴다. 탭할 때마다 시간 → … → 직접 닫기로 돌고, 자동 번역이 켜져 있으면 직접 닫기는 뺀다 (D-047).
+        val overlayDisplay = display == ResultDisplay.OVERLAY
+        val hideChoices = QuickSettingChoices.hide(autoTranslate)
+        val shownHideMs = if (autoTranslate && storedHideMs < 0) AppSettings.DEFAULT_HIDE_AFTER_INTERACTION_MS else storedHideMs
+        options += MenuOption(
+            Symbol.VISIBILITY_OFF,
+            if (overlayDisplay) {
+                context.getString(R.string.overlay_setting_hide, hideLabel(shownHideMs))
+            } else {
+                context.getString(R.string.overlay_setting_hide_overlay_only)
+            },
+            selected = false,
+            enabled = overlayDisplay,
+        ) {
+            val next = QuickSettingChoices.next(hideChoices, shownHideMs)
+            scope.launch { settingsRepository.setHideAfterInteractionMs(next) }
+            post(::dismissMenu)
+        }
+        // 새 번역 대기 시간: 자동 번역이 켜져 있을 때만 나온다.
+        if (autoTranslate) {
+            options += MenuOption(
+                Symbol.AUTO_AWESOME,
+                context.getString(R.string.overlay_setting_show_delay, hideLabel(storedShowDelayMs)),
+                selected = false,
+            ) {
+                val next = QuickSettingChoices.next(QuickSettingChoices.showDelay(), storedShowDelayMs)
+                scope.launch { settingsRepository.setAutoShowDelayMs(next) }
+                post(::dismissMenu)
+            }
+        }
+        return options
+    }
+
+    /** 시간 값의 이름표: 0 = 바로, 음수 = 직접 닫기, 그 외 초. */
+    private fun hideLabel(ms: Long): String = when {
+        ms < 0 -> context.getString(R.string.overlay_time_manual)
+        ms == 0L -> context.getString(R.string.overlay_time_instant)
+        else -> context.getString(R.string.overlay_time_seconds, (ms / 1000.0).let { if (ms % 1000 == 0L) it.toInt().toString() else it.toString() })
     }
 
     /**
