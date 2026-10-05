@@ -674,9 +674,8 @@ class OverlayController(
                 if (enable) post(::startTranslation)
             },
         )
-        // 결과 닫기: 덮어쓰기 표시에서만 쓴다. 탭할 때마다 시간 → … → 직접 닫기로 돌고, 자동 번역이 켜져 있으면 직접 닫기는 뺀다 (D-047).
+        // 결과 닫기: 덮어쓰기 표시에서만 쓴다. 누르면 선택지 목록이 열리고, 자동 번역이 켜져 있으면 직접 닫기는 뺀다 (D-047).
         val overlayDisplay = display == ResultDisplay.OVERLAY
-        val hideChoices = QuickSettingChoices.hide(autoTranslate)
         val shownHideMs = if (autoTranslate && storedHideMs < 0) AppSettings.DEFAULT_HIDE_AFTER_INTERACTION_MS else storedHideMs
         options += MenuOption(
             Symbol.VISIBILITY_OFF,
@@ -688,9 +687,7 @@ class OverlayController(
             selected = false,
             enabled = overlayDisplay,
         ) {
-            val next = QuickSettingChoices.next(hideChoices, shownHideMs)
-            scope.launch { settingsRepository.setHideAfterInteractionMs(next) }
-            post(::dismissMenu)
+            showChoices(QuickSettingChoices.hide(autoTranslate), shownHideMs, settingsRepository::setHideAfterInteractionMs)
         }
         // 새 번역 대기 시간: 자동 번역이 켜져 있을 때만 나온다.
         if (autoTranslate) {
@@ -699,12 +696,24 @@ class OverlayController(
                 context.getString(R.string.overlay_setting_show_delay, hideLabel(storedShowDelayMs)),
                 selected = false,
             ) {
-                val next = QuickSettingChoices.next(QuickSettingChoices.showDelay(), storedShowDelayMs)
-                scope.launch { settingsRepository.setAutoShowDelayMs(next) }
-                post(::dismissMenu)
+                showChoices(QuickSettingChoices.showDelay(), storedShowDelayMs, settingsRepository::setAutoShowDelayMs)
             }
         }
         return options
+    }
+
+    /** 선택지 목록을 버튼 옆에 열고, 고른 값을 저장한 뒤 닫는다. */
+    private fun showChoices(choices: List<Long>, current: Long, save: suspend (Long) -> Unit) {
+        val options = choices.map { ms ->
+            MenuOption(Symbol.CHECK, hideLabel(ms), ms == current) {
+                scope.launch { save(ms) }
+                post(::dismissMenu)
+            }
+        }
+        post {
+            dismissMenu()
+            openOptionWindow(options)
+        }
     }
 
     /** 시간 값의 이름표: 0 = 바로, 음수 = 직접 닫기, 그 외 초. */
