@@ -71,6 +71,7 @@
     <string name="result_no_model_title">Language model needed</string>
     <string name="result_no_model_body">Download the language in the app\'s Language tab.</string>
     <string name="engine_ml_kit">ML Kit</string>
+    <string name="engine_gemini">Gemini</string>
     <!-- 텍스트 선택 번역 (NA-24) -->
     <string name="selection_translating">Translating…</string>
     <string name="selection_languages">%1$s → %2$s</string>

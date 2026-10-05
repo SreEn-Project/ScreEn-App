@@ -89,5 +89,6 @@ dependencies {
 
     // 네이티브 순수 로직 단위 테스트 (OCR 결과 고르기 등)
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }

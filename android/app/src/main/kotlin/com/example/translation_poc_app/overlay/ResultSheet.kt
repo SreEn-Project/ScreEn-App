@@ -218,7 +218,7 @@ private fun ColumnScope.ResultList(
             modifier = Modifier.weight(1f),
         )
         // AI로 다시 번역은 AI 엔진(NA-13)이 생기면 연결한다. ML Kit 결과일 때만 보인다.
-        if (result.engine == EngineId.ML_KIT) {
+        if (result.engine != EngineId.GEMINI) {
             PillButton(
                 text = stringResource(R.string.result_retranslate_ai),
                 icon = Symbol.AUTO_AWESOME,
@@ -229,7 +229,7 @@ private fun ColumnScope.ResultList(
             )
         }
     }
-    if (result.engine == EngineId.ML_KIT) {
+    if (result.engine != EngineId.GEMINI) {
         Spacer(Modifier.height(8.dp))
         BasicText(
             stringResource(R.string.result_ai_coming_soon),
@@ -334,6 +334,7 @@ private fun ColumnScope.Message(symbol: Symbol, title: String, body: String, onD
 private fun engineName(engine: EngineId): String = stringResource(
     when (engine) {
         EngineId.ML_KIT -> R.string.engine_ml_kit
+        EngineId.GEMINI -> R.string.engine_gemini
     },
 )
 

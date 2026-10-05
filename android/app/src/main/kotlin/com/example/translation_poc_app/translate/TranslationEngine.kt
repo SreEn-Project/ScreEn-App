@@ -3,7 +3,7 @@ package com.example.translation_poc_app.translate
 import java.io.Closeable
 
 /** 번역 엔진 종류. 엔진이 늘면(Gemini · Firebase AI 등) 여기에 추가한다 (NA-11). */
-enum class EngineId { ML_KIT }
+enum class EngineId { ML_KIT, GEMINI }
 
 /** 원문 언어를 엔진이 알아서 고르게 할 때 쓰는 값. */
 const val AUTO_LANGUAGE = "auto"

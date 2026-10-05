@@ -26,6 +26,9 @@ import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.overlay.OverlayController
 import com.example.translation_poc_app.translate.DetectedBlock
 import com.example.translation_poc_app.translate.LanguageDetector
+import com.example.translation_poc_app.translate.ApiKeyProvider
+import com.example.translation_poc_app.translate.FallbackTranslationEngine
+import com.example.translation_poc_app.translate.GeminiTranslationEngine
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
 import com.example.translation_poc_app.translate.ModelDownloadPolicy
 import com.example.translation_poc_app.translate.TranslationEngine
@@ -154,16 +157,23 @@ class TranslatorService : LifecycleService() {
      * 엔진이 추가되면 [Engine]별 분기만 늘리면 된다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
-        when (settings.engine) {
-            Engine.ML_KIT -> Unit
-            Engine.GEMINI, Engine.FIREBASE_AI -> Log.w(TAG, "${settings.engine} 엔진은 아직 없어 ML Kit으로 번역한다")
-        }
-        return mlKitEngine ?: MlKitTranslationEngine(
+        val mlKit = mlKitEngine ?: MlKitTranslationEngine(
             downloadPolicyProvider = {
                 ModelDownloadPolicy(AppGraph.settingsRepository(this).current().wifiOnlyModelDownload)
             },
         ).also { mlKitEngine = it }
+        return when (settings.engine) {
+            Engine.ML_KIT -> mlKit
+            // 키 저장 방식이 정해지면(BYOK / Firebase) 키 제공자를 연결한다. 그 전엔 키가 없어 ML Kit으로 대체된다.
+            Engine.GEMINI -> FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit)
+            Engine.FIREBASE_AI -> {
+                Log.w(TAG, "FIREBASE_AI 엔진은 아직 없어 ML Kit으로 번역한다")
+                mlKit
+            }
+        }
     }
+
+    private val geminiKeys = ApiKeyProvider { null }
 
     /** 번역 결과를 기록에 남긴다 (NA-23). 실패해도 번역에는 영향이 없다. */
     private fun recordHistory(outcome: TranslationOutcome.Translated) {
