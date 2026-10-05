@@ -1,5 +1,6 @@
 package com.example.translation_poc_app.overlay
 
+import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.Settings
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -19,5 +20,10 @@ class QuickSettingChoicesTest {
     @Test
     fun `대기 시간 선택지`() {
         assertEquals(listOf(0L, 1_000L, 2_000L, 3_000L), QuickSettingChoices.showDelay())
+    }
+
+    @Test
+    fun `엔진 선택지는 ML Kit과 Gemini`() {
+        assertEquals(listOf(Engine.ML_KIT, Engine.GEMINI), QuickSettingChoices.engines())
     }
 }

@@ -207,6 +207,7 @@ class TranslatorService : LifecycleService() {
             sampleSignature = { region -> capturer?.captureSignature(region) },
             onStopRequested = { stopSelf() },
             onTranslated = ::recordHistory,
+            hasGeminiKey = { !AppGraph.apiKeyStore(this).get().isNullOrBlank() },
         ).takeIf { it.show() }
     }
 
