@@ -2,6 +2,11 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-06 · 번역 기록 상세 보기 (FL-13, 이슈 #113, 브랜치 `feat/113-history-detail-sheet`)
+- 기록 카드(기록 화면 · 홈 최근 기록)에서 번역은 3줄, 원문은 2줄까지만 보이고 말줄임표로 줄인다. 카드를 탭하면 둥근 바텀시트가 열려 번역 · 원문 전체(선택 가능)와 언어 쌍 · 시각을 보여 주고, 각각 "복사" 버튼으로 클립보드에 복사한다 (누르면 "복사됨"). 삭제 버튼은 그대로 카드에서 동작한다.
+- 변경: `features/history/presentation/widgets/history_detail_sheet.dart`(새 파일), `history_card.dart`(줄임 · 탭), ARB 4줄(ko/en) + 생성된 `lib/l10n/app_localizations*.dart`. pubspec · Gradle · Manifest 변경 없음. 시트는 앱 테마의 `bottomSheetTheme`(상단 28dp 라운드)를 그대로 쓴다.
+- 확인: analyze 경고 0 · flutter test 통과(위젯 테스트 `history_detail_test` 추가) · 디버그 빌드 통과. 기기 확인은 하지 않음.
+
 ## 2026-10-06 · 빠른 설정에 AI 번역 엔진 선택 (FL-06, NA-18, 이슈 #100, 브랜치 `feat/100-quick-ai-engine`)
 - 플로팅 '설정' 버블에 "AI 번역: ML Kit/Gemini AI" 항목을 추가했다. 누르면 결과 닫기처럼 목록이 열려 ML Kit · Gemini AI를 바로 고른다 (탭 순환 아님). 저장은 앱 설정 화면과 같은 엔진 설정(DataStore `engine`)이라 서로 맞는다.
 - Gemini API 키가 없으면 Gemini AI 줄은 비활성이고 "Gemini AI: 앱 설정에서 키 등록"으로 안내한다. 키 확인은 `ApiKeyStore`(Keystore)를 서비스가 `hasGeminiKey`로 넘겨 IO 스레드에서 읽는다. 설정에 있는 AI 관련 옵션은 엔진 선택뿐이라 이것만 넣었다.

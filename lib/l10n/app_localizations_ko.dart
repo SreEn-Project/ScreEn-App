@@ -254,6 +254,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get historyClearConfirm => '정말 삭제';
 
   @override
+  String get historyDetailTranslated => '번역';
+
+  @override
+  String get historyDetailOriginal => '원문';
+
+  @override
+  String get historyCopy => '복사';
+
+  @override
+  String get historyCopied => '복사됨';
+
+  @override
   String get captureModeFull => '전체 화면';
 
   @override
