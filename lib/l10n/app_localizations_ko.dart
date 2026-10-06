@@ -823,6 +823,62 @@ class AppLocalizationsKo extends AppLocalizations {
   String get learnGames => '미니게임';
 
   @override
+  String get learnCardsHint => '카드를 뒤집어 뜻을 보고, 밀어서 외웠는지 나눠요';
+
+  @override
+  String get cardsTitle => '카드 학습';
+
+  @override
+  String cardsProgress(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String cardsUnknownCount(int count) {
+    return '못 외움 $count';
+  }
+
+  @override
+  String cardsKnownCount(int count) {
+    return '외움 $count';
+  }
+
+  @override
+  String get cardsFlipHint => '카드를 탭하면 뒤집혀요';
+
+  @override
+  String get cardsSwipeHint => '왼쪽으로 밀면 못 외움, 오른쪽으로 밀면 외움';
+
+  @override
+  String get cardsKnown => '외웠어요';
+
+  @override
+  String get cardsUnknown => '못 외웠어요';
+
+  @override
+  String get cardsResultTitle => '카드 학습 결과';
+
+  @override
+  String cardsResultSummary(int known, int unknown) {
+    return '$known개 외우고 $unknown개는 더 봐야 해요';
+  }
+
+  @override
+  String get cardsAllKnown => '모두 외웠어요!';
+
+  @override
+  String get cardsReviewUnknown => '못 외운 단어만 다시 보기';
+
+  @override
+  String get cardsRestart => '처음부터 다시';
+
+  @override
+  String get cardsDone => '끝내기';
+
+  @override
+  String get cardsUnknownWords => '못 외운 단어';
+
+  @override
   String get learnComingSoon => '준비 중이에요';
 
   @override

@@ -241,3 +241,26 @@ final class CreateWordTest
     return questions;
   }
 }
+
+class CreateFlashcardDeckParams {
+  const CreateFlashcardDeckParams(this.wordbookId, {this.random});
+
+  final int wordbookId;
+
+  /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
+  final Random? random;
+}
+
+/// 카드 학습용 단어 묶음 만들기 (AD-08): 단어장의 모든 단어를 무작위 순서로.
+final class CreateFlashcardDeck
+    implements UseCase<List<VocabularyWord>, CreateFlashcardDeckParams> {
+  const CreateFlashcardDeck(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<VocabularyWord>> call(CreateFlashcardDeckParams params) async {
+    final words = await _repository.words(params.wordbookId);
+    return [...words]..shuffle(params.random ?? Random());
+  }
+}

@@ -1652,6 +1652,102 @@ abstract class AppLocalizations {
   /// **'Mini games'**
   String get learnGames;
 
+  /// No description provided for @learnCardsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip cards to see meanings and swipe to sort what you know'**
+  String get learnCardsHint;
+
+  /// No description provided for @cardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flashcards'**
+  String get cardsTitle;
+
+  /// No description provided for @cardsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {total}'**
+  String cardsProgress(int current, int total);
+
+  /// No description provided for @cardsUnknownCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet {count}'**
+  String cardsUnknownCount(int count);
+
+  /// No description provided for @cardsKnownCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Known {count}'**
+  String cardsKnownCount(int count);
+
+  /// No description provided for @cardsFlipHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the card to flip it'**
+  String get cardsFlipHint;
+
+  /// No description provided for @cardsSwipeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left if not yet, right if you know it'**
+  String get cardsSwipeHint;
+
+  /// No description provided for @cardsKnown.
+  ///
+  /// In en, this message translates to:
+  /// **'I know it'**
+  String get cardsKnown;
+
+  /// No description provided for @cardsUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get cardsUnknown;
+
+  /// No description provided for @cardsResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flashcard results'**
+  String get cardsResultTitle;
+
+  /// No description provided for @cardsResultSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{known} known, {unknown} to review'**
+  String cardsResultSummary(int known, int unknown);
+
+  /// No description provided for @cardsAllKnown.
+  ///
+  /// In en, this message translates to:
+  /// **'You know them all!'**
+  String get cardsAllKnown;
+
+  /// No description provided for @cardsReviewUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Review only the ones I missed'**
+  String get cardsReviewUnknown;
+
+  /// No description provided for @cardsRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get cardsRestart;
+
+  /// No description provided for @cardsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get cardsDone;
+
+  /// No description provided for @cardsUnknownWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Words to review'**
+  String get cardsUnknownWords;
+
   /// No description provided for @learnComingSoon.
   ///
   /// In en, this message translates to:

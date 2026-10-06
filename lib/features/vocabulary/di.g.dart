@@ -512,3 +512,51 @@ final class CreateWordTestProvider
 }
 
 String _$createWordTestHash() => r'c5e94602b338092b74bc517d695f1e2aac6be255';
+
+@ProviderFor(createFlashcardDeck)
+final createFlashcardDeckProvider = CreateFlashcardDeckProvider._();
+
+final class CreateFlashcardDeckProvider
+    extends
+        $FunctionalProvider<
+          CreateFlashcardDeck,
+          CreateFlashcardDeck,
+          CreateFlashcardDeck
+        >
+    with $Provider<CreateFlashcardDeck> {
+  CreateFlashcardDeckProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'createFlashcardDeckProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$createFlashcardDeckHash();
+
+  @$internal
+  @override
+  $ProviderElement<CreateFlashcardDeck> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CreateFlashcardDeck create(Ref ref) {
+    return createFlashcardDeck(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CreateFlashcardDeck value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CreateFlashcardDeck>(value),
+    );
+  }
+}
+
+String _$createFlashcardDeckHash() =>
+    r'6f6daf8e82f0d175c7ab258b141362e32d4cbc0b';

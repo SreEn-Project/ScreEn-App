@@ -842,6 +842,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get learnGames => 'Mini games';
 
   @override
+  String get learnCardsHint =>
+      'Flip cards to see meanings and swipe to sort what you know';
+
+  @override
+  String get cardsTitle => 'Flashcards';
+
+  @override
+  String cardsProgress(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String cardsUnknownCount(int count) {
+    return 'Not yet $count';
+  }
+
+  @override
+  String cardsKnownCount(int count) {
+    return 'Known $count';
+  }
+
+  @override
+  String get cardsFlipHint => 'Tap the card to flip it';
+
+  @override
+  String get cardsSwipeHint => 'Swipe left if not yet, right if you know it';
+
+  @override
+  String get cardsKnown => 'I know it';
+
+  @override
+  String get cardsUnknown => 'Not yet';
+
+  @override
+  String get cardsResultTitle => 'Flashcard results';
+
+  @override
+  String cardsResultSummary(int known, int unknown) {
+    return '$known known, $unknown to review';
+  }
+
+  @override
+  String get cardsAllKnown => 'You know them all!';
+
+  @override
+  String get cardsReviewUnknown => 'Review only the ones I missed';
+
+  @override
+  String get cardsRestart => 'Start over';
+
+  @override
+  String get cardsDone => 'Done';
+
+  @override
+  String get cardsUnknownWords => 'Words to review';
+
+  @override
   String get learnComingSoon => 'Coming soon';
 
   @override
