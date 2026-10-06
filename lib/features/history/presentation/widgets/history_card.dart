@@ -5,8 +5,14 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/history_entry.dart';
+import 'history_detail_sheet.dart';
 
-/// 기록 한 줄 카드 (FL-13): 번역 · 원문 · 언어 쌍 · 시각. [onDelete]를 주면 삭제 버튼이 붙는다.
+// 목록에서 보이는 최대 줄 수. 넘치는 글은 상세 시트에서 본다.
+const _translatedMaxLines = 3;
+const _originalMaxLines = 2;
+
+/// 기록 한 줄 카드 (FL-13): 번역 · 원문 · 언어 쌍 · 시각. 긴 글은 줄여 보이고, 탭하면 상세 시트로 전체를 본다.
+/// [onDelete]를 주면 삭제 버튼이 붙는다.
 class HistoryCard extends StatelessWidget {
   const HistoryCard({
     super.key,
@@ -28,10 +34,11 @@ class HistoryCard extends StatelessWidget {
         .add_Hm()
         .format(entry.translatedAt);
     final meta =
-        '${_languageName(entry.sourceLanguage, locale.languageCode)} → '
-        '${_languageName(entry.targetLanguage, locale.languageCode)} · $time';
+        '${historyLanguageName(entry.sourceLanguage, locale.languageCode)} → '
+        '${historyLanguageName(entry.targetLanguage, locale.languageCode)} · $time';
 
     return AppCard(
+      onTap: () => HistoryDetailSheet.show(context, entry),
       padding: EdgeInsets.fromLTRB(20, 16, onDelete == null ? 20 : 8, 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,10 +47,17 @@ class HistoryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(entry.translated, style: theme.textTheme.titleMedium),
+                Text(
+                  entry.translated,
+                  maxLines: _translatedMaxLines,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium,
+                ),
                 const SizedBox(height: 4),
                 Text(
                   entry.original,
+                  maxLines: _originalMaxLines,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colors.onSurfaceVariant,
                   ),
@@ -67,7 +81,8 @@ class HistoryCard extends StatelessWidget {
   }
 }
 
-String _languageName(String code, String uiLanguageCode) {
+/// 언어 코드의 화면 표시 이름. 모르는 코드는 코드 그대로.
+String historyLanguageName(String code, String uiLanguageCode) {
   for (final language in SupportedLanguage.all) {
     if (language.code == code) return language.displayName(uiLanguageCode);
   }

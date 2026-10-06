@@ -88,6 +88,10 @@
   "historyDelete": "Delete",
   "historyClearAll": "Clear all",
   "historyClearConfirm": "Delete all?",
+  "historyDetailTranslated": "Translation",
+  "historyDetailOriginal": "Original",
+  "historyCopy": "Copy",
+  "historyCopied": "Copied",
 
   "captureModeFull": "Full screen",
   "captureModeRegion": "Select area",

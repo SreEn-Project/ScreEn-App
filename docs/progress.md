@@ -2,6 +2,11 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-06 · 번역 기록 상세 보기 (FL-13, 이슈 #113, 브랜치 `feat/113-history-detail-sheet`)
+- 기록 카드(기록 화면 · 홈 최근 기록)에서 번역은 3줄, 원문은 2줄까지만 보이고 말줄임표로 줄인다. 카드를 탭하면 둥근 바텀시트가 열려 번역 · 원문 전체(선택 가능)와 언어 쌍 · 시각을 보여 주고, 각각 "복사" 버튼으로 클립보드에 복사한다 (누르면 "복사됨"). 삭제 버튼은 그대로 카드에서 동작한다.
+- 변경: `features/history/presentation/widgets/history_detail_sheet.dart`(새 파일), `history_card.dart`(줄임 · 탭), ARB 4줄(ko/en) + 생성된 `lib/l10n/app_localizations*.dart`. pubspec · Gradle · Manifest 변경 없음. 시트는 앱 테마의 `bottomSheetTheme`(상단 28dp 라운드)를 그대로 쓴다.
+- 확인: analyze 경고 0 · flutter test 통과(위젯 테스트 `history_detail_test` 추가) · 디버그 빌드 통과. 기기 확인은 하지 않음.
+
 ## 2026-10-06 · 구글 로그인 AI(Firebase AI) 엔진 제거 (NA-14, FL-12, 이슈 #110, 브랜치 `feat/110-remove-firebase-ai-engine`)
 - 설정 화면 엔진 목록에서 "구글 로그인 AI" 항목을 없애고, 뒤의 미사용 코드 · 문구를 걷어냈다. ML Kit · 내 Gemini 키(BYOK)는 그대로다 (D-048).
 - 변경: Pigeon `EngineType`(생성 코드 재생성) · Flutter `EngineType` · 설정 매퍼 · 라벨/아이콘 · 설정 화면 · `EngineViewModel` · ARB(ko/en, `engineFirebase*` · `engineNeedsLogin`) · 네이티브 `Engine` · `Mappers` · `TranslatorService` · 관련 테스트 · docs. pubspec · Gradle · Manifest는 건드리지 않았다 (Firebase 의존성은 원래 없었다).
@@ -430,3 +435,6 @@
 
 ## Gemini 404 수정 (NA-13, #108)
 - 원인: 공식 모델 목록상 Gemini 2.5는 새 프로젝트에서 접근 불가라 404. 모델을 gemini-3.5-flash-lite로, 404면 gemini-3.1-flash-lite로 재시도. 모델 이름은 자주 바뀌므로 MODELS 한 곳에서 관리.
+
+## 번역 기록 "전체 삭제" 잘림 수정 (FL-13, #111)
+- 원인: AppHeader 양옆 칸이 56px 고정이라 글자 버튼("전체 삭제")이 말줄임으로 잘렸다. 양옆 동작을 내용 너비로 자라게 하고 제목은 가운데를 유지하도록 Stack으로 바꿨다. 헤더 위젯 테스트 추가. 기기 확인 전.

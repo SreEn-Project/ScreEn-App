@@ -261,6 +261,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyClearConfirm => 'Delete all?';
 
   @override
+  String get historyDetailTranslated => 'Translation';
+
+  @override
+  String get historyDetailOriginal => 'Original';
+
+  @override
+  String get historyCopy => 'Copy';
+
+  @override
+  String get historyCopied => 'Copied';
+
+  @override
   String get captureModeFull => 'Full screen';
 
   @override
