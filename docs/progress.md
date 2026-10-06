@@ -466,3 +466,7 @@
 - 설계 D-053. 단어장 상세 "+"와 번역 기록 상세 시트의 "단어장에 추가"가 같은 편집 시트(`WordEditSheet`: 단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문 + 단어장 칩/새 단어장)를 거쳐 저장한다. Pigeon `saveWord`/`VocabWordInput` 추가, 유스케이스 `SaveWord`, `WordEditViewModel`, `AppTextField.maxLines`(design.md 갱신). 문구(ko/en) 추가.
 - 확인: `flutter analyze` 0, `flutter test` 통과(편집 시트 · 직접 추가 · 기록 연결 테스트 3개 추가), 네이티브 `flutter build apk --debug`. 기기 확인 전 — 확인 항목: 단어장 상세 "+" → 입력 → 저장 → 목록에 보임 / 새 단어장으로 저장 / 기록 카드 탭 → 글 드래그 선택 → "단어장에 추가" → 칸이 채워져 있음.
 - 남은 일(PR B): 오버레이 사전 카드 → 편집 → 단어장 선택, 문단형 결과에서 단어 고르기.
+
+## 오버레이 저장 전 편집 · 문단형에서 단어 고르기 (AD-01 · AD-03, #126 — PR B)
+- 설계 D-054. 오버레이: 사전 카드 → 편집 화면(`WordCardState.Editing`, `WordEdit`) → 단어장 선택 → 저장. 결과 시트의 문단형에 "원문에서 단어 고르기" 토글. 문구(ko/en) 추가.
+- 확인: `flutter analyze` 0, `flutter test` 통과, 네이티브 단위 테스트(`WordEditTest` 3개 추가) 통과, `flutter build apk --debug`. 기기 확인 전 — 확인 항목: 카드 "단어장에 저장" → 편집 화면에서 단어 · 뜻 고침 → 다음 → 단어장 선택 → 저장한 내용이 앱 단어장에 고친 대로 보임 / 단어장 선택에서 뒤로 → 고친 값 유지 / 편집 칸에서 키보드가 시트를 가리지 않는지 / 표시 방식을 문단형으로 두고 번역 → "원문에서 단어 고르기" → 단어 탭 → 카드.

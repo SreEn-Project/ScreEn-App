@@ -108,6 +108,13 @@
     <string name="word_saved">Saved to “%1$s”</string>
     <string name="word_save_failed">Couldn’t save. Please try again</string>
     <string name="word_back">Back</string>
+    <string name="word_edit_title">Edit before saving</string>
+    <string name="word_edit_word">Word</string>
+    <string name="word_edit_pronunciation">Pronunciation</string>
+    <string name="word_edit_pos">Part of speech</string>
+    <string name="word_edit_next">Next</string>
+    <string name="word_pick_paragraph">Pick a word from the original</string>
+    <string name="word_pick_paragraph_off">Back to paragraph</string>
     <string name="region_word_mode">Pick a word</string>
     <string name="region_hint_word">Drag over the area with the word</string>
 </resources>
