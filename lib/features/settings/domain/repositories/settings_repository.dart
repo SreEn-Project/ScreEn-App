@@ -32,4 +32,19 @@ abstract interface class SettingsRepository {
 
   /// 키를 실제로 호출해 본다. 성공이면 null, 실패면 구글이 알려 준 이유.
   Future<String?> testApiKey(String apiKey);
+
+  /// API 키 접근 PIN (NA-13). 켜져 있는지.
+  Future<bool> isApiKeyPinEnabled();
+
+  /// 4자리 PIN이 맞는지. PIN이 없으면 true.
+  Future<bool> verifyApiKeyPin(String pin);
+
+  /// PIN을 켜거나 바꾼다. 이미 있으면 [currentPin]이 맞아야 하고, 틀리면 false.
+  Future<bool> setApiKeyPin(String newPin, String? currentPin);
+
+  /// PIN을 끈다. 틀리면 false.
+  Future<bool> clearApiKeyPin(String currentPin);
+
+  /// PIN 분실: 키와 PIN을 함께 지운다.
+  Future<void> resetApiKeyProtection();
 }

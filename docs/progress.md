@@ -456,3 +456,8 @@
 - Notion 명세 확인 후 구현(설계 D-051). 네이티브: `WordSelection`(탭한 자리 → 단어), `WordLookup`(ML Kit 번역 + AI 풀이 동시 조회), `GeminiDictionary`(JSON 풀이), 오버레이 `WordCardSheet`(X-01 사전 카드 · X-02 단어장 선택 · 저장 완료). 결과 시트 원문 탭, 덮어쓰기 막 길게 누르기, 드래그 영역 "단어 선택" 토글로 단어를 고른다. 저장은 `VocabularyRepository.saveWord`(#120).
 - 확인: `flutter analyze` 0, `flutter test` 통과, 네이티브 단위 테스트(단어 경계 8 · 조회 7 · AI 풀이 7) 통과, `flutter build apk --debug` 성공. 기기 확인 전 — 확인 항목: 시트 원문 단어 탭 → 카드 → 저장 → 앱 단어장에 나타남 / AI 엔진일 때 뜻 · 발음 · 문맥 뜻 / 새 단어장 이름 입력 시 키보드가 시트를 가리지 않는지 / 덮어쓰기 길게 누르기 / 드래그 단어 선택.
 - 남은 일: 출처 앱(사용 정보 접근 권한 결정 필요), 학습(AD-07~14).
+
+## API 키 접근 PIN 잠금 (NA-13 보강, #124)
+- 설계 D-052. Pigeon: `isApiKeyPinEnabled` · `verifyApiKeyPin` · `setApiKeyPin` · `clearApiKeyPin` · `resetApiKeyProtection`. 네이티브: `ApiKeyStore`에 PIN(salt + PBKDF2 해시, Keystore 암호화) 저장 · 검증. Flutter: 유스케이스 5개, `ApiKeyPinViewModel`, PIN 입력 시트 · 분실 초기화 시트, AI 번역 설정에 "키 잠금 PIN" 줄과 잠금 카드. 문구(ko/en) 추가.
+- 확인: `flutter analyze` 0, `flutter test`(ViewModel PIN 테스트 6개 추가), `flutter build apk --debug`. 기기 확인 전 — 확인 항목: PIN 켜기(두 번 입력) → 화면 나갔다 들어오면 잠김 → 틀린 PIN 오류 → 맞으면 키 보임 · 수정 · 삭제 → PIN 변경 · 끄기 → "PIN을 잊었어요"로 초기화(키 삭제 · ML Kit 복귀) → PIN 켠 채로도 번역이 정상 동작.
+- 새 의존성 없음.

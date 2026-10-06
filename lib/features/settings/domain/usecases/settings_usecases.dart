@@ -265,3 +265,58 @@ final class TestApiKey implements UseCase<String?, String> {
   @override
   Future<String?> call(String apiKey) => _repository.testApiKey(apiKey.trim());
 }
+
+/// API 키 접근 PIN이 켜져 있는지 (NA-13).
+final class IsApiKeyPinEnabled implements NoParamsUseCase<bool> {
+  const IsApiKeyPinEnabled(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<bool> call() => _repository.isApiKeyPinEnabled();
+}
+
+/// 4자리 PIN 확인 (NA-13). 맞으면 true.
+final class VerifyApiKeyPin implements UseCase<bool, String> {
+  const VerifyApiKeyPin(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<bool> call(String pin) => _repository.verifyApiKeyPin(pin);
+}
+
+/// [SetApiKeyPin] 입력: 새 PIN과 (이미 PIN이 있을 때) 현재 PIN.
+typedef SetApiKeyPinParams = ({String newPin, String? currentPin});
+
+/// API 키 접근 PIN 켜기 · 바꾸기 (NA-13). 현재 PIN이 틀리거나 4자리 숫자가 아니면 false.
+final class SetApiKeyPin implements UseCase<bool, SetApiKeyPinParams> {
+  const SetApiKeyPin(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<bool> call(SetApiKeyPinParams params) =>
+      _repository.setApiKeyPin(params.newPin, params.currentPin);
+}
+
+/// API 키 접근 PIN 끄기 (NA-13). 현재 PIN이 틀리면 false.
+final class ClearApiKeyPin implements UseCase<bool, String> {
+  const ClearApiKeyPin(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<bool> call(String currentPin) =>
+      _repository.clearApiKeyPin(currentPin);
+}
+
+/// PIN 분실 시 초기화 (NA-13): 키와 PIN을 함께 지운다.
+final class ResetApiKeyProtection implements NoParamsUseCase<void> {
+  const ResetApiKeyProtection(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call() => _repository.resetApiKeyProtection();
+}

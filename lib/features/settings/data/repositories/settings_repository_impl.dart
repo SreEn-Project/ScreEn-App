@@ -87,4 +87,21 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<String?> testApiKey(String apiKey) => _dataSource.testApiKey(apiKey);
+
+  @override
+  Future<bool> isApiKeyPinEnabled() => _dataSource.isApiKeyPinEnabled();
+
+  @override
+  Future<bool> verifyApiKeyPin(String pin) => _dataSource.verifyApiKeyPin(pin);
+
+  @override
+  Future<bool> setApiKeyPin(String newPin, String? currentPin) =>
+      _dataSource.setApiKeyPin(newPin, currentPin);
+
+  @override
+  Future<bool> clearApiKeyPin(String currentPin) =>
+      _dataSource.clearApiKeyPin(currentPin);
+
+  @override
+  Future<void> resetApiKeyProtection() => _dataSource.resetApiKeyProtection();
 }

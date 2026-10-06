@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_tokens.dart';
@@ -208,12 +209,22 @@ class AppTextField extends StatelessWidget {
     required this.hint,
     this.obscure = false,
     this.onChanged,
+    this.keyboardType,
+    this.inputFormatters,
+    this.maxLength,
+    this.autofocus = false,
+    this.textAlign = TextAlign.start,
   });
 
   final TextEditingController controller;
   final String hint;
   final bool obscure;
   final ValueChanged<String>? onChanged;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
+  final bool autofocus;
+  final TextAlign textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -230,12 +241,18 @@ class AppTextField extends StatelessWidget {
         controller: controller,
         onChanged: onChanged,
         obscureText: obscure,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
+        maxLength: maxLength,
+        autofocus: autofocus,
+        textAlign: textAlign,
         autocorrect: false,
         enableSuggestions: false,
         style: theme.textTheme.bodyLarge,
         cursorColor: colors.primary,
         decoration: InputDecoration(
           hintText: hint,
+          counterText: '',
           hintStyle: theme.textTheme.bodyLarge?.copyWith(
             color: colors.onSurfaceVariant,
           ),

@@ -366,6 +366,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get apiKeyGet => 'Get a key from Google AI Studio';
 
   @override
+  String get apiKeyPinTitle => 'Key PIN lock';
+
+  @override
+  String get apiKeyPinDetail =>
+      'Ask for a 4-digit PIN before viewing, editing or deleting the key';
+
+  @override
+  String get apiKeyPinChange => 'Change PIN';
+
+  @override
+  String get apiKeyLockedTitle => 'API key is locked';
+
+  @override
+  String get apiKeyLockedBody => 'Enter your PIN to view or edit the key.';
+
+  @override
+  String get apiKeyUnlock => 'Enter PIN';
+
+  @override
+  String get apiKeyPinForgot => 'I forgot my PIN';
+
+  @override
+  String get pinEnterTitle => 'Enter PIN';
+
+  @override
+  String get pinEnterBody => 'Enter your 4-digit PIN.';
+
+  @override
+  String get pinCurrentTitle => 'Current PIN';
+
+  @override
+  String get pinNewTitle => 'Create a new PIN';
+
+  @override
+  String get pinNewBody => '4 digits to lock the key.';
+
+  @override
+  String get pinConfirmTitle => 'Enter PIN again';
+
+  @override
+  String get pinWrong => 'Wrong PIN';
+
+  @override
+  String get pinMismatch => 'Doesn\'t match the first PIN';
+
+  @override
+  String get pinResetTitle => 'Delete the key and reset?';
+
+  @override
+  String get pinResetBody =>
+      'If you forgot the PIN, the saved API key and the PIN are deleted. You\'ll need to add the key again, and the AI engine goes back to ML Kit.';
+
+  @override
+  String get pinResetConfirm => 'Delete key and reset';
+
+  @override
+  String get pinCancel => 'Cancel';
+
+  @override
   String get aiAgeTitle => 'I am 18 or older';
 
   @override

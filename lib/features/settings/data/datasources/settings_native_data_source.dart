@@ -62,4 +62,16 @@ class SettingsNativeDataSource {
   Future<void> clearApiKey() => _api.clearApiKey();
 
   Future<String?> testApiKey(String apiKey) => _api.testApiKey(apiKey);
+
+  Future<bool> isApiKeyPinEnabled() => _api.isApiKeyPinEnabled();
+
+  Future<bool> verifyApiKeyPin(String pin) => _api.verifyApiKeyPin(pin);
+
+  Future<bool> setApiKeyPin(String newPin, String? currentPin) =>
+      _api.setApiKeyPin(newPin, currentPin);
+
+  Future<bool> clearApiKeyPin(String currentPin) =>
+      _api.clearApiKeyPin(currentPin);
+
+  Future<void> resetApiKeyProtection() => _api.resetApiKeyProtection();
 }

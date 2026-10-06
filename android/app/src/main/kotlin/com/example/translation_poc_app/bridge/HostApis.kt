@@ -66,6 +66,17 @@ class SettingsHostApiImpl(
     override suspend fun clearApiKey() = apiKeys.clear()
 
     override suspend fun testApiKey(apiKey: String): String? = GeminiKeyTester.test(apiKey)
+
+    override suspend fun isApiKeyPinEnabled(): Boolean = apiKeys.isPinEnabled()
+
+    override suspend fun verifyApiKeyPin(pin: String): Boolean = apiKeys.verifyPin(pin)
+
+    override suspend fun setApiKeyPin(newPin: String, currentPin: String?): Boolean =
+        apiKeys.setPin(newPin, currentPin)
+
+    override suspend fun clearApiKeyPin(currentPin: String): Boolean = apiKeys.clearPin(currentPin)
+
+    override suspend fun resetApiKeyProtection() = apiKeys.reset()
 }
 
 /** 언어 모델 조회 · 받기 · 삭제 (FL-05). 실패는 예외로 던져 Flutter에 오류로 전해진다. */

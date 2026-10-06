@@ -356,6 +356,64 @@ class AppLocalizationsKo extends AppLocalizations {
   String get apiKeyGet => 'Google AI Studio에서 키 발급받기';
 
   @override
+  String get apiKeyPinTitle => '키 잠금 PIN';
+
+  @override
+  String get apiKeyPinDetail => '키를 보거나 고치거나 지울 때 4자리 PIN을 물어요';
+
+  @override
+  String get apiKeyPinChange => 'PIN 변경';
+
+  @override
+  String get apiKeyLockedTitle => 'API 키가 잠겨 있어요';
+
+  @override
+  String get apiKeyLockedBody => 'PIN을 입력하면 키를 보고 고칠 수 있어요.';
+
+  @override
+  String get apiKeyUnlock => 'PIN 입력';
+
+  @override
+  String get apiKeyPinForgot => 'PIN을 잊었어요';
+
+  @override
+  String get pinEnterTitle => 'PIN 입력';
+
+  @override
+  String get pinEnterBody => '4자리 숫자를 입력하세요.';
+
+  @override
+  String get pinCurrentTitle => '현재 PIN';
+
+  @override
+  String get pinNewTitle => '새 PIN 만들기';
+
+  @override
+  String get pinNewBody => '키를 잠글 4자리 숫자예요.';
+
+  @override
+  String get pinConfirmTitle => 'PIN 한 번 더';
+
+  @override
+  String get pinWrong => 'PIN이 달라요';
+
+  @override
+  String get pinMismatch => '처음 입력한 PIN과 달라요';
+
+  @override
+  String get pinResetTitle => '키를 지우고 초기화할까요?';
+
+  @override
+  String get pinResetBody =>
+      'PIN을 잊으면 등록한 API 키를 지우고 PIN도 없애요. 키는 다시 등록해야 하고, AI 엔진은 ML Kit으로 돌아가요.';
+
+  @override
+  String get pinResetConfirm => '키 삭제하고 초기화';
+
+  @override
+  String get pinCancel => '취소';
+
+  @override
   String get aiAgeTitle => '만 18세 이상이에요';
 
   @override
