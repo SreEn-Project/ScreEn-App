@@ -56,17 +56,34 @@ internal sealed interface WordCardState {
     /** 카드. [saveFailed]면 저장하려다 실패한 직후. */
     data class Ready(override val target: WordTarget, val entry: WordEntry, val saveFailed: Boolean = false) : WordCardState
 
-    /** 저장할 단어장을 고르는 중 (X-02). */
-    data class Picking(override val target: WordTarget, val entry: WordEntry, val books: List<WordbookRow>) : WordCardState
+    /** 저장 전에 단어 · 뜻 · 발음 등을 고치는 중. [edit]은 고친 내용(돌아왔을 때 이어서). */
+    data class Editing(
+        override val target: WordTarget,
+        val entry: WordEntry,
+        val edit: WordEdit = WordEdit.of(entry),
+        val saveFailed: Boolean = false,
+    ) : WordCardState
 
-    data class Saved(override val target: WordTarget, val entry: WordEntry, val bookName: String) : WordCardState
+    /** 저장할 단어장을 고르는 중 (X-02). */
+    data class Picking(
+        override val target: WordTarget,
+        val entry: WordEntry,
+        val edit: WordEdit,
+        val books: List<WordbookRow>,
+    ) : WordCardState
+
+    data class Saved(override val target: WordTarget, val entry: WordEntry, val word: String, val bookName: String) : WordCardState
 }
 
 internal class WordCardActions(
     val onClose: () -> Unit,
-    /** 카드의 "단어장에 저장". */
+    /** 카드의 "단어장에 저장": 편집 화면으로. */
     val onSave: () -> Unit,
-    /** 단어장 선택에서 카드로 돌아간다. */
+    /** 편집 화면에서 카드로 돌아간다. */
+    val onEditBack: () -> Unit,
+    /** 편집을 마치고 단어장 선택으로. */
+    val onEdited: (WordEdit) -> Unit,
+    /** 단어장 선택에서 편집 화면으로 돌아간다. */
     val onBack: () -> Unit,
     val onPick: (wordbookId: Long) -> Unit,
     /** 새 단어장을 만들고 저장한다. 이름은 호출 쪽이 다듬는다. */
@@ -100,6 +117,7 @@ internal fun WordCardSheet(state: WordCardState, actions: WordCardActions) {
                 is WordCardState.Loading -> Loading(state, actions)
                 is WordCardState.Failed -> Failed(state, actions)
                 is WordCardState.Ready -> Card(state, actions)
+                is WordCardState.Editing -> Editor(state, actions)
                 is WordCardState.Picking -> Picker(state, actions)
                 is WordCardState.Saved -> SavedMessage(state)
             }
@@ -230,7 +248,7 @@ private fun ColumnScope.Picker(state: WordCardState.Picking, actions: WordCardAc
     }
     Spacer(Modifier.height(4.dp))
     BasicText(
-        state.entry.word,
+        state.edit.word,
         style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant),
     )
     Spacer(Modifier.height(12.dp))
@@ -306,6 +324,104 @@ private fun ColumnScope.Picker(state: WordCardState.Picking, actions: WordCardAc
     )
 }
 
+/** 저장 전에 고칠 수 있는 단어 내용 (편집 화면). 카드에 보인 값이 처음 값이다. */
+internal data class WordEdit(
+    val word: String,
+    val meaning: String,
+    val pronunciation: String,
+    val partOfSpeech: String,
+    val contextMeaning: String,
+    val sentence: String,
+) {
+    /** 단어와 뜻이 있어야 저장할 수 있다. */
+    val isSavable: Boolean get() = word.isNotBlank() && meaning.isNotBlank()
+
+    companion object {
+        fun of(entry: WordEntry): WordEdit {
+            val definition = entry.definition
+            return WordEdit(
+                word = entry.word,
+                meaning = entry.savedMeaning,
+                pronunciation = definition?.pronunciation.orEmpty(),
+                partOfSpeech = definition?.partOfSpeech.orEmpty(),
+                contextMeaning = definition?.contextMeaning.orEmpty(),
+                sentence = entry.sentence.orEmpty(),
+            )
+        }
+    }
+}
+
+/** 편집 화면의 입력 칸 하나: 작은 이름표 + 둥근 칸. */
+@Composable
+private fun EditField(label: String, value: String, onChange: (String) -> Unit, singleLine: Boolean = true) {
+    val colors = OverlayTheme.colors
+    BasicText(label, style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant))
+    Spacer(Modifier.height(4.dp))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(colors.background)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onChange,
+            singleLine = singleLine,
+            textStyle = OverlayTheme.body.copy(color = colors.onSurface, textAlign = TextAlign.Start),
+            cursorBrush = SolidColor(colors.primary),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+    Spacer(Modifier.height(10.dp))
+}
+
+/** 저장 전 편집: 단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 원래 문장을 고친 뒤 단어장 선택으로 간다. */
+@Composable
+private fun ColumnScope.Editor(state: WordCardState.Editing, actions: WordCardActions) {
+    val colors = OverlayTheme.colors
+    var edit by remember { mutableStateOf(state.edit) }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        BasicText(
+            stringResource(R.string.word_edit_title),
+            style = OverlayTheme.title.copy(color = colors.onSurface),
+            modifier = Modifier.weight(1f),
+        )
+        PlainIconButton(Symbol.CLOSE, stringResource(R.string.result_close), colors.onSurface, actions.onClose)
+    }
+    Spacer(Modifier.height(12.dp))
+    Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+        EditField(stringResource(R.string.word_edit_word), edit.word, { edit = edit.copy(word = it) })
+        EditField(stringResource(R.string.word_label_meaning), edit.meaning, { edit = edit.copy(meaning = it) }, singleLine = false)
+        EditField(stringResource(R.string.word_edit_pronunciation), edit.pronunciation, { edit = edit.copy(pronunciation = it) })
+        EditField(stringResource(R.string.word_edit_pos), edit.partOfSpeech, { edit = edit.copy(partOfSpeech = it) })
+        EditField(stringResource(R.string.word_label_context), edit.contextMeaning, { edit = edit.copy(contextMeaning = it) }, singleLine = false)
+        EditField(stringResource(R.string.word_label_sentence), edit.sentence, { edit = edit.copy(sentence = it) }, singleLine = false)
+    }
+    Spacer(Modifier.height(8.dp))
+    if (state.saveFailed) {
+        BasicText(
+            stringResource(R.string.word_save_failed),
+            style = OverlayTheme.caption.copy(color = colors.error),
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        PillButton(
+            text = stringResource(R.string.word_back),
+            style = PillStyle.SECONDARY,
+            onClick = actions.onEditBack,
+            modifier = Modifier.weight(1f),
+        )
+        PillButton(
+            text = stringResource(R.string.word_edit_next),
+            onClick = { actions.onEdited(edit) },
+            enabled = edit.isSavable,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
 @Composable
 private fun ColumnScope.SavedMessage(state: WordCardState.Saved) {
     val colors = OverlayTheme.colors
@@ -320,6 +436,6 @@ private fun ColumnScope.SavedMessage(state: WordCardState.Saved) {
             style = OverlayTheme.title.copy(color = colors.onSurface, textAlign = TextAlign.Center),
         )
         Spacer(Modifier.height(4.dp))
-        BasicText(state.entry.word, style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant))
+        BasicText(state.word, style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant))
     }
 }

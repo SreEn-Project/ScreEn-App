@@ -160,7 +160,10 @@ private fun ColumnScope.ResultList(
 ) {
     val colors = OverlayTheme.colors
     // 문단형: 번역된 블록을 나누지 않고 한 문단으로 잇는다. 번역된 게 없으면 목록으로 보여 준다.
-    val paragraph = if (display == ResultDisplay.PARAGRAPH) paragraphText(result.items, result.targetLanguage) else null
+    val paragraphAll = if (display == ResultDisplay.PARAGRAPH) paragraphText(result.items, result.targetLanguage) else null
+    // 문단형은 원문이 안 보이므로, 단어를 고르려면 "원문에서 단어 고르기"로 원문 목록을 펼친다 (AD-01).
+    var pickingWords by remember { mutableStateOf(false) }
+    val paragraph = paragraphAll.takeUnless { pickingWords }
     var copied by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(copied) {
         if (copied != null) {
@@ -181,7 +184,6 @@ private fun ColumnScope.ResultList(
                 stringResource(R.string.result_languages, languageName(result.targetLanguage)),
                 style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant),
             )
-            // 문단형은 원문이 안 보여 단어를 고를 수 없다.
             if (onWord != null && paragraph == null) {
                 Spacer(Modifier.height(2.dp))
                 BasicText(
@@ -191,6 +193,16 @@ private fun ColumnScope.ResultList(
             }
         }
         PlainIconButton(Symbol.CLOSE, stringResource(R.string.result_close), colors.onSurface, onDismiss)
+    }
+    if (onWord != null && paragraphAll != null) {
+        Spacer(Modifier.height(12.dp))
+        PillButton(
+            text = stringResource(if (pickingWords) R.string.word_pick_paragraph_off else R.string.word_pick_paragraph),
+            style = PillStyle.SECONDARY,
+            onClick = { pickingWords = !pickingWords },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(8.dp))
     }
     Spacer(Modifier.height(16.dp))
 
@@ -227,7 +239,7 @@ private fun ColumnScope.ResultList(
             text = stringResource(if (copied == ALL) R.string.result_copied else R.string.result_copy_all),
             icon = if (copied == ALL) Symbol.CHECK else Symbol.CONTENT_COPY,
             onClick = {
-                onCopy(paragraph ?: copyAllText(result.items))
+                onCopy(paragraphAll ?: copyAllText(result.items))
                 copied = ALL
             },
             modifier = Modifier.weight(1f),

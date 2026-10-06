@@ -1066,9 +1066,15 @@ class OverlayController(
 
     private val wordActions = WordCardActions(
         onClose = { post(::dismissWordWindow) },
-        onSave = ::chooseWordbook,
+        onSave = {
+            (wordState as? WordCardState.Ready)?.let { wordState = WordCardState.Editing(it.target, it.entry) }
+        },
+        onEditBack = {
+            (wordState as? WordCardState.Editing)?.let { wordState = WordCardState.Ready(it.target, it.entry) }
+        },
+        onEdited = ::chooseWordbook,
         onBack = {
-            (wordState as? WordCardState.Picking)?.let { wordState = WordCardState.Ready(it.target, it.entry) }
+            (wordState as? WordCardState.Picking)?.let { wordState = WordCardState.Editing(it.target, it.entry, it.edit) }
         },
         onPick = { id -> saveWord(id) },
         onCreate = { name ->
@@ -1083,7 +1089,7 @@ class OverlayController(
                         null
                     }
                     if (book == null) {
-                        wordState = WordCardState.Ready(current.target, current.entry, saveFailed = true)
+                        wordState = WordCardState.Editing(current.target, current.entry, current.edit, saveFailed = true)
                     } else {
                         saveWord(book.id, book.name)
                     }
@@ -1092,16 +1098,16 @@ class OverlayController(
         },
     )
 
-    /** 카드의 저장 버튼: 저장할 단어장을 고르는 화면(X-02)으로. */
-    private fun chooseWordbook() {
+    /** 편집을 마쳤다: 저장할 단어장을 고르는 화면(X-02)으로. */
+    private fun chooseWordbook(edit: WordEdit) {
         val repository = vocabulary ?: return
-        val current = wordState as? WordCardState.Ready ?: return
+        val current = wordState as? WordCardState.Editing ?: return
         scope.launch {
             wordState = try {
-                WordCardState.Picking(current.target, current.entry, repository.wordbooks())
+                WordCardState.Picking(current.target, current.entry, edit, repository.wordbooks())
             } catch (e: Exception) {
                 Log.w(TAG, "단어장 목록 읽기 실패", e)
-                WordCardState.Ready(current.target, current.entry, saveFailed = true)
+                WordCardState.Editing(current.target, current.entry, edit, saveFailed = true)
             }
         }
     }
@@ -1112,24 +1118,23 @@ class OverlayController(
         val state = wordState
         val target: WordTarget
         val entry: com.example.translation_poc_app.translate.WordEntry
+        val edit: WordEdit
         val books: List<com.example.translation_poc_app.data.vocabulary.WordbookRow>
         when (state) {
-            is WordCardState.Picking -> { target = state.target; entry = state.entry; books = state.books }
-            is WordCardState.Ready -> { target = state.target; entry = state.entry; books = emptyList() }
+            is WordCardState.Picking -> { target = state.target; entry = state.entry; edit = state.edit; books = state.books }
             else -> return
         }
         scope.launch {
             val saved = try {
-                val definition = entry.definition
                 repository.saveWord(
                     wordbookId,
                     WordDraft(
-                        word = entry.word,
-                        meaning = entry.savedMeaning,
-                        pronunciation = definition?.pronunciation,
-                        partOfSpeech = definition?.partOfSpeech,
-                        contextMeaning = definition?.contextMeaning,
-                        sentence = entry.sentence,
+                        word = edit.word,
+                        meaning = edit.meaning,
+                        pronunciation = edit.pronunciation,
+                        partOfSpeech = edit.partOfSpeech,
+                        contextMeaning = edit.contextMeaning,
+                        sentence = edit.sentence,
                         sourceApp = null,
                         sourceLanguage = entry.sourceLanguage,
                         targetLanguage = entry.targetLanguage,
@@ -1141,9 +1146,9 @@ class OverlayController(
             }
             wordState = if (saved) {
                 val name = knownName ?: books.firstOrNull { it.id == wordbookId }?.name.orEmpty()
-                WordCardState.Saved(target, entry, name)
+                WordCardState.Saved(target, entry, edit.word.trim(), name)
             } else {
-                WordCardState.Ready(target, entry, saveFailed = true)
+                WordCardState.Editing(target, entry, edit, saveFailed = true)
             }
         }
     }
