@@ -823,6 +823,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get learnGames => '미니게임';
 
   @override
+  String get learnMatch => '선 잇기';
+
+  @override
   String get learnCardsHint => '카드를 뒤집어 뜻을 보고, 밀어서 외웠는지 나눠요';
 
   @override
@@ -877,6 +880,37 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cardsUnknownWords => '못 외운 단어';
+
+  @override
+  String get learnMatchHint => '단어에서 뜻으로 선을 이어요';
+
+  @override
+  String get learnFall => '하강형 타이핑';
+
+  @override
+  String get learnAssemble => '단어 조립';
+
+  @override
+  String get matchTitle => '선 잇기';
+
+  @override
+  String matchScore(int score) {
+    return '점수 $score';
+  }
+
+  @override
+  String matchRemaining(int count) {
+    return '남은 단어 $count개';
+  }
+
+  @override
+  String get matchHint => '단어를 끌어서 맞는 뜻에 이어 보세요';
+
+  @override
+  String get matchResultTitle => '선 잇기 결과';
+
+  @override
+  String get matchRetry => '다시 하기';
 
   @override
   String get learnComingSoon => '준비 중이에요';

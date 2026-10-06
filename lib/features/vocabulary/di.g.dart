@@ -560,3 +560,51 @@ final class CreateFlashcardDeckProvider
 
 String _$createFlashcardDeckHash() =>
     r'6f6daf8e82f0d175c7ab258b141362e32d4cbc0b';
+
+@ProviderFor(createLineMatchGame)
+final createLineMatchGameProvider = CreateLineMatchGameProvider._();
+
+final class CreateLineMatchGameProvider
+    extends
+        $FunctionalProvider<
+          CreateLineMatchGame,
+          CreateLineMatchGame,
+          CreateLineMatchGame
+        >
+    with $Provider<CreateLineMatchGame> {
+  CreateLineMatchGameProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'createLineMatchGameProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$createLineMatchGameHash();
+
+  @$internal
+  @override
+  $ProviderElement<CreateLineMatchGame> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CreateLineMatchGame create(Ref ref) {
+    return createLineMatchGame(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CreateLineMatchGame value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CreateLineMatchGame>(value),
+    );
+  }
+}
+
+String _$createLineMatchGameHash() =>
+    r'a48a9ebf047293fb03474a7eff77d4a6a9b56120';

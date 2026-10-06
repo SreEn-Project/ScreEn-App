@@ -58,3 +58,7 @@ CreateWordTest createWordTest(Ref ref) =>
 @riverpod
 CreateFlashcardDeck createFlashcardDeck(Ref ref) =>
     CreateFlashcardDeck(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+CreateLineMatchGame createLineMatchGame(Ref ref) =>
+    CreateLineMatchGame(ref.watch(vocabularyRepositoryProvider));

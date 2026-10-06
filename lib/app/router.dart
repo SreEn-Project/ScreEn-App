@@ -15,6 +15,7 @@ import '../features/permission/presentation/screens/permission_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/vocabulary/presentation/screens/flashcards_screen.dart';
 import '../features/vocabulary/presentation/screens/learning_start_screen.dart';
+import '../features/vocabulary/presentation/screens/line_match_screen.dart';
 import '../features/vocabulary/presentation/screens/word_detail_screen.dart';
 import '../features/vocabulary/presentation/screens/word_test_screen.dart';
 import '../features/vocabulary/presentation/screens/wordbook_detail_screen.dart';
@@ -45,6 +46,7 @@ abstract final class AppRoutes {
   static const learning = '/learning';
   static String wordTestPath(int wordbookId) => '/learning/test/$wordbookId';
   static String flashcardsPath(int wordbookId) => '/learning/cards/$wordbookId';
+  static String lineMatchPath(int wordbookId) => '/learning/match/$wordbookId';
 }
 
 /// 첫 실행이면 온보딩, 이미 마쳤으면 홈에서 시작한다 (FL-01). 저장된 설정을 한 번 읽는다.
@@ -131,6 +133,12 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
           GoRoute(
             path: 'cards/:id',
             builder: (context, state) => FlashcardsScreen(
+              wordbookId: int.parse(state.pathParameters['id']!),
+            ),
+          ),
+          GoRoute(
+            path: 'match/:id',
+            builder: (context, state) => LineMatchScreen(
               wordbookId: int.parse(state.pathParameters['id']!),
             ),
           ),
