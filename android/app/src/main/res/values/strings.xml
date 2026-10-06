@@ -115,6 +115,7 @@
     <string name="word_edit_next">Next</string>
     <string name="word_pick_paragraph">Pick a word from the original</string>
     <string name="word_pick_paragraph_off">Back to paragraph</string>
+    <string name="word_add_block">Add to word list</string>
     <string name="region_word_mode">Pick a word</string>
     <string name="region_hint_word">Drag over the area with the word</string>
 </resources>

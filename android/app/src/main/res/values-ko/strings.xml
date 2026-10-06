@@ -114,6 +114,7 @@
     <string name="word_edit_next">다음</string>
     <string name="word_pick_paragraph">원문에서 단어 고르기</string>
     <string name="word_pick_paragraph_off">문단으로 돌아가기</string>
+    <string name="word_add_block">단어장에 추가</string>
     <string name="region_word_mode">단어 선택</string>
     <string name="region_hint_word">끌어서 단어가 있는 영역을 고르세요</string>
 </resources>

@@ -179,4 +179,55 @@ void main() {
     expect(saved.sourceLanguage, 'en');
     expect(saved.targetLanguage, 'ko');
   });
+
+  testWidgets('저장할 단어장은 목록 시트에서 골라 바꾼다', (tester) async {
+    final second = Wordbook(
+      id: 2,
+      name: '일본어',
+      wordCount: 0,
+      memorizedCount: 0,
+      createdAt: DateTime(2026, 10, 2),
+    );
+    final repository = FakeVocabularyRepository(books: [_book, second]);
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.75;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: fakeNativeOverrides(vocabulary: repository),
+        child: MaterialApp.router(
+          theme: AppTheme.light,
+          locale: const Locale('ko'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: createRouter(
+            initialLocation: AppRoutes.wordbookPath(1),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('단어 추가'));
+    await tester.pumpAndSettle();
+    final fields = find.descendant(
+      of: find.byType(WordEditSheet),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(fields.at(0), 'りんご');
+    await tester.enterText(fields.at(1), '사과');
+    await tester.pump();
+
+    // 단어장 칸을 눌러 목록 시트에서 다른 단어장을 고른다.
+    await tester.tap(find.text('영어').last);
+    await tester.pumpAndSettle();
+    expect(find.text('새 단어장'), findsOneWidget);
+    await tester.tap(find.text('일본어').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('저장').last);
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(repository.savedWords.single.wordbookId, 2);
+  });
 }

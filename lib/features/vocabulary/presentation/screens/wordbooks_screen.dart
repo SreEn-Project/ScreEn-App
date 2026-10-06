@@ -89,11 +89,16 @@ class WordbooksScreen extends ConsumerWidget {
                         AppTokens.pagePadding,
                         AppTokens.sectionGap,
                       ),
-                      itemCount: books.length,
+                      itemCount: books.length + 1,
                       separatorBuilder: (_, _) =>
                           const SizedBox(height: AppTokens.space12),
                       itemBuilder: (context, index) {
-                        final book = books[index];
+                        if (index == 0) {
+                          return _StudyCard(
+                            onTap: () => context.push(AppRoutes.learning),
+                          );
+                        }
+                        final book = books[index - 1];
                         return WordbookCard(
                           book: book,
                           onTap: () async {
@@ -135,5 +140,55 @@ class WordbooksScreen extends ConsumerWidget {
     if (confirmed) {
       await ref.read(wordbooksViewModelProvider.notifier).delete(book.id);
     }
+  }
+}
+
+/// 학습 시작(L-01)으로 가는 카드: 단어장 목록 맨 위에 둔다.
+class _StudyCard extends StatelessWidget {
+  const _StudyCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return AppCard(
+      onTap: onTap,
+      color: colors.primaryContainer,
+      shadow: false,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTokens.pagePadding,
+        vertical: AppTokens.space16,
+      ),
+      child: Row(
+        children: [
+          Icon(Symbols.quiz_rounded, color: colors.onPrimaryContainer),
+          const SizedBox(width: AppTokens.space12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.vocabStudy,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colors.onPrimaryContainer,
+                  ),
+                ),
+                const SizedBox(height: AppTokens.space4),
+                Text(
+                  l10n.vocabStudyHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colors.onPrimaryContainer,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(Symbols.chevron_right_rounded, color: colors.onPrimaryContainer),
+        ],
+      ),
+    );
   }
 }

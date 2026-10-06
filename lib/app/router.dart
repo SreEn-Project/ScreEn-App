@@ -13,7 +13,9 @@ import '../features/settings/presentation/screens/quick_languages_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/permission/presentation/screens/permission_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/vocabulary/presentation/screens/learning_start_screen.dart';
 import '../features/vocabulary/presentation/screens/word_detail_screen.dart';
+import '../features/vocabulary/presentation/screens/word_test_screen.dart';
 import '../features/vocabulary/presentation/screens/wordbook_detail_screen.dart';
 import '../features/vocabulary/presentation/screens/wordbooks_screen.dart';
 import 'app_shell.dart';
@@ -39,6 +41,8 @@ abstract final class AppRoutes {
 
   static String wordbookPath(int id) => '/vocabulary/book/$id';
   static String wordPath(int id) => '/vocabulary/word/$id';
+  static const learning = '/learning';
+  static String wordTestPath(int wordbookId) => '/learning/test/$wordbookId';
 }
 
 /// 첫 실행이면 온보딩, 이미 마쳤으면 홈에서 시작한다 (FL-01). 저장된 설정을 한 번 읽는다.
@@ -110,6 +114,22 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
             path: 'word/:id',
             builder: (context, state) => WordDetailScreen(
               wordId: int.parse(state.pathParameters['id']!),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.learning,
+        builder: (context, state) => LearningStartScreen(
+          initialWordbookId: int.tryParse(
+            state.uri.queryParameters['book'] ?? '',
+          ),
+        ),
+        routes: [
+          GoRoute(
+            path: 'test/:id',
+            builder: (context, state) => WordTestScreen(
+              wordbookId: int.parse(state.pathParameters['id']!),
             ),
           ),
         ],

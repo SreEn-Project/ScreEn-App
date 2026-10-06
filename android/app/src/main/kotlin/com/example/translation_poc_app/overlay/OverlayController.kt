@@ -198,6 +198,8 @@ class OverlayController(
     /** 단어를 고르는 중 (AD-01): 덮어쓰기 막을 길게 눌러 연 한 글 목록, 사전 카드 창, 카드 상태. */
     private var blockWindow: OverlayWindow? = null
     private var wordWindow: OverlayWindow? = null
+    /** 지금 단어 창이 결과 카드의 "단어장에 추가"로 열렸다 (사전 카드를 거치지 않음). */
+    private var wordDirectAdd = false
     private var wordState by mutableStateOf<WordCardState?>(null)
     private var wordJob: Job? = null
 
@@ -990,6 +992,7 @@ class OverlayController(
                         onDismiss = { post(::closeByUser) },
                         onCopy = ::copy,
                         onWord = if (vocabulary != null) ({ target -> post { openWord(target) } }) else null,
+                        onAdd = if (vocabulary != null) ({ item -> post { openBlockAdd(item) } }) else null,
                     )
                 }
             }
@@ -1021,6 +1024,7 @@ class OverlayController(
                 onDismiss = { post(::dismissBlockWindow) },
                 onCopy = ::copy,
                 onWord = { target -> post { openWord(target) } },
+                onAdd = { added -> post { openBlockAdd(added) } },
             )
         }.apply {
             root.onBack = { post(::dismissBlockWindow) }
@@ -1034,11 +1038,30 @@ class OverlayController(
         current.destroy()
     }
 
-    /** 고른 단어의 사전 카드를 연다 (X-01). 번역(ML Kit)은 바로, AI 풀이는 AI 엔진일 때 같이 받는다. */
-    private fun openWord(target: WordTarget) {
+    /**
+     * 결과 카드의 "단어장에 추가": 사전 조회 없이 원문 · 번역을 채운 편집 화면을 바로 연다.
+     * 단어 = 원문, 뜻 = 번역. 고쳐서 "다음"으로 단어장을 골라 저장한다.
+     */
+    private fun openBlockAdd(item: TranslatedItem) {
         if (vocabulary == null) return
+        val translated = item.translated ?: return
         dismissWordWindow()
-        wordState = WordCardState.Loading(target)
+        wordDirectAdd = true
+        val original = item.original.trim()
+        val entry = com.example.translation_poc_app.translate.WordEntry(
+            word = original,
+            translation = translated.trim(),
+            definition = null,
+            aiError = null,
+            sentence = null,
+            sourceLanguage = item.sourceLanguage.ifBlank { "und" },
+            targetLanguage = targetLanguage,
+        )
+        wordState = WordCardState.Editing(WordTarget(original, null, entry.sourceLanguage), entry)
+        showWordWindow()
+    }
+
+    private fun showWordWindow() {
         val params = OverlayWindow.params(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, 0)
             // 새 단어장 이름을 칠 때 키보드가 올라온다.
             .apply { softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE }
@@ -1048,6 +1071,15 @@ class OverlayController(
             root.onBack = { post(::dismissWordWindow) }
             show()
         }
+    }
+
+    /** 고른 단어의 사전 카드를 연다 (X-01). 번역(ML Kit)은 바로, AI 풀이는 AI 엔진일 때 같이 받는다. */
+    private fun openWord(target: WordTarget) {
+        if (vocabulary == null) return
+        dismissWordWindow()
+        wordDirectAdd = false
+        wordState = WordCardState.Loading(target)
+        showWordWindow()
         wordJob = scope.launch {
             val outcome = try {
                 lookupWord(target, targetLanguage)
@@ -1070,7 +1102,9 @@ class OverlayController(
             (wordState as? WordCardState.Ready)?.let { wordState = WordCardState.Editing(it.target, it.entry) }
         },
         onEditBack = {
-            (wordState as? WordCardState.Editing)?.let { wordState = WordCardState.Ready(it.target, it.entry) }
+            // 결과 카드에서 바로 연 편집 화면은 돌아갈 사전 카드가 없다: 닫는다.
+            if (wordDirectAdd) post(::dismissWordWindow)
+            else (wordState as? WordCardState.Editing)?.let { wordState = WordCardState.Ready(it.target, it.entry) }
         },
         onEdited = ::chooseWordbook,
         onBack = {
