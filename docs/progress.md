@@ -446,3 +446,8 @@
 - Notion 명세 확인 후 구현(설계 D-049). Pigeon: `AiTone`, `GlossaryEntry`, `AppSettings.ageConfirmed/aiTone/glossary`, `setAgeConfirmed/setAiTone/setGlossary`. 네이티브: DataStore 키 3개, 연령 확인 전 Gemini 차단(설정 읽기 · setEngine · 서비스), 프롬프트에 말투 · 용어집, 캐시 키에 옵션. Flutter: `AiOptionsViewModel` · 유스케이스 3개 · AI 번역 설정 화면(연령 스위치 → 전송 고지 → 키 → 말투 · 용어집), 엔진 목록에 "만 18세 확인 필요" 안내. 문구(ko/en) · 플로팅 버튼 엔진 메뉴 문구 갱신.
 - 확인: `flutter analyze` 0, `flutter test` 통과(ViewModel · 저장소 매퍼 · 엔진 선택 규칙), 네이티브 단위 테스트(용어집 정리 · 저장 형식 · 프롬프트 · 캐시 키) 통과, `flutter build apk --debug` 성공. 화면 스크린샷 2장(11 · 12) 추가. 기기 확인 전.
 - 새 의존성 없음.
+
+## 단어장 저장소 · 화면 (AD-03 저장소 · AD-04 · AD-05 · AD-06, #120)
+- Notion 명세 확인 후 구현(설계 D-050). 네이티브: Room 표 `wordbooks` · `vocabulary_words`(DB v2, 자동 마이그레이션), `VocabularyRepository`(저장 · 이동 합치기 · 이름 규칙), Pigeon `VocabularyHostApi`(`Wordbook` · `VocabWord` · `VocabSort`). Flutter: `features/vocabulary` — 단어장 목록 · 관리(X-03), 단어장 상세(X-04: 검색 · 정렬 · 이동 · 삭제 · 외운 체크), 단어 상세(X-05), 홈에 "단어장" 진입 줄.
+- 확인: `flutter analyze` 0, `flutter test` 통과(ViewModel 18개 · 화면 6개), 네이티브 단위 테스트(이름 · 저장 내용 정리) 통과, `flutter build apk --debug` 성공. 화면 스크린샷 3장(13~15) 추가. 기기 확인 전.
+- 새 의존성 없음. 남은 일: AD-01 단어 선택 · AD-02 사전 카드 · AD-03 저장 UI(오버레이).

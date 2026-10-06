@@ -149,6 +149,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onTap: () => context.go(AppRoutes.settings),
           ),
         ),
+        const SizedBox(height: 12),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: AppListTile(
+            icon: Symbols.menu_book_rounded,
+            title: l10n.vocabTitle,
+            subtitle: l10n.vocabHomeHint,
+            onTap: () => context.push(AppRoutes.vocabulary),
+          ),
+        ),
         const SizedBox(height: 28),
         SectionTitle(
           l10n.homeRecent,

@@ -18,6 +18,8 @@ import 'package:translation_poc_app/features/service/domain/entities/service_sta
 import 'package:translation_poc_app/app/theme/app_theme.dart';
 import 'package:translation_poc_app/l10n/app_localizations.dart';
 
+import 'package:translation_poc_app/features/vocabulary/domain/entities/vocabulary.dart';
+
 import '../fakes.dart';
 
 const _outDir = 'build/screenshots';
@@ -54,10 +56,12 @@ Widget _route(
   ThemeMode mode = ThemeMode.light,
   ServiceStatus service = ServiceStatus.stopped,
   FakeSettingsRepository? settings,
+  FakeVocabularyRepository? vocabulary,
 }) => ProviderScope(
   overrides: fakeNativeOverrides(
     service: service,
     settings: settings,
+    vocabulary: vocabulary,
     permissionsGranted: location != AppRoutes.permission,
   ),
   child: MaterialApp.router(
@@ -181,6 +185,67 @@ void main() {
       ),
     );
     await _shoot(tester, '12_ai_setup_options');
+
+    // 단어장 (AD-04 ~ AD-06)
+    final vocabulary = FakeVocabularyRepository(
+      books: [
+        Wordbook(
+          id: 1,
+          name: '영어 기초',
+          wordCount: 0,
+          memorizedCount: 0,
+          createdAt: DateTime(2026, 10, 1),
+        ),
+        Wordbook(
+          id: 2,
+          name: '게임 용어',
+          wordCount: 0,
+          memorizedCount: 0,
+          createdAt: DateTime(2026, 10, 2),
+        ),
+      ],
+      words: [
+        for (final (i, w) in [
+          ('apple', '사과'),
+          ('journey', '여정'),
+          ('reluctant', '꺼리는'),
+        ].indexed)
+          VocabularyWord(
+            id: i + 1,
+            wordbookId: 1,
+            word: w.$1,
+            meaning: w.$2,
+            pronunciation: '/ˈæp.əl/',
+            partOfSpeech: '명사',
+            contextMeaning: '(과일) 사과',
+            sentence: 'An apple a day keeps the doctor away.',
+            sourceApp: 'Chrome',
+            sourceLanguage: 'en',
+            targetLanguage: 'ko',
+            memorized: i == 1,
+            savedAt: DateTime(2026, 10, 6, 9, 30 + i),
+          ),
+      ],
+    );
+    await _setSize(tester, _phone);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      _route(AppRoutes.vocabulary, vocabulary: vocabulary),
+    );
+    await _shoot(tester, '13_wordbooks');
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      _route(AppRoutes.wordbookPath(1), vocabulary: vocabulary),
+    );
+    await _shoot(tester, '14_wordbook_detail');
+
+    await _setSize(tester, const Size(412, 1000));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      _route(AppRoutes.wordPath(1), vocabulary: vocabulary),
+    );
+    await _shoot(tester, '15_word_detail');
 
     debugDisableShadows = true;
   });

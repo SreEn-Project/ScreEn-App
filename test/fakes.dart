@@ -13,6 +13,9 @@ import 'package:translation_poc_app/features/models/domain/repositories/model_re
 import 'package:translation_poc_app/features/permission/di.dart';
 import 'package:translation_poc_app/features/permission/domain/entities/app_permissions.dart';
 import 'package:translation_poc_app/features/permission/domain/repositories/permission_repository.dart';
+import 'package:translation_poc_app/features/vocabulary/di.dart';
+import 'package:translation_poc_app/features/vocabulary/domain/entities/vocabulary.dart';
+import 'package:translation_poc_app/features/vocabulary/domain/repositories/vocabulary_repository.dart';
 import 'package:translation_poc_app/features/service/di.dart';
 import 'package:translation_poc_app/features/service/domain/entities/service_status.dart';
 import 'package:translation_poc_app/features/service/domain/repositories/service_repository.dart';
@@ -208,12 +211,158 @@ class FakeAppInfoRepository implements AppInfoRepository {
       const AppInfo(version: '1.2.3', buildNumber: '45');
 }
 
+/// 메모리에 단어장 · 단어를 두는 가짜 저장소. 네이티브 Room 규칙을 따라 한다:
+/// 이름 중복 금지, 옮길 때 같은 단어가 있으면 합침.
+class FakeVocabularyRepository implements VocabularyRepository {
+  FakeVocabularyRepository({
+    List<Wordbook> books = const [],
+    List<VocabularyWord> words = const [],
+  }) : books = [...books],
+       savedWords = [...words];
+
+  final List<Wordbook> books;
+  final List<VocabularyWord> savedWords;
+
+  int _nextId = 100;
+
+  Wordbook _counted(Wordbook book) {
+    final inBook = savedWords.where((w) => w.wordbookId == book.id);
+    return Wordbook(
+      id: book.id,
+      name: book.name,
+      wordCount: inBook.length,
+      memorizedCount: inBook.where((w) => w.memorized).length,
+      createdAt: book.createdAt,
+    );
+  }
+
+  @override
+  Future<List<Wordbook>> wordbooks() async => [
+    for (final b in books) _counted(b),
+  ];
+
+  @override
+  Future<Wordbook?> createWordbook(String name) async {
+    if (name.isEmpty) return null;
+    for (final book in books) {
+      if (book.name == name) return _counted(book);
+    }
+    final book = Wordbook(
+      id: _nextId++,
+      name: name,
+      wordCount: 0,
+      memorizedCount: 0,
+      createdAt: DateTime(2026, 10, 6),
+    );
+    books.add(book);
+    return book;
+  }
+
+  @override
+  Future<bool> renameWordbook(int id, String name) async {
+    if (name.isEmpty) return false;
+    for (final book in books) {
+      if (book.name == name) return book.id == id;
+    }
+    final index = books.indexWhere((b) => b.id == id);
+    final old = books[index];
+    books[index] = Wordbook(
+      id: id,
+      name: name,
+      wordCount: old.wordCount,
+      memorizedCount: old.memorizedCount,
+      createdAt: old.createdAt,
+    );
+    return true;
+  }
+
+  @override
+  Future<void> deleteWordbook(int id) async {
+    books.removeWhere((b) => b.id == id);
+    savedWords.removeWhere((w) => w.wordbookId == id);
+  }
+
+  @override
+  Future<List<VocabularyWord>> words(
+    int wordbookId, {
+    String query = '',
+    WordSort sort = WordSort.newest,
+  }) async {
+    final q = query.toLowerCase();
+    final found = savedWords
+        .where(
+          (w) =>
+              w.wordbookId == wordbookId &&
+              (q.isEmpty ||
+                  w.word.toLowerCase().contains(q) ||
+                  w.meaning.toLowerCase().contains(q)),
+        )
+        .toList();
+    found.sort(
+      (a, b) => switch (sort) {
+        WordSort.newest => b.savedAt.compareTo(a.savedAt),
+        WordSort.oldest => a.savedAt.compareTo(b.savedAt),
+        WordSort.alphabetical => a.word.toLowerCase().compareTo(
+          b.word.toLowerCase(),
+        ),
+      },
+    );
+    return found;
+  }
+
+  @override
+  Future<VocabularyWord?> word(int id) async =>
+      savedWords.where((w) => w.id == id).firstOrNull;
+
+  VocabularyWord _copy(VocabularyWord w, {int? wordbookId, bool? memorized}) =>
+      VocabularyWord(
+        id: w.id,
+        wordbookId: wordbookId ?? w.wordbookId,
+        word: w.word,
+        meaning: w.meaning,
+        pronunciation: w.pronunciation,
+        partOfSpeech: w.partOfSpeech,
+        contextMeaning: w.contextMeaning,
+        sentence: w.sentence,
+        sourceApp: w.sourceApp,
+        sourceLanguage: w.sourceLanguage,
+        targetLanguage: w.targetLanguage,
+        memorized: memorized ?? w.memorized,
+        savedAt: w.savedAt,
+      );
+
+  @override
+  Future<void> moveWord(int id, int wordbookId) async {
+    final index = savedWords.indexWhere((w) => w.id == id);
+    final moving = savedWords[index];
+    final duplicate = savedWords.any(
+      (w) => w.wordbookId == wordbookId && w.word == moving.word,
+    );
+    if (duplicate) {
+      savedWords.removeAt(index);
+    } else {
+      savedWords[index] = _copy(moving, wordbookId: wordbookId);
+    }
+  }
+
+  @override
+  Future<void> deleteWord(int id) async =>
+      savedWords.removeWhere((w) => w.id == id);
+
+  @override
+  Future<void> setMemorized(int id, bool memorized) async {
+    final index = savedWords.indexWhere((w) => w.id == id);
+    savedWords[index] = _copy(savedWords[index], memorized: memorized);
+  }
+}
+
 /// 네이티브 연결 provider를 가짜로 바꾼다.
 List<Override> fakeNativeOverrides({
   ServiceStatus service = ServiceStatus.stopped,
   bool permissionsGranted = false,
   bool onboardingCompleted = false,
   FakeSettingsRepository? settings,
+  FakeVocabularyRepository? vocabulary,
 }) => [
   serviceRepositoryProvider.overrideWithValue(FakeServiceRepository(service)),
   settingsRepositoryProvider.overrideWithValue(
@@ -225,6 +374,9 @@ List<Override> fakeNativeOverrides({
   appInfoRepositoryProvider.overrideWithValue(const FakeAppInfoRepository()),
   modelRepositoryProvider.overrideWithValue(FakeModelRepository()),
   historyRepositoryProvider.overrideWithValue(FakeHistoryRepository()),
+  vocabularyRepositoryProvider.overrideWithValue(
+    vocabulary ?? FakeVocabularyRepository(),
+  ),
   permissionRepositoryProvider.overrideWithValue(
     FakePermissionRepository(
       overlay: permissionsGranted,

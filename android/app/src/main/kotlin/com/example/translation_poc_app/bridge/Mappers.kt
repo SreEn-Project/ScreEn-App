@@ -90,3 +90,33 @@ fun RunState.toPigeon() = when (this) {
     RunState.RUNNING -> ServiceState.RUNNING
     RunState.ERROR -> ServiceState.ERROR
 }
+
+fun com.example.translation_poc_app.data.vocabulary.WordbookRow.toPigeon() = Wordbook(
+    id = id,
+    name = name,
+    wordCount = wordCount.toLong(),
+    memorizedCount = memorizedCount.toLong(),
+    createdAtMs = createdAt,
+)
+
+fun com.example.translation_poc_app.data.vocabulary.WordEntity.toPigeon() = VocabWord(
+    id = id,
+    wordbookId = wordbookId,
+    word = word,
+    meaning = meaning,
+    pronunciation = pronunciation,
+    partOfSpeech = partOfSpeech,
+    contextMeaning = contextMeaning,
+    sentence = sentence,
+    sourceApp = sourceApp,
+    sourceLanguage = sourceLanguage,
+    targetLanguage = targetLanguage,
+    memorized = memorized,
+    createdAtMs = createdAt,
+)
+
+fun VocabSort.toNative() = when (this) {
+    VocabSort.NEWEST -> com.example.translation_poc_app.data.vocabulary.WordSort.NEWEST
+    VocabSort.OLDEST -> com.example.translation_poc_app.data.vocabulary.WordSort.OLDEST
+    VocabSort.ALPHABETICAL -> com.example.translation_poc_app.data.vocabulary.WordSort.ALPHABETICAL
+}

@@ -1171,6 +1171,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get aboutPending;
+
+  /// No description provided for @vocabTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vocabulary'**
+  String get vocabTitle;
+
+  /// No description provided for @vocabHomeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the words you saved'**
+  String get vocabHomeHint;
+
+  /// No description provided for @vocabEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No word lists yet'**
+  String get vocabEmpty;
+
+  /// No description provided for @vocabEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create one to save words while you translate'**
+  String get vocabEmptyHint;
+
+  /// No description provided for @vocabNewBook.
+  ///
+  /// In en, this message translates to:
+  /// **'New list'**
+  String get vocabNewBook;
+
+  /// No description provided for @vocabNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'List name'**
+  String get vocabNameHint;
+
+  /// No description provided for @vocabCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get vocabCreate;
+
+  /// No description provided for @vocabRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get vocabRename;
+
+  /// No description provided for @vocabDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get vocabDelete;
+
+  /// No description provided for @vocabCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get vocabCancel;
+
+  /// No description provided for @vocabSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get vocabSave;
+
+  /// No description provided for @vocabNameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'A list with this name already exists'**
+  String get vocabNameTaken;
+
+  /// No description provided for @vocabWordCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Words: {count}'**
+  String vocabWordCount(int count);
+
+  /// No description provided for @vocabMemorizedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} memorized'**
+  String vocabMemorizedCount(int count);
+
+  /// No description provided for @vocabDeleteBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String vocabDeleteBookTitle(String name);
+
+  /// No description provided for @vocabDeleteBookBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Words inside will be deleted too ({count}).'**
+  String vocabDeleteBookBody(int count);
+
+  /// No description provided for @vocabSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search words or meanings'**
+  String get vocabSearchHint;
+
+  /// No description provided for @vocabSortNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest'**
+  String get vocabSortNewest;
+
+  /// No description provided for @vocabSortOldest.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest'**
+  String get vocabSortOldest;
+
+  /// No description provided for @vocabSortAlphabetical.
+  ///
+  /// In en, this message translates to:
+  /// **'A–Z'**
+  String get vocabSortAlphabetical;
+
+  /// No description provided for @vocabNoWords.
+  ///
+  /// In en, this message translates to:
+  /// **'This list is empty'**
+  String get vocabNoWords;
+
+  /// No description provided for @vocabNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching words'**
+  String get vocabNoResult;
+
+  /// No description provided for @vocabMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to another list'**
+  String get vocabMove;
+
+  /// No description provided for @vocabMoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to'**
+  String get vocabMoveTitle;
+
+  /// No description provided for @vocabMoveNoOther.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no other list to move to'**
+  String get vocabMoveNoOther;
+
+  /// No description provided for @vocabMemorizedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorized'**
+  String get vocabMemorizedLabel;
+
+  /// No description provided for @vocabWordDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Word'**
+  String get vocabWordDetailTitle;
+
+  /// No description provided for @vocabMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning'**
+  String get vocabMeaning;
+
+  /// No description provided for @vocabPronunciation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation'**
+  String get vocabPronunciation;
+
+  /// No description provided for @vocabPartOfSpeech.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of speech'**
+  String get vocabPartOfSpeech;
+
+  /// No description provided for @vocabContextMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning in context'**
+  String get vocabContextMeaning;
+
+  /// No description provided for @vocabSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Example from the screen'**
+  String get vocabSentence;
+
+  /// No description provided for @vocabSourceApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get vocabSourceApp;
+
+  /// No description provided for @vocabSavedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved on'**
+  String get vocabSavedAt;
+
+  /// No description provided for @vocabDeleteWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete word'**
+  String get vocabDeleteWord;
+
+  /// No description provided for @vocabDeleteWordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this word?'**
+  String get vocabDeleteWordTitle;
+
+  /// No description provided for @vocabWordGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This word was already deleted'**
+  String get vocabWordGone;
 }
 
 class _AppLocalizationsDelegate

@@ -5,6 +5,8 @@ import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.ApiKeyStore
 import com.example.translation_poc_app.data.settings.GlossaryEntry as NativeGlossaryEntry
 import com.example.translation_poc_app.data.settings.SettingsRepository
+import com.example.translation_poc_app.data.vocabulary.VocabularyRepository
+import com.example.translation_poc_app.data.vocabulary.WordSort
 import com.example.translation_poc_app.translate.GeminiKeyTester
 import com.example.translation_poc_app.service.CaptureConsentActivity
 import com.example.translation_poc_app.service.RunState
@@ -84,6 +86,31 @@ class HistoryHostApiImpl(private val repository: HistoryRepository) : HistoryHos
     override suspend fun deleteHistory(id: Long) = repository.delete(id)
 
     override suspend fun clearHistory() = repository.clear()
+}
+
+/** 단어장 · 단어 관리 (AD-04 ~ AD-06). 단어 저장은 오버레이(네이티브)가 직접 한다. */
+class VocabularyHostApiImpl(private val repository: VocabularyRepository) : VocabularyHostApi {
+    override suspend fun getWordbooks(): List<Wordbook> = repository.wordbooks().map { it.toPigeon() }
+
+    override suspend fun createWordbook(name: String): Wordbook? =
+        repository.createWordbook(name)?.let { created ->
+            repository.wordbooks().first { it.id == created.id }.toPigeon()
+        }
+
+    override suspend fun renameWordbook(id: Long, name: String): Boolean = repository.renameWordbook(id, name)
+
+    override suspend fun deleteWordbook(id: Long) = repository.deleteWordbook(id)
+
+    override suspend fun getWords(wordbookId: Long, query: String, sort: VocabSort): List<VocabWord> =
+        repository.words(wordbookId, query, sort.toNative()).map { it.toPigeon() }
+
+    override suspend fun getWord(id: Long): VocabWord? = repository.word(id)?.toPigeon()
+
+    override suspend fun moveWord(id: Long, wordbookId: Long) = repository.moveWord(id, wordbookId)
+
+    override suspend fun deleteWord(id: Long) = repository.deleteWord(id)
+
+    override suspend fun setMemorized(id: Long, memorized: Boolean) = repository.setMemorized(id, memorized)
 }
 
 /** 서비스 상태 조회 · 시작 · 중지 (NA-01, NA-02). */

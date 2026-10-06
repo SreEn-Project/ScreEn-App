@@ -584,4 +584,123 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutPending => 'Coming soon';
+
+  @override
+  String get vocabTitle => 'Vocabulary';
+
+  @override
+  String get vocabHomeHint => 'Browse the words you saved';
+
+  @override
+  String get vocabEmpty => 'No word lists yet';
+
+  @override
+  String get vocabEmptyHint => 'Create one to save words while you translate';
+
+  @override
+  String get vocabNewBook => 'New list';
+
+  @override
+  String get vocabNameHint => 'List name';
+
+  @override
+  String get vocabCreate => 'Create';
+
+  @override
+  String get vocabRename => 'Rename';
+
+  @override
+  String get vocabDelete => 'Delete';
+
+  @override
+  String get vocabCancel => 'Cancel';
+
+  @override
+  String get vocabSave => 'Save';
+
+  @override
+  String get vocabNameTaken => 'A list with this name already exists';
+
+  @override
+  String vocabWordCount(int count) {
+    return 'Words: $count';
+  }
+
+  @override
+  String vocabMemorizedCount(int count) {
+    return '$count memorized';
+  }
+
+  @override
+  String vocabDeleteBookTitle(String name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String vocabDeleteBookBody(int count) {
+    return 'Words inside will be deleted too ($count).';
+  }
+
+  @override
+  String get vocabSearchHint => 'Search words or meanings';
+
+  @override
+  String get vocabSortNewest => 'Newest';
+
+  @override
+  String get vocabSortOldest => 'Oldest';
+
+  @override
+  String get vocabSortAlphabetical => 'A–Z';
+
+  @override
+  String get vocabNoWords => 'This list is empty';
+
+  @override
+  String get vocabNoResult => 'No matching words';
+
+  @override
+  String get vocabMove => 'Move to another list';
+
+  @override
+  String get vocabMoveTitle => 'Move to';
+
+  @override
+  String get vocabMoveNoOther => 'There is no other list to move to';
+
+  @override
+  String get vocabMemorizedLabel => 'Memorized';
+
+  @override
+  String get vocabWordDetailTitle => 'Word';
+
+  @override
+  String get vocabMeaning => 'Meaning';
+
+  @override
+  String get vocabPronunciation => 'Pronunciation';
+
+  @override
+  String get vocabPartOfSpeech => 'Part of speech';
+
+  @override
+  String get vocabContextMeaning => 'Meaning in context';
+
+  @override
+  String get vocabSentence => 'Example from the screen';
+
+  @override
+  String get vocabSourceApp => 'Source';
+
+  @override
+  String get vocabSavedAt => 'Saved on';
+
+  @override
+  String get vocabDeleteWord => 'Delete word';
+
+  @override
+  String get vocabDeleteWordTitle => 'Delete this word?';
+
+  @override
+  String get vocabWordGone => 'This word was already deleted';
 }
