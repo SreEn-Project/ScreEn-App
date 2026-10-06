@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -63,6 +67,8 @@ internal fun ResultSheet(
     display: ResultDisplay,
     onDismiss: () -> Unit,
     onCopy: (String) -> Unit,
+    /** 원문의 단어를 탭했다 (AD-01). null이면 단어를 고를 수 없다. */
+    onWord: ((WordTarget) -> Unit)? = null,
 ) {
     val colors = OverlayTheme.colors
     val noRipple = remember { MutableInteractionSource() }
@@ -73,7 +79,7 @@ internal fun ResultSheet(
     Box(modifier = frame, contentAlignment = Alignment.BottomCenter) {
         SheetSurface {
             when (outcome) {
-                is TranslationOutcome.Translated -> ResultList(outcome, display, onDismiss, onCopy)
+                is TranslationOutcome.Translated -> ResultList(outcome, display, onDismiss, onCopy, onWord)
                 TranslationOutcome.SecureScreen -> Message(
                     Symbol.VISIBILITY_OFF,
                     stringResource(R.string.result_secure_title),
@@ -109,7 +115,7 @@ internal fun ResultSheet(
 
 /** 아래에서 올라오는 흰 시트. 시트 안을 눌러도 닫히지 않는다. */
 @Composable
-private fun SheetSurface(content: @Composable ColumnScope.() -> Unit) {
+internal fun SheetSurface(content: @Composable ColumnScope.() -> Unit) {
     val colors = OverlayTheme.colors
     val shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     val maxHeight = (LocalConfiguration.current.screenHeightDp * 0.75f).dp
@@ -150,6 +156,7 @@ private fun ColumnScope.ResultList(
     display: ResultDisplay,
     onDismiss: () -> Unit,
     onCopy: (String) -> Unit,
+    onWord: ((WordTarget) -> Unit)?,
 ) {
     val colors = OverlayTheme.colors
     // 문단형: 번역된 블록을 나누지 않고 한 문단으로 잇는다. 번역된 게 없으면 목록으로 보여 준다.
@@ -174,6 +181,14 @@ private fun ColumnScope.ResultList(
                 stringResource(R.string.result_languages, languageName(result.targetLanguage)),
                 style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant),
             )
+            // 문단형은 원문이 안 보여 단어를 고를 수 없다.
+            if (onWord != null && paragraph == null) {
+                Spacer(Modifier.height(2.dp))
+                BasicText(
+                    stringResource(R.string.word_hint),
+                    style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant),
+                )
+            }
         }
         PlainIconButton(Symbol.CLOSE, stringResource(R.string.result_close), colors.onSurface, onDismiss)
     }
@@ -187,7 +202,7 @@ private fun ColumnScope.ResultList(
             item { ParagraphCard(paragraph, copied = copied == 0) { onCopy(paragraph); copied = 0 } }
         } else {
             itemsIndexed(result.items) { index, item ->
-                ResultCard(item, copied = copied == index) {
+                ResultCard(item, copied = copied == index, onWord = onWord) {
                     item.translated?.let {
                         onCopy(it)
                         copied = index
@@ -241,7 +256,7 @@ private fun ColumnScope.ResultList(
 
 /** 원문(회색 작은 글자) · 번역문(본문) 카드. 오른쪽 위 복사. */
 @Composable
-private fun ResultCard(item: TranslatedItem, copied: Boolean, onCopy: () -> Unit) {
+private fun ResultCard(item: TranslatedItem, copied: Boolean, onWord: ((WordTarget) -> Unit)?, onCopy: () -> Unit) {
     val colors = OverlayTheme.colors
     Row(
         modifier = Modifier
@@ -251,7 +266,14 @@ private fun ResultCard(item: TranslatedItem, copied: Boolean, onCopy: () -> Unit
             .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
     ) {
         Column(Modifier.weight(1f).padding(top = 2.dp)) {
-            BasicText(item.original, style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant))
+            val originalStyle = OverlayTheme.caption.copy(color = colors.onSurfaceVariant)
+            if (onWord != null) {
+                WordPickText(item.original, originalStyle) { word ->
+                    onWord(WordTarget(word, item.original, item.sourceLanguage))
+                }
+            } else {
+                BasicText(item.original, style = originalStyle)
+            }
             Spacer(Modifier.height(6.dp))
             if (item.translated != null) {
                 BasicText(item.translated, style = OverlayTheme.translated.copy(color = colors.onSurface))
@@ -275,6 +297,30 @@ private fun ResultCard(item: TranslatedItem, copied: Boolean, onCopy: () -> Unit
             )
         }
     }
+}
+
+/**
+ * 글에서 탭한 단어를 [onWord]로 알린다 (AD-01). 글자 칸에서 조금 벗어난 곳을 눌러도 되지만(작은 글자라서),
+ * 줄 끝 빈 곳이나 멀리 떨어진 곳은 무시한다.
+ */
+@Composable
+private fun WordPickText(text: String, style: TextStyle, onWord: (String) -> Unit) {
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val slop = with(LocalDensity.current) { 12.dp.toPx() }
+    BasicText(
+        text,
+        style = style,
+        onTextLayout = { layout = it },
+        modifier = Modifier.pointerInput(text) {
+            detectTapGestures { position ->
+                val result = layout ?: return@detectTapGestures
+                val offset = result.getOffsetForPosition(position).coerceIn(0, text.length - 1)
+                val box = result.getBoundingBox(offset)
+                val near = position.x in (box.left - slop)..(box.right + slop) && position.y in (box.top - slop)..(box.bottom + slop)
+                if (near) WordSelection.wordAt(text, offset)?.let(onWord)
+            }
+        },
+    )
 }
 
 /** 문단형 카드: 번역문만 한 덩어리로. 오른쪽 위 복사. */

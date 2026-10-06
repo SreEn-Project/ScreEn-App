@@ -90,4 +90,24 @@
     <string name="tile_on">On</string>
     <string name="tile_off">Off</string>
     <string name="tile_starting">Starting…</string>
+    <string name="word_hint">Tap a word to open its dictionary card</string>
+    <string name="word_loading">Looking it up…</string>
+    <string name="word_label_translation">Translation</string>
+    <string name="word_label_meaning">Meaning</string>
+    <string name="word_label_context">Meaning in context</string>
+    <string name="word_label_sentence">Original sentence</string>
+    <string name="word_ai_hint">Turn on the AI engine to see meaning, pronunciation and context meaning</string>
+    <string name="word_ai_failed">Couldn’t get the AI explanation, showing the translation only</string>
+    <string name="word_save">Save to word list</string>
+    <string name="word_pick_title">Save to</string>
+    <string name="word_new_book">Create a new list</string>
+    <string name="word_new_book_hint">List name</string>
+    <string name="word_create">Create and save</string>
+    <string name="word_book_count">%1$d words</string>
+    <string name="word_no_books">No word lists yet. Create one to save this word</string>
+    <string name="word_saved">Saved to “%1$s”</string>
+    <string name="word_save_failed">Couldn’t save. Please try again</string>
+    <string name="word_back">Back</string>
+    <string name="region_word_mode">Pick a word</string>
+    <string name="region_hint_word">Drag over the area with the word</string>
 </resources>
