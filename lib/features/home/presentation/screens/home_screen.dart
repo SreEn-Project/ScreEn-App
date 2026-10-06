@@ -19,6 +19,7 @@ import '../../../history/domain/entities/history_entry.dart';
 import '../../../history/presentation/view_models/history_view_model.dart';
 import '../../../history/presentation/widgets/history_card.dart';
 import '../view_models/service_view_model.dart';
+import '../../../vocabulary/presentation/widgets/word_of_the_day_card.dart';
 
 /// 홈 (S-03, FL-03).
 /// 캡처 범위는 플로팅 버튼 메뉴에서 고르므로 홈에는 두지 않고, 언어 · 모델 설정을 둔다 (D-016).
@@ -150,6 +151,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
         const SizedBox(height: 12),
+        const WordOfTheDayCard(),
         AppCard(
           padding: EdgeInsets.zero,
           child: AppListTile(

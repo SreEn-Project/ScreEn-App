@@ -70,3 +70,7 @@ CreateFallingGame createFallingGame(Ref ref) =>
 @riverpod
 CreateAssemblyGame createAssemblyGame(Ref ref) =>
     CreateAssemblyGame(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+GetWordOfTheDay getWordOfTheDay(Ref ref) =>
+    GetWordOfTheDay(ref.watch(vocabularyRepositoryProvider));
