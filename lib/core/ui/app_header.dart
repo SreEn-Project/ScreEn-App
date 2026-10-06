@@ -21,6 +21,9 @@ class AppHeader extends StatelessWidget {
   final Widget? trailing;
   final bool showBack;
 
+  /// 제목 양옆으로 비워 두는 폭 (아이콘 버튼 하나가 들어가는 크기).
+  static const double _sideSlot = 56;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -41,10 +44,12 @@ class AppHeader extends StatelessWidget {
       height: AppTokens.headerHeight,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
+        // 제목은 항상 가운데. 양옆 동작은 내용 너비만큼 자라서 글자 버튼도 잘리지 않는다.
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            SizedBox(width: 56, child: Center(child: start)),
-            Expanded(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: _sideSlot),
               child: Text(
                 title,
                 textAlign: TextAlign.center,
@@ -53,7 +58,10 @@ class AppHeader extends StatelessWidget {
                 style: theme.textTheme.titleLarge,
               ),
             ),
-            SizedBox(width: 56, child: Center(child: trailing)),
+            if (start != null)
+              Align(alignment: Alignment.centerLeft, child: start),
+            if (trailing != null)
+              Align(alignment: Alignment.centerRight, child: trailing),
           ],
         ),
       ),
