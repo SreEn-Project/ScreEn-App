@@ -1952,6 +1952,24 @@ abstract class AppLocalizations {
   /// **'Word assembly results'**
   String get assembleResultTitle;
 
+  /// No description provided for @wotdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Word of the day'**
+  String get wotdTitle;
+
+  /// No description provided for @wotdAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Another word'**
+  String get wotdAnother;
+
+  /// No description provided for @wotdReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show meaning'**
+  String get wotdReveal;
+
   /// No description provided for @learnComingSoon.
   ///
   /// In en, this message translates to:

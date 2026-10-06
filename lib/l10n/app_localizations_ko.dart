@@ -988,6 +988,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assembleResultTitle => '단어 조립 결과';
 
   @override
+  String get wotdTitle => '오늘의 단어';
+
+  @override
+  String get wotdAnother => '다른 단어';
+
+  @override
+  String get wotdReveal => '뜻 보기';
+
+  @override
   String get learnComingSoon => '준비 중이에요';
 
   @override

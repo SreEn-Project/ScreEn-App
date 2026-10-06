@@ -1012,6 +1012,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assembleResultTitle => 'Word assembly results';
 
   @override
+  String get wotdTitle => 'Word of the day';
+
+  @override
+  String get wotdAnother => 'Another word';
+
+  @override
+  String get wotdReveal => 'Show meaning';
+
+  @override
   String get learnComingSoon => 'Coming soon';
 
   @override

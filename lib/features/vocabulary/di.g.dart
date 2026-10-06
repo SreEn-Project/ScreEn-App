@@ -703,3 +703,45 @@ final class CreateAssemblyGameProvider
 
 String _$createAssemblyGameHash() =>
     r'69cd92af5b79d8b34380b0766651359af8578b13';
+
+@ProviderFor(getWordOfTheDay)
+final getWordOfTheDayProvider = GetWordOfTheDayProvider._();
+
+final class GetWordOfTheDayProvider
+    extends
+        $FunctionalProvider<GetWordOfTheDay, GetWordOfTheDay, GetWordOfTheDay>
+    with $Provider<GetWordOfTheDay> {
+  GetWordOfTheDayProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getWordOfTheDayProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getWordOfTheDayHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetWordOfTheDay> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GetWordOfTheDay create(Ref ref) {
+    return getWordOfTheDay(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetWordOfTheDay value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetWordOfTheDay>(value),
+    );
+  }
+}
+
+String _$getWordOfTheDayHash() => r'd44bce7d72aae7fa55449105ad60bd7a4f252ec9';

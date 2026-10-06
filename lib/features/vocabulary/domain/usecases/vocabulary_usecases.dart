@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../../../core/domain/use_case.dart';
+import '../entities/daily_word.dart';
 import '../entities/falling_game.dart';
 import '../entities/line_match.dart';
 import '../entities/vocabulary.dart';
@@ -351,5 +352,58 @@ final class CreateAssemblyGame
           random: random,
         ),
     ];
+  }
+}
+
+class GetWordOfTheDayParams {
+  const GetWordOfTheDayParams(this.date, {this.skip = 0});
+
+  final DateTime date;
+
+  /// "다른 단어 보기"를 누른 횟수. 하루 단어에서 순서대로 다음 단어로 넘어간다.
+  final int skip;
+}
+
+/// 오늘의 단어 고르기 (AD-14): 모든 단어장의 단어 중 날짜로 정한 한 단어. 같은 날에는 같은 단어가 나온다
+/// (단어를 새로 저장하면 바뀔 수 있다). 단어가 없으면 null.
+final class GetWordOfTheDay
+    implements UseCase<DailyWord?, GetWordOfTheDayParams> {
+  const GetWordOfTheDay(this._repository);
+
+  static const choiceCount = 4;
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<DailyWord?> call(GetWordOfTheDayParams params) async {
+    final all = <VocabularyWord>[];
+    for (final book in await _repository.wordbooks()) {
+      all.addAll(await _repository.words(book.id));
+    }
+    if (all.isEmpty) return null;
+    all.sort((a, b) => a.id.compareTo(b.id));
+
+    final date = params.date;
+    final day = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).difference(DateTime.utc(2000)).inDays;
+    final random = Random(day);
+    final word = all[(random.nextInt(all.length) + params.skip) % all.length];
+
+    final seen = <String>{word.meaning.trim().toLowerCase()};
+    final wrong = <String>[];
+    for (final other in [...all]..shuffle(random)) {
+      if (wrong.length == choiceCount - 1) break;
+      if (seen.add(other.meaning.trim().toLowerCase())) {
+        wrong.add(other.meaning);
+      }
+    }
+    if (wrong.isEmpty) return DailyWord(word: word);
+    return DailyWord(
+      word: word,
+      choices: [word.meaning, ...wrong]..shuffle(random),
+    );
   }
 }
