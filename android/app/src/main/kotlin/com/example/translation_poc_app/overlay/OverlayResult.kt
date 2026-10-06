@@ -9,7 +9,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.runtime.getValue
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -60,7 +62,14 @@ private const val MIN_SP = 10
  * 화면 아무 곳이나 누르면 닫힌다. 창이 화면 전체라서 비율 좌표를 그대로 창 크기에 곱한다.
  */
 @Composable
-internal fun OverlayResult(items: List<TranslatedItem>, pending: List<NormalizedRegion>, onDismiss: () -> Unit) {
+@OptIn(ExperimentalFoundationApi::class)
+internal fun OverlayResult(
+    items: List<TranslatedItem>,
+    pending: List<NormalizedRegion>,
+    onDismiss: () -> Unit,
+    /** 막을 길게 누르면 그 글의 원문에서 단어를 고르게 한다 (AD-01). 터치를 통과시키는 막에서는 어차피 닿지 않는다. */
+    onPickWord: ((TranslatedItem) -> Unit)? = null,
+) {
     val colors = OverlayTheme.colors
     val noRipple = remember { MutableInteractionSource() }
     val measurer = rememberTextMeasurer()
@@ -98,6 +107,18 @@ internal fun OverlayResult(items: List<TranslatedItem>, pending: List<Normalized
                     )
                     .clip(RoundedCornerShape(6.dp))
                     .background(BoxColor)
+                    .then(
+                        if (onPickWord != null) {
+                            Modifier.combinedClickable(
+                                interactionSource = noRipple,
+                                indication = null,
+                                onClick = onDismiss,
+                                onLongClick = { onPickWord(item) },
+                            )
+                        } else {
+                            Modifier
+                        },
+                    )
                     .padding(horizontal = 4.dp, vertical = 2.dp),
                 contentAlignment = Alignment.Center,
             ) {

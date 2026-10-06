@@ -26,10 +26,14 @@ import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.overlay.OverlayController
+import com.example.translation_poc_app.overlay.WordTarget
 import com.example.translation_poc_app.translate.DetectedBlock
 import com.example.translation_poc_app.translate.LanguageDetector
 import com.example.translation_poc_app.translate.ApiKeyProvider
 import com.example.translation_poc_app.translate.FallbackTranslationEngine
+import com.example.translation_poc_app.translate.GeminiDictionary
+import com.example.translation_poc_app.translate.WordLookup
+import com.example.translation_poc_app.translate.WordLookupOutcome
 import com.example.translation_poc_app.translate.GeminiTranslationEngine
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
 import com.example.translation_poc_app.translate.ModelDownloadPolicy
@@ -159,16 +163,29 @@ class TranslatorService : LifecycleService() {
      * 엔진이 추가되면 [Engine]별 분기만 늘리면 된다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
-        val mlKit = mlKitEngine ?: MlKitTranslationEngine(
-            downloadPolicyProvider = {
-                ModelDownloadPolicy(AppGraph.settingsRepository(this).current().wifiOnlyModelDownload)
-            },
-        ).also { mlKitEngine = it }
+        val mlKit = mlKit()
         return when (settings.engine) {
             Engine.ML_KIT -> mlKit
             // 설정이 연령 확인 전 Gemini를 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
             Engine.GEMINI -> if (!settings.ageConfirmed) mlKit else FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit, ::notifyAiFallback)
         }
+    }
+
+    private fun mlKit(): MlKitTranslationEngine = mlKitEngine ?: MlKitTranslationEngine(
+        downloadPolicyProvider = {
+            ModelDownloadPolicy(AppGraph.settingsRepository(this).current().wifiOnlyModelDownload)
+        },
+    ).also { mlKitEngine = it }
+
+    /**
+     * 고른 단어의 사전 카드 내용 (AD-02): 번역은 ML Kit, 뜻 · 발음 · 품사 · 문맥 뜻은 AI 엔진을 쓰고 있을 때만 (키 · 연령 확인 포함).
+     */
+    private suspend fun lookupWord(target: WordTarget, targetLanguage: String): WordLookupOutcome {
+        val settings = AppGraph.settingsRepository(this).current()
+        val useAi = settings.engine == Engine.GEMINI && settings.ageConfirmed &&
+            withContext(Dispatchers.IO) { !AppGraph.apiKeyStore(this@TranslatorService).get().isNullOrBlank() }
+        return WordLookup(mlKit(), if (useAi) GeminiDictionary(geminiKeys) else null)
+            .lookup(target.word, target.sentence, target.sourceLanguage, targetLanguage)
     }
 
     private var lastFallbackNoticeMs = 0L
@@ -231,6 +248,8 @@ class TranslatorService : LifecycleService() {
                 AppGraph.settingsRepository(this).current().ageConfirmed &&
                     !AppGraph.apiKeyStore(this).get().isNullOrBlank()
             },
+            vocabulary = AppGraph.vocabularyRepository(this),
+            lookupWord = ::lookupWord,
         ).takeIf { it.show() }
     }
 

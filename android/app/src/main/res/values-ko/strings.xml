@@ -89,4 +89,24 @@
     <string name="tile_on">켜짐</string>
     <string name="tile_off">꺼짐</string>
     <string name="tile_starting">시작 중…</string>
+    <string name="word_hint">단어를 누르면 사전 카드가 열려요</string>
+    <string name="word_loading">찾아보는 중…</string>
+    <string name="word_label_translation">번역</string>
+    <string name="word_label_meaning">뜻</string>
+    <string name="word_label_context">문맥 뜻</string>
+    <string name="word_label_sentence">원래 문장</string>
+    <string name="word_ai_hint">AI 번역 엔진을 켜면 뜻 · 발음 · 문맥 뜻도 볼 수 있어요</string>
+    <string name="word_ai_failed">AI 풀이를 받지 못해 번역만 보여 드려요</string>
+    <string name="word_save">단어장에 저장</string>
+    <string name="word_pick_title">저장할 단어장</string>
+    <string name="word_new_book">새 단어장 만들기</string>
+    <string name="word_new_book_hint">단어장 이름</string>
+    <string name="word_create">만들고 저장</string>
+    <string name="word_book_count">단어 %1$d개</string>
+    <string name="word_no_books">아직 단어장이 없어요. 새로 만들어 저장하세요</string>
+    <string name="word_saved">‘%1$s’에 저장했어요</string>
+    <string name="word_save_failed">저장하지 못했어요. 다시 시도해 주세요</string>
+    <string name="word_back">뒤로</string>
+    <string name="region_word_mode">단어 선택</string>
+    <string name="region_hint_word">끌어서 단어가 있는 영역을 고르세요</string>
 </resources>

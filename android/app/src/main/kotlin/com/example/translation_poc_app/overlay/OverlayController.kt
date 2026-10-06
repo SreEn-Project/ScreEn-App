@@ -33,6 +33,10 @@ import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.ResultDisplay
 import com.example.translation_poc_app.data.settings.Settings as AppSettings
 import com.example.translation_poc_app.data.settings.SettingsRepository
+import com.example.translation_poc_app.data.vocabulary.VocabularyRepository
+import com.example.translation_poc_app.data.vocabulary.WordDraft
+import com.example.translation_poc_app.translate.EngineId
+import com.example.translation_poc_app.translate.WordLookupOutcome
 import com.example.translation_poc_app.translate.TranslatedItem
 import com.example.translation_poc_app.translate.TranslationOutcome
 import com.example.translation_poc_app.translate.TranslationPipeline
@@ -67,6 +71,10 @@ class OverlayController(
     private val onTranslated: (TranslationOutcome.Translated) -> Unit = {},
     /** Gemini API 키가 저장돼 있는가 (NA-13). 빠른 설정의 AI 엔진 선택이 Gemini를 고를 수 있게 할지 정한다. */
     private val hasGeminiKey: suspend () -> Boolean = { false },
+    /** 단어장 (AD-03). null이면 단어 고르기 · 저장을 쓰지 않는다. */
+    private val vocabulary: VocabularyRepository? = null,
+    /** 고른 단어의 사전 카드 내용을 만든다 (AD-02). 두 번째 값은 대상 언어. */
+    private val lookupWord: suspend (WordTarget, String) -> WordLookupOutcome = { _, _ -> WordLookupOutcome.Failed(null) },
 ) {
     private val windowManager = context.getSystemService(WindowManager::class.java)
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -187,6 +195,16 @@ class OverlayController(
     private var sheetIsList = false
     private var picker: OverlayWindow? = null
 
+    /** 단어를 고르는 중 (AD-01): 덮어쓰기 막을 길게 눌러 연 한 글 목록, 사전 카드 창, 카드 상태. */
+    private var blockWindow: OverlayWindow? = null
+    private var wordWindow: OverlayWindow? = null
+    private var wordState by mutableStateOf<WordCardState?>(null)
+    private var wordJob: Job? = null
+
+    /** 이번 번역 결과를 표시 설정과 상관없이 목록 시트로 보인다 (드래그 영역의 단어 선택 모드, AD-01). */
+    private var forceList = false
+    private val shownDisplay get() = if (forceList) ResultDisplay.LIST else display
+
     /** 번역 중인 작업 (버튼 탭 · 화면 이동으로 취소한다). 자동 번역의 다시 번역은 감시가 따로 가진다. */
     private var translateJob: Job? = null
 
@@ -265,6 +283,8 @@ class OverlayController(
         dismissMenu()
         dismissSheet()
         dismissPicker()
+        dismissWordWindow()
+        dismissBlockWindow()
         closeZone.destroy()
         button.destroy()
         lastPlacement = placement to area
@@ -311,15 +331,16 @@ class OverlayController(
     private fun startTranslation() {
         when (mode) {
             CaptureRange.FULL_SCREEN -> translate()
-            CaptureRange.DRAG_REGION -> showPicker(RegionPickMode.DRAG) { translate(it) }
-            CaptureRange.FIXED_REGION -> fixedRegion?.let { translate(it) } ?: showPicker(RegionPickMode.EDIT, ::saveFixedRegion)
+            CaptureRange.DRAG_REGION -> showPicker(RegionPickMode.DRAG) { region, wordMode -> translate(region, wordMode) }
+            CaptureRange.FIXED_REGION -> fixedRegion?.let { translate(it) } ?: showPicker(RegionPickMode.EDIT) { region, _ -> saveFixedRegion(region) }
         }
     }
 
-    private fun translate(region: NormalizedRegion? = null) {
+    private fun translate(region: NormalizedRegion? = null, wordMode: Boolean = false) {
         if (busy) return
         dismissMenu()
         dismissSheet()
+        forceList = wordMode
         busy = true
         lastRegion = region
         pendingRegions = emptyList()
@@ -338,7 +359,7 @@ class OverlayController(
                     },
                     // 글자 자리를 먼저 보여 주고 번역이 끝날 때까지 로딩 표시를 건다 (덮어쓰기 표시일 때).
                     onPending = { regions ->
-                        if (display == ResultDisplay.OVERLAY && regions.isNotEmpty()) {
+                        if (shownDisplay == ResultDisplay.OVERLAY && regions.isNotEmpty()) {
                             pendingRegions = regions
                             showSheet(null, regions, final = false)
                         }
@@ -848,7 +869,7 @@ class OverlayController(
         scope.launch { settingsRepository.setCaptureRange(item.range) }
         post(::dismissMenu)
         // 고정 영역을 고르면 바로 영역을 지정 · 수정한다. 이후 버튼 탭 = 번역.
-        if (item.range == CaptureRange.FIXED_REGION) post { showPicker(RegionPickMode.EDIT, ::saveFixedRegion) }
+        if (item.range == CaptureRange.FIXED_REGION) post { showPicker(RegionPickMode.EDIT) { region, _ -> saveFixedRegion(region) } }
     }
 
     // ── 영역 선택 (NA-20 · NA-21) ────────────────────────
@@ -861,7 +882,7 @@ class OverlayController(
     }
 
     /** 화면 전체를 덮는 영역 선택 창. 고르면 [onPicked]. 취소 · 뒤로 가기는 그냥 닫는다. */
-    private fun showPicker(pickMode: RegionPickMode, onPicked: (NormalizedRegion) -> Unit) {
+    private fun showPicker(pickMode: RegionPickMode, onPicked: (NormalizedRegion, wordMode: Boolean) -> Unit) {
         if (busy || picker != null) return
         dismissMenu()
         dismissSheet()
@@ -875,7 +896,7 @@ class OverlayController(
             RegionPicker(
                 pickMode,
                 initial = fixedRegion,
-                onDone = { region -> post { dismissPicker(); onPicked(region) } },
+                onDone = { region, wordMode -> post { dismissPicker(); onPicked(region, wordMode) } },
                 onCancel = { post(::dismissPicker) },
             )
         }.apply {
@@ -905,12 +926,12 @@ class OverlayController(
      */
     private fun showSheet(outcome: TranslationOutcome?, pending: List<NormalizedRegion> = emptyList(), final: Boolean = true) {
         // 원문 위에 덮기(NA-22): 자리를 아는 번역 항목이 하나라도 있으면 막으로, 없으면 목록 시트로.
-        val overItems = if (display == ResultDisplay.OVERLAY && outcome is TranslationOutcome.Translated) {
+        val overItems = if (shownDisplay == ResultDisplay.OVERLAY && outcome is TranslationOutcome.Translated) {
             overlayItems(outcome.items)
         } else {
             emptyList()
         }
-        val layerPendingNow = if (display == ResultDisplay.OVERLAY) pending else emptyList()
+        val layerPendingNow = if (shownDisplay == ResultDisplay.OVERLAY) pending else emptyList()
         val isLayer = overItems.isNotEmpty() || layerPendingNow.isNotEmpty()
         // 자동 번역 중이거나 닫힘 시간이 정해져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
         // (#23, #35). '직접 닫기'(자동 번역 꺼짐)는 화면 전체를 막고 사용자가 닫을 때까지 둔다. 목록 · 문장 시트는 항상 막는다.
@@ -955,14 +976,185 @@ class OverlayController(
         }
         sheet = OverlayWindow(context, windowManager, params) {
             if (isLayer) {
-                OverlayResult(layerItems, layerPending, onDismiss = { post(::closeByUser) })
+                OverlayResult(
+                    layerItems,
+                    layerPending,
+                    onDismiss = { post(::closeByUser) },
+                    onPickWord = if (vocabulary != null) ({ item -> post { openBlockWindow(item) } }) else null,
+                )
             } else {
-                sheetOutcome?.let { ResultSheet(it, display, onDismiss = { post(::closeByUser) }, onCopy = ::copy) }
+                sheetOutcome?.let {
+                    ResultSheet(
+                        it,
+                        shownDisplay,
+                        onDismiss = { post(::closeByUser) },
+                        onCopy = ::copy,
+                        onWord = if (vocabulary != null) ({ target -> post { openWord(target) } }) else null,
+                    )
+                }
             }
         }.apply {
             if (!touchless) root.onBack = { post(::closeByUser) }
             show()
         }
+    }
+
+    // ── 단어 선택 · 사전 카드 · 단어 저장 (AD-01 ~ AD-03) ──────────────
+
+    /**
+     * 덮어쓰기 막을 길게 눌렀다: 그 글의 원문을 목록 시트로 보여 줘서 단어를 탭하게 한다 (AD-01).
+     * 막은 번역문만 보여 주고 원문 단어의 자리를 모르기 때문에, 단어는 이 목록에서 고른다.
+     */
+    private fun openBlockWindow(item: TranslatedItem) {
+        dismissBlockWindow()
+        val outcome = TranslationOutcome.Translated(
+            items = listOf(item),
+            engine = if (engine == Engine.GEMINI) EngineId.GEMINI else EngineId.ML_KIT,
+            targetLanguage = targetLanguage,
+            skipped = 0,
+        )
+        val params = OverlayWindow.params(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, 0)
+        blockWindow = OverlayWindow(context, windowManager, params) {
+            ResultSheet(
+                outcome,
+                ResultDisplay.LIST,
+                onDismiss = { post(::dismissBlockWindow) },
+                onCopy = ::copy,
+                onWord = { target -> post { openWord(target) } },
+            )
+        }.apply {
+            root.onBack = { post(::dismissBlockWindow) }
+            show()
+        }
+    }
+
+    private fun dismissBlockWindow() {
+        val current = blockWindow ?: return
+        blockWindow = null
+        current.destroy()
+    }
+
+    /** 고른 단어의 사전 카드를 연다 (X-01). 번역(ML Kit)은 바로, AI 풀이는 AI 엔진일 때 같이 받는다. */
+    private fun openWord(target: WordTarget) {
+        if (vocabulary == null) return
+        dismissWordWindow()
+        wordState = WordCardState.Loading(target)
+        val params = OverlayWindow.params(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, 0)
+            // 새 단어장 이름을 칠 때 키보드가 올라온다.
+            .apply { softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE }
+        wordWindow = OverlayWindow(context, windowManager, params) {
+            wordState?.let { WordCardSheet(it, wordActions) }
+        }.apply {
+            root.onBack = { post(::dismissWordWindow) }
+            show()
+        }
+        wordJob = scope.launch {
+            val outcome = try {
+                lookupWord(target, targetLanguage)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "단어 조회 실패", e)
+                WordLookupOutcome.Failed(null)
+            }
+            wordState = when (outcome) {
+                is WordLookupOutcome.Found -> WordCardState.Ready(target, outcome.entry)
+                is WordLookupOutcome.Failed -> WordCardState.Failed(target, outcome.error)
+            }
+        }
+    }
+
+    private val wordActions = WordCardActions(
+        onClose = { post(::dismissWordWindow) },
+        onSave = ::chooseWordbook,
+        onBack = {
+            (wordState as? WordCardState.Picking)?.let { wordState = WordCardState.Ready(it.target, it.entry) }
+        },
+        onPick = { id -> saveWord(id) },
+        onCreate = { name ->
+            val repository = vocabulary
+            val current = wordState as? WordCardState.Picking
+            if (repository != null && current != null) {
+                scope.launch {
+                    val book = try {
+                        repository.createWordbook(name)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "단어장 만들기 실패", e)
+                        null
+                    }
+                    if (book == null) {
+                        wordState = WordCardState.Ready(current.target, current.entry, saveFailed = true)
+                    } else {
+                        saveWord(book.id, book.name)
+                    }
+                }
+            }
+        },
+    )
+
+    /** 카드의 저장 버튼: 저장할 단어장을 고르는 화면(X-02)으로. */
+    private fun chooseWordbook() {
+        val repository = vocabulary ?: return
+        val current = wordState as? WordCardState.Ready ?: return
+        scope.launch {
+            wordState = try {
+                WordCardState.Picking(current.target, current.entry, repository.wordbooks())
+            } catch (e: Exception) {
+                Log.w(TAG, "단어장 목록 읽기 실패", e)
+                WordCardState.Ready(current.target, current.entry, saveFailed = true)
+            }
+        }
+    }
+
+    /** 고른 단어장에 단어를 저장한다 (AD-03). 출처 앱은 알아낼 권한이 없어 비워 둔다 (D-051). */
+    private fun saveWord(wordbookId: Long, knownName: String? = null) {
+        val repository = vocabulary ?: return
+        val state = wordState
+        val target: WordTarget
+        val entry: com.example.translation_poc_app.translate.WordEntry
+        val books: List<com.example.translation_poc_app.data.vocabulary.WordbookRow>
+        when (state) {
+            is WordCardState.Picking -> { target = state.target; entry = state.entry; books = state.books }
+            is WordCardState.Ready -> { target = state.target; entry = state.entry; books = emptyList() }
+            else -> return
+        }
+        scope.launch {
+            val saved = try {
+                val definition = entry.definition
+                repository.saveWord(
+                    wordbookId,
+                    WordDraft(
+                        word = entry.word,
+                        meaning = entry.savedMeaning,
+                        pronunciation = definition?.pronunciation,
+                        partOfSpeech = definition?.partOfSpeech,
+                        contextMeaning = definition?.contextMeaning,
+                        sentence = entry.sentence,
+                        sourceApp = null,
+                        sourceLanguage = entry.sourceLanguage,
+                        targetLanguage = entry.targetLanguage,
+                    ),
+                ) != null
+            } catch (e: Exception) {
+                Log.w(TAG, "단어 저장 실패", e)
+                false
+            }
+            wordState = if (saved) {
+                val name = knownName ?: books.firstOrNull { it.id == wordbookId }?.name.orEmpty()
+                WordCardState.Saved(target, entry, name)
+            } else {
+                WordCardState.Ready(target, entry, saveFailed = true)
+            }
+        }
+    }
+
+    private fun dismissWordWindow() {
+        wordJob?.cancel()
+        wordJob = null
+        wordState = null
+        val current = wordWindow ?: return
+        wordWindow = null
+        current.destroy()
     }
 
     /**

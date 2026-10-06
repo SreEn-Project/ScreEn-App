@@ -51,7 +51,8 @@ internal enum class RegionPickMode {
 internal fun RegionPicker(
     mode: RegionPickMode,
     initial: NormalizedRegion?,
-    onDone: (NormalizedRegion) -> Unit,
+    /** 두 번째 값은 '단어 선택' 모드가 켜져 있는지 (드래그 모드에서만 켤 수 있다). */
+    onDone: (NormalizedRegion, wordMode: Boolean) -> Unit,
     onCancel: () -> Unit,
 ) {
     val colors = OverlayTheme.colors
@@ -63,6 +64,9 @@ internal fun RegionPicker(
 
     var size by remember { mutableStateOf(IntSize.Zero) }
     var rect by remember { mutableStateOf<Rect?>(null) }
+    // 단어 선택 모드 (AD-01): 고른 영역을 번역 결과 시트로 보여 줘서 그 안의 단어를 탭해 사전 카드로 연다.
+    var wordMode by remember { mutableStateOf(false) }
+    val currentWordMode by rememberUpdatedState(wordMode)
 
     // 편집은 처음 크기가 정해지면 저장된 영역(없으면 가운데 기본 영역)으로 시작한다.
     if (mode == RegionPickMode.EDIT && rect == null && size != IntSize.Zero) {
@@ -120,6 +124,7 @@ internal fun RegionPicker(
                                             picked.right / size.width,
                                             picked.bottom / size.height,
                                         ),
+                                        currentWordMode,
                                     )
                                 } else {
                                     rect = null
@@ -154,7 +159,13 @@ internal fun RegionPicker(
         }
 
         BasicText(
-            stringResource(if (mode == RegionPickMode.DRAG) R.string.region_hint_drag else R.string.region_hint_edit),
+            stringResource(
+                when {
+                    mode == RegionPickMode.EDIT -> R.string.region_hint_edit
+                    wordMode -> R.string.region_hint_word
+                    else -> R.string.region_hint_drag
+                },
+            ),
             style = OverlayTheme.label.copy(color = colors.onSurface),
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -171,12 +182,20 @@ internal fun RegionPicker(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             PillButton(stringResource(R.string.region_cancel), onCancel, style = PillStyle.SECONDARY)
+            if (mode == RegionPickMode.DRAG) {
+                PillButton(
+                    stringResource(R.string.region_word_mode),
+                    onClick = { wordMode = !wordMode },
+                    style = if (wordMode) PillStyle.PRIMARY else PillStyle.SECONDARY,
+                    icon = if (wordMode) Symbol.CHECK else null,
+                )
+            }
             if (mode == RegionPickMode.EDIT) {
                 PillButton(
                     stringResource(R.string.region_save),
                     onClick = {
                         rect?.let {
-                            onDone(NormalizedRegion(it.left / size.width, it.top / size.height, it.right / size.width, it.bottom / size.height))
+                            onDone(NormalizedRegion(it.left / size.width, it.top / size.height, it.right / size.width, it.bottom / size.height), false)
                         }
                     },
                     icon = Symbol.CHECK,

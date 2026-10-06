@@ -451,3 +451,8 @@
 - Notion 명세 확인 후 구현(설계 D-050). 네이티브: Room 표 `wordbooks` · `vocabulary_words`(DB v2, 자동 마이그레이션), `VocabularyRepository`(저장 · 이동 합치기 · 이름 규칙), Pigeon `VocabularyHostApi`(`Wordbook` · `VocabWord` · `VocabSort`). Flutter: `features/vocabulary` — 단어장 목록 · 관리(X-03), 단어장 상세(X-04: 검색 · 정렬 · 이동 · 삭제 · 외운 체크), 단어 상세(X-05), 홈에 "단어장" 진입 줄.
 - 확인: `flutter analyze` 0, `flutter test` 통과(ViewModel 18개 · 화면 6개), 네이티브 단위 테스트(이름 · 저장 내용 정리) 통과, `flutter build apk --debug` 성공. 화면 스크린샷 3장(13~15) 추가. 기기 확인 전.
 - 새 의존성 없음. 남은 일: AD-01 단어 선택 · AD-02 사전 카드 · AD-03 저장 UI(오버레이).
+
+## 단어 선택 · 사전 카드 · 단어 저장 (AD-01 · AD-02 · AD-03, #122)
+- Notion 명세 확인 후 구현(설계 D-051). 네이티브: `WordSelection`(탭한 자리 → 단어), `WordLookup`(ML Kit 번역 + AI 풀이 동시 조회), `GeminiDictionary`(JSON 풀이), 오버레이 `WordCardSheet`(X-01 사전 카드 · X-02 단어장 선택 · 저장 완료). 결과 시트 원문 탭, 덮어쓰기 막 길게 누르기, 드래그 영역 "단어 선택" 토글로 단어를 고른다. 저장은 `VocabularyRepository.saveWord`(#120).
+- 확인: `flutter analyze` 0, `flutter test` 통과, 네이티브 단위 테스트(단어 경계 8 · 조회 7 · AI 풀이 7) 통과, `flutter build apk --debug` 성공. 기기 확인 전 — 확인 항목: 시트 원문 단어 탭 → 카드 → 저장 → 앱 단어장에 나타남 / AI 엔진일 때 뜻 · 발음 · 문맥 뜻 / 새 단어장 이름 입력 시 키보드가 시트를 가리지 않는지 / 덮어쓰기 길게 누르기 / 드래그 단어 선택.
+- 남은 일: 출처 앱(사용 정보 접근 권한 결정 필요), 학습(AD-07~14).
