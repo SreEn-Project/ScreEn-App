@@ -174,6 +174,53 @@ final class HistoryHostApiProvider
 
 String _$historyHostApiHash() => r'52a9b8bf67a95277a4b36b7fcce84e76e5a1ab16';
 
+@ProviderFor(vocabularyHostApi)
+final vocabularyHostApiProvider = VocabularyHostApiProvider._();
+
+final class VocabularyHostApiProvider
+    extends
+        $FunctionalProvider<
+          VocabularyHostApi,
+          VocabularyHostApi,
+          VocabularyHostApi
+        >
+    with $Provider<VocabularyHostApi> {
+  VocabularyHostApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'vocabularyHostApiProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$vocabularyHostApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<VocabularyHostApi> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  VocabularyHostApi create(Ref ref) {
+    return vocabularyHostApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VocabularyHostApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VocabularyHostApi>(value),
+    );
+  }
+}
+
+String _$vocabularyHostApiHash() => r'79a988f0c63c6e78c934eec0906b52266856e404';
+
 @ProviderFor(translatorEventBus)
 final translatorEventBusProvider = TranslatorEventBusProvider._();
 

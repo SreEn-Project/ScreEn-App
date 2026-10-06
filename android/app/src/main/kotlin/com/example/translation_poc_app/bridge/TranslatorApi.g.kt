@@ -266,6 +266,18 @@ enum class ServiceState(val raw: Int) {
   }
 }
 
+enum class VocabSort(val raw: Int) {
+  NEWEST(0),
+  OLDEST(1),
+  ALPHABETICAL(2);
+
+  companion object {
+    fun ofRaw(raw: Int): VocabSort? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /**
  * AI 번역 용어집 한 줄 (FL-11): 원문 표현을 항상 이 번역어로 옮긴다.
  *
@@ -494,6 +506,155 @@ data class TranslationRecord (
 }
 
 /**
+ * 단어장 (AD-03, AD-04).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class Wordbook (
+  val id: Long,
+  val name: String,
+  val wordCount: Long,
+  val memorizedCount: Long,
+  val createdAtMs: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): Wordbook {
+      val id = pigeonVar_list[0] as Long
+      val name = pigeonVar_list[1] as String
+      val wordCount = pigeonVar_list[2] as Long
+      val memorizedCount = pigeonVar_list[3] as Long
+      val createdAtMs = pigeonVar_list[4] as Long
+      return Wordbook(id, name, wordCount, memorizedCount, createdAtMs)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      name,
+      wordCount,
+      memorizedCount,
+      createdAtMs,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as Wordbook
+    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.name, other.name) && TranslatorApiPigeonUtils.deepEquals(this.wordCount, other.wordCount) && TranslatorApiPigeonUtils.deepEquals(this.memorizedCount, other.memorizedCount) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.id)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.name)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wordCount)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.memorizedCount)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.createdAtMs)
+    return result
+  }
+  override fun toString(): String {
+    return "Wordbook(id=$id, name=$name, wordCount=$wordCount, memorizedCount=$memorizedCount, createdAtMs=$createdAtMs)"
+  }
+}
+
+/**
+ * 저장한 단어 (AD-03, AD-05, AD-06).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class VocabWord (
+  val id: Long,
+  val wordbookId: Long,
+  val word: String,
+  val meaning: String,
+  val pronunciation: String? = null,
+  val partOfSpeech: String? = null,
+  /** 주변 문장 기준 문맥 뜻 (AI 엔진으로 저장했을 때만). */
+  val contextMeaning: String? = null,
+  /** 단어를 고른 원래 문장. */
+  val sentence: String? = null,
+  val sourceApp: String? = null,
+  val sourceLanguage: String,
+  val targetLanguage: String,
+  val memorized: Boolean,
+  /** 저장한 시각 (epoch ms). */
+  val createdAtMs: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VocabWord {
+      val id = pigeonVar_list[0] as Long
+      val wordbookId = pigeonVar_list[1] as Long
+      val word = pigeonVar_list[2] as String
+      val meaning = pigeonVar_list[3] as String
+      val pronunciation = pigeonVar_list[4] as String?
+      val partOfSpeech = pigeonVar_list[5] as String?
+      val contextMeaning = pigeonVar_list[6] as String?
+      val sentence = pigeonVar_list[7] as String?
+      val sourceApp = pigeonVar_list[8] as String?
+      val sourceLanguage = pigeonVar_list[9] as String
+      val targetLanguage = pigeonVar_list[10] as String
+      val memorized = pigeonVar_list[11] as Boolean
+      val createdAtMs = pigeonVar_list[12] as Long
+      return VocabWord(id, wordbookId, word, meaning, pronunciation, partOfSpeech, contextMeaning, sentence, sourceApp, sourceLanguage, targetLanguage, memorized, createdAtMs)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      wordbookId,
+      word,
+      meaning,
+      pronunciation,
+      partOfSpeech,
+      contextMeaning,
+      sentence,
+      sourceApp,
+      sourceLanguage,
+      targetLanguage,
+      memorized,
+      createdAtMs,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as VocabWord
+    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.wordbookId, other.wordbookId) && TranslatorApiPigeonUtils.deepEquals(this.word, other.word) && TranslatorApiPigeonUtils.deepEquals(this.meaning, other.meaning) && TranslatorApiPigeonUtils.deepEquals(this.pronunciation, other.pronunciation) && TranslatorApiPigeonUtils.deepEquals(this.partOfSpeech, other.partOfSpeech) && TranslatorApiPigeonUtils.deepEquals(this.contextMeaning, other.contextMeaning) && TranslatorApiPigeonUtils.deepEquals(this.sentence, other.sentence) && TranslatorApiPigeonUtils.deepEquals(this.sourceApp, other.sourceApp) && TranslatorApiPigeonUtils.deepEquals(this.sourceLanguage, other.sourceLanguage) && TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.memorized, other.memorized) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.id)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wordbookId)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.word)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.meaning)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.pronunciation)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.partOfSpeech)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.contextMeaning)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.sentence)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.sourceApp)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.sourceLanguage)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.targetLanguage)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.memorized)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.createdAtMs)
+    return result
+  }
+  override fun toString(): String {
+    return "VocabWord(id=$id, wordbookId=$wordbookId, word=$word, meaning=$meaning, pronunciation=$pronunciation, partOfSpeech=$partOfSpeech, contextMeaning=$contextMeaning, sentence=$sentence, sourceApp=$sourceApp, sourceLanguage=$sourceLanguage, targetLanguage=$targetLanguage, memorized=$memorized, createdAtMs=$createdAtMs)"
+  }
+}
+
+/**
  * 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
  *
  * Generated class from Pigeon that represents data sent in messages.
@@ -602,26 +763,41 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
         }
       }
       134.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          GlossaryEntry.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          VocabSort.ofRaw(it.toInt())
         }
       }
       135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AppSettings.fromList(it)
+          GlossaryEntry.fromList(it)
         }
       }
       136.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationRecord.fromList(it)
+          AppSettings.fromList(it)
         }
       }
       137.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ServiceStateChanged.fromList(it)
+          TranslationRecord.fromList(it)
         }
       }
       138.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          Wordbook.fromList(it)
+        }
+      }
+      139.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VocabWord.fromList(it)
+        }
+      }
+      140.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ServiceStateChanged.fromList(it)
+        }
+      }
+      141.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SettingsChanged.fromList(it)
         }
@@ -651,24 +827,36 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
         stream.write(133)
         writeValue(stream, value.raw.toLong())
       }
-      is GlossaryEntry -> {
+      is VocabSort -> {
         stream.write(134)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is AppSettings -> {
+      is GlossaryEntry -> {
         stream.write(135)
         writeValue(stream, value.toList())
       }
-      is TranslationRecord -> {
+      is AppSettings -> {
         stream.write(136)
         writeValue(stream, value.toList())
       }
-      is ServiceStateChanged -> {
+      is TranslationRecord -> {
         stream.write(137)
         writeValue(stream, value.toList())
       }
-      is SettingsChanged -> {
+      is Wordbook -> {
         stream.write(138)
+        writeValue(stream, value.toList())
+      }
+      is VocabWord -> {
+        stream.write(139)
+        writeValue(stream, value.toList())
+      }
+      is ServiceStateChanged -> {
+        stream.write(140)
+        writeValue(stream, value.toList())
+      }
+      is SettingsChanged -> {
+        stream.write(141)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -1353,6 +1541,218 @@ interface HistoryHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.clearHistory()
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * 단어장 관리 (AD-04 ~ AD-06). 단어 저장(AD-03)은 오버레이(네이티브)가 직접 한다.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface VocabularyHostApi {
+  /** 만든 순서대로. 단어 수 · 외운 단어 수 포함. */
+  suspend fun getWordbooks(): List<Wordbook>
+  /** 같은 이름이 이미 있으면 그 단어장을 돌려준다. 이름이 비었으면 null. */
+  suspend fun createWordbook(name: String): Wordbook?
+  /** 이름이 비었거나 다른 단어장과 겹치면 false. */
+  suspend fun renameWordbook(id: Long, name: String): Boolean
+  /** 안의 단어도 함께 지운다. */
+  suspend fun deleteWordbook(id: Long)
+  /** [query]는 단어 · 뜻에서 찾을 글자(빈 문자열 = 전부). */
+  suspend fun getWords(wordbookId: Long, query: String, sort: VocabSort): List<VocabWord>
+  suspend fun getWord(id: Long): VocabWord?
+  /** 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽을 지운다). */
+  suspend fun moveWord(id: Long, wordbookId: Long)
+  suspend fun deleteWord(id: Long)
+  suspend fun setMemorized(id: Long, memorized: Boolean)
+
+  companion object {
+    /** The codec used by VocabularyHostApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      TranslatorApiPigeonCodec()
+    }
+    /** Sets up an instance of `VocabularyHostApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: VocabularyHostApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWordbooks$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getWordbooks())
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.createWordbook$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val nameArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.createWordbook(nameArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.renameWordbook$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val nameArg = args[1] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.renameWordbook(idArg, nameArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.deleteWordbook$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deleteWordbook(idArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWords$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val wordbookIdArg = args[0] as Long
+            val queryArg = args[1] as String
+            val sortArg = args[2] as VocabSort
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getWords(wordbookIdArg, queryArg, sortArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWord$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getWord(idArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.moveWord$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val wordbookIdArg = args[1] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.moveWord(idArg, wordbookIdArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.deleteWord$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deleteWord(idArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.setMemorized$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val memorizedArg = args[1] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setMemorized(idArg, memorizedArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

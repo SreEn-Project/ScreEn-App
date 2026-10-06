@@ -5,6 +5,7 @@ import com.example.translation_poc_app.data.settings.ApiKeyStore
 import com.example.translation_poc_app.data.history.AppDatabase
 import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.SettingsRepository
+import com.example.translation_poc_app.data.vocabulary.VocabularyRepository
 
 /**
  * 프로세스 단위 공유 객체. Activity(Flutter 브리지)와 서비스가 같은 인스턴스를 쓴다.
@@ -22,13 +23,33 @@ object AppGraph {
         }
 
     @Volatile
+    private var database: AppDatabase? = null
+
+    /** 기록 · 단어장이 함께 쓰는 DB. 처음 쓸 때 연다 (NA-23, AD-03). */
+    private fun database(context: Context): AppDatabase =
+        database ?: synchronized(this) {
+            database ?: AppDatabase.create(context).also { database = it }
+        }
+
+    @Volatile
     private var historyRepository: HistoryRepository? = null
 
-    /** 번역 기록 (NA-23). DB는 처음 쓸 때 연다. */
+    /** 번역 기록 (NA-23). */
     fun historyRepository(context: Context): HistoryRepository =
         historyRepository ?: synchronized(this) {
-            historyRepository ?: HistoryRepository(AppDatabase.create(context).history()).also {
+            historyRepository ?: HistoryRepository(database(context).history()).also {
                 historyRepository = it
+            }
+        }
+
+    @Volatile
+    private var vocabularyRepository: VocabularyRepository? = null
+
+    /** 단어장 (AD-03). */
+    fun vocabularyRepository(context: Context): VocabularyRepository =
+        vocabularyRepository ?: synchronized(this) {
+            vocabularyRepository ?: VocabularyRepository(database(context).vocabulary()).also {
+                vocabularyRepository = it
             }
         }
 

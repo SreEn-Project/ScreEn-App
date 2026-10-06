@@ -2,6 +2,7 @@ package com.example.translation_poc_app.data.history
 
 import android.content.Context
 import androidx.room.Dao
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Entity
 import androidx.room.Index
@@ -12,6 +13,9 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
+import com.example.translation_poc_app.data.vocabulary.VocabularyDao
+import com.example.translation_poc_app.data.vocabulary.WordEntity
+import com.example.translation_poc_app.data.vocabulary.WordbookEntity
 
 /**
  * 번역 기록 한 줄 (NA-23, FL-13): 번역된 블록 하나. 같은 (원문, 번역, 언어, 엔진)은 한 줄이고
@@ -85,9 +89,17 @@ interface HistoryDao {
     suspend fun trim(keep: Int)
 }
 
-@Database(entities = [TranslationRecord::class], version = 1, exportSchema = true)
+/** 버전 2: 단어장 표 추가 (AD-03). 기존 표는 그대로라 자동 마이그레이션. */
+@Database(
+    entities = [TranslationRecord::class, WordbookEntity::class, WordEntity::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun history(): HistoryDao
+
+    abstract fun vocabulary(): VocabularyDao
 
     companion object {
         const val NAME = "screen_translator.db"

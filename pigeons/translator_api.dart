@@ -237,6 +237,101 @@ abstract class HistoryHostApi {
   void clearHistory();
 }
 
+/// 단어장 (AD-03, AD-04).
+class Wordbook {
+  Wordbook({
+    required this.id,
+    required this.name,
+    required this.wordCount,
+    required this.memorizedCount,
+    required this.createdAtMs,
+  });
+
+  int id;
+  String name;
+  int wordCount;
+  int memorizedCount;
+  int createdAtMs;
+}
+
+/// 저장한 단어 (AD-03, AD-05, AD-06).
+class VocabWord {
+  VocabWord({
+    required this.id,
+    required this.wordbookId,
+    required this.word,
+    required this.meaning,
+    this.pronunciation,
+    this.partOfSpeech,
+    this.contextMeaning,
+    this.sentence,
+    this.sourceApp,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+    required this.memorized,
+    required this.createdAtMs,
+  });
+
+  int id;
+  int wordbookId;
+  String word;
+  String meaning;
+  String? pronunciation;
+  String? partOfSpeech;
+
+  /// 주변 문장 기준 문맥 뜻 (AI 엔진으로 저장했을 때만).
+  String? contextMeaning;
+
+  /// 단어를 고른 원래 문장.
+  String? sentence;
+  String? sourceApp;
+  String sourceLanguage;
+  String targetLanguage;
+  bool memorized;
+
+  /// 저장한 시각 (epoch ms).
+  int createdAtMs;
+}
+
+enum VocabSort { newest, oldest, alphabetical }
+
+/// 단어장 관리 (AD-04 ~ AD-06). 단어 저장(AD-03)은 오버레이(네이티브)가 직접 한다.
+@HostApi()
+abstract class VocabularyHostApi {
+  /// 만든 순서대로. 단어 수 · 외운 단어 수 포함.
+  @async
+  List<Wordbook> getWordbooks();
+
+  /// 같은 이름이 이미 있으면 그 단어장을 돌려준다. 이름이 비었으면 null.
+  @async
+  Wordbook? createWordbook(String name);
+
+  /// 이름이 비었거나 다른 단어장과 겹치면 false.
+  @async
+  bool renameWordbook(int id, String name);
+
+  /// 안의 단어도 함께 지운다.
+  @async
+  void deleteWordbook(int id);
+
+  /// [query]는 단어 · 뜻에서 찾을 글자(빈 문자열 = 전부).
+  @async
+  List<VocabWord> getWords(int wordbookId, String query, VocabSort sort);
+
+  @async
+  VocabWord? getWord(int id);
+
+  /// 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽을 지운다).
+  @async
+  void moveWord(int id, int wordbookId);
+
+  @async
+  void deleteWord(int id);
+
+  @async
+  void setMemorized(int id, bool memorized);
+}
+
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
 sealed class TranslatorEvent {}
 

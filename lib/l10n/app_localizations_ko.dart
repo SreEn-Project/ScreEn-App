@@ -568,4 +568,123 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get aboutPending => '준비 중';
+
+  @override
+  String get vocabTitle => '단어장';
+
+  @override
+  String get vocabHomeHint => '저장한 단어를 모아 봐요';
+
+  @override
+  String get vocabEmpty => '아직 단어장이 없어요';
+
+  @override
+  String get vocabEmptyHint => '만들어 두면 번역 중 단어를 바로 저장할 수 있어요';
+
+  @override
+  String get vocabNewBook => '새 단어장';
+
+  @override
+  String get vocabNameHint => '단어장 이름';
+
+  @override
+  String get vocabCreate => '만들기';
+
+  @override
+  String get vocabRename => '이름 변경';
+
+  @override
+  String get vocabDelete => '삭제';
+
+  @override
+  String get vocabCancel => '취소';
+
+  @override
+  String get vocabSave => '저장';
+
+  @override
+  String get vocabNameTaken => '같은 이름의 단어장이 있어요';
+
+  @override
+  String vocabWordCount(int count) {
+    return '단어 $count개';
+  }
+
+  @override
+  String vocabMemorizedCount(int count) {
+    return '외움 $count개';
+  }
+
+  @override
+  String vocabDeleteBookTitle(String name) {
+    return '‘$name’ 단어장을 삭제할까요?';
+  }
+
+  @override
+  String vocabDeleteBookBody(int count) {
+    return '안의 단어 $count개도 함께 지워져요.';
+  }
+
+  @override
+  String get vocabSearchHint => '단어 · 뜻 검색';
+
+  @override
+  String get vocabSortNewest => '최신순';
+
+  @override
+  String get vocabSortOldest => '오래된순';
+
+  @override
+  String get vocabSortAlphabetical => '이름순';
+
+  @override
+  String get vocabNoWords => '이 단어장은 비어 있어요';
+
+  @override
+  String get vocabNoResult => '찾는 단어가 없어요';
+
+  @override
+  String get vocabMove => '다른 단어장으로 이동';
+
+  @override
+  String get vocabMoveTitle => '이동할 단어장';
+
+  @override
+  String get vocabMoveNoOther => '이동할 다른 단어장이 없어요';
+
+  @override
+  String get vocabMemorizedLabel => '외운 단어';
+
+  @override
+  String get vocabWordDetailTitle => '단어 상세';
+
+  @override
+  String get vocabMeaning => '뜻';
+
+  @override
+  String get vocabPronunciation => '발음';
+
+  @override
+  String get vocabPartOfSpeech => '품사';
+
+  @override
+  String get vocabContextMeaning => '문맥 뜻';
+
+  @override
+  String get vocabSentence => '문맥 예문';
+
+  @override
+  String get vocabSourceApp => '출처';
+
+  @override
+  String get vocabSavedAt => '저장한 날';
+
+  @override
+  String get vocabDeleteWord => '단어 삭제';
+
+  @override
+  String get vocabDeleteWordTitle => '이 단어를 삭제할까요?';
+
+  @override
+  String get vocabWordGone => '이미 지워진 단어예요';
 }
