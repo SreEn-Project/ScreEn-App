@@ -54,3 +54,7 @@ SaveWord saveWord(Ref ref) => SaveWord(ref.watch(vocabularyRepositoryProvider));
 @riverpod
 CreateWordTest createWordTest(Ref ref) =>
     CreateWordTest(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+CreateFlashcardDeck createFlashcardDeck(Ref ref) =>
+    CreateFlashcardDeck(ref.watch(vocabularyRepositoryProvider));

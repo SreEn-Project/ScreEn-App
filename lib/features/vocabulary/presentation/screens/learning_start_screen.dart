@@ -13,7 +13,7 @@ import '../widgets/vocabulary_sheets.dart';
 import '../widgets/wordbook_selector.dart';
 
 /// 학습 시작 (L-01, AD-07): 학습할 단어장을 고르고 학습 유형을 고른다.
-/// 지금은 암기 테스트(AD-09)만 열려 있다.
+/// 암기 테스트(AD-09) · 카드 학습(AD-08)이 열려 있고 미니게임은 준비 중이다.
 class LearningStartScreen extends ConsumerStatefulWidget {
   const LearningStartScreen({super.key, this.initialWordbookId});
 
@@ -125,9 +125,14 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                 AppListTile(
                   icon: Symbols.style_rounded,
                   title: l10n.learnCards,
-                  subtitle: l10n.learnComingSoon,
-                  enabled: false,
-                  onTap: () {},
+                  subtitle: count == 0
+                      ? l10n.learnTestNeedWords
+                      : l10n.learnCardsHint,
+                  enabled: count > 0,
+                  onTap: selected == null
+                      ? null
+                      : () =>
+                            context.push(AppRoutes.flashcardsPath(selected.id)),
                 ),
                 const AppDivider(),
                 AppListTile(

@@ -475,3 +475,8 @@
 - 설계 D-055. (1) 오버레이 결과 목록 카드의 "단어장에 추가" → 원문 · 번역이 채워진 편집 화면(`openBlockAdd`, `WordCardState.Editing`) → 단어장 선택 → 저장. (2) 편집 시트의 단어장 칩 → 고른 단어장 칸 + 목록 시트(`showWordbookPickerSheet` 확장, `WordbookSelector`). (3) 학습 시작(L-01)과 암기 테스트(L-03, 4지선다 · 직접 입력): `CreateWordTest`, `WordTestViewModel`, 화면 2개, 단어장 목록 맨 위 "단어 학습" 카드. `AppTextField`에 `onSubmitted` · `enabled` 추가. 문구(ko/en) 추가.
 - 확인: `flutter analyze` 0, `flutter test` 통과(문제 만들기 · 정답 판정 · ViewModel · 선택 시트 · 테스트 흐름), `flutter build apk --debug` 성공. 기기 확인 전 — 확인 항목: 번역 후 결과 카드의 "단어장에 추가" → 단어 · 뜻이 채워져 있음 → 고쳐서 저장 → 앱 단어장에 보임 / 편집 시트의 단어장 칸 → 목록 시트에서 고르기 · 새 단어장 / 단어장 목록 "단어 학습" → 단어장 고르기 → 암기 테스트 두 방식 / 단어 4개 미만이면 4지선다 비활성 안내.
 - 새 의존성 없음.
+
+## 카드 학습 (AD-08, #131)
+- 설계 D-056. `/learning/cards/:id` 카드 학습(L-02): 카드 탭 → 뒤집혀 뜻(발음 · 품사 · 문맥 뜻), 좌우 스와이프 또는 하단 버튼으로 외움 · 못 외움 기록(외움 표시는 즉시 단어장에 반영), 다 넘기면 결과 요약 + "못 외운 단어만 다시 보기" · "처음부터 다시". 유스케이스 `CreateFlashcardDeck`, `FlashcardsViewModel`. 학습 시작에서 카드 학습이 열림. 문구(ko/en) 추가.
+- 확인: `flutter analyze` 0, `flutter test` 통과(ViewModel 1 · 화면 흐름 1 추가), `flutter build apk --debug` 성공. 기기 확인 전 — 확인 항목: 카드 탭 뒤집힘 / 오른쪽 · 왼쪽 스와이프 애니메이션과 "외웠어요" · "못 외웠어요" 표시 / 버튼으로도 넘어감 / 결과에서 못 외운 단어만 다시 / 단어장 상세에 외운 표시 반영.
+- 새 의존성 없음.
