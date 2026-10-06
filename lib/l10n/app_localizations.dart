@@ -572,6 +572,30 @@ abstract class AppLocalizations {
   /// **'Delete all?'**
   String get historyClearConfirm;
 
+  /// No description provided for @historyDetailTranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get historyDetailTranslated;
+
+  /// No description provided for @historyDetailOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Original'**
+  String get historyDetailOriginal;
+
+  /// No description provided for @historyCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get historyCopy;
+
+  /// No description provided for @historyCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get historyCopied;
+
   /// No description provided for @captureModeFull.
   ///
   /// In en, this message translates to:
