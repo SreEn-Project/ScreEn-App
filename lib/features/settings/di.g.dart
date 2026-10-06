@@ -1045,3 +1045,223 @@ final class TestApiKeyProvider
 }
 
 String _$testApiKeyHash() => r'a1a176b88b94790b83824267ed2566ce95ef6b7f';
+
+@ProviderFor(isApiKeyPinEnabled)
+final isApiKeyPinEnabledProvider = IsApiKeyPinEnabledProvider._();
+
+final class IsApiKeyPinEnabledProvider
+    extends
+        $FunctionalProvider<
+          IsApiKeyPinEnabled,
+          IsApiKeyPinEnabled,
+          IsApiKeyPinEnabled
+        >
+    with $Provider<IsApiKeyPinEnabled> {
+  IsApiKeyPinEnabledProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isApiKeyPinEnabledProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isApiKeyPinEnabledHash();
+
+  @$internal
+  @override
+  $ProviderElement<IsApiKeyPinEnabled> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  IsApiKeyPinEnabled create(Ref ref) {
+    return isApiKeyPinEnabled(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IsApiKeyPinEnabled value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IsApiKeyPinEnabled>(value),
+    );
+  }
+}
+
+String _$isApiKeyPinEnabledHash() =>
+    r'f37a0fc569ee2db52ec1a9e9bc824c832b9fab4d';
+
+@ProviderFor(verifyApiKeyPin)
+final verifyApiKeyPinProvider = VerifyApiKeyPinProvider._();
+
+final class VerifyApiKeyPinProvider
+    extends
+        $FunctionalProvider<VerifyApiKeyPin, VerifyApiKeyPin, VerifyApiKeyPin>
+    with $Provider<VerifyApiKeyPin> {
+  VerifyApiKeyPinProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'verifyApiKeyPinProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$verifyApiKeyPinHash();
+
+  @$internal
+  @override
+  $ProviderElement<VerifyApiKeyPin> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VerifyApiKeyPin create(Ref ref) {
+    return verifyApiKeyPin(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VerifyApiKeyPin value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VerifyApiKeyPin>(value),
+    );
+  }
+}
+
+String _$verifyApiKeyPinHash() => r'e678469da2974c1f793699b9bbc3ca7f992e465c';
+
+@ProviderFor(setApiKeyPin)
+final setApiKeyPinProvider = SetApiKeyPinProvider._();
+
+final class SetApiKeyPinProvider
+    extends $FunctionalProvider<SetApiKeyPin, SetApiKeyPin, SetApiKeyPin>
+    with $Provider<SetApiKeyPin> {
+  SetApiKeyPinProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'setApiKeyPinProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$setApiKeyPinHash();
+
+  @$internal
+  @override
+  $ProviderElement<SetApiKeyPin> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SetApiKeyPin create(Ref ref) {
+    return setApiKeyPin(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SetApiKeyPin value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SetApiKeyPin>(value),
+    );
+  }
+}
+
+String _$setApiKeyPinHash() => r'5c8498a3802c74ec43abd1d1220ab23b3bf15401';
+
+@ProviderFor(clearApiKeyPin)
+final clearApiKeyPinProvider = ClearApiKeyPinProvider._();
+
+final class ClearApiKeyPinProvider
+    extends $FunctionalProvider<ClearApiKeyPin, ClearApiKeyPin, ClearApiKeyPin>
+    with $Provider<ClearApiKeyPin> {
+  ClearApiKeyPinProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'clearApiKeyPinProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$clearApiKeyPinHash();
+
+  @$internal
+  @override
+  $ProviderElement<ClearApiKeyPin> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ClearApiKeyPin create(Ref ref) {
+    return clearApiKeyPin(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ClearApiKeyPin value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ClearApiKeyPin>(value),
+    );
+  }
+}
+
+String _$clearApiKeyPinHash() => r'cbd73534b77ee9f0feffc808d2270115f9899cd7';
+
+@ProviderFor(resetApiKeyProtection)
+final resetApiKeyProtectionProvider = ResetApiKeyProtectionProvider._();
+
+final class ResetApiKeyProtectionProvider
+    extends
+        $FunctionalProvider<
+          ResetApiKeyProtection,
+          ResetApiKeyProtection,
+          ResetApiKeyProtection
+        >
+    with $Provider<ResetApiKeyProtection> {
+  ResetApiKeyProtectionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'resetApiKeyProtectionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$resetApiKeyProtectionHash();
+
+  @$internal
+  @override
+  $ProviderElement<ResetApiKeyProtection> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ResetApiKeyProtection create(Ref ref) {
+    return resetApiKeyProtection(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ResetApiKeyProtection value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ResetApiKeyProtection>(value),
+    );
+  }
+}
+
+String _$resetApiKeyProtectionHash() =>
+    r'be8aa27a6e27b674a763eeff4577da4fbd6bc782';

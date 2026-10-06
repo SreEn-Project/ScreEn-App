@@ -170,6 +170,26 @@ abstract class SettingsHostApi {
   /// 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 구글이 알려 준 이유(사람이 읽는 문장).
   @async
   String? testApiKey(String apiKey);
+
+  /// API 키 접근 PIN이 켜져 있는지 (NA-13).
+  @async
+  bool isApiKeyPinEnabled();
+
+  /// 4자리 PIN이 맞는지. PIN이 없으면 true.
+  @async
+  bool verifyApiKeyPin(String pin);
+
+  /// PIN을 켜거나 바꾼다. 이미 PIN이 있으면 [currentPin]이 맞아야 하고, 틀리면 false.
+  @async
+  bool setApiKeyPin(String newPin, String? currentPin);
+
+  /// PIN을 끈다. [currentPin]이 맞아야 하고, 틀리면 false.
+  @async
+  bool clearApiKeyPin(String currentPin);
+
+  /// PIN 분실: 키와 PIN을 함께 지운다.
+  @async
+  void resetApiKeyProtection();
 }
 
 /// 언어 모델 관리 (FL-05, NA-12). 모델의 원본은 ML Kit이 기기에 받아 둔 파일이다.

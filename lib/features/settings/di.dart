@@ -105,3 +105,23 @@ ClearApiKey clearApiKey(Ref ref) =>
 @riverpod
 TestApiKey testApiKey(Ref ref) =>
     TestApiKey(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+IsApiKeyPinEnabled isApiKeyPinEnabled(Ref ref) =>
+    IsApiKeyPinEnabled(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+VerifyApiKeyPin verifyApiKeyPin(Ref ref) =>
+    VerifyApiKeyPin(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+SetApiKeyPin setApiKeyPin(Ref ref) =>
+    SetApiKeyPin(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ClearApiKeyPin clearApiKeyPin(Ref ref) =>
+    ClearApiKeyPin(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ResetApiKeyProtection resetApiKeyProtection(Ref ref) =>
+    ResetApiKeyProtection(ref.watch(settingsRepositoryProvider));

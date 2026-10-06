@@ -148,6 +148,36 @@ class FakeSettingsRepository implements SettingsRepository {
 
   @override
   Future<String?> testApiKey(String apiKey) async => testResult;
+
+  /// null이면 PIN이 꺼진 상태.
+  String? apiKeyPin;
+
+  @override
+  Future<bool> isApiKeyPinEnabled() async => apiKeyPin != null;
+
+  @override
+  Future<bool> verifyApiKeyPin(String pin) async =>
+      apiKeyPin == null || apiKeyPin == pin;
+
+  @override
+  Future<bool> setApiKeyPin(String newPin, String? currentPin) async {
+    if (apiKeyPin != null && apiKeyPin != currentPin) return false;
+    apiKeyPin = newPin;
+    return true;
+  }
+
+  @override
+  Future<bool> clearApiKeyPin(String currentPin) async {
+    if (apiKeyPin != currentPin) return false;
+    apiKeyPin = null;
+    return true;
+  }
+
+  @override
+  Future<void> resetApiKeyProtection() async {
+    apiKey = null;
+    apiKeyPin = null;
+  }
 }
 
 /// 받은 모델을 기억만 하는 가짜 모델 저장소.

@@ -770,6 +770,120 @@ abstract class AppLocalizations {
   /// **'Get a key from Google AI Studio'**
   String get apiKeyGet;
 
+  /// No description provided for @apiKeyPinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Key PIN lock'**
+  String get apiKeyPinTitle;
+
+  /// No description provided for @apiKeyPinDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a 4-digit PIN before viewing, editing or deleting the key'**
+  String get apiKeyPinDetail;
+
+  /// No description provided for @apiKeyPinChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change PIN'**
+  String get apiKeyPinChange;
+
+  /// No description provided for @apiKeyLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'API key is locked'**
+  String get apiKeyLockedTitle;
+
+  /// No description provided for @apiKeyLockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your PIN to view or edit the key.'**
+  String get apiKeyLockedBody;
+
+  /// No description provided for @apiKeyUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN'**
+  String get apiKeyUnlock;
+
+  /// No description provided for @apiKeyPinForgot.
+  ///
+  /// In en, this message translates to:
+  /// **'I forgot my PIN'**
+  String get apiKeyPinForgot;
+
+  /// No description provided for @pinEnterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN'**
+  String get pinEnterTitle;
+
+  /// No description provided for @pinEnterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your 4-digit PIN.'**
+  String get pinEnterBody;
+
+  /// No description provided for @pinCurrentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current PIN'**
+  String get pinCurrentTitle;
+
+  /// No description provided for @pinNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new PIN'**
+  String get pinNewTitle;
+
+  /// No description provided for @pinNewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'4 digits to lock the key.'**
+  String get pinNewBody;
+
+  /// No description provided for @pinConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PIN again'**
+  String get pinConfirmTitle;
+
+  /// No description provided for @pinWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN'**
+  String get pinWrong;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Doesn\'t match the first PIN'**
+  String get pinMismatch;
+
+  /// No description provided for @pinResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the key and reset?'**
+  String get pinResetTitle;
+
+  /// No description provided for @pinResetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If you forgot the PIN, the saved API key and the PIN are deleted. You\'ll need to add the key again, and the AI engine goes back to ML Kit.'**
+  String get pinResetBody;
+
+  /// No description provided for @pinResetConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete key and reset'**
+  String get pinResetConfirm;
+
+  /// No description provided for @pinCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get pinCancel;
+
   /// No description provided for @aiAgeTitle.
   ///
   /// In en, this message translates to:

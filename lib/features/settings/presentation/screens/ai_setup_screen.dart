@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../view_models/ai_options_view_model.dart';
+import '../view_models/api_key_pin_view_model.dart';
 import '../view_models/api_key_view_model.dart';
 import '../widgets/ai_options_section.dart';
+import '../widgets/pin_sheets.dart';
 
 /// AI 번역 설정 (S-06): 만 18세 확인(FL-09), 본인 Gemini API 키(NA-13), 말투 · 용어집(FL-11), 데이터 전송 고지.
 /// 연령 확인 전에는 키 입력 · 옵션을 보여 주지 않는다.
 /// 등록된 키가 있으면 입력창에 가려서 채워 두고, 보기 · 수정 · 삭제를 할 수 있다.
+/// 키 접근 PIN을 켜 두면(NA-13) PIN을 넣기 전에는 키 영역 대신 잠금 카드만 보인다.
 class AiSetupScreen extends ConsumerStatefulWidget {
   const AiSetupScreen({super.key});
 
@@ -65,6 +69,69 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
     });
   }
 
+  ApiKeyPinViewModel get _pin => ref.read(apiKeyPinViewModelProvider.notifier);
+
+  Future<void> _unlock() {
+    final l10n = AppLocalizations.of(context);
+    return showPinSheet(
+      context,
+      title: l10n.pinEnterTitle,
+      body: l10n.pinEnterBody,
+      validate: (pin) async => await _pin.unlock(pin) ? null : l10n.pinWrong,
+    );
+  }
+
+  /// 새 PIN을 두 번 받아 돌려준다. 취소하면 null.
+  Future<String?> _askNewPin() async {
+    final l10n = AppLocalizations.of(context);
+    final first = await showPinSheet(
+      context,
+      title: l10n.pinNewTitle,
+      body: l10n.pinNewBody,
+    );
+    if (first == null || !mounted) return null;
+    return showPinSheet(
+      context,
+      title: l10n.pinConfirmTitle,
+      validate: (pin) async => pin == first ? null : l10n.pinMismatch,
+    );
+  }
+
+  Future<void> _enablePin() async {
+    final pin = await _askNewPin();
+    if (pin != null) await _pin.enable(pin);
+  }
+
+  Future<void> _disablePin() {
+    final l10n = AppLocalizations.of(context);
+    return showPinSheet(
+      context,
+      title: l10n.pinCurrentTitle,
+      body: l10n.pinEnterBody,
+      validate: (pin) async => await _pin.disable(pin) ? null : l10n.pinWrong,
+    );
+  }
+
+  Future<void> _changePin() async {
+    final l10n = AppLocalizations.of(context);
+    final current = await showPinSheet(
+      context,
+      title: l10n.pinCurrentTitle,
+      body: l10n.pinEnterBody,
+      validate: (pin) async => await _pin.verify(pin) ? null : l10n.pinWrong,
+    );
+    if (current == null || !mounted) return;
+    final next = await _askNewPin();
+    if (next != null) await _pin.change(current, next);
+  }
+
+  Future<void> _forgotPin() async {
+    if (!await showPinResetSheet(context)) return;
+    await _pin.reset();
+    _controller.clear();
+    if (mounted) setState(() => _filled = false);
+  }
+
   Future<void> _openStudio() =>
       launchUrl(_studioUrl, mode: LaunchMode.externalApplication);
 
@@ -75,7 +142,11 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
     final options = ref.watch(aiOptionsViewModelProvider).value;
     final ageConfirmed = options?.ageConfirmed ?? false;
     final saved = ref.watch(apiKeyViewModelProvider).value;
-    if (!_filled && saved != null) {
+    final pinState = ref.watch(apiKeyPinViewModelProvider).value;
+    final pinEnabled = pinState?.enabled ?? false;
+    // PIN 상태를 읽기 전에도 잠긴 것처럼 둬서 키가 잠깐 비치지 않게 한다.
+    final locked = pinState == null || (pinState.enabled && !pinState.unlocked);
+    if (!_filled && !locked && saved != null) {
       _controller.text = saved;
       _filled = true;
     }
@@ -96,7 +167,9 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                   const SizedBox(height: 12),
                   const AiNoticeCard(),
                   const SizedBox(height: 24),
-                  if (ageConfirmed) ...[
+                  if (ageConfirmed && locked)
+                    _LockedCard(onUnlock: _unlock, onForgot: _forgotPin)
+                  else if (ageConfirmed) ...[
                     if (saved != null) ...[
                       Text(
                         l10n.apiKeyRegistered,
@@ -153,6 +226,31 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                         onPressed: _remove,
                       ),
                     ],
+                    const SizedBox(height: 24),
+                    AppCard(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppTokens.cardListPaddingV,
+                      ),
+                      child: Column(
+                        children: [
+                          AppListTile(
+                            icon: Symbols.lock_rounded,
+                            title: l10n.apiKeyPinTitle,
+                            subtitle: l10n.apiKeyPinDetail,
+                            trailing: AppSwitch(
+                              value: pinEnabled,
+                              onChanged: (on) =>
+                                  on ? _enablePin() : _disablePin(),
+                            ),
+                          ),
+                          if (pinEnabled)
+                            AppListTile(
+                              title: l10n.apiKeyPinChange,
+                              onTap: _changePin,
+                            ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 32),
                     AiOptionsSection(options: options!),
                   ],
@@ -161,6 +259,59 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// PIN이 켜져 있고 아직 풀지 않았을 때 키 영역 대신 보이는 카드.
+class _LockedCard extends StatelessWidget {
+  const _LockedCard({required this.onUnlock, required this.onForgot});
+
+  final VoidCallback onUnlock;
+  final VoidCallback onForgot;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Symbols.lock_rounded, color: theme.colorScheme.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n.apiKeyLockedTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.apiKeyLockedBody,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          AppButton(
+            label: l10n.apiKeyUnlock,
+            expand: true,
+            onPressed: onUnlock,
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: AppButton.text(
+              label: l10n.apiKeyPinForgot,
+              onPressed: onForgot,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -309,3 +309,11 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 - **출처 앱은 비워 둔다.** 접근성 API는 쓰지 않는 규칙이고(CLAUDE.md), 포그라운드 앱을 알려면 '사용 정보 접근' 특별 권한이 필요하다. 권한을 받을지는 사용자 결정 대기. 표 칸(`sourceApp`)과 화면(단어 상세의 "출처")은 이미 있어 권한만 생기면 채우면 된다.
 - 카드 · 단어장 선택은 새 오버레이 창(`wordWindow`)이다. 새 단어장 이름을 치려고 이 창만 포커스를 받고 `SOFT_INPUT_ADJUST_RESIZE` + Compose `WindowInsets.ime`로 키보드를 피한다 — **기기에서 키보드가 시트를 가리지 않는지 확인이 필요하다.** 오버레이 아이콘 글꼴은 부분 글꼴이라 새 아이콘을 쓰지 않고 글자 버튼만 썼다(D-025).
 - 화면 문구는 `strings.xml`(ko · en) `word_*` · `region_word_mode` · `region_hint_word`.
+
+## D-052 · 2026-10-06 · API 키 접근 PIN 잠금 (NA-13 · NA-17 보강, 이슈 #124)
+- AI 번역 설정에서 키를 **보고 · 고치고 · 지우기 전에 4자리 PIN을 묻는 옵션**을 넣었다. **기본은 꺼짐**. 켜면 새 PIN을 두 번 입력받는다. 변경 · 끄기는 현재 PIN이 맞아야 한다.
+- PIN 원문은 저장하지 않는다. 16바이트 salt + PBKDF2-HMAC-SHA256(1만 회) 해시를, API 키와 같은 **Keystore AES 키로 암호화**해 `api_key_store`에 둔다. 검증 · 변경 · 끄기는 **네이티브(`ApiKeyStore`)가** 한다(Pigeon `verifyApiKeyPin` · `setApiKeyPin(new, current)` · `clearApiKeyPin(current)`). Keystore 키를 잃어 PIN을 읽을 수 없으면 켜진 채 풀 수 없는 상태가 되므로 "PIN을 잊었어요"로 초기화한다.
+- **분실 시**: "PIN을 잊었어요" → 확인 시트 → 키와 PIN을 함께 지우고(`resetApiKeyProtection`) 엔진을 ML Kit으로 되돌린다. 키는 다시 등록해야 한다.
+- **잠금은 화면 단위**다. PIN이 켜져 있으면 설정 화면에 들어올 때마다 잠겨 있고(키 영역 대신 잠금 카드), PIN을 맞히면 그 화면을 떠날 때까지만 풀린다(`ApiKeyPinViewModel`은 auto-dispose). 잠금 중에는 키 입력 · 보기 · 테스트 · 저장 · 삭제가 모두 보이지 않는다.
+- **한계(의도)**: 번역 서비스는 PIN과 상관없이 저장된 키를 쓴다(번역이 PIN에 막히면 안 되므로). 이 PIN은 "폰을 집어 든 다른 사람이 설정에서 키를 보거나 바꾸는 것"을 막는 용도이며, 루팅된 기기나 앱 메모리 분석을 막지 않는다. 틀린 PIN 횟수 제한은 두지 않았다(4자리라 한계가 있음, 필요해지면 추가).
+- UI: 입력은 작은 바텀시트(4자리가 차면 자동 확인), 켜기 · 끄기는 스위치 줄 + 켜졌을 때 "PIN 변경" 줄. `AppTextField`에 `keyboardType` · `inputFormatters` · `maxLength` · `autofocus` · `textAlign` 추가.
