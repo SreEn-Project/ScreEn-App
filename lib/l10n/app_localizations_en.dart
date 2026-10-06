@@ -933,6 +933,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchRetry => 'Play again';
 
   @override
+  String get learnFallHint => 'Type to destroy the falling words';
+
+  @override
+  String get fallTitle => 'Falling words';
+
+  @override
+  String get fallRules =>
+      'You lose a life when a block hits the bottom. 3 lives, and it speeds up';
+
+  @override
+  String get fallModeMeaning => 'Word → meaning';
+
+  @override
+  String get fallModeSpelling => 'Meaning → spelling';
+
+  @override
+  String get fallModeMeaningHint =>
+      'Type the meaning of the falling word. For meanings split by commas, one is enough';
+
+  @override
+  String get fallModeSpellingHint =>
+      'Type the word for the falling meaning. Case is ignored';
+
+  @override
+  String get fallInputMeaning => 'Type the meaning';
+
+  @override
+  String get fallInputSpelling => 'Type the word';
+
+  @override
+  String get fallResultTitle => 'Falling words results';
+
+  @override
+  String fallDestroyed(int count) {
+    return '$count destroyed';
+  }
+
+  @override
+  String get fallMissedWords => 'Missed words';
+
+  @override
   String get learnComingSoon => 'Coming soon';
 
   @override

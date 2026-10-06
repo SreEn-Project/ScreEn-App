@@ -913,6 +913,44 @@ class AppLocalizationsKo extends AppLocalizations {
   String get matchRetry => '다시 하기';
 
   @override
+  String get learnFallHint => '떨어지는 단어를 입력해서 없애요';
+
+  @override
+  String get fallTitle => '하강형 타이핑';
+
+  @override
+  String get fallRules => '블록이 바닥에 닿으면 목숨이 줄어요. 목숨 3개, 점점 빨라져요';
+
+  @override
+  String get fallModeMeaning => '단어 → 뜻';
+
+  @override
+  String get fallModeSpelling => '뜻 → 철자';
+
+  @override
+  String get fallModeMeaningHint => '떨어지는 단어를 보고 뜻을 입력해요. 쉼표로 나뉜 뜻은 하나만 써도 돼요';
+
+  @override
+  String get fallModeSpellingHint => '떨어지는 뜻을 보고 단어를 입력해요. 대소문자는 무시해요';
+
+  @override
+  String get fallInputMeaning => '뜻을 입력하세요';
+
+  @override
+  String get fallInputSpelling => '단어를 입력하세요';
+
+  @override
+  String get fallResultTitle => '하강형 타이핑 결과';
+
+  @override
+  String fallDestroyed(int count) {
+    return '$count개 없앴어요';
+  }
+
+  @override
+  String get fallMissedWords => '놓친 단어';
+
+  @override
   String get learnComingSoon => '준비 중이에요';
 
   @override
