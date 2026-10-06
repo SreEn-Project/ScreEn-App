@@ -13,6 +13,7 @@ import '../features/settings/presentation/screens/quick_languages_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/permission/presentation/screens/permission_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/vocabulary/presentation/screens/assembly_screen.dart';
 import '../features/vocabulary/presentation/screens/falling_screen.dart';
 import '../features/vocabulary/presentation/screens/flashcards_screen.dart';
 import '../features/vocabulary/presentation/screens/learning_start_screen.dart';
@@ -49,6 +50,8 @@ abstract final class AppRoutes {
   static String flashcardsPath(int wordbookId) => '/learning/cards/$wordbookId';
   static String lineMatchPath(int wordbookId) => '/learning/match/$wordbookId';
   static String fallingPath(int wordbookId) => '/learning/falling/$wordbookId';
+  static String assemblyPath(int wordbookId) =>
+      '/learning/assembly/$wordbookId';
 }
 
 /// 첫 실행이면 온보딩, 이미 마쳤으면 홈에서 시작한다 (FL-01). 저장된 설정을 한 번 읽는다.
@@ -147,6 +150,12 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
           GoRoute(
             path: 'falling/:id',
             builder: (context, state) => FallingScreen(
+              wordbookId: int.parse(state.pathParameters['id']!),
+            ),
+          ),
+          GoRoute(
+            path: 'assembly/:id',
+            builder: (context, state) => AssemblyScreen(
               wordbookId: int.parse(state.pathParameters['id']!),
             ),
           ),

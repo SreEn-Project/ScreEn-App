@@ -951,6 +951,43 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fallMissedWords => '놓친 단어';
 
   @override
+  String get learnAssembleHint => '조각이나 글자 카드로 단어를 완성해요';
+
+  @override
+  String get assembleTitle => '단어 조립';
+
+  @override
+  String get assembleModePieces => '조각 고르기';
+
+  @override
+  String get assembleModeLetters => '글자 정렬';
+
+  @override
+  String get assembleModePiecesHint =>
+      '뜻을 보고 조각 카드를 순서대로 골라 단어를 만들어요. 다른 단어의 조각도 섞여 있어요';
+
+  @override
+  String get assembleModeLettersHint => '뜻을 보고 섞인 글자 카드를 끌어서 올바른 순서로 맞춰요';
+
+  @override
+  String get assembleSlot => '완성할 단어';
+
+  @override
+  String get assembleSlotHint => '아래 카드를 눌러 채워 보세요';
+
+  @override
+  String get assembleCards => '카드';
+
+  @override
+  String get assembleUndo => '되돌리기';
+
+  @override
+  String get assembleDragHint => '카드를 끌어서 자리를 바꿔요';
+
+  @override
+  String get assembleResultTitle => '단어 조립 결과';
+
+  @override
   String get learnComingSoon => '준비 중이에요';
 
   @override
