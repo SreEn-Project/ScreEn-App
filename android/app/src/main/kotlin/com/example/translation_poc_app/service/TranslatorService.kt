@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ServiceCompat
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.LifecycleService
@@ -26,6 +25,8 @@ import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.Settings
 import com.example.translation_poc_app.overlay.OverlayController
+import com.example.translation_poc_app.overlay.OverlayToast
+import com.example.translation_poc_app.overlay.ToastKind
 import com.example.translation_poc_app.overlay.WordTarget
 import com.example.translation_poc_app.translate.DetectedBlock
 import com.example.translation_poc_app.translate.LanguageDetector
@@ -59,6 +60,9 @@ class TranslatorService : LifecycleService() {
     private val textRecognizer by lazy { ScreenTextRecognizer() }
     private val languageDetector by lazy { LanguageDetector() }
     private var overlay: OverlayController? = null
+
+    /** 시스템 Toast 대신 오버레이 토스트 (design.md "오버레이"). */
+    private val toast by lazy { OverlayToast(this) }
     private var mlKitEngine: MlKitTranslationEngine? = null
 
     /** 플로팅 버튼 한 번 = 캡처 → 문자 인식 → 언어 감지 → 번역 (NA-18 → NA-19). */
@@ -204,9 +208,7 @@ class TranslatorService : LifecycleService() {
             TranslationError.Network -> R.string.ai_fallback_offline
             else -> R.string.ai_fallback_failed
         }
-        Handler(Looper.getMainLooper()).post {
-            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
-        }
+        Handler(Looper.getMainLooper()).post { toast.show(getString(message), ToastKind.INFO) }
     }
 
     private val geminiKeys = ApiKeyProvider { AppGraph.apiKeyStore(this).get() }
@@ -325,6 +327,7 @@ class TranslatorService : LifecycleService() {
     }
 
     override fun onDestroy() {
+        toast.dismiss()
         overlay?.destroy()
         overlay = null
         mlKitEngine?.close()

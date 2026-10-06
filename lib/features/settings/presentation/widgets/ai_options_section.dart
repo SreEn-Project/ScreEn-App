@@ -158,15 +158,7 @@ class _AiOptionsSectionState extends ConsumerState<AiOptionsSection> {
         ),
         const SizedBox(height: 12),
         if (options.glossary.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Text(
-              l10n.aiGlossaryEmpty,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          )
+          AppNotice(l10n.aiGlossaryEmpty)
         else
           AppCard(
             padding: const EdgeInsets.symmetric(
@@ -203,12 +195,7 @@ class _AiOptionsSectionState extends ConsumerState<AiOptionsSection> {
         ),
         if (_message != null) ...[
           const SizedBox(height: 8),
-          Text(
-            _message!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.error,
-            ),
-          ),
+          AppNotice.error(_message!),
         ],
       ],
     );

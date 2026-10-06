@@ -29,6 +29,17 @@ class LanguageModelsScreen extends ConsumerWidget {
         ref.watch(languageModelsViewModelProvider).value ??
         const LanguageModelsState();
     final viewModel = ref.read(languageModelsViewModelProvider.notifier);
+    ref.listen(languageModelsViewModelProvider, (previous, next) {
+      final before = previous?.value?.failed ?? const <String>{};
+      final now = next.value?.failed ?? const <String>{};
+      if (now.difference(before).isNotEmpty) {
+        AppToast.show(
+          context,
+          l10n.modelsDownloadFailed,
+          kind: AppMessageKind.error,
+        );
+      }
+    });
 
     final installed = SupportedLanguage.all
         .where((l) => models.installed.contains(l.code))

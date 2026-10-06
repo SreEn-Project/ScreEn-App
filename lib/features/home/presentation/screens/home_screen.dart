@@ -385,7 +385,6 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final periods = {
       HistoryPeriod.all: l10n.homeRecentFilterAll,
       HistoryPeriod.today: l10n.homeRecentFilterToday,
@@ -412,13 +411,12 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
         const SizedBox(height: 14),
         if (entries.isEmpty)
           AppCard(
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-            child: Column(
-              children: [
-                const IconBadge(icon: Symbols.history_rounded, size: 48),
-                const SizedBox(height: 12),
-                Text(l10n.homeRecentEmpty, style: theme.textTheme.bodySmall),
-              ],
+            padding: EdgeInsets.zero,
+            child: Center(
+              child: AppEmptyState(
+                icon: Symbols.history_rounded,
+                title: l10n.homeRecentEmpty,
+              ),
             ),
           )
         else

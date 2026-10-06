@@ -346,6 +346,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get apiKeyRegistered => 'A key is registered';
 
   @override
+  String get apiKeySavedToast => 'Key saved';
+
+  @override
+  String get apiKeyRemovedToast => 'Key removed';
+
+  @override
   String get apiKeyShow => 'Show';
 
   @override

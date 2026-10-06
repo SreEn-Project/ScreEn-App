@@ -53,9 +53,9 @@ class _LanguageListState extends State<LanguageList> {
         Expanded(
           child: languages.isEmpty
               ? Center(
-                  child: Text(
-                    l10n.languageEmpty,
-                    style: Theme.of(context).textTheme.bodySmall,
+                  child: AppEmptyState(
+                    icon: Symbols.search_off_rounded,
+                    title: l10n.languageEmpty,
                   ),
                 )
               : ListView.separated(

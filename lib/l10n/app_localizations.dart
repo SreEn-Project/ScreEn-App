@@ -734,6 +734,18 @@ abstract class AppLocalizations {
   /// **'A key is registered'**
   String get apiKeyRegistered;
 
+  /// No description provided for @apiKeySavedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Key saved'**
+  String get apiKeySavedToast;
+
+  /// No description provided for @apiKeyRemovedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Key removed'**
+  String get apiKeyRemovedToast;
+
   /// No description provided for @apiKeyShow.
   ///
   /// In en, this message translates to:

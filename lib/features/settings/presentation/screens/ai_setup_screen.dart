@@ -41,13 +41,17 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
 
   Future<void> _save() async {
     await ref.read(apiKeyViewModelProvider.notifier).save(_controller.text);
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    AppToast.show(context, AppLocalizations.of(context).apiKeySavedToast);
   }
 
   Future<void> _remove() async {
     await ref.read(apiKeyViewModelProvider.notifier).clear();
     _controller.clear();
-    if (mounted) setState(() => _revealed = false);
+    if (!mounted) return;
+    setState(() => _revealed = false);
+    AppToast.show(context, AppLocalizations.of(context).apiKeyRemovedToast);
   }
 
   Future<void> _test() async {
@@ -199,13 +203,11 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                     ),
                     if (_testMessage != null) ...[
                       const SizedBox(height: 8),
-                      Text(
+                      AppNotice(
                         _testMessage!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: _testOk
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.error,
-                        ),
+                        kind: _testOk
+                            ? AppMessageKind.success
+                            : AppMessageKind.error,
                       ),
                     ],
                     const SizedBox(height: 8),

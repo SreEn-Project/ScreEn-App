@@ -87,6 +87,24 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 | `AppTextField` | 입력창 (흰 둥근 사각형 + 그림자). 기본 한 줄, `maxLines`로 여러 줄(예문). `obscure`로 API 키 등을 가린다. `onSubmitted`(완료 키) · `enabled`(false면 입력 불가) |
 | `AppBadge` · `AppStatusPill` · `StatusDot` | 작은 연두 배지 / 점 + 글자 알약 / 켜짐 점(accent) |
 | `IconBadge` · `AccentTitle` | 연한 초록 원 + 선 아이콘 / 한 단어 강조 제목 |
+| `AppToast` | 잠깐 뜨는 한 줄 메시지: 흰 알약 + 그림자 + 성격 아이콘(성공 · 안내 primary, 오류 error). 탭바 위, 2.4초, 한 번에 하나. `AppToast.show(context, 문구, kind:)`. SnackBar 금지 |
+| `AppNotice` | 화면 안 안내 배너: 둥근 16dp 사각형 + 아이콘 + 글자. info(회색) · success(primaryContainer) · error(error 10%). 테스트 결과 · 입력 오류 · 안내 문구 |
+| `AppEmptyState` | 빈 목록 · 검색 결과 없음: 연한 초록 원 아이콘 + 제목 + (설명) + (동작 버튼) |
+| `showAppConfirm` | 되돌릴 수 없는 동작 전 확인 하단 시트: 제목 + 설명 + primary 확인 + secondary 취소. AlertDialog 금지 |
+
+## 알림 · 시스템 메시지 (D-061)
+메시지는 **성격과 지속 시간**으로 고른다. 같은 상황은 같은 모양을 쓴다.
+| 상황 | 쓰는 것 |
+|---|---|
+| 방금 한 동작의 결과(저장 · 삭제 · 실패), 잠깐 알리면 끝 | `AppToast` (Flutter) / `OverlayToast` (오버레이) |
+| 화면에 남아 있어야 하는 안내 · 검증 결과 · 입력 오류 | `AppNotice` |
+| 목록이 비었거나 검색 결과가 없음 | `AppEmptyState` |
+| 되돌릴 수 없는 동작 확인 | `showAppConfirm` |
+| 값 하나의 상태(받기 실패 등) | 목록 줄의 상태 글자(error 색) |
+- 문구는 "~했어요 / ~해 주세요" 해요체 한 문장. 원인과 해결을 함께 말한다(예: "받지 못했어요. 인터넷 연결을 확인해 주세요").
+- 오류는 error 색 아이콘으로만 구분하고 배경 전체를 빨갛게 칠하지 않는다(알림은 흰 바탕 유지).
+- 시스템 `SnackBar` · `AlertDialog` · 안드로이드 `Toast`는 쓰지 않는다. 오버레이 위 짧은 안내는 `OverlayToast`(흰 알약 + 초록 그림자 + 아이콘, 터치 통과, 3.2초).
+- 상시 알림(포그라운드 서비스, NA-03)은 시스템이 그리므로 모양은 못 바꾼다: 브랜드 작은 아이콘 + primary 강조색, 제목 + 한 줄 설명, "중지" 동작 하나, 조용한 채널(IMPORTANCE_LOW, 소리 · 진동 없음). 문구는 해요체.
 
 ## 화면 구조
 하단 탭 3개: **홈 · 언어 · 설정** (`lib/app/app_shell.dart`). 대상 언어 선택 · 앱 정보는 탭 위로 덮어 연다.
@@ -121,5 +139,6 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 | `PillButton` | primary 초록 알약 + 빛 / secondary 연한 배경 알약 |
 | `PlainIconButton` | 배경 없는 원형 아이콘 버튼 |
 | `OverlayBadge` · `SymbolBadge` | 연두 배지 / 연한 초록 원 + 선 아이콘 |
+| `OverlayToast` · `ToastPill` | 흰 알약 + 초록 그림자 + 아이콘 + 한 줄(최대 3줄). 아래 가운데, 터치 통과, 스스로 사라짐. 시스템 Toast 대신 (예: AI 실패 → ML Kit 대체 안내) |
 - 원문 위치 덮어쓰기(NA-22)는 원래 화면에 맞춰야 하므로 이 팔레트를 강제하지 않는다.
 - 다른 앱 위에 뜨므로 가독성 우선: 불투명 배경, 큰 글자, 빨리 닫힘.
