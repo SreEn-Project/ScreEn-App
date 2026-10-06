@@ -295,16 +295,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'More natural AI translation · API key needed';
 
   @override
-  String get engineFirebase => 'Google sign-in AI';
-
-  @override
-  String get engineFirebaseDetail => 'AI translation with just a sign-in';
-
-  @override
   String get engineNeedsKey => 'Add an API key to use this';
-
-  @override
-  String get engineNeedsLogin => 'Requires Google sign-in and age check';
 
   @override
   String get settingsTitle => 'Settings';

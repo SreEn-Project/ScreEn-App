@@ -638,29 +638,11 @@ abstract class AppLocalizations {
   /// **'More natural AI translation · API key needed'**
   String get engineGeminiDetail;
 
-  /// No description provided for @engineFirebase.
-  ///
-  /// In en, this message translates to:
-  /// **'Google sign-in AI'**
-  String get engineFirebase;
-
-  /// No description provided for @engineFirebaseDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'AI translation with just a sign-in'**
-  String get engineFirebaseDetail;
-
   /// No description provided for @engineNeedsKey.
   ///
   /// In en, this message translates to:
   /// **'Add an API key to use this'**
   String get engineNeedsKey;
-
-  /// No description provided for @engineNeedsLogin.
-  ///
-  /// In en, this message translates to:
-  /// **'Requires Google sign-in and age check'**
-  String get engineNeedsLogin;
 
   /// No description provided for @settingsTitle.
   ///

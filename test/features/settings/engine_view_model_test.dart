@@ -60,7 +60,6 @@ void main() {
     final viewModel = container.read(engineViewModelProvider.notifier);
 
     await viewModel.select(EngineType.gemini);
-    await viewModel.select(EngineType.firebaseAi);
 
     verifyNever(() => repository.setEngine(any()));
   });

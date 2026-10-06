@@ -7,6 +7,11 @@
 - 변경: `features/history/presentation/widgets/history_detail_sheet.dart`(새 파일), `history_card.dart`(줄임 · 탭), ARB 4줄(ko/en) + 생성된 `lib/l10n/app_localizations*.dart`. pubspec · Gradle · Manifest 변경 없음. 시트는 앱 테마의 `bottomSheetTheme`(상단 28dp 라운드)를 그대로 쓴다.
 - 확인: analyze 경고 0 · flutter test 통과(위젯 테스트 `history_detail_test` 추가) · 디버그 빌드 통과. 기기 확인은 하지 않음.
 
+## 2026-10-06 · 구글 로그인 AI(Firebase AI) 엔진 제거 (NA-14, FL-12, 이슈 #110, 브랜치 `feat/110-remove-firebase-ai-engine`)
+- 설정 화면 엔진 목록에서 "구글 로그인 AI" 항목을 없애고, 뒤의 미사용 코드 · 문구를 걷어냈다. ML Kit · 내 Gemini 키(BYOK)는 그대로다 (D-048).
+- 변경: Pigeon `EngineType`(생성 코드 재생성) · Flutter `EngineType` · 설정 매퍼 · 라벨/아이콘 · 설정 화면 · `EngineViewModel` · ARB(ko/en, `engineFirebase*` · `engineNeedsLogin`) · 네이티브 `Engine` · `Mappers` · `TranslatorService` · 관련 테스트 · docs. pubspec · Gradle · Manifest는 건드리지 않았다 (Firebase 의존성은 원래 없었다).
+- 확인: analyze · flutter test · 네이티브 단위 테스트 · 디버그 빌드 (결과는 PR). 기기 확인은 하지 않음 — 사용자가 확인.
+
 ## 2026-10-06 · 빠른 설정에 AI 번역 엔진 선택 (FL-06, NA-18, 이슈 #100, 브랜치 `feat/100-quick-ai-engine`)
 - 플로팅 '설정' 버블에 "AI 번역: ML Kit/Gemini AI" 항목을 추가했다. 누르면 결과 닫기처럼 목록이 열려 ML Kit · Gemini AI를 바로 고른다 (탭 순환 아님). 저장은 앱 설정 화면과 같은 엔진 설정(DataStore `engine`)이라 서로 맞는다.
 - Gemini API 키가 없으면 Gemini AI 줄은 비활성이고 "Gemini AI: 앱 설정에서 키 등록"으로 안내한다. 키 확인은 `ApiKeyStore`(Keystore)를 서비스가 `hasGeminiKey`로 넘겨 IO 스레드에서 읽는다. 설정에 있는 AI 관련 옵션은 엔진 선택뿐이라 이것만 넣었다.

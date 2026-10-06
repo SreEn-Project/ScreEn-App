@@ -287,16 +287,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get engineGeminiDetail => '더 자연스러운 AI 번역 · API 키 필요';
 
   @override
-  String get engineFirebase => '구글 로그인 AI';
-
-  @override
-  String get engineFirebaseDetail => '로그인만 하면 쓰는 AI 번역';
-
-  @override
   String get engineNeedsKey => 'API 키를 등록해야 쓸 수 있어요';
-
-  @override
-  String get engineNeedsLogin => '구글 로그인과 연령 확인이 필요해요';
 
   @override
   String get settingsTitle => '설정';
