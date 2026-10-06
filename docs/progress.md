@@ -2,6 +2,9 @@
 
 최신 항목을 위에 추가한다. 형식: 날짜 · 기능 ID · 한 일 · 남은 일.
 
+## 2026-10-06 · 로드맵 상태를 실제 구현에 맞게 갱신 (이슈 #116, 브랜치 `docs/116-roadmap-status`)
+- 1단계 NA-04 · 05 · 09 · 10 · 18 · 19, FL-06 완료 처리. 3단계 NA-13 · 15 · 17, FL-10 완료, NA-14 · FL-12는 제거(D-048) 표시. 문서만 변경.
+
 ## 2026-10-06 · 번역 기록 상세 보기 (FL-13, 이슈 #113, 브랜치 `feat/113-history-detail-sheet`)
 - 기록 카드(기록 화면 · 홈 최근 기록)에서 번역은 3줄, 원문은 2줄까지만 보이고 말줄임표로 줄인다. 카드를 탭하면 둥근 바텀시트가 열려 번역 · 원문 전체(선택 가능)와 언어 쌍 · 시각을 보여 주고, 각각 "복사" 버튼으로 클립보드에 복사한다 (누르면 "복사됨"). 삭제 버튼은 그대로 카드에서 동작한다.
 - 변경: `features/history/presentation/widgets/history_detail_sheet.dart`(새 파일), `history_card.dart`(줄임 · 탭), ARB 4줄(ko/en) + 생성된 `lib/l10n/app_localizations*.dart`. pubspec · Gradle · Manifest 변경 없음. 시트는 앱 테마의 `bottomSheetTheme`(상단 28dp 라운드)를 그대로 쓴다.
