@@ -99,12 +99,7 @@ class _PinSheetState extends State<_PinSheet> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: AppTokens.space8),
-                Text(
-                  _error!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
-                ),
+                AppNotice.error(_error!),
               ],
             ],
           ),
@@ -115,47 +110,13 @@ class _PinSheetState extends State<_PinSheet> {
 }
 
 /// PIN을 잊었을 때: 키를 지우고 초기화할지 묻는다. 하겠다고 하면 true.
-Future<bool> showPinResetSheet(BuildContext context) async {
-  final confirmed = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (sheetContext) {
-      final l10n = AppLocalizations.of(sheetContext);
-      final theme = Theme.of(sheetContext);
-      return SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppTokens.pagePadding,
-            0,
-            AppTokens.pagePadding,
-            AppTokens.sectionGap,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.pinResetTitle, style: theme.textTheme.titleLarge),
-              const SizedBox(height: AppTokens.space8),
-              Text(l10n.pinResetBody, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: AppTokens.sectionGap),
-              AppButton(
-                label: l10n.pinResetConfirm,
-                expand: true,
-                onPressed: () => Navigator.of(sheetContext).pop(true),
-              ),
-              const SizedBox(height: AppTokens.space8),
-              AppButton.secondary(
-                label: l10n.pinCancel,
-                expand: true,
-                onPressed: () => Navigator.of(sheetContext).pop(false),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
+Future<bool> showPinResetSheet(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+  return showAppConfirm(
+    context,
+    title: l10n.pinResetTitle,
+    message: l10n.pinResetBody,
+    confirmLabel: l10n.pinResetConfirm,
+    cancelLabel: l10n.pinCancel,
   );
-  return confirmed ?? false;
 }

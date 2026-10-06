@@ -24,7 +24,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final state = ref.watch(historyViewModelProvider).value;
     final model = ref.read(historyViewModelProvider.notifier);
     final periods = {
@@ -94,21 +93,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   ? Center(
                       child: state == null
                           ? const SizedBox.shrink()
-                          : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const IconBadge(
-                                  icon: Symbols.history_rounded,
-                                  size: 48,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  state.filtered
-                                      ? l10n.historyNoResult
-                                      : l10n.homeRecentEmpty,
-                                  style: theme.textTheme.bodySmall,
-                                ),
-                              ],
+                          : AppEmptyState(
+                              icon: state.filtered
+                                  ? Symbols.search_off_rounded
+                                  : Symbols.history_rounded,
+                              title: state.filtered
+                                  ? l10n.historyNoResult
+                                  : l10n.homeRecentEmpty,
                             ),
                     )
                   : ListView.separated(

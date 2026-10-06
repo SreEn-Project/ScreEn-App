@@ -500,3 +500,9 @@
 - 설계 D-060. 홈(S-03)에 "오늘의 단어" 카드: 날짜로 정한 저장 단어 한 개 + 뜻 보기 4개 문제(오답 보기는 다른 단어 뜻), 답하면 정답 여부와 뜻, "다른 단어"로 다음 단어. 단어가 하나뿐이면 보기 없이 "뜻 보기" 버튼. 저장한 단어가 없으면 카드 숨김. 도메인 `DailyWord` · `GetWordOfTheDay`, `WordOfTheDayViewModel`, `WordOfTheDayCard`. 문구(ko/en) 추가.
 - 확인: `flutter analyze` 0, `flutter test` 통과(선택 규칙 2 · 홈 카드 2 추가), `flutter build apk --debug` 성공. 기기 확인 전 — 확인 항목: 단어를 저장한 뒤 홈에 카드 표시 / 보기 선택 → 정답 · 오답 색 / "다른 단어" / 단어 없으면 카드 없음 / 다음 날 다른 단어.
 - 새 의존성 없음.
+
+## 알림 · 시스템 메시지 통일 (UI-01, #141)
+- 설계 D-061. 공통 컴포넌트 `AppToast` · `AppNotice` · `AppEmptyState` · `showAppConfirm` 추가(`lib/core/ui`), 오류 글자 · 빈 상태 · 확인 시트를 이것으로 교체. API 키 저장 · 삭제와 모델 받기 실패에 토스트. 안드로이드 `OverlayToast`로 AI 대체 안내의 시스템 Toast를 대체. design.md에 "알림 · 시스템 메시지" 규칙 추가.
+- 확인: `flutter analyze` 0, `flutter test` 통과(컴포넌트 4 추가), `flutter build apk --debug` 성공. 기기 확인 전 — 확인 항목: AI 키 저장/삭제 시 아래 흰 알약 토스트 / 키 테스트 결과 배너 / 용어 한도 안내 배너 / 기록 · 언어 검색 빈 상태 / PIN 오류 / Gemini 실패 상태에서 번역 시 오버레이 토스트(시스템 Toast가 아님).
+- 새 의존성 없음. 코드 변경: Flutter lib/core/ui · features 화면, 네이티브 `OverlayToast.kt` 추가 · `TranslatorService.kt` 수정, ARB 문구 2개.
+

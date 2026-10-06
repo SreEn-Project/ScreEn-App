@@ -117,6 +117,8 @@
   "apiKeySave": "키 저장",
   "apiKeyRemove": "키 삭제",
   "apiKeyRegistered": "키가 등록돼 있어요",
+  "apiKeySavedToast": "키를 저장했어요",
+  "apiKeyRemovedToast": "키를 삭제했어요",
   "apiKeyShow": "보기",
   "apiKeyHide": "숨기기",
   "apiKeyTest": "키 테스트",

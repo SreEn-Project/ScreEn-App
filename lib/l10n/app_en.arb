@@ -118,6 +118,8 @@
   "apiKeySave": "Save key",
   "apiKeyRemove": "Remove key",
   "apiKeyRegistered": "A key is registered",
+  "apiKeySavedToast": "Key saved",
+  "apiKeyRemovedToast": "Key removed",
   "apiKeyShow": "Show",
   "apiKeyHide": "Hide",
   "apiKeyTest": "Test key",

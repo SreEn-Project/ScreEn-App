@@ -249,49 +249,15 @@ Future<bool> showDeleteConfirmSheet(
   BuildContext context, {
   required String title,
   String? body,
-}) async {
-  final confirmed = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (sheetContext) {
-      final l10n = AppLocalizations.of(sheetContext);
-      final theme = Theme.of(sheetContext);
-      return SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppTokens.pagePadding,
-            0,
-            AppTokens.pagePadding,
-            AppTokens.sectionGap,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: theme.textTheme.titleLarge),
-              if (body != null) ...[
-                const SizedBox(height: AppTokens.space8),
-                Text(body, style: theme.textTheme.bodyMedium),
-              ],
-              const SizedBox(height: AppTokens.sectionGap),
-              AppButton(
-                label: l10n.vocabDelete,
-                onPressed: () => Navigator.of(sheetContext).pop(true),
-              ),
-              const SizedBox(height: AppTokens.space8),
-              AppButton.secondary(
-                label: l10n.vocabCancel,
-                onPressed: () => Navigator.of(sheetContext).pop(false),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
+}) {
+  final l10n = AppLocalizations.of(context);
+  return showAppConfirm(
+    context,
+    title: title,
+    message: body,
+    confirmLabel: l10n.vocabDelete,
+    cancelLabel: l10n.vocabCancel,
   );
-  return confirmed ?? false;
 }
 
 enum WordAction { move, delete }
