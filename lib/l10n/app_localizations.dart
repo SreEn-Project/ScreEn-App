@@ -1652,6 +1652,12 @@ abstract class AppLocalizations {
   /// **'Mini games'**
   String get learnGames;
 
+  /// No description provided for @learnMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Line match'**
+  String get learnMatch;
+
   /// No description provided for @learnCardsHint.
   ///
   /// In en, this message translates to:
@@ -1747,6 +1753,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Words to review'**
   String get cardsUnknownWords;
+
+  /// No description provided for @learnMatchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag lines from words to meanings'**
+  String get learnMatchHint;
+
+  /// No description provided for @learnFall.
+  ///
+  /// In en, this message translates to:
+  /// **'Falling words'**
+  String get learnFall;
+
+  /// No description provided for @learnAssemble.
+  ///
+  /// In en, this message translates to:
+  /// **'Word assembly'**
+  String get learnAssemble;
+
+  /// No description provided for @matchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Line match'**
+  String get matchTitle;
+
+  /// No description provided for @matchScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Score {score}'**
+  String matchScore(int score);
+
+  /// No description provided for @matchRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words left'**
+  String matchRemaining(int count);
+
+  /// No description provided for @matchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag a word onto its meaning'**
+  String get matchHint;
+
+  /// No description provided for @matchResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Line match results'**
+  String get matchResultTitle;
+
+  /// No description provided for @matchRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Play again'**
+  String get matchRetry;
 
   /// No description provided for @learnComingSoon.
   ///

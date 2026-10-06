@@ -13,7 +13,7 @@ import '../widgets/vocabulary_sheets.dart';
 import '../widgets/wordbook_selector.dart';
 
 /// 학습 시작 (L-01, AD-07): 학습할 단어장을 고르고 학습 유형을 고른다.
-/// 암기 테스트(AD-09) · 카드 학습(AD-08)이 열려 있고 미니게임은 준비 중이다.
+/// 암기 테스트(AD-09) · 카드 학습(AD-08)이 열려 있고 선 잇기(AD-11)가 열려 있고 나머지 미니게임은 준비 중이다.
 class LearningStartScreen extends ConsumerStatefulWidget {
   const LearningStartScreen({super.key, this.initialWordbookId});
 
@@ -134,10 +134,42 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                       : () =>
                             context.push(AppRoutes.flashcardsPath(selected.id)),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppTokens.sectionGap),
+          SectionTitle(l10n.learnGames),
+          const SizedBox(height: AppTokens.sectionTitleGap),
+          AppCard(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppTokens.cardListPaddingV,
+            ),
+            child: Column(
+              children: [
+                AppListTile(
+                  icon: Symbols.cable_rounded,
+                  title: l10n.learnMatch,
+                  subtitle: count == 0
+                      ? l10n.learnTestNeedWords
+                      : l10n.learnMatchHint,
+                  enabled: count > 0,
+                  onTap: selected == null
+                      ? null
+                      : () =>
+                            context.push(AppRoutes.lineMatchPath(selected.id)),
+                ),
                 const AppDivider(),
                 AppListTile(
-                  icon: Symbols.sports_esports_rounded,
-                  title: l10n.learnGames,
+                  icon: Symbols.keyboard_rounded,
+                  title: l10n.learnFall,
+                  subtitle: l10n.learnComingSoon,
+                  enabled: false,
+                  onTap: () {},
+                ),
+                const AppDivider(),
+                AppListTile(
+                  icon: Symbols.extension_rounded,
+                  title: l10n.learnAssemble,
                   subtitle: l10n.learnComingSoon,
                   enabled: false,
                   onTap: () {},

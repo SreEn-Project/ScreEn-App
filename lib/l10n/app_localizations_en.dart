@@ -842,6 +842,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get learnGames => 'Mini games';
 
   @override
+  String get learnMatch => 'Line match';
+
+  @override
   String get learnCardsHint =>
       'Flip cards to see meanings and swipe to sort what you know';
 
@@ -897,6 +900,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardsUnknownWords => 'Words to review';
+
+  @override
+  String get learnMatchHint => 'Drag lines from words to meanings';
+
+  @override
+  String get learnFall => 'Falling words';
+
+  @override
+  String get learnAssemble => 'Word assembly';
+
+  @override
+  String get matchTitle => 'Line match';
+
+  @override
+  String matchScore(int score) {
+    return 'Score $score';
+  }
+
+  @override
+  String matchRemaining(int count) {
+    return '$count words left';
+  }
+
+  @override
+  String get matchHint => 'Drag a word onto its meaning';
+
+  @override
+  String get matchResultTitle => 'Line match results';
+
+  @override
+  String get matchRetry => 'Play again';
 
   @override
   String get learnComingSoon => 'Coming soon';

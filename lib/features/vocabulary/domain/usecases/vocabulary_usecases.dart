@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../../../core/domain/use_case.dart';
+import '../entities/line_match.dart';
 import '../entities/vocabulary.dart';
 import '../entities/word_test.dart';
 import '../repositories/vocabulary_repository.dart';
@@ -262,5 +263,29 @@ final class CreateFlashcardDeck
   Future<List<VocabularyWord>> call(CreateFlashcardDeckParams params) async {
     final words = await _repository.words(params.wordbookId);
     return [...words]..shuffle(params.random ?? Random());
+  }
+}
+
+class CreateLineMatchGameParams {
+  const CreateLineMatchGameParams(this.wordbookId, {this.random});
+
+  final int wordbookId;
+
+  /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
+  final Random? random;
+}
+
+/// 선 잇기 게임 만들기 (AD-11). 단어가 없으면 null.
+final class CreateLineMatchGame
+    implements UseCase<LineMatchGame?, CreateLineMatchGameParams> {
+  const CreateLineMatchGame(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<LineMatchGame?> call(CreateLineMatchGameParams params) async {
+    final words = await _repository.words(params.wordbookId);
+    if (words.isEmpty) return null;
+    return LineMatchGame.start(words, random: params.random);
   }
 }
