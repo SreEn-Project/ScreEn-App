@@ -38,3 +38,16 @@ extension WordSortMapper on WordSort {
     WordSort.alphabetical => pigeon.VocabSort.alphabetical,
   };
 }
+
+extension WordDraftMapper on WordDraft {
+  pigeon.VocabWordInput toPigeon() => pigeon.VocabWordInput(
+    word: word,
+    meaning: meaning,
+    pronunciation: pronunciation,
+    partOfSpeech: partOfSpeech,
+    contextMeaning: contextMeaning,
+    sentence: sentence,
+    sourceLanguage: sourceLanguage,
+    targetLanguage: targetLanguage,
+  );
+}

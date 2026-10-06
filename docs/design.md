@@ -84,7 +84,7 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 | `AppSegmented` · `AppChip` | 회색 트랙 안에서 고른 칸만 흰 알약으로(`enabled: false`면 흐리게 · 누를 수 없음) / 선택 시 primary 알약 |
 | `AppSlider` · `AppProgressBar` | 가는 알약 트랙 + 흰 원 손잡이(primary 테두리) |
 | `AppSearchField` | 테두리 없는 흰 알약 + 그림자 |
-| `AppTextField` | 한 줄 입력창 (흰 둥근 사각형 + 그림자). `obscure`로 API 키 등을 가린다 |
+| `AppTextField` | 입력창 (흰 둥근 사각형 + 그림자). 기본 한 줄, `maxLines`로 여러 줄(예문). `obscure`로 API 키 등을 가린다 |
 | `AppBadge` · `AppStatusPill` · `StatusDot` | 작은 연두 배지 / 점 + 글자 알약 / 켜짐 점(accent) |
 | `IconBadge` · `AccentTitle` | 연한 초록 원 + 선 아이콘 / 한 단어 강조 제목 |
 

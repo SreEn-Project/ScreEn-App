@@ -1507,6 +1507,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This word was already deleted'**
   String get vocabWordGone;
+
+  /// No description provided for @vocabAddWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Add word'**
+  String get vocabAddWord;
+
+  /// No description provided for @vocabAddToBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to wordbook'**
+  String get vocabAddToBook;
+
+  /// No description provided for @vocabWordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Word'**
+  String get vocabWordHint;
+
+  /// No description provided for @vocabMeaningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning'**
+  String get vocabMeaningHint;
+
+  /// No description provided for @vocabPronunciationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation (optional)'**
+  String get vocabPronunciationHint;
+
+  /// No description provided for @vocabPartOfSpeechHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of speech (optional)'**
+  String get vocabPartOfSpeechHint;
+
+  /// No description provided for @vocabContextMeaningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning in context (optional)'**
+  String get vocabContextMeaningHint;
+
+  /// No description provided for @vocabSentenceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example sentence (optional)'**
+  String get vocabSentenceHint;
+
+  /// No description provided for @vocabSaveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to'**
+  String get vocabSaveTo;
+
+  /// No description provided for @vocabNewBookChip.
+  ///
+  /// In en, this message translates to:
+  /// **'New wordbook'**
+  String get vocabNewBookChip;
+
+  /// No description provided for @vocabSavedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to ‘{name}’'**
+  String vocabSavedTo(String name);
+
+  /// No description provided for @vocabSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Check the word and meaning'**
+  String get vocabSaveFailed;
+
+  /// No description provided for @vocabHistoryAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a word from history'**
+  String get vocabHistoryAddTitle;
 }
 
 class _AppLocalizationsDelegate

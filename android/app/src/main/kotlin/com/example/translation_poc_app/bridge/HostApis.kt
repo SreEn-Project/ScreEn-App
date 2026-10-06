@@ -6,6 +6,7 @@ import com.example.translation_poc_app.data.settings.ApiKeyStore
 import com.example.translation_poc_app.data.settings.GlossaryEntry as NativeGlossaryEntry
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.data.vocabulary.VocabularyRepository
+import com.example.translation_poc_app.data.vocabulary.WordDraft
 import com.example.translation_poc_app.data.vocabulary.WordSort
 import com.example.translation_poc_app.translate.GeminiKeyTester
 import com.example.translation_poc_app.service.CaptureConsentActivity
@@ -99,7 +100,7 @@ class HistoryHostApiImpl(private val repository: HistoryRepository) : HistoryHos
     override suspend fun clearHistory() = repository.clear()
 }
 
-/** 단어장 · 단어 관리 (AD-04 ~ AD-06). 단어 저장은 오버레이(네이티브)가 직접 한다. */
+/** 단어장 · 단어 관리 (AD-04 ~ AD-06)와 앱에서 단어 저장. 오버레이는 저장소를 직접 부른다. */
 class VocabularyHostApiImpl(private val repository: VocabularyRepository) : VocabularyHostApi {
     override suspend fun getWordbooks(): List<Wordbook> = repository.wordbooks().map { it.toPigeon() }
 
@@ -122,6 +123,21 @@ class VocabularyHostApiImpl(private val repository: VocabularyRepository) : Voca
     override suspend fun deleteWord(id: Long) = repository.deleteWord(id)
 
     override suspend fun setMemorized(id: Long, memorized: Boolean) = repository.setMemorized(id, memorized)
+
+    override suspend fun saveWord(wordbookId: Long, input: VocabWordInput): Long? =
+        repository.saveWord(
+            wordbookId,
+            WordDraft(
+                word = input.word,
+                meaning = input.meaning,
+                pronunciation = input.pronunciation,
+                partOfSpeech = input.partOfSpeech,
+                contextMeaning = input.contextMeaning,
+                sentence = input.sentence,
+                sourceLanguage = input.sourceLanguage,
+                targetLanguage = input.targetLanguage,
+            ),
+        )
 }
 
 /** 서비스 상태 조회 · 시작 · 중지 (NA-01, NA-02). */

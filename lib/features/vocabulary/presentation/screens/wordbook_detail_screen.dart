@@ -12,6 +12,7 @@ import '../view_models/wordbook_detail_view_model.dart';
 import '../view_models/wordbooks_view_model.dart';
 import '../widgets/vocabulary_sheets.dart';
 import '../widgets/word_card.dart';
+import '../widgets/word_edit_sheet.dart';
 
 /// 단어장 상세 (X-04, AD-05): 단어 검색 · 정렬 · 이동 · 삭제 · 외운 단어 체크, 탭하면 단어 상세.
 class WordbookDetailScreen extends ConsumerWidget {
@@ -43,7 +44,16 @@ class WordbookDetailScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            AppHeader(title: name ?? l10n.vocabTitle),
+            AppHeader(
+              title: name ?? l10n.vocabTitle,
+              trailing: AppIconButton(
+                icon: Symbols.add_rounded,
+                tooltip: l10n.vocabAddWord,
+                plain: true,
+                size: 44,
+                onPressed: () => _addWord(context, model),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppTokens.pagePadding,
@@ -129,6 +139,26 @@ class WordbookDetailScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// 직접 단어 추가: 편집 시트에서 이 단어장에 저장한다.
+  Future<void> _addWord(
+    BuildContext context,
+    WordbookDetailViewModel model,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final saved = await showWordEditSheet(
+      context,
+      title: l10n.vocabAddWord,
+      initial: WordDraft(
+        word: '',
+        meaning: '',
+        sourceLanguage: 'und',
+        targetLanguage: Localizations.localeOf(context).languageCode,
+      ),
+      wordbookId: wordbookId,
+    );
+    if (saved != null) await model.refresh();
   }
 
   Future<void> _showActions(

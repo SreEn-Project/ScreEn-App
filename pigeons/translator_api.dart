@@ -315,7 +315,30 @@ class VocabWord {
 
 enum VocabSort { newest, oldest, alphabetical }
 
-/// 단어장 관리 (AD-04 ~ AD-06). 단어 저장(AD-03)은 오버레이(네이티브)가 직접 한다.
+/// 앱에서 저장할 단어 한 건 (AD-03): 직접 추가 · 번역 기록에서 추가.
+class VocabWordInput {
+  VocabWordInput({
+    required this.word,
+    required this.meaning,
+    this.pronunciation,
+    this.partOfSpeech,
+    this.contextMeaning,
+    this.sentence,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+  });
+
+  String word;
+  String meaning;
+  String? pronunciation;
+  String? partOfSpeech;
+  String? contextMeaning;
+  String? sentence;
+  String sourceLanguage;
+  String targetLanguage;
+}
+
+/// 단어장 관리 (AD-04 ~ AD-06). 오버레이는 저장소를 직접 부르고, 앱의 직접 추가 · 기록에서 추가는 [saveWord]로 한다.
 @HostApi()
 abstract class VocabularyHostApi {
   /// 만든 순서대로. 단어 수 · 외운 단어 수 포함.
@@ -350,6 +373,11 @@ abstract class VocabularyHostApi {
 
   @async
   void setMemorized(int id, bool memorized);
+
+  /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
+  /// 저장한 단어의 id를 돌려준다.
+  @async
+  int? saveWord(int wordbookId, VocabWordInput input);
 }
 
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
