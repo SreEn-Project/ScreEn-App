@@ -4,6 +4,7 @@ import '../../../../core/domain/use_case.dart';
 import '../entities/falling_game.dart';
 import '../entities/line_match.dart';
 import '../entities/vocabulary.dart';
+import '../entities/word_assembly.dart';
 import '../entities/word_test.dart';
 import '../repositories/vocabulary_repository.dart';
 
@@ -313,5 +314,42 @@ final class CreateFallingGame
     final words = await _repository.words(params.wordbookId);
     if (words.isEmpty) return null;
     return FallingGame(words: words, mode: params.mode, random: params.random);
+  }
+}
+
+class CreateAssemblyGameParams {
+  const CreateAssemblyGameParams(this.wordbookId, this.mode, {this.random});
+
+  final int wordbookId;
+  final AssemblyMode mode;
+
+  /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
+  final Random? random;
+}
+
+/// 단어 조립 문제 만들기 (AD-13). 단어장에서 최대 [maxQuestions]개를 무작위로 뽑는다.
+final class CreateAssemblyGame
+    implements UseCase<List<AssemblyQuestion>, CreateAssemblyGameParams> {
+  const CreateAssemblyGame(this._repository);
+
+  static const maxQuestions = 10;
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<AssemblyQuestion>> call(CreateAssemblyGameParams params) async {
+    final random = params.random ?? Random();
+    final words = await _repository.words(params.wordbookId);
+    if (words.isEmpty) return const [];
+    final targets = ([...words]..shuffle(random)).take(maxQuestions);
+    return [
+      for (final word in targets)
+        AssemblyQuestion.build(
+          word,
+          params.mode,
+          others: words,
+          random: random,
+        ),
+    ];
   }
 }

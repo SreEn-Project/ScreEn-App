@@ -1880,6 +1880,78 @@ abstract class AppLocalizations {
   /// **'Missed words'**
   String get fallMissedWords;
 
+  /// No description provided for @learnAssembleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Build words from pieces or letter cards'**
+  String get learnAssembleHint;
+
+  /// No description provided for @assembleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Word assembly'**
+  String get assembleTitle;
+
+  /// No description provided for @assembleModePieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick pieces'**
+  String get assembleModePieces;
+
+  /// No description provided for @assembleModeLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort letters'**
+  String get assembleModeLetters;
+
+  /// No description provided for @assembleModePiecesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick piece cards in order to build the word for the meaning. Pieces of other words are mixed in'**
+  String get assembleModePiecesHint;
+
+  /// No description provided for @assembleModeLettersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the shuffled letter cards into the right order for the meaning'**
+  String get assembleModeLettersHint;
+
+  /// No description provided for @assembleSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Your word'**
+  String get assembleSlot;
+
+  /// No description provided for @assembleSlotHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the cards below to fill this in'**
+  String get assembleSlotHint;
+
+  /// No description provided for @assembleCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get assembleCards;
+
+  /// No description provided for @assembleUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get assembleUndo;
+
+  /// No description provided for @assembleDragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag cards to swap their places'**
+  String get assembleDragHint;
+
+  /// No description provided for @assembleResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Word assembly results'**
+  String get assembleResultTitle;
+
   /// No description provided for @learnComingSoon.
   ///
   /// In en, this message translates to:

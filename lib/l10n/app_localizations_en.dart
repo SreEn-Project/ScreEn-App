@@ -974,6 +974,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fallMissedWords => 'Missed words';
 
   @override
+  String get learnAssembleHint => 'Build words from pieces or letter cards';
+
+  @override
+  String get assembleTitle => 'Word assembly';
+
+  @override
+  String get assembleModePieces => 'Pick pieces';
+
+  @override
+  String get assembleModeLetters => 'Sort letters';
+
+  @override
+  String get assembleModePiecesHint =>
+      'Pick piece cards in order to build the word for the meaning. Pieces of other words are mixed in';
+
+  @override
+  String get assembleModeLettersHint =>
+      'Drag the shuffled letter cards into the right order for the meaning';
+
+  @override
+  String get assembleSlot => 'Your word';
+
+  @override
+  String get assembleSlotHint => 'Tap the cards below to fill this in';
+
+  @override
+  String get assembleCards => 'Cards';
+
+  @override
+  String get assembleUndo => 'Undo';
+
+  @override
+  String get assembleDragHint => 'Drag cards to swap their places';
+
+  @override
+  String get assembleResultTitle => 'Word assembly results';
+
+  @override
   String get learnComingSoon => 'Coming soon';
 
   @override

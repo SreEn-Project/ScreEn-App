@@ -655,3 +655,51 @@ final class CreateFallingGameProvider
 }
 
 String _$createFallingGameHash() => r'ea461466788d23c2b243c58c9d31d4588430802e';
+
+@ProviderFor(createAssemblyGame)
+final createAssemblyGameProvider = CreateAssemblyGameProvider._();
+
+final class CreateAssemblyGameProvider
+    extends
+        $FunctionalProvider<
+          CreateAssemblyGame,
+          CreateAssemblyGame,
+          CreateAssemblyGame
+        >
+    with $Provider<CreateAssemblyGame> {
+  CreateAssemblyGameProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'createAssemblyGameProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$createAssemblyGameHash();
+
+  @$internal
+  @override
+  $ProviderElement<CreateAssemblyGame> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CreateAssemblyGame create(Ref ref) {
+    return createAssemblyGame(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CreateAssemblyGame value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CreateAssemblyGame>(value),
+    );
+  }
+}
+
+String _$createAssemblyGameHash() =>
+    r'69cd92af5b79d8b34380b0766651359af8578b13';

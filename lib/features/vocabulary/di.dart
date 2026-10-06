@@ -66,3 +66,7 @@ CreateLineMatchGame createLineMatchGame(Ref ref) =>
 @riverpod
 CreateFallingGame createFallingGame(Ref ref) =>
     CreateFallingGame(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+CreateAssemblyGame createAssemblyGame(Ref ref) =>
+    CreateAssemblyGame(ref.watch(vocabularyRepositoryProvider));
