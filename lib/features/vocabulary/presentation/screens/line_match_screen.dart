@@ -264,52 +264,56 @@ class _BoardState extends ConsumerState<_Board> {
           onPointerMove: _move,
           onPointerUp: _up,
           onPointerCancel: _cancel,
-          child: Stack(
-            key: _stackKey,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        for (final b in game.left)
-                          block(
-                            b,
-                            key: _key(_leftKeys, b.wordId),
-                            isWord: true,
-                          ),
-                      ],
+          // 빈 팬 제스처로 바깥 목록의 스크롤이 드래그를 가져가지 못하게 한다.
+          child: GestureDetector(
+            onPanUpdate: (_) {},
+            child: Stack(
+              key: _stackKey,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          for (final b in game.left)
+                            block(
+                              b,
+                              key: _key(_leftKeys, b.wordId),
+                              isWord: true,
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: _columnGap),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        for (final b in game.right)
-                          block(
-                            b,
-                            key: _key(_rightKeys, b.wordId),
-                            isWord: false,
-                          ),
-                      ],
+                    const SizedBox(width: _columnGap),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          for (final b in game.right)
+                            block(
+                              b,
+                              key: _key(_rightKeys, b.wordId),
+                              isWord: false,
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              if (from != null && to != null)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: _LinePainter(
-                        from: from,
-                        to: to,
-                        color: lineColor,
+                  ],
+                ),
+                if (from != null && to != null)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: CustomPaint(
+                        painter: _LinePainter(
+                          from: from,
+                          to: to,
+                          color: lineColor,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

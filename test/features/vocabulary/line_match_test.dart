@@ -119,6 +119,7 @@ void main() {
       );
       await gesture.moveTo(tester.getCenter(find.text(meaning)));
       await gesture.up();
+      await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
     }
 

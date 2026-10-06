@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../../../../core/domain/use_case.dart';
+import '../entities/falling_game.dart';
 import '../entities/line_match.dart';
 import '../entities/vocabulary.dart';
 import '../entities/word_test.dart';
@@ -287,5 +288,30 @@ final class CreateLineMatchGame
     final words = await _repository.words(params.wordbookId);
     if (words.isEmpty) return null;
     return LineMatchGame.start(words, random: params.random);
+  }
+}
+
+class CreateFallingGameParams {
+  const CreateFallingGameParams(this.wordbookId, this.mode, {this.random});
+
+  final int wordbookId;
+  final FallingMode mode;
+
+  /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
+  final Random? random;
+}
+
+/// 하강형 타이핑 게임 만들기 (AD-12). 단어가 없으면 null.
+final class CreateFallingGame
+    implements UseCase<FallingGame?, CreateFallingGameParams> {
+  const CreateFallingGame(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<FallingGame?> call(CreateFallingGameParams params) async {
+    final words = await _repository.words(params.wordbookId);
+    if (words.isEmpty) return null;
+    return FallingGame(words: words, mode: params.mode, random: params.random);
   }
 }

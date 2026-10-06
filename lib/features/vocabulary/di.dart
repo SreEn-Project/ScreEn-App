@@ -62,3 +62,7 @@ CreateFlashcardDeck createFlashcardDeck(Ref ref) =>
 @riverpod
 CreateLineMatchGame createLineMatchGame(Ref ref) =>
     CreateLineMatchGame(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+CreateFallingGame createFallingGame(Ref ref) =>
+    CreateFallingGame(ref.watch(vocabularyRepositoryProvider));

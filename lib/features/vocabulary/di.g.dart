@@ -608,3 +608,50 @@ final class CreateLineMatchGameProvider
 
 String _$createLineMatchGameHash() =>
     r'a48a9ebf047293fb03474a7eff77d4a6a9b56120';
+
+@ProviderFor(createFallingGame)
+final createFallingGameProvider = CreateFallingGameProvider._();
+
+final class CreateFallingGameProvider
+    extends
+        $FunctionalProvider<
+          CreateFallingGame,
+          CreateFallingGame,
+          CreateFallingGame
+        >
+    with $Provider<CreateFallingGame> {
+  CreateFallingGameProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'createFallingGameProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$createFallingGameHash();
+
+  @$internal
+  @override
+  $ProviderElement<CreateFallingGame> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  CreateFallingGame create(Ref ref) {
+    return createFallingGame(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CreateFallingGame value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CreateFallingGame>(value),
+    );
+  }
+}
+
+String _$createFallingGameHash() => r'ea461466788d23c2b243c58c9d31d4588430802e';

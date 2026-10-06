@@ -1808,6 +1808,78 @@ abstract class AppLocalizations {
   /// **'Play again'**
   String get matchRetry;
 
+  /// No description provided for @learnFallHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type to destroy the falling words'**
+  String get learnFallHint;
+
+  /// No description provided for @fallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Falling words'**
+  String get fallTitle;
+
+  /// No description provided for @fallRules.
+  ///
+  /// In en, this message translates to:
+  /// **'You lose a life when a block hits the bottom. 3 lives, and it speeds up'**
+  String get fallRules;
+
+  /// No description provided for @fallModeMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Word → meaning'**
+  String get fallModeMeaning;
+
+  /// No description provided for @fallModeSpelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning → spelling'**
+  String get fallModeSpelling;
+
+  /// No description provided for @fallModeMeaningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the meaning of the falling word. For meanings split by commas, one is enough'**
+  String get fallModeMeaningHint;
+
+  /// No description provided for @fallModeSpellingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the word for the falling meaning. Case is ignored'**
+  String get fallModeSpellingHint;
+
+  /// No description provided for @fallInputMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the meaning'**
+  String get fallInputMeaning;
+
+  /// No description provided for @fallInputSpelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the word'**
+  String get fallInputSpelling;
+
+  /// No description provided for @fallResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Falling words results'**
+  String get fallResultTitle;
+
+  /// No description provided for @fallDestroyed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} destroyed'**
+  String fallDestroyed(int count);
+
+  /// No description provided for @fallMissedWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed words'**
+  String get fallMissedWords;
+
   /// No description provided for @learnComingSoon.
   ///
   /// In en, this message translates to:
