@@ -441,3 +441,8 @@
 
 ## 번역 기록 "전체 삭제" 잘림 수정 (FL-13, #111)
 - 원인: AppHeader 양옆 칸이 56px 고정이라 글자 버튼("전체 삭제")이 말줄임으로 잘렸다. 양옆 동작을 내용 너비로 자라게 하고 제목은 가운데를 유지하도록 Stack으로 바꿨다. 헤더 위젯 테스트 추가. 기기 확인 전.
+
+## AI 번역 설정: 연령 확인 · 말투 · 용어집 (FL-09 · FL-11, #118)
+- Notion 명세 확인 후 구현(설계 D-049). Pigeon: `AiTone`, `GlossaryEntry`, `AppSettings.ageConfirmed/aiTone/glossary`, `setAgeConfirmed/setAiTone/setGlossary`. 네이티브: DataStore 키 3개, 연령 확인 전 Gemini 차단(설정 읽기 · setEngine · 서비스), 프롬프트에 말투 · 용어집, 캐시 키에 옵션. Flutter: `AiOptionsViewModel` · 유스케이스 3개 · AI 번역 설정 화면(연령 스위치 → 전송 고지 → 키 → 말투 · 용어집), 엔진 목록에 "만 18세 확인 필요" 안내. 문구(ko/en) · 플로팅 버튼 엔진 메뉴 문구 갱신.
+- 확인: `flutter analyze` 0, `flutter test` 통과(ViewModel · 저장소 매퍼 · 엔진 선택 규칙), 네이티브 단위 테스트(용어집 정리 · 저장 형식 · 프롬프트 · 캐시 키) 통과, `flutter build apk --debug` 성공. 화면 스크린샷 2장(11 · 12) 추가. 기기 확인 전.
+- 새 의존성 없음.

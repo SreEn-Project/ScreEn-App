@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/app/router.dart';
+import 'package:translation_poc_app/features/settings/domain/entities/translator_settings.dart';
 import 'package:translation_poc_app/features/service/domain/entities/service_status.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
 import 'package:translation_poc_app/l10n/app_localizations.dart';
@@ -52,9 +53,11 @@ Widget _route(
   String location, {
   ThemeMode mode = ThemeMode.light,
   ServiceStatus service = ServiceStatus.stopped,
+  FakeSettingsRepository? settings,
 }) => ProviderScope(
   overrides: fakeNativeOverrides(
     service: service,
+    settings: settings,
     permissionsGranted: location != AppRoutes.permission,
   ),
   child: MaterialApp.router(
@@ -152,6 +155,32 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(_route(AppRoutes.about));
     await _shoot(tester, '10_about');
+
+    // AI 번역 설정 (FL-09 · FL-11): 연령 확인 전 / 후
+    await _setSize(tester, const Size(412, 1000));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(_route(AppRoutes.aiSetup));
+    await _shoot(tester, '11_ai_setup_age');
+
+    await _setSize(tester, const Size(412, 1700));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      _route(
+        AppRoutes.aiSetup,
+        settings: FakeSettingsRepository(
+          const TranslatorSettings(
+            onboardingCompleted: true,
+            ageConfirmed: true,
+            aiTone: AiTone.formal,
+            glossary: [
+              GlossaryEntry(source: 'Mana', target: '마나'),
+              GlossaryEntry(source: 'Quest', target: '퀘스트'),
+            ],
+          ),
+        ),
+      ),
+    );
+    await _shoot(tester, '12_ai_setup_options');
 
     debugDisableShadows = true;
   });

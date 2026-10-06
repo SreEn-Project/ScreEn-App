@@ -704,6 +704,136 @@ final class ResetFixedRegionProvider
 
 String _$resetFixedRegionHash() => r'760edf4187d76541bb648465dd3763e5d5f28992';
 
+@ProviderFor(changeAgeConfirmed)
+final changeAgeConfirmedProvider = ChangeAgeConfirmedProvider._();
+
+final class ChangeAgeConfirmedProvider
+    extends
+        $FunctionalProvider<
+          ChangeAgeConfirmed,
+          ChangeAgeConfirmed,
+          ChangeAgeConfirmed
+        >
+    with $Provider<ChangeAgeConfirmed> {
+  ChangeAgeConfirmedProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeAgeConfirmedProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeAgeConfirmedHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeAgeConfirmed> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeAgeConfirmed create(Ref ref) {
+    return changeAgeConfirmed(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeAgeConfirmed value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeAgeConfirmed>(value),
+    );
+  }
+}
+
+String _$changeAgeConfirmedHash() =>
+    r'828720be31184a24deaaa3a3655513feafcd7244';
+
+@ProviderFor(changeAiTone)
+final changeAiToneProvider = ChangeAiToneProvider._();
+
+final class ChangeAiToneProvider
+    extends $FunctionalProvider<ChangeAiTone, ChangeAiTone, ChangeAiTone>
+    with $Provider<ChangeAiTone> {
+  ChangeAiToneProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeAiToneProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeAiToneHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeAiTone> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChangeAiTone create(Ref ref) {
+    return changeAiTone(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeAiTone value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeAiTone>(value),
+    );
+  }
+}
+
+String _$changeAiToneHash() => r'234e610631216cba0623731038734bb1976699bc';
+
+@ProviderFor(changeGlossary)
+final changeGlossaryProvider = ChangeGlossaryProvider._();
+
+final class ChangeGlossaryProvider
+    extends $FunctionalProvider<ChangeGlossary, ChangeGlossary, ChangeGlossary>
+    with $Provider<ChangeGlossary> {
+  ChangeGlossaryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeGlossaryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeGlossaryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeGlossary> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChangeGlossary create(Ref ref) {
+    return changeGlossary(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeGlossary value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeGlossary>(value),
+    );
+  }
+}
+
+String _$changeGlossaryHash() => r'44cef35e1ed96eb3dc9315d6cae6f15179ab6626';
+
 @ProviderFor(completeOnboarding)
 final completeOnboardingProvider = CompleteOnboardingProvider._();
 

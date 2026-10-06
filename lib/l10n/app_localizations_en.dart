@@ -298,6 +298,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get engineNeedsKey => 'Add an API key to use this';
 
   @override
+  String get engineNeedsAge =>
+      'Confirm you are 18 or older in AI translation setup';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -330,7 +334,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apiKeyIntro =>
-      'Get your own key from Google AI Studio and paste it here. It is encrypted and stored only on this device. Gemini API terms require you to be 18 or older. Translated text is sent to Google; if anything fails, ML Kit takes over.';
+      'Get your own key from Google AI Studio and paste it here. It is encrypted and stored only on this device. Translated text is sent to Google; if anything fails, ML Kit takes over.';
 
   @override
   String get apiKeySave => 'Save key';
@@ -360,6 +364,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apiKeyGet => 'Get a key from Google AI Studio';
+
+  @override
+  String get aiAgeTitle => 'I am 18 or older';
+
+  @override
+  String get aiAgeDetail =>
+      'Under the Gemini API terms, AI translation is only for people 18 or older. Confirm to turn it on.';
+
+  @override
+  String get aiNoticeTitle => 'About data sent';
+
+  @override
+  String get aiNoticeBody =>
+      'When AI translation is on, the text read from your screen is sent to the AI provider you chose (Google Gemini). On the free tier, Google may use it to improve and review its services. Don\'t translate screens that show passwords or personal information.';
+
+  @override
+  String get aiOptionsTitle => 'Translation options';
+
+  @override
+  String get aiToneTitle => 'Tone';
+
+  @override
+  String get aiToneHint =>
+      'Applies to AI translation only. Works best when the target language has formal and casual speech.';
+
+  @override
+  String get aiToneStandard => 'Default';
+
+  @override
+  String get aiToneFormal => 'Formal';
+
+  @override
+  String get aiToneInformal => 'Casual';
+
+  @override
+  String get aiGlossaryTitle => 'Glossary';
+
+  @override
+  String get aiGlossaryDetail =>
+      'Always translates a term the way you set it. Only terms found in the text are sent to the AI.';
+
+  @override
+  String get aiGlossarySourceHint => 'Original (e.g. Mana)';
+
+  @override
+  String get aiGlossaryTargetHint => 'Translation (e.g. 마나)';
+
+  @override
+  String get aiGlossaryAdd => 'Add term';
+
+  @override
+  String get aiGlossaryRemove => 'Delete';
+
+  @override
+  String get aiGlossaryEmpty => 'No terms yet';
+
+  @override
+  String aiGlossaryFull(int max) {
+    return 'You can add up to $max terms';
+  }
 
   @override
   String get settingsSectionCapture => 'Capture';

@@ -66,6 +66,17 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _dataSource.setOnboardingCompleted(completed);
 
   @override
+  Future<void> setAgeConfirmed(bool confirmed) =>
+      _dataSource.setAgeConfirmed(confirmed);
+
+  @override
+  Future<void> setAiTone(AiTone tone) => _dataSource.setAiTone(tone.toPigeon());
+
+  @override
+  Future<void> setGlossary(List<GlossaryEntry> entries) =>
+      _dataSource.setGlossary([for (final e in entries) e.toPigeon()]);
+
+  @override
   Future<String?> getApiKey() => _dataSource.getApiKey();
 
   @override

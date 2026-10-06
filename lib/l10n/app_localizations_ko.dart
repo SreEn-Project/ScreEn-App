@@ -290,6 +290,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get engineNeedsKey => 'API 키를 등록해야 쓸 수 있어요';
 
   @override
+  String get engineNeedsAge => 'AI 번역 설정에서 만 18세 확인이 필요해요';
+
+  @override
   String get settingsTitle => '설정';
 
   @override
@@ -321,7 +324,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get apiKeyIntro =>
-      'Google AI Studio에서 본인 키를 발급받아 여기에 붙여 넣으세요. 키는 암호화되어 이 기기에만 저장돼요. Gemini API 약관상 만 18세 이상만 쓸 수 있어요. 번역할 글자는 구글로 보내지고, 실패하면 ML Kit으로 대신 번역해요.';
+      'Google AI Studio에서 본인 키를 발급받아 여기에 붙여 넣으세요. 키는 암호화되어 이 기기에만 저장돼요. 번역할 글자는 구글로 보내지고, 실패하면 ML Kit으로 대신 번역해요.';
 
   @override
   String get apiKeySave => '키 저장';
@@ -351,6 +354,65 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get apiKeyGet => 'Google AI Studio에서 키 발급받기';
+
+  @override
+  String get aiAgeTitle => '만 18세 이상이에요';
+
+  @override
+  String get aiAgeDetail =>
+      'Gemini API 약관상 만 18세 미만은 AI 번역을 쓸 수 없어요. 확인해야 AI 번역을 켤 수 있어요.';
+
+  @override
+  String get aiNoticeTitle => '데이터 전송 안내';
+
+  @override
+  String get aiNoticeBody =>
+      'AI 번역을 켜면 화면에서 읽은 글자가 내가 고른 AI 제공자(Google Gemini)로 전송돼요. 무료 등급에서는 구글이 이 글을 서비스 개선과 검토에 쓸 수 있어요. 비밀번호나 개인정보가 보이는 화면은 번역하지 마세요.';
+
+  @override
+  String get aiOptionsTitle => '번역 옵션';
+
+  @override
+  String get aiToneTitle => '말투';
+
+  @override
+  String get aiToneHint => 'AI 번역에만 적용돼요. 대상 언어에 높임말 구분이 있을 때 효과가 커요.';
+
+  @override
+  String get aiToneStandard => '기본';
+
+  @override
+  String get aiToneFormal => '존댓말';
+
+  @override
+  String get aiToneInformal => '반말';
+
+  @override
+  String get aiGlossaryTitle => '용어집';
+
+  @override
+  String get aiGlossaryDetail =>
+      '원문 표현을 항상 정한 번역어로 옮겨요. 번역할 글에 나온 항목만 AI로 보내요.';
+
+  @override
+  String get aiGlossarySourceHint => '원문 (예: Mana)';
+
+  @override
+  String get aiGlossaryTargetHint => '번역어 (예: 마나)';
+
+  @override
+  String get aiGlossaryAdd => '용어 추가';
+
+  @override
+  String get aiGlossaryRemove => '삭제';
+
+  @override
+  String get aiGlossaryEmpty => '아직 등록한 용어가 없어요';
+
+  @override
+  String aiGlossaryFull(int max) {
+    return '용어는 최대 $max개까지 등록할 수 있어요';
+  }
 
   @override
   String get settingsSectionCapture => '캡처';

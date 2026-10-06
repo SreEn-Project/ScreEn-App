@@ -179,6 +179,53 @@ final class CompleteOnboarding implements NoParamsUseCase<void> {
   Future<void> call() => _repository.setOnboardingCompleted(true);
 }
 
+/// 만 18세 이상 확인 저장 · 해제 (FL-09).
+final class ChangeAgeConfirmed implements UseCase<void, bool> {
+  const ChangeAgeConfirmed(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(bool confirmed) => _repository.setAgeConfirmed(confirmed);
+}
+
+/// AI 번역 말투 변경 (FL-11).
+final class ChangeAiTone implements UseCase<void, AiTone> {
+  const ChangeAiTone(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(AiTone tone) => _repository.setAiTone(tone);
+}
+
+/// AI 번역 용어집 변경 (FL-11). 앞뒤 공백을 걷고, 빈 칸 · 같은 원문(대소문자 무시) 중복을 빼고,
+/// 길이 · 개수를 제한한 뒤 저장한다. 앞의 항목이 이긴다.
+final class ChangeGlossary implements UseCase<void, List<GlossaryEntry>> {
+  const ChangeGlossary(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(List<GlossaryEntry> entries) {
+    final seen = <String>{};
+    final cleaned = <GlossaryEntry>[];
+    for (final entry in entries) {
+      final source = _limit(entry.source.trim());
+      final target = _limit(entry.target.trim());
+      if (source.isEmpty || target.isEmpty) continue;
+      if (!seen.add(source.toLowerCase())) continue;
+      cleaned.add(GlossaryEntry(source: source, target: target));
+      if (cleaned.length == maxGlossaryEntries) break;
+    }
+    return _repository.setGlossary(cleaned);
+  }
+
+  static String _limit(String text) => text.length > maxGlossaryTextLength
+      ? text.substring(0, maxGlossaryTextLength).trim()
+      : text;
+}
+
 /// 저장된 AI 번역 API 키 (NA-13). 없으면 null.
 final class GetApiKey implements NoParamsUseCase<String?> {
   const GetApiKey(this._repository);

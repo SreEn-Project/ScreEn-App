@@ -5,6 +5,31 @@ part 'translator_settings.freezed.dart';
 /// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini = 내 API 키 (NA-13).
 enum EngineType { mlKit, gemini }
 
+/// AI 번역 말투 (FL-11). standard = 지정하지 않음 (AI가 원문에 맞춘다).
+enum AiTone { standard, formal, informal }
+
+/// AI 번역 용어집 한 줄 (FL-11): [source] 표현은 항상 [target]으로 옮긴다.
+class GlossaryEntry {
+  const GlossaryEntry({required this.source, required this.target});
+
+  final String source;
+  final String target;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GlossaryEntry &&
+      other.source == source &&
+      other.target == target;
+
+  @override
+  int get hashCode => Object.hash(source, target);
+}
+
+/// 용어집은 최대 [maxGlossaryEntries]개, 원문 · 번역어 각각 [maxGlossaryTextLength]자까지
+/// (네이티브 `Settings.MAX_GLOSSARY_*`와 같게).
+const maxGlossaryEntries = 50;
+const maxGlossaryTextLength = 60;
+
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
 
@@ -79,5 +104,14 @@ abstract class TranslatorSettings with _$TranslatorSettings {
 
     /// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용.
     @Default(false) bool hasFixedRegion,
+
+    /// 만 18세 이상 확인 (FL-09). 확인하기 전에는 AI 엔진을 고를 수 없다.
+    @Default(false) bool ageConfirmed,
+
+    /// AI 번역 말투 (FL-11).
+    @Default(AiTone.standard) AiTone aiTone,
+
+    /// AI 번역 용어집 (FL-11).
+    @Default(<GlossaryEntry>[]) List<GlossaryEntry> glossary,
   }) = _TranslatorSettings;
 }

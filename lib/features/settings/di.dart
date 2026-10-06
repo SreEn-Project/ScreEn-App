@@ -75,6 +75,18 @@ ResetFixedRegion resetFixedRegion(Ref ref) =>
     ResetFixedRegion(ref.watch(settingsRepositoryProvider));
 
 @riverpod
+ChangeAgeConfirmed changeAgeConfirmed(Ref ref) =>
+    ChangeAgeConfirmed(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ChangeAiTone changeAiTone(Ref ref) =>
+    ChangeAiTone(ref.watch(settingsRepositoryProvider));
+
+@riverpod
+ChangeGlossary changeGlossary(Ref ref) =>
+    ChangeGlossary(ref.watch(settingsRepositoryProvider));
+
+@riverpod
 CompleteOnboarding completeOnboarding(Ref ref) =>
     CompleteOnboarding(ref.watch(settingsRepositoryProvider));
 

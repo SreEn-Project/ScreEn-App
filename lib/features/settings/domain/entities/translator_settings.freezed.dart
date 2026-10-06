@@ -24,7 +24,10 @@ mixin _$TranslatorSettings {
  bool get wifiOnlyModelDownload;/// 플로팅 버튼 원 지름 (dp, FL-07).
  int get buttonSizeDp;/// 플로팅 버튼 불투명도 (%, FL-07).
  int get buttonOpacityPercent;/// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용.
- bool get hasFixedRegion;
+ bool get hasFixedRegion;/// 만 18세 이상 확인 (FL-09). 확인하기 전에는 AI 엔진을 고를 수 없다.
+ bool get ageConfirmed;/// AI 번역 말투 (FL-11).
+ AiTone get aiTone;/// AI 번역 용어집 (FL-11).
+ List<GlossaryEntry> get glossary;
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -36,20 +39,20 @@ $TranslatorSettingsCopyWith<TranslatorSettings> get copyWith => _$TranslatorSett
 @override
 bool operator ==(Object other) {
   final _this = this as TranslatorSettings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TranslatorSettings&&(identical(other.targetLanguage, _this.targetLanguage) || other.targetLanguage == _this.targetLanguage)&&(identical(other.engine, _this.engine) || other.engine == _this.engine)&&(identical(other.captureMode, _this.captureMode) || other.captureMode == _this.captureMode)&&(identical(other.displayMode, _this.displayMode) || other.displayMode == _this.displayMode)&&(identical(other.onboardingCompleted, _this.onboardingCompleted) || other.onboardingCompleted == _this.onboardingCompleted)&&const DeepCollectionEquality().equals(other.quickLanguages, _this.quickLanguages)&&(identical(other.autoTranslate, _this.autoTranslate) || other.autoTranslate == _this.autoTranslate)&&(identical(other.autoShowDelayMs, _this.autoShowDelayMs) || other.autoShowDelayMs == _this.autoShowDelayMs)&&(identical(other.hideAfterInteractionMs, _this.hideAfterInteractionMs) || other.hideAfterInteractionMs == _this.hideAfterInteractionMs)&&(identical(other.wifiOnlyModelDownload, _this.wifiOnlyModelDownload) || other.wifiOnlyModelDownload == _this.wifiOnlyModelDownload)&&(identical(other.buttonSizeDp, _this.buttonSizeDp) || other.buttonSizeDp == _this.buttonSizeDp)&&(identical(other.buttonOpacityPercent, _this.buttonOpacityPercent) || other.buttonOpacityPercent == _this.buttonOpacityPercent)&&(identical(other.hasFixedRegion, _this.hasFixedRegion) || other.hasFixedRegion == _this.hasFixedRegion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TranslatorSettings&&(identical(other.targetLanguage, _this.targetLanguage) || other.targetLanguage == _this.targetLanguage)&&(identical(other.engine, _this.engine) || other.engine == _this.engine)&&(identical(other.captureMode, _this.captureMode) || other.captureMode == _this.captureMode)&&(identical(other.displayMode, _this.displayMode) || other.displayMode == _this.displayMode)&&(identical(other.onboardingCompleted, _this.onboardingCompleted) || other.onboardingCompleted == _this.onboardingCompleted)&&const DeepCollectionEquality().equals(other.quickLanguages, _this.quickLanguages)&&(identical(other.autoTranslate, _this.autoTranslate) || other.autoTranslate == _this.autoTranslate)&&(identical(other.autoShowDelayMs, _this.autoShowDelayMs) || other.autoShowDelayMs == _this.autoShowDelayMs)&&(identical(other.hideAfterInteractionMs, _this.hideAfterInteractionMs) || other.hideAfterInteractionMs == _this.hideAfterInteractionMs)&&(identical(other.wifiOnlyModelDownload, _this.wifiOnlyModelDownload) || other.wifiOnlyModelDownload == _this.wifiOnlyModelDownload)&&(identical(other.buttonSizeDp, _this.buttonSizeDp) || other.buttonSizeDp == _this.buttonSizeDp)&&(identical(other.buttonOpacityPercent, _this.buttonOpacityPercent) || other.buttonOpacityPercent == _this.buttonOpacityPercent)&&(identical(other.hasFixedRegion, _this.hasFixedRegion) || other.hasFixedRegion == _this.hasFixedRegion)&&(identical(other.ageConfirmed, _this.ageConfirmed) || other.ageConfirmed == _this.ageConfirmed)&&(identical(other.aiTone, _this.aiTone) || other.aiTone == _this.aiTone)&&const DeepCollectionEquality().equals(other.glossary, _this.glossary));
 }
 
 
 @override
 int get hashCode {
   final _this = this as TranslatorSettings;
-  return Object.hash(runtimeType,_this.targetLanguage,_this.engine,_this.captureMode,_this.displayMode,_this.onboardingCompleted,const DeepCollectionEquality().hash(_this.quickLanguages),_this.autoTranslate,_this.autoShowDelayMs,_this.hideAfterInteractionMs,_this.wifiOnlyModelDownload,_this.buttonSizeDp,_this.buttonOpacityPercent,_this.hasFixedRegion);
+  return Object.hash(runtimeType,_this.targetLanguage,_this.engine,_this.captureMode,_this.displayMode,_this.onboardingCompleted,const DeepCollectionEquality().hash(_this.quickLanguages),_this.autoTranslate,_this.autoShowDelayMs,_this.hideAfterInteractionMs,_this.wifiOnlyModelDownload,_this.buttonSizeDp,_this.buttonOpacityPercent,_this.hasFixedRegion,_this.ageConfirmed,_this.aiTone,const DeepCollectionEquality().hash(_this.glossary));
 }
 
 @override
 String toString() {
   final _this = this as TranslatorSettings;
-  return 'TranslatorSettings(targetLanguage: ${_this.targetLanguage}, engine: ${_this.engine}, captureMode: ${_this.captureMode}, displayMode: ${_this.displayMode}, onboardingCompleted: ${_this.onboardingCompleted}, quickLanguages: ${_this.quickLanguages}, autoTranslate: ${_this.autoTranslate}, autoShowDelayMs: ${_this.autoShowDelayMs}, hideAfterInteractionMs: ${_this.hideAfterInteractionMs}, wifiOnlyModelDownload: ${_this.wifiOnlyModelDownload}, buttonSizeDp: ${_this.buttonSizeDp}, buttonOpacityPercent: ${_this.buttonOpacityPercent}, hasFixedRegion: ${_this.hasFixedRegion})';
+  return 'TranslatorSettings(targetLanguage: ${_this.targetLanguage}, engine: ${_this.engine}, captureMode: ${_this.captureMode}, displayMode: ${_this.displayMode}, onboardingCompleted: ${_this.onboardingCompleted}, quickLanguages: ${_this.quickLanguages}, autoTranslate: ${_this.autoTranslate}, autoShowDelayMs: ${_this.autoShowDelayMs}, hideAfterInteractionMs: ${_this.hideAfterInteractionMs}, wifiOnlyModelDownload: ${_this.wifiOnlyModelDownload}, buttonSizeDp: ${_this.buttonSizeDp}, buttonOpacityPercent: ${_this.buttonOpacityPercent}, hasFixedRegion: ${_this.hasFixedRegion}, ageConfirmed: ${_this.ageConfirmed}, aiTone: ${_this.aiTone}, glossary: ${_this.glossary})';
 }
 
 
@@ -60,7 +63,7 @@ abstract mixin class $TranslatorSettingsCopyWith<$Res>  {
   factory $TranslatorSettingsCopyWith(TranslatorSettings value, $Res Function(TranslatorSettings) _then) = _$TranslatorSettingsCopyWithImpl;
 @useResult
 $Res call({
- String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted, List<String> quickLanguages, bool autoTranslate, int autoShowDelayMs, int hideAfterInteractionMs, bool wifiOnlyModelDownload, int buttonSizeDp, int buttonOpacityPercent, bool hasFixedRegion
+ String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted, List<String> quickLanguages, bool autoTranslate, int autoShowDelayMs, int hideAfterInteractionMs, bool wifiOnlyModelDownload, int buttonSizeDp, int buttonOpacityPercent, bool hasFixedRegion, bool ageConfirmed, AiTone aiTone, List<GlossaryEntry> glossary
 });
 
 
@@ -77,7 +80,7 @@ class _$TranslatorSettingsCopyWithImpl<$Res>
 
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,Object? quickLanguages = null,Object? autoTranslate = null,Object? autoShowDelayMs = null,Object? hideAfterInteractionMs = null,Object? wifiOnlyModelDownload = null,Object? buttonSizeDp = null,Object? buttonOpacityPercent = null,Object? hasFixedRegion = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,Object? quickLanguages = null,Object? autoTranslate = null,Object? autoShowDelayMs = null,Object? hideAfterInteractionMs = null,Object? wifiOnlyModelDownload = null,Object? buttonSizeDp = null,Object? buttonOpacityPercent = null,Object? hasFixedRegion = null,Object? ageConfirmed = null,Object? aiTone = null,Object? glossary = null,}) {
   return _then(TranslatorSettings(
 targetLanguage: null == targetLanguage ? _self.targetLanguage : targetLanguage // ignore: cast_nullable_to_non_nullable
 as String,engine: null == engine ? _self.engine : engine // ignore: cast_nullable_to_non_nullable
@@ -92,7 +95,10 @@ as int,wifiOnlyModelDownload: null == wifiOnlyModelDownload ? _self.wifiOnlyMode
 as bool,buttonSizeDp: null == buttonSizeDp ? _self.buttonSizeDp : buttonSizeDp // ignore: cast_nullable_to_non_nullable
 as int,buttonOpacityPercent: null == buttonOpacityPercent ? _self.buttonOpacityPercent : buttonOpacityPercent // ignore: cast_nullable_to_non_nullable
 as int,hasFixedRegion: null == hasFixedRegion ? _self.hasFixedRegion : hasFixedRegion // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,ageConfirmed: null == ageConfirmed ? _self.ageConfirmed : ageConfirmed // ignore: cast_nullable_to_non_nullable
+as bool,aiTone: null == aiTone ? _self.aiTone : aiTone // ignore: cast_nullable_to_non_nullable
+as AiTone,glossary: null == glossary ? _self.glossary : glossary // ignore: cast_nullable_to_non_nullable
+as List<GlossaryEntry>,
   ));
 }
 
@@ -177,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages,  bool autoTranslate,  int autoShowDelayMs,  int hideAfterInteractionMs,  bool wifiOnlyModelDownload,  int buttonSizeDp,  int buttonOpacityPercent,  bool hasFixedRegion)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages,  bool autoTranslate,  int autoShowDelayMs,  int hideAfterInteractionMs,  bool wifiOnlyModelDownload,  int buttonSizeDp,  int buttonOpacityPercent,  bool hasFixedRegion,  bool ageConfirmed,  AiTone aiTone,  List<GlossaryEntry> glossary)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TranslatorSettings() when $default != null:
-return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages,_that.autoTranslate,_that.autoShowDelayMs,_that.hideAfterInteractionMs,_that.wifiOnlyModelDownload,_that.buttonSizeDp,_that.buttonOpacityPercent,_that.hasFixedRegion);case _:
+return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages,_that.autoTranslate,_that.autoShowDelayMs,_that.hideAfterInteractionMs,_that.wifiOnlyModelDownload,_that.buttonSizeDp,_that.buttonOpacityPercent,_that.hasFixedRegion,_that.ageConfirmed,_that.aiTone,_that.glossary);case _:
   return orElse();
 
 }
@@ -198,10 +204,10 @@ return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages,  bool autoTranslate,  int autoShowDelayMs,  int hideAfterInteractionMs,  bool wifiOnlyModelDownload,  int buttonSizeDp,  int buttonOpacityPercent,  bool hasFixedRegion)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages,  bool autoTranslate,  int autoShowDelayMs,  int hideAfterInteractionMs,  bool wifiOnlyModelDownload,  int buttonSizeDp,  int buttonOpacityPercent,  bool hasFixedRegion,  bool ageConfirmed,  AiTone aiTone,  List<GlossaryEntry> glossary)  $default,) {final _that = this;
 switch (_that) {
 case _TranslatorSettings():
-return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages,_that.autoTranslate,_that.autoShowDelayMs,_that.hideAfterInteractionMs,_that.wifiOnlyModelDownload,_that.buttonSizeDp,_that.buttonOpacityPercent,_that.hasFixedRegion);case _:
+return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages,_that.autoTranslate,_that.autoShowDelayMs,_that.hideAfterInteractionMs,_that.wifiOnlyModelDownload,_that.buttonSizeDp,_that.buttonOpacityPercent,_that.hasFixedRegion,_that.ageConfirmed,_that.aiTone,_that.glossary);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -218,10 +224,10 @@ return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages,  bool autoTranslate,  int autoShowDelayMs,  int hideAfterInteractionMs,  bool wifiOnlyModelDownload,  int buttonSizeDp,  int buttonOpacityPercent,  bool hasFixedRegion)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String targetLanguage,  EngineType engine,  CaptureMode captureMode,  DisplayMode displayMode,  bool onboardingCompleted,  List<String> quickLanguages,  bool autoTranslate,  int autoShowDelayMs,  int hideAfterInteractionMs,  bool wifiOnlyModelDownload,  int buttonSizeDp,  int buttonOpacityPercent,  bool hasFixedRegion,  bool ageConfirmed,  AiTone aiTone,  List<GlossaryEntry> glossary)?  $default,) {final _that = this;
 switch (_that) {
 case _TranslatorSettings() when $default != null:
-return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages,_that.autoTranslate,_that.autoShowDelayMs,_that.hideAfterInteractionMs,_that.wifiOnlyModelDownload,_that.buttonSizeDp,_that.buttonOpacityPercent,_that.hasFixedRegion);case _:
+return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displayMode,_that.onboardingCompleted,_that.quickLanguages,_that.autoTranslate,_that.autoShowDelayMs,_that.hideAfterInteractionMs,_that.wifiOnlyModelDownload,_that.buttonSizeDp,_that.buttonOpacityPercent,_that.hasFixedRegion,_that.ageConfirmed,_that.aiTone,_that.glossary);case _:
   return null;
 
 }
@@ -233,7 +239,7 @@ return $default(_that.targetLanguage,_that.engine,_that.captureMode,_that.displa
 
 
 class _TranslatorSettings implements TranslatorSettings {
-  const _TranslatorSettings({this.targetLanguage = 'ko', this.engine = EngineType.mlKit, this.captureMode = CaptureMode.fullScreen, this.displayMode = DisplayMode.list, this.onboardingCompleted = false,  List<String> quickLanguages = defaultQuickLanguages, this.autoTranslate = false, this.autoShowDelayMs = defaultAutoShowDelayMs, this.hideAfterInteractionMs = defaultHideAfterInteractionMs, this.wifiOnlyModelDownload = true, this.buttonSizeDp = defaultButtonSizeDp, this.buttonOpacityPercent = defaultButtonOpacityPercent, this.hasFixedRegion = false}): _quickLanguages = quickLanguages;
+  const _TranslatorSettings({this.targetLanguage = 'ko', this.engine = EngineType.mlKit, this.captureMode = CaptureMode.fullScreen, this.displayMode = DisplayMode.list, this.onboardingCompleted = false,  List<String> quickLanguages = defaultQuickLanguages, this.autoTranslate = false, this.autoShowDelayMs = defaultAutoShowDelayMs, this.hideAfterInteractionMs = defaultHideAfterInteractionMs, this.wifiOnlyModelDownload = true, this.buttonSizeDp = defaultButtonSizeDp, this.buttonOpacityPercent = defaultButtonOpacityPercent, this.hasFixedRegion = false, this.ageConfirmed = false, this.aiTone = AiTone.standard,  List<GlossaryEntry> glossary = const <GlossaryEntry>[]}): _quickLanguages = quickLanguages,_glossary = glossary;
   
 
 /// BCP-47 언어 코드. 예: "ko", "en".
@@ -265,6 +271,19 @@ class _TranslatorSettings implements TranslatorSettings {
 @override@JsonKey() final  int buttonOpacityPercent;
 /// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용.
 @override@JsonKey() final  bool hasFixedRegion;
+/// 만 18세 이상 확인 (FL-09). 확인하기 전에는 AI 엔진을 고를 수 없다.
+@override@JsonKey() final  bool ageConfirmed;
+/// AI 번역 말투 (FL-11).
+@override@JsonKey() final  AiTone aiTone;
+/// AI 번역 용어집 (FL-11).
+ final  List<GlossaryEntry> _glossary;
+/// AI 번역 용어집 (FL-11).
+@override@JsonKey() List<GlossaryEntry> get glossary {
+  if (_glossary is EqualUnmodifiableListView) return _glossary;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_glossary);
+}
+
 
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -276,18 +295,18 @@ _$TranslatorSettingsCopyWith<_TranslatorSettings> get copyWith => __$TranslatorS
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TranslatorSettings&&(identical(other.targetLanguage, targetLanguage) || other.targetLanguage == targetLanguage)&&(identical(other.engine, engine) || other.engine == engine)&&(identical(other.captureMode, captureMode) || other.captureMode == captureMode)&&(identical(other.displayMode, displayMode) || other.displayMode == displayMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&const DeepCollectionEquality().equals(other.quickLanguages, _quickLanguages)&&(identical(other.autoTranslate, autoTranslate) || other.autoTranslate == autoTranslate)&&(identical(other.autoShowDelayMs, autoShowDelayMs) || other.autoShowDelayMs == autoShowDelayMs)&&(identical(other.hideAfterInteractionMs, hideAfterInteractionMs) || other.hideAfterInteractionMs == hideAfterInteractionMs)&&(identical(other.wifiOnlyModelDownload, wifiOnlyModelDownload) || other.wifiOnlyModelDownload == wifiOnlyModelDownload)&&(identical(other.buttonSizeDp, buttonSizeDp) || other.buttonSizeDp == buttonSizeDp)&&(identical(other.buttonOpacityPercent, buttonOpacityPercent) || other.buttonOpacityPercent == buttonOpacityPercent)&&(identical(other.hasFixedRegion, hasFixedRegion) || other.hasFixedRegion == hasFixedRegion));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TranslatorSettings&&(identical(other.targetLanguage, targetLanguage) || other.targetLanguage == targetLanguage)&&(identical(other.engine, engine) || other.engine == engine)&&(identical(other.captureMode, captureMode) || other.captureMode == captureMode)&&(identical(other.displayMode, displayMode) || other.displayMode == displayMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&const DeepCollectionEquality().equals(other.quickLanguages, _quickLanguages)&&(identical(other.autoTranslate, autoTranslate) || other.autoTranslate == autoTranslate)&&(identical(other.autoShowDelayMs, autoShowDelayMs) || other.autoShowDelayMs == autoShowDelayMs)&&(identical(other.hideAfterInteractionMs, hideAfterInteractionMs) || other.hideAfterInteractionMs == hideAfterInteractionMs)&&(identical(other.wifiOnlyModelDownload, wifiOnlyModelDownload) || other.wifiOnlyModelDownload == wifiOnlyModelDownload)&&(identical(other.buttonSizeDp, buttonSizeDp) || other.buttonSizeDp == buttonSizeDp)&&(identical(other.buttonOpacityPercent, buttonOpacityPercent) || other.buttonOpacityPercent == buttonOpacityPercent)&&(identical(other.hasFixedRegion, hasFixedRegion) || other.hasFixedRegion == hasFixedRegion)&&(identical(other.ageConfirmed, ageConfirmed) || other.ageConfirmed == ageConfirmed)&&(identical(other.aiTone, aiTone) || other.aiTone == aiTone)&&const DeepCollectionEquality().equals(other.glossary, _glossary));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,targetLanguage,engine,captureMode,displayMode,onboardingCompleted,const DeepCollectionEquality().hash(_quickLanguages),autoTranslate,autoShowDelayMs,hideAfterInteractionMs,wifiOnlyModelDownload,buttonSizeDp,buttonOpacityPercent,hasFixedRegion);
+    return Object.hash(runtimeType,targetLanguage,engine,captureMode,displayMode,onboardingCompleted,const DeepCollectionEquality().hash(_quickLanguages),autoTranslate,autoShowDelayMs,hideAfterInteractionMs,wifiOnlyModelDownload,buttonSizeDp,buttonOpacityPercent,hasFixedRegion,ageConfirmed,aiTone,const DeepCollectionEquality().hash(_glossary));
 }
 
 @override
 String toString() {
-    return 'TranslatorSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion)';
+    return 'TranslatorSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion, ageConfirmed: $ageConfirmed, aiTone: $aiTone, glossary: $glossary)';
 }
 
 
@@ -298,7 +317,7 @@ abstract mixin class _$TranslatorSettingsCopyWith<$Res> implements $TranslatorSe
   factory _$TranslatorSettingsCopyWith(_TranslatorSettings value, $Res Function(_TranslatorSettings) _then) = __$TranslatorSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted, List<String> quickLanguages, bool autoTranslate, int autoShowDelayMs, int hideAfterInteractionMs, bool wifiOnlyModelDownload, int buttonSizeDp, int buttonOpacityPercent, bool hasFixedRegion
+ String targetLanguage, EngineType engine, CaptureMode captureMode, DisplayMode displayMode, bool onboardingCompleted, List<String> quickLanguages, bool autoTranslate, int autoShowDelayMs, int hideAfterInteractionMs, bool wifiOnlyModelDownload, int buttonSizeDp, int buttonOpacityPercent, bool hasFixedRegion, bool ageConfirmed, AiTone aiTone, List<GlossaryEntry> glossary
 });
 
 
@@ -315,7 +334,7 @@ class __$TranslatorSettingsCopyWithImpl<$Res>
 
 /// Create a copy of TranslatorSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,Object? quickLanguages = null,Object? autoTranslate = null,Object? autoShowDelayMs = null,Object? hideAfterInteractionMs = null,Object? wifiOnlyModelDownload = null,Object? buttonSizeDp = null,Object? buttonOpacityPercent = null,Object? hasFixedRegion = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? targetLanguage = null,Object? engine = null,Object? captureMode = null,Object? displayMode = null,Object? onboardingCompleted = null,Object? quickLanguages = null,Object? autoTranslate = null,Object? autoShowDelayMs = null,Object? hideAfterInteractionMs = null,Object? wifiOnlyModelDownload = null,Object? buttonSizeDp = null,Object? buttonOpacityPercent = null,Object? hasFixedRegion = null,Object? ageConfirmed = null,Object? aiTone = null,Object? glossary = null,}) {
   return _then(_TranslatorSettings(
 targetLanguage: null == targetLanguage ? _self.targetLanguage : targetLanguage // ignore: cast_nullable_to_non_nullable
 as String,engine: null == engine ? _self.engine : engine // ignore: cast_nullable_to_non_nullable
@@ -330,7 +349,10 @@ as int,wifiOnlyModelDownload: null == wifiOnlyModelDownload ? _self.wifiOnlyMode
 as bool,buttonSizeDp: null == buttonSizeDp ? _self.buttonSizeDp : buttonSizeDp // ignore: cast_nullable_to_non_nullable
 as int,buttonOpacityPercent: null == buttonOpacityPercent ? _self.buttonOpacityPercent : buttonOpacityPercent // ignore: cast_nullable_to_non_nullable
 as int,hasFixedRegion: null == hasFixedRegion ? _self.hasFixedRegion : hasFixedRegion // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,ageConfirmed: null == ageConfirmed ? _self.ageConfirmed : ageConfirmed // ignore: cast_nullable_to_non_nullable
+as bool,aiTone: null == aiTone ? _self.aiTone : aiTone // ignore: cast_nullable_to_non_nullable
+as AiTone,glossary: null == glossary ? _self._glossary : glossary // ignore: cast_nullable_to_non_nullable
+as List<GlossaryEntry>,
   ));
 }
 

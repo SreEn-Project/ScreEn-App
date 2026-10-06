@@ -30,5 +30,11 @@ class BlockCache<K : Any, V : Any>(private val capacity: Int = DEFAULT_CAPACITY)
 /** 언어 감지 캐시 키: 감지에 쓰는 글자 + OCR이 추정한 언어 + 대상 언어. */
 data class DecisionKey(val text: String, val ocrLanguage: String, val target: String)
 
-/** 번역 캐시 키: 엔진 + 원문 + 원문 언어 + 대상 언어. 성공한 번역만 넣는다. */
-data class TranslationKey(val engine: EngineId, val text: String, val source: String, val target: String)
+/** 번역 캐시 키: 엔진 + 원문 + 원문 언어 + 대상 언어 + AI 옵션(말투 · 용어집, FL-11). 성공한 번역만 넣는다. */
+data class TranslationKey(
+    val engine: EngineId,
+    val text: String,
+    val source: String,
+    val target: String,
+    val style: AiStyle = AiStyle.NONE,
+)

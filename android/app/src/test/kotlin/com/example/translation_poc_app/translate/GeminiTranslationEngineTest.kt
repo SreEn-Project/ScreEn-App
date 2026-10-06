@@ -1,5 +1,7 @@
 package com.example.translation_poc_app.translate
 
+import com.example.translation_poc_app.data.settings.AiTone
+import com.example.translation_poc_app.data.settings.GlossaryEntry
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -71,5 +73,39 @@ class GeminiTranslationEngineTest {
         val ml = FakeEngine(EngineId.ML_KIT, EngineResult.Err(TranslationError.Network))
         FallbackTranslationEngine(ai, ml).translate(request)
         assertEquals(0, ml.calls)
+    }
+}
+
+class GeminiPromptTest {
+    private fun prompt(style: AiStyle, text: String = "Open the Quest log") =
+        GeminiTranslationEngine.systemPrompt(TranslationRequest(text, "en", "ko", style), "en")
+
+    @Test
+    fun `옵션이 없으면 기본 지시문만`() {
+        val p = prompt(AiStyle.NONE)
+        assertTrue(!p.contains("speech level"))
+        assertTrue(!p.contains("exactly as given"))
+    }
+
+    @Test
+    fun `말투를 지시문에 넣는다`() {
+        assertTrue(prompt(AiStyle(AiTone.FORMAL)).contains("formal speech level"))
+        assertTrue(prompt(AiStyle(AiTone.INFORMAL)).contains("informal speech level"))
+    }
+
+    @Test
+    fun `용어집은 이 글에 나오는 항목만 대소문자 무시로 넣는다`() {
+        val style = AiStyle(glossary = listOf(GlossaryEntry("quest", "퀘스트"), GlossaryEntry("Mana", "마나")))
+        val p = prompt(style)
+        assertTrue(p.contains("quest => 퀘스트"))
+        assertTrue(!p.contains("Mana"))
+    }
+
+    @Test
+    fun `옵션이 다르면 캐시 키도 다르다`() {
+        val a = TranslationKey(EngineId.GEMINI, "hi", "en", "ko", AiStyle(AiTone.FORMAL))
+        val b = TranslationKey(EngineId.GEMINI, "hi", "en", "ko", AiStyle(AiTone.INFORMAL))
+        assertTrue(a != b)
+        assertEquals(a, TranslationKey(EngineId.GEMINI, "hi", "en", "ko", AiStyle(AiTone.FORMAL)))
     }
 }

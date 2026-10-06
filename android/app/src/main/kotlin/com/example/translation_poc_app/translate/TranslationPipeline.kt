@@ -3,6 +3,7 @@ package com.example.translation_poc_app.translate
 import com.example.translation_poc_app.capture.CaptureResult
 import com.example.translation_poc_app.capture.FrameStats
 import android.graphics.Bitmap
+import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.NormalizedRegion
 import com.example.translation_poc_app.data.settings.PixelRect
 import com.example.translation_poc_app.data.settings.Settings
@@ -169,7 +170,9 @@ class TranslationPipeline(
             )
             val detectMs = lap()
             val engine = engineFor(current)
-            val requests = TranslationAssembler.requests(detected, current.targetLanguage)
+            // 말투 · 용어집은 AI 엔진에만 쓴다 (FL-11). ML Kit에는 넣지 않아 캐시도 나뉘지 않는다.
+            val style = if (current.engine == Engine.GEMINI) AiStyle(current.aiTone, current.glossary) else AiStyle.NONE
+            val requests = TranslationAssembler.requests(detected, current.targetLanguage, style)
             val lineHeight = { block: OcrBlock -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } }
             val bounds = { block: OcrBlock ->
                 block.bounds?.let {
@@ -237,7 +240,7 @@ class TranslationPipeline(
         onHit: () -> Unit,
     ): List<EngineResult<TranslationResult>> = coroutineScope {
         val done = arrayOfNulls<EngineResult<TranslationResult>>(requests.size)
-        val keys = requests.map { TranslationKey(engine.id, it.text, it.source, it.target) }
+        val keys = requests.map { TranslationKey(engine.id, it.text, it.source, it.target, it.style) }
         keys.forEachIndexed { i, key ->
             translations[key]?.let {
                 onHit()
@@ -298,9 +301,15 @@ object TranslationAssembler {
     fun detectionText(block: OcrBlock): String = sourceText(block, "und")
 
     /** 엔진에 넘길 요청. [BlockAction.TRANSLATE] 블록만, 화면 순서대로. 원문 언어는 감지한 값을 넘긴다. */
-    fun requests(detected: List<DetectedBlock>, targetLanguage: String): List<TranslationRequest> =
+    fun requests(
+        detected: List<DetectedBlock>,
+        targetLanguage: String,
+        style: AiStyle = AiStyle.NONE,
+    ): List<TranslationRequest> =
         detected.filter { it.decision.action == BlockAction.TRANSLATE }
-            .map { TranslationRequest(sourceText(it.block, it.decision.language), it.decision.language, targetLanguage) }
+            .map {
+                TranslationRequest(sourceText(it.block, it.decision.language), it.decision.language, targetLanguage, style)
+            }
 
     /**
      * 번역이 일부만 끝난 중간 결과 (#41). [results]는 번역할 블록 순서이고 안 끝난 칸은 null — 그 블록은 뺀다.

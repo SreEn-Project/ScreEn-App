@@ -1,5 +1,6 @@
 package com.example.translation_poc_app.translate
 
+import com.example.translation_poc_app.data.settings.AiTone
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -111,18 +112,37 @@ class GeminiTranslationEngine(
         val MODELS = listOf("gemini-3.5-flash-lite", "gemini-3.1-flash-lite")
 
         /** 프롬프트를 바꾸면 올린다 (캐시 키에 넣을 값). */
-        const val PROMPT_VERSION = 1
+        const val PROMPT_VERSION = 2
 
         internal fun buildBody(request: TranslationRequest): String {
             val from = if (request.source == AUTO_LANGUAGE) "the source language (detect it)" else request.source
-            val system = "You translate text captured from a phone screen. Translate from $from to " +
-                "${request.target}. Keep line breaks, numbers, names and symbols. " +
-                "Reply with the translation only, no notes or quotes."
+            val system = systemPrompt(request, from)
             return JSONObject()
                 .put("systemInstruction", JSONObject().put("parts", JSONArray().put(JSONObject().put("text", system))))
                 .put("contents", JSONArray().put(JSONObject().put("parts", JSONArray().put(JSONObject().put("text", request.text)))))
                 .put("generationConfig", JSONObject().put("temperature", 0))
                 .toString()
+        }
+
+        /** 말투(FL-11)와 용어집(FL-11)을 덧붙인 지시문. 용어집은 이 글에 나오는 항목만 넣어 요청을 작게 유지한다. */
+        internal fun systemPrompt(request: TranslationRequest, from: String): String {
+            val sb = StringBuilder(
+                "You translate text captured from a phone screen. Translate from $from to " +
+                    "${request.target}. Keep line breaks, numbers, names and symbols. " +
+                    "Reply with the translation only, no notes or quotes.",
+            )
+            when (request.style.tone) {
+                AiTone.STANDARD -> Unit
+                AiTone.FORMAL -> sb.append(" Use a polite, formal speech level (for example 존댓말 in Korean, 敬語 in Japanese).")
+                AiTone.INFORMAL -> sb.append(" Use a casual, informal speech level (for example 반말 in Korean, タメ口 in Japanese).")
+            }
+            val lowered = request.text.lowercase()
+            val terms = request.style.glossary.filter { lowered.contains(it.source.lowercase()) }
+            if (terms.isNotEmpty()) {
+                sb.append(" Always translate these terms exactly as given, never differently:")
+                terms.forEach { sb.append("\n- ").append(it.source).append(" => ").append(it.target) }
+            }
+            return sb.toString()
         }
 
         internal fun parse(response: String): String? =

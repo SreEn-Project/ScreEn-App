@@ -9,6 +9,12 @@ enum class CaptureRange { FULL_SCREEN, DRAG_REGION, FIXED_REGION }
 /** 결과 표시 방식 (FL-07). PARAGRAPH = 블록 · 문장으로 나누지 않고 번역문을 한 문단으로 잇는다. */
 enum class ResultDisplay { LIST, PARAGRAPH, OVERLAY }
 
+/** AI 번역 말투 (FL-11). STANDARD = 지정하지 않음. */
+enum class AiTone { STANDARD, FORMAL, INFORMAL }
+
+/** AI 번역 용어집 한 줄 (FL-11): [source] 표현은 항상 [target]으로 옮긴다. */
+data class GlossaryEntry(val source: String, val target: String)
+
 /**
  * 네이티브 쪽 설정 모델 (NA-16).
  * 서비스 · 오버레이는 Pigeon 생성 타입 대신 이 모델을 쓴다. 변환은 bridge/Mappers.kt.
@@ -40,6 +46,12 @@ data class Settings(
     val buttonSizeDp: Int = DEFAULT_BUTTON_SIZE_DP,
     /** 플로팅 버튼 불투명도 (%, FL-07). */
     val buttonOpacityPercent: Int = DEFAULT_BUTTON_OPACITY_PERCENT,
+    /** 만 18세 이상 확인 (FL-09). 확인 전에는 AI 엔진을 쓰지 않는다 (Gemini API 약관). */
+    val ageConfirmed: Boolean = false,
+    /** AI 번역 말투 (FL-11). */
+    val aiTone: AiTone = AiTone.STANDARD,
+    /** AI 번역 용어집 (FL-11). */
+    val glossary: List<GlossaryEntry> = emptyList(),
 ) {
     companion object {
         const val DEFAULT_TARGET_LANGUAGE = "ko"
@@ -56,6 +68,22 @@ data class Settings(
         /** 설정 화면이 고르게 하는 값의 범위. 저장된 값이 벗어나면 이 안으로 맞춘다. */
         val AUTO_SHOW_DELAY_RANGE_MS = 0L..5_000L
         val HIDE_AFTER_INTERACTION_RANGE_MS = 0L..5_000L
+
+        const val MAX_GLOSSARY_ENTRIES = 50
+        const val MAX_GLOSSARY_TEXT_LENGTH = 60
+
+        /** 용어집 정리: 앞뒤 공백을 걷고, 빈 칸 · 같은 원문(대소문자 무시) 중복을 빼고, 길이 · 개수를 제한한다. 앞의 항목이 이긴다. */
+        fun normalizeGlossary(entries: List<GlossaryEntry>): List<GlossaryEntry> =
+            entries
+                .map {
+                    GlossaryEntry(
+                        it.source.trim().take(MAX_GLOSSARY_TEXT_LENGTH),
+                        it.target.trim().take(MAX_GLOSSARY_TEXT_LENGTH),
+                    )
+                }
+                .filter { it.source.isNotEmpty() && it.target.isNotEmpty() }
+                .distinctBy { it.source.lowercase() }
+                .take(MAX_GLOSSARY_ENTRIES)
 
         /** 숨김 시간: 음수는 "안 숨김", 나머지는 범위 안으로. */
         fun normalizeHideAfterInteraction(ms: Long): Long =

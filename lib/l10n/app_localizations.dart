@@ -644,6 +644,12 @@ abstract class AppLocalizations {
   /// **'Add an API key to use this'**
   String get engineNeedsKey;
 
+  /// No description provided for @engineNeedsAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm you are 18 or older in AI translation setup'**
+  String get engineNeedsAge;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
@@ -707,7 +713,7 @@ abstract class AppLocalizations {
   /// No description provided for @apiKeyIntro.
   ///
   /// In en, this message translates to:
-  /// **'Get your own key from Google AI Studio and paste it here. It is encrypted and stored only on this device. Gemini API terms require you to be 18 or older. Translated text is sent to Google; if anything fails, ML Kit takes over.'**
+  /// **'Get your own key from Google AI Studio and paste it here. It is encrypted and stored only on this device. Translated text is sent to Google; if anything fails, ML Kit takes over.'**
   String get apiKeyIntro;
 
   /// No description provided for @apiKeySave.
@@ -763,6 +769,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get a key from Google AI Studio'**
   String get apiKeyGet;
+
+  /// No description provided for @aiAgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I am 18 or older'**
+  String get aiAgeTitle;
+
+  /// No description provided for @aiAgeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Under the Gemini API terms, AI translation is only for people 18 or older. Confirm to turn it on.'**
+  String get aiAgeDetail;
+
+  /// No description provided for @aiNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About data sent'**
+  String get aiNoticeTitle;
+
+  /// No description provided for @aiNoticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When AI translation is on, the text read from your screen is sent to the AI provider you chose (Google Gemini). On the free tier, Google may use it to improve and review its services. Don\'t translate screens that show passwords or personal information.'**
+  String get aiNoticeBody;
+
+  /// No description provided for @aiOptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation options'**
+  String get aiOptionsTitle;
+
+  /// No description provided for @aiToneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tone'**
+  String get aiToneTitle;
+
+  /// No description provided for @aiToneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to AI translation only. Works best when the target language has formal and casual speech.'**
+  String get aiToneHint;
+
+  /// No description provided for @aiToneStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get aiToneStandard;
+
+  /// No description provided for @aiToneFormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Formal'**
+  String get aiToneFormal;
+
+  /// No description provided for @aiToneInformal.
+  ///
+  /// In en, this message translates to:
+  /// **'Casual'**
+  String get aiToneInformal;
+
+  /// No description provided for @aiGlossaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Glossary'**
+  String get aiGlossaryTitle;
+
+  /// No description provided for @aiGlossaryDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Always translates a term the way you set it. Only terms found in the text are sent to the AI.'**
+  String get aiGlossaryDetail;
+
+  /// No description provided for @aiGlossarySourceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Original (e.g. Mana)'**
+  String get aiGlossarySourceHint;
+
+  /// No description provided for @aiGlossaryTargetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation (e.g. 마나)'**
+  String get aiGlossaryTargetHint;
+
+  /// No description provided for @aiGlossaryAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add term'**
+  String get aiGlossaryAdd;
+
+  /// No description provided for @aiGlossaryRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get aiGlossaryRemove;
+
+  /// No description provided for @aiGlossaryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No terms yet'**
+  String get aiGlossaryEmpty;
+
+  /// No description provided for @aiGlossaryFull.
+  ///
+  /// In en, this message translates to:
+  /// **'You can add up to {max} terms'**
+  String aiGlossaryFull(int max);
 
   /// No description provided for @settingsSectionCapture.
   ///

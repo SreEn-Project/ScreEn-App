@@ -25,6 +25,9 @@ pigeon.AppSettings _pigeonSettings({String targetLanguage = 'ko'}) =>
       buttonSizeDp: 60,
       buttonOpacityPercent: 70,
       hasFixedRegion: true,
+      ageConfirmed: true,
+      aiTone: pigeon.AiTone.formal,
+      glossary: [pigeon.GlossaryEntry(source: 'Mana', target: '마나')],
     );
 
 void main() {
@@ -32,7 +35,11 @@ void main() {
   late StreamController<pigeon.TranslatorEvent> events;
   late SettingsRepositoryImpl repository;
 
-  setUpAll(() => registerFallbackValue(pigeon.EngineType.mlKit));
+  setUpAll(() {
+    registerFallbackValue(pigeon.EngineType.mlKit);
+    registerFallbackValue(pigeon.AiTone.standard);
+    registerFallbackValue(<pigeon.GlossaryEntry>[]);
+  });
 
   setUp(() {
     api = _MockSettingsHostApi();
@@ -62,6 +69,9 @@ void main() {
         buttonSizeDp: 60,
         buttonOpacityPercent: 70,
         hasFixedRegion: true,
+        ageConfirmed: true,
+        aiTone: AiTone.formal,
+        glossary: [GlossaryEntry(source: 'Mana', target: '마나')],
       ),
     );
   });
@@ -84,5 +94,25 @@ void main() {
     await repository.setEngine(EngineType.gemini);
 
     verify(() => api.setEngine(pigeon.EngineType.gemini)).called(1);
+  });
+
+  test('연령 확인 · 말투 · 용어집도 Pigeon 값으로 바꿔 저장한다', () async {
+    when(() => api.setAgeConfirmed(any())).thenAnswer((_) async {});
+    when(() => api.setAiTone(any())).thenAnswer((_) async {});
+    when(() => api.setGlossary(any())).thenAnswer((_) async {});
+
+    await repository.setAgeConfirmed(true);
+    await repository.setAiTone(AiTone.informal);
+    await repository.setGlossary([
+      const GlossaryEntry(source: 'Mana', target: '마나'),
+    ]);
+
+    verify(() => api.setAgeConfirmed(true)).called(1);
+    verify(() => api.setAiTone(pigeon.AiTone.informal)).called(1);
+    final sent =
+        verify(() => api.setGlossary(captureAny())).captured.single
+            as List<pigeon.GlossaryEntry>;
+    expect(sent.single.source, 'Mana');
+    expect(sent.single.target, '마나');
   });
 }

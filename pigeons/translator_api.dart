@@ -22,9 +22,20 @@ enum CaptureMode { fullScreen, dragRegion, fixedRegion }
 /// 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22).
 enum DisplayMode { list, paragraph, overlay }
 
+/// AI 번역 말투 (FL-11). standard = 지정하지 않음(AI가 원문에 맞춤).
+enum AiTone { standard, formal, informal }
+
 /// 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
 /// error = 시작 실패 (동의 후 서비스 시작 실패 등). 다시 시작하면 벗어난다.
 enum ServiceState { stopped, starting, running, error }
+
+/// AI 번역 용어집 한 줄 (FL-11): 원문 표현을 항상 이 번역어로 옮긴다.
+class GlossaryEntry {
+  GlossaryEntry({required this.source, required this.target});
+
+  String source;
+  String target;
+}
 
 /// DataStore에 저장되는 설정 (NA-16).
 class AppSettings {
@@ -42,6 +53,9 @@ class AppSettings {
     required this.buttonSizeDp,
     required this.buttonOpacityPercent,
     required this.hasFixedRegion,
+    required this.ageConfirmed,
+    required this.aiTone,
+    required this.glossary,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -75,6 +89,15 @@ class AppSettings {
 
   /// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용이다.
   bool hasFixedRegion;
+
+  /// 만 18세 이상임을 확인했다 (FL-09). 확인하기 전에는 AI 엔진을 고를 수 없다.
+  bool ageConfirmed;
+
+  /// AI 번역 말투 (FL-11).
+  AiTone aiTone;
+
+  /// AI 번역 용어집 (FL-11). 입력 순서 유지.
+  List<GlossaryEntry> glossary;
 }
 
 @HostApi()
@@ -121,6 +144,17 @@ abstract class SettingsHostApi {
 
   @async
   void setOnboardingCompleted(bool completed);
+
+  /// 만 18세 이상 확인을 기록한다 (FL-09).
+  @async
+  void setAgeConfirmed(bool confirmed);
+
+  @async
+  void setAiTone(AiTone tone);
+
+  /// 용어집 전체를 바꾼다 (FL-11). 네이티브가 빈 칸 · 중복 · 개수를 정리해 저장한다.
+  @async
+  void setGlossary(List<GlossaryEntry> entries);
 
   /// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다.
   @async
