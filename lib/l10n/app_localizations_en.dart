@@ -791,9 +791,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabSaveTo => 'Save to';
 
   @override
-  String get vocabNewBookChip => 'New wordbook';
-
-  @override
   String vocabSavedTo(String name) {
     return 'Saved to ‘$name’';
   }
@@ -803,4 +800,156 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vocabHistoryAddTitle => 'Add a word from history';
+
+  @override
+  String get learnTitle => 'Study';
+
+  @override
+  String get learnPickBook => 'Word list to study';
+
+  @override
+  String get learnNoBooks => 'No word lists yet';
+
+  @override
+  String get learnNoBooksHint =>
+      'Save words from a translation result or history and you can study them here';
+
+  @override
+  String get learnBook => 'Word list';
+
+  @override
+  String learnBookStats(int count, int memorized) {
+    return 'Words: $count · $memorized memorized';
+  }
+
+  @override
+  String get learnTypes => 'Study type';
+
+  @override
+  String get learnTest => 'Word test';
+
+  @override
+  String get learnTestHint =>
+      'Type the word from its meaning, or pick from choices';
+
+  @override
+  String get learnTestNeedWords => 'Save at least one word to take it';
+
+  @override
+  String get learnCards => 'Flashcards';
+
+  @override
+  String get learnGames => 'Mini games';
+
+  @override
+  String get learnComingSoon => 'Coming soon';
+
+  @override
+  String get testTitle => 'Word test';
+
+  @override
+  String get testStart => 'Start';
+
+  @override
+  String testQuestionCount(int count) {
+    return 'Questions: $count';
+  }
+
+  @override
+  String get testMode => 'Mode';
+
+  @override
+  String get testModeChoice => 'Multiple choice';
+
+  @override
+  String get testModeTyping => 'Type it';
+
+  @override
+  String get testModeChoiceHint =>
+      'See a word and pick its meaning from 4 choices';
+
+  @override
+  String get testModeTypingHint =>
+      'See a meaning and type the word. Case and surrounding spaces are ignored';
+
+  @override
+  String testChoiceUnavailable(int min) {
+    return 'Multiple choice needs at least $min words across your word lists';
+  }
+
+  @override
+  String get testCannotStart =>
+      'Couldn’t make questions. Save more words first';
+
+  @override
+  String testProgress(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String testCorrectSoFar(int count) {
+    return 'Correct: $count';
+  }
+
+  @override
+  String get testPromptMeaning => 'Which word means this?';
+
+  @override
+  String get testPromptWord => 'What does this word mean?';
+
+  @override
+  String get testAnswerHint => 'Type the word';
+
+  @override
+  String get testSubmit => 'Check';
+
+  @override
+  String get testNext => 'Next question';
+
+  @override
+  String get testSeeResult => 'See result';
+
+  @override
+  String get testCorrect => 'Correct!';
+
+  @override
+  String testWrong(String answer) {
+    return 'Answer: $answer';
+  }
+
+  @override
+  String get testResultTitle => 'Test result';
+
+  @override
+  String testScore(int correct, int total) {
+    return '$correct / $total';
+  }
+
+  @override
+  String get testPerfect => 'You got them all!';
+
+  @override
+  String testWrongCount(int count) {
+    return 'Missed words: $count';
+  }
+
+  @override
+  String get testWrongWords => 'Missed words';
+
+  @override
+  String testYourAnswer(String answer) {
+    return 'Your answer: $answer';
+  }
+
+  @override
+  String get testRetry => 'Try again';
+
+  @override
+  String get testDone => 'Done';
+
+  @override
+  String get vocabStudy => 'Study words';
+
+  @override
+  String get vocabStudyHint => 'Check what you know with a word test';
 }

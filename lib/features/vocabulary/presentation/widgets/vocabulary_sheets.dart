@@ -126,11 +126,19 @@ class _WordbookNameSheetState extends State<_WordbookNameSheet> {
   }
 }
 
-/// 이동할 단어장 고르기 (AD-05, AD-06). [books]에서 [exceptId]는 뺀다. 고르면 그 id를 돌려준다.
+/// [showWordbookPickerSheet]에서 "새 단어장"을 골랐을 때 돌려주는 값.
+const pickNewWordbook = -1;
+
+/// 단어장 고르기 (AD-03, AD-05, AD-06, AD-07). [books]에서 [exceptId]는 뺀다.
+/// 고르면 그 id를, [allowCreate]에서 "새 단어장"을 고르면 [pickNewWordbook]을 돌려준다.
+/// [selectedId]인 줄에는 체크 표시를 한다. 단어장이 늘어나도 세로로 훑어 고를 수 있다.
 Future<int?> showWordbookPickerSheet(
   BuildContext context, {
   required List<Wordbook> books,
-  required int exceptId,
+  int? exceptId,
+  int? selectedId,
+  String? title,
+  bool allowCreate = false,
 }) {
   return showModalBottomSheet<int>(
     context: context,
@@ -139,10 +147,49 @@ Future<int?> showWordbookPickerSheet(
     builder: (sheetContext) {
       final l10n = AppLocalizations.of(sheetContext);
       final theme = Theme.of(sheetContext);
+      final colors = theme.colorScheme;
       final others = [
         for (final book in books)
           if (book.id != exceptId) book,
       ];
+
+      Widget row({
+        required IconData icon,
+        required String name,
+        String? count,
+        bool selected = false,
+        required VoidCallback onTap,
+      }) {
+        return AppCard(
+          onTap: onTap,
+          color: selected ? colors.primaryContainer : null,
+          shadow: !selected,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTokens.rowPaddingH,
+            vertical: AppTokens.space12,
+          ),
+          child: Row(
+            children: [
+              IconBadge(icon: icon, size: 40),
+              const SizedBox(width: AppTokens.space12),
+              Expanded(
+                child: Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              if (count != null) Text(count, style: theme.textTheme.bodySmall),
+              if (selected) ...[
+                const SizedBox(width: AppTokens.space8),
+                Icon(Symbols.check_rounded, color: colors.primary, size: 22),
+              ],
+            ],
+          ),
+        );
+      }
+
       return SafeArea(
         top: false,
         child: Padding(
@@ -156,45 +203,37 @@ Future<int?> showWordbookPickerSheet(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.vocabMoveTitle, style: theme.textTheme.titleLarge),
+              Text(
+                title ?? l10n.vocabMoveTitle,
+                style: theme.textTheme.titleLarge,
+              ),
               const SizedBox(height: AppTokens.space16),
-              if (others.isEmpty)
+              if (others.isEmpty && !allowCreate)
                 Text(l10n.vocabMoveNoOther, style: theme.textTheme.bodySmall)
               else
                 Flexible(
-                  child: ListView.separated(
+                  child: ListView(
                     shrinkWrap: true,
-                    itemCount: others.length,
-                    separatorBuilder: (_, _) =>
+                    children: [
+                      for (final book in others) ...[
+                        row(
+                          icon: Symbols.menu_book_rounded,
+                          name: book.name,
+                          count: l10n.vocabWordCount(book.wordCount),
+                          selected: book.id == selectedId,
+                          onTap: () => Navigator.of(sheetContext).pop(book.id),
+                        ),
                         const SizedBox(height: AppTokens.space8),
-                    itemBuilder: (_, index) {
-                      final book = others[index];
-                      return AppCard(
-                        onTap: () => Navigator.of(sheetContext).pop(book.id),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppTokens.rowPaddingH,
-                          vertical: AppTokens.space16,
+                      ],
+                      if (allowCreate)
+                        row(
+                          icon: Symbols.add_rounded,
+                          name: l10n.vocabNewBook,
+                          selected: selectedId == pickNewWordbook,
+                          onTap: () =>
+                              Navigator.of(sheetContext).pop(pickNewWordbook),
                         ),
-                        child: Row(
-                          children: [
-                            const IconBadge(icon: Symbols.menu_book_rounded),
-                            const SizedBox(width: AppTokens.space12),
-                            Expanded(
-                              child: Text(
-                                book.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleMedium,
-                              ),
-                            ),
-                            Text(
-                              l10n.vocabWordCount(book.wordCount),
-                              style: theme.textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                    ],
                   ),
                 ),
             ],

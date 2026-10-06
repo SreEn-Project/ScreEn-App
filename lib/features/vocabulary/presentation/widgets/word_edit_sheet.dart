@@ -8,6 +8,8 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/vocabulary.dart';
 import '../view_models/word_edit_view_model.dart';
 import '../view_models/wordbooks_view_model.dart';
+import 'vocabulary_sheets.dart';
+import 'wordbook_selector.dart';
 
 /// 단어 편집 시트 (AD-03): 단어장에 저장하기 전에 단어 · 뜻 · 발음 등을 고친다.
 /// 직접 추가 · 번역 기록에서 추가가 같이 쓴다. 저장하면 단어장 이름을 돌려주고, 닫으면 null.
@@ -86,6 +88,27 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
       c.dispose();
     }
     super.dispose();
+  }
+
+  /// 저장할 단어장을 목록 시트에서 고른다 (가로로 넘기는 칩은 단어장이 늘면 불편해서).
+  Future<void> _pickBook(
+    List<Wordbook> books,
+    bool creating,
+    int? selectedId,
+  ) async {
+    FocusScope.of(context).unfocus();
+    final picked = await showWordbookPickerSheet(
+      context,
+      books: books,
+      selectedId: creating ? pickNewWordbook : selectedId,
+      title: AppLocalizations.of(context).vocabSaveTo,
+      allowCreate: true,
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _wantsNewBook = picked == pickNewWordbook;
+      if (!_wantsNewBook) _bookId = picked;
+    });
   }
 
   bool _canSave(List<Wordbook> books) {
@@ -233,25 +256,21 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                       ),
                     ),
                     const SizedBox(height: AppTokens.space8),
-                    Wrap(
-                      spacing: AppTokens.space8,
-                      runSpacing: AppTokens.space8,
-                      children: [
-                        for (final book in books)
-                          AppChip(
-                            label: book.name,
-                            selected: !creating && book.id == selectedId,
-                            onTap: () => setState(() {
-                              _bookId = book.id;
-                              _wantsNewBook = false;
-                            }),
-                          ),
-                        AppChip(
-                          label: l10n.vocabNewBookChip,
-                          selected: creating,
-                          onTap: () => setState(() => _wantsNewBook = true),
-                        ),
-                      ],
+                    WordbookSelector(
+                      label: creating
+                          ? l10n.vocabNewBook
+                          : books
+                                    .where((b) => b.id == selectedId)
+                                    .firstOrNull
+                                    ?.name ??
+                                '',
+                      count: creating
+                          ? null
+                          : books
+                                .where((b) => b.id == selectedId)
+                                .firstOrNull
+                                ?.wordCount,
+                      onTap: () => _pickBook(books, creating, selectedId),
                     ),
                     if (creating) ...[
                       const SizedBox(height: AppTokens.space12),

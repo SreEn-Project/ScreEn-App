@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import '../../../../core/domain/use_case.dart';
 import '../entities/vocabulary.dart';
+import '../entities/word_test.dart';
 import '../repositories/vocabulary_repository.dart';
 
 /// 단어장 목록 조회 (AD-04).
@@ -153,5 +156,88 @@ final class SaveWord implements UseCase<int?, SaveWordParams> {
       return Future.value();
     }
     return _repository.saveWord(params.wordbookId, draft);
+  }
+}
+
+class CreateWordTestParams {
+  const CreateWordTestParams(this.wordbookId, this.mode, {this.random});
+
+  final int wordbookId;
+  final WordTestMode mode;
+
+  /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
+  final Random? random;
+}
+
+/// 암기 테스트 문제 만들기 (AD-09).
+/// 문제 수는 단어장 크기에 맞춘다(최대 [maxQuestions]개, 무작위). 4지선다의 오답 보기 3개는 같은 단어장의
+/// 다른 단어에서 뽑고, 모자라면 다른 단어장에서 채운다. 보기는 서로 · 정답과 뜻이 달라야 한다.
+final class CreateWordTest
+    implements UseCase<List<WordTestQuestion>, CreateWordTestParams> {
+  const CreateWordTest(this._repository);
+
+  static const maxQuestions = 10;
+  static const choiceCount = 4;
+
+  final VocabularyRepository _repository;
+
+  /// 4지선다를 만들 수 있는 최소 단어 수 (모든 단어장 합).
+  static const minWordsForChoice = choiceCount;
+
+  @override
+  Future<List<WordTestQuestion>> call(CreateWordTestParams params) async {
+    final random = params.random ?? Random();
+    final own = await _repository.words(params.wordbookId);
+    if (own.isEmpty) return const [];
+    final picked = [...own]..shuffle(random);
+    final targets = picked.take(maxQuestions).toList();
+
+    if (params.mode == WordTestMode.typing) {
+      return [
+        for (final word in targets)
+          WordTestQuestion(
+            wordId: word.id,
+            mode: WordTestMode.typing,
+            word: word.word,
+            meaning: word.meaning,
+          ),
+      ];
+    }
+
+    // 같은 단어장 → 다른 단어장 순으로 오답 후보를 모은다.
+    final others = <VocabularyWord>[];
+    for (final book in await _repository.wordbooks()) {
+      if (book.id == params.wordbookId) continue;
+      others.addAll(await _repository.words(book.id));
+    }
+    final questions = <WordTestQuestion>[];
+    for (final word in targets) {
+      final meanings = <String>{word.meaning.trim().toLowerCase()};
+      final wrong = <String>[];
+      void collect(Iterable<VocabularyWord> pool) {
+        final shuffled = [...pool]..shuffle(random);
+        for (final candidate in shuffled) {
+          if (wrong.length == choiceCount - 1) return;
+          if (candidate.id == word.id) continue;
+          if (meanings.add(candidate.meaning.trim().toLowerCase())) {
+            wrong.add(candidate.meaning);
+          }
+        }
+      }
+
+      collect(own);
+      collect(others);
+      if (wrong.isEmpty) continue;
+      questions.add(
+        WordTestQuestion(
+          wordId: word.id,
+          mode: WordTestMode.choice,
+          word: word.word,
+          meaning: word.meaning,
+          choices: [word.meaning, ...wrong]..shuffle(random),
+        ),
+      );
+    }
+    return questions;
   }
 }

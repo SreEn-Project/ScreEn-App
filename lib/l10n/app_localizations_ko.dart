@@ -774,9 +774,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vocabSaveTo => '저장할 단어장';
 
   @override
-  String get vocabNewBookChip => '새 단어장';
-
-  @override
   String vocabSavedTo(String name) {
     return '‘$name’에 저장했어요';
   }
@@ -786,4 +783,151 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vocabHistoryAddTitle => '기록에서 단어 추가';
+
+  @override
+  String get learnTitle => '학습';
+
+  @override
+  String get learnPickBook => '학습할 단어장';
+
+  @override
+  String get learnNoBooks => '단어장이 아직 없어요';
+
+  @override
+  String get learnNoBooksHint => '번역 결과나 기록에서 단어를 저장하면 여기서 학습할 수 있어요';
+
+  @override
+  String get learnBook => '단어장';
+
+  @override
+  String learnBookStats(int count, int memorized) {
+    return '단어 $count개 · 외움 $memorized개';
+  }
+
+  @override
+  String get learnTypes => '학습 유형';
+
+  @override
+  String get learnTest => '암기 테스트';
+
+  @override
+  String get learnTestHint => '뜻을 보고 단어를 쓰거나, 보기에서 고르기';
+
+  @override
+  String get learnTestNeedWords => '단어를 하나 이상 저장하면 볼 수 있어요';
+
+  @override
+  String get learnCards => '카드 학습';
+
+  @override
+  String get learnGames => '미니게임';
+
+  @override
+  String get learnComingSoon => '준비 중이에요';
+
+  @override
+  String get testTitle => '암기 테스트';
+
+  @override
+  String get testStart => '시작하기';
+
+  @override
+  String testQuestionCount(int count) {
+    return '$count문제';
+  }
+
+  @override
+  String get testMode => '방식';
+
+  @override
+  String get testModeChoice => '4지선다';
+
+  @override
+  String get testModeTyping => '직접 입력';
+
+  @override
+  String get testModeChoiceHint => '단어를 보고 보기 4개 중 맞는 뜻을 골라요';
+
+  @override
+  String get testModeTypingHint => '뜻을 보고 단어를 직접 써요. 대소문자와 앞뒤 공백은 무시해요';
+
+  @override
+  String testChoiceUnavailable(int min) {
+    return '4지선다는 단어장 전체에 단어가 $min개 이상일 때 쓸 수 있어요';
+  }
+
+  @override
+  String get testCannotStart => '문제를 만들지 못했어요. 단어를 더 저장해 주세요';
+
+  @override
+  String testProgress(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String testCorrectSoFar(int count) {
+    return '정답 $count개';
+  }
+
+  @override
+  String get testPromptMeaning => '이 뜻의 단어는?';
+
+  @override
+  String get testPromptWord => '이 단어의 뜻은?';
+
+  @override
+  String get testAnswerHint => '단어를 입력하세요';
+
+  @override
+  String get testSubmit => '확인';
+
+  @override
+  String get testNext => '다음 문제';
+
+  @override
+  String get testSeeResult => '결과 보기';
+
+  @override
+  String get testCorrect => '정답이에요!';
+
+  @override
+  String testWrong(String answer) {
+    return '정답: $answer';
+  }
+
+  @override
+  String get testResultTitle => '테스트 결과';
+
+  @override
+  String testScore(int correct, int total) {
+    return '$correct / $total';
+  }
+
+  @override
+  String get testPerfect => '모두 맞혔어요!';
+
+  @override
+  String testWrongCount(int count) {
+    return '틀린 단어 $count개';
+  }
+
+  @override
+  String get testWrongWords => '틀린 단어';
+
+  @override
+  String testYourAnswer(String answer) {
+    return '내 답: $answer';
+  }
+
+  @override
+  String get testRetry => '다시 풀기';
+
+  @override
+  String get testDone => '끝내기';
+
+  @override
+  String get vocabStudy => '단어 학습';
+
+  @override
+  String get vocabStudyHint => '암기 테스트로 단어를 확인해요';
 }

@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.translation_poc_app.R
 import com.example.translation_poc_app.data.settings.ResultDisplay
@@ -69,6 +70,8 @@ internal fun ResultSheet(
     onCopy: (String) -> Unit,
     /** 원문의 단어를 탭했다 (AD-01). null이면 단어를 고를 수 없다. */
     onWord: ((WordTarget) -> Unit)? = null,
+    /** 카드의 "단어장에 추가"를 눌렀다: 원문 · 번역을 채운 편집 화면으로. null이면 버튼이 없다. */
+    onAdd: ((TranslatedItem) -> Unit)? = null,
 ) {
     val colors = OverlayTheme.colors
     val noRipple = remember { MutableInteractionSource() }
@@ -79,7 +82,7 @@ internal fun ResultSheet(
     Box(modifier = frame, contentAlignment = Alignment.BottomCenter) {
         SheetSurface {
             when (outcome) {
-                is TranslationOutcome.Translated -> ResultList(outcome, display, onDismiss, onCopy, onWord)
+                is TranslationOutcome.Translated -> ResultList(outcome, display, onDismiss, onCopy, onWord, onAdd)
                 TranslationOutcome.SecureScreen -> Message(
                     Symbol.VISIBILITY_OFF,
                     stringResource(R.string.result_secure_title),
@@ -157,6 +160,7 @@ private fun ColumnScope.ResultList(
     onDismiss: () -> Unit,
     onCopy: (String) -> Unit,
     onWord: ((WordTarget) -> Unit)?,
+    onAdd: ((TranslatedItem) -> Unit)?,
 ) {
     val colors = OverlayTheme.colors
     // 문단형: 번역된 블록을 나누지 않고 한 문단으로 잇는다. 번역된 게 없으면 목록으로 보여 준다.
@@ -214,7 +218,7 @@ private fun ColumnScope.ResultList(
             item { ParagraphCard(paragraph, copied = copied == 0) { onCopy(paragraph); copied = 0 } }
         } else {
             itemsIndexed(result.items) { index, item ->
-                ResultCard(item, copied = copied == index, onWord = onWord) {
+                ResultCard(item, copied = copied == index, onWord = onWord, onAdd = onAdd) {
                     item.translated?.let {
                         onCopy(it)
                         copied = index
@@ -268,7 +272,13 @@ private fun ColumnScope.ResultList(
 
 /** 원문(회색 작은 글자) · 번역문(본문) 카드. 오른쪽 위 복사. */
 @Composable
-private fun ResultCard(item: TranslatedItem, copied: Boolean, onWord: ((WordTarget) -> Unit)?, onCopy: () -> Unit) {
+private fun ResultCard(
+    item: TranslatedItem,
+    copied: Boolean,
+    onWord: ((WordTarget) -> Unit)?,
+    onAdd: ((TranslatedItem) -> Unit)?,
+    onCopy: () -> Unit,
+) {
     val colors = OverlayTheme.colors
     Row(
         modifier = Modifier
@@ -297,6 +307,17 @@ private fun ResultCard(item: TranslatedItem, copied: Boolean, onWord: ((WordTarg
                         stringResource(R.string.result_item_failed)
                     },
                     style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant, fontStyle = FontStyle.Italic),
+                )
+            }
+            if (onAdd != null && item.translated != null) {
+                Spacer(Modifier.height(8.dp))
+                BasicText(
+                    stringResource(R.string.word_add_block),
+                    style = OverlayTheme.caption.copy(color = colors.primary, fontWeight = FontWeight.SemiBold),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .pressable(onClick = { onAdd(item) })
+                        .padding(vertical = 4.dp),
                 )
             }
         }

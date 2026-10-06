@@ -215,6 +215,8 @@ class AppTextField extends StatelessWidget {
     this.autofocus = false,
     this.textAlign = TextAlign.start,
     this.maxLines = 1,
+    this.onSubmitted,
+    this.enabled = true,
   });
 
   final TextEditingController controller;
@@ -230,6 +232,12 @@ class AppTextField extends StatelessWidget {
   /// 여러 줄 입력이면 1보다 크게 (예문 등).
   final int maxLines;
 
+  /// 키보드의 완료 키를 눌렀다.
+  final ValueChanged<String>? onSubmitted;
+
+  /// false면 입력할 수 없다 (정답을 보여 주는 동안 등).
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -244,6 +252,8 @@ class AppTextField extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        enabled: enabled,
         obscureText: obscure,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,

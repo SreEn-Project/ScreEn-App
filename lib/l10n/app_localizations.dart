@@ -1562,12 +1562,6 @@ abstract class AppLocalizations {
   /// **'Save to'**
   String get vocabSaveTo;
 
-  /// No description provided for @vocabNewBookChip.
-  ///
-  /// In en, this message translates to:
-  /// **'New wordbook'**
-  String get vocabNewBookChip;
-
   /// No description provided for @vocabSavedTo.
   ///
   /// In en, this message translates to:
@@ -1585,6 +1579,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a word from history'**
   String get vocabHistoryAddTitle;
+
+  /// No description provided for @learnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get learnTitle;
+
+  /// No description provided for @learnPickBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Word list to study'**
+  String get learnPickBook;
+
+  /// No description provided for @learnNoBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'No word lists yet'**
+  String get learnNoBooks;
+
+  /// No description provided for @learnNoBooksHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save words from a translation result or history and you can study them here'**
+  String get learnNoBooksHint;
+
+  /// No description provided for @learnBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Word list'**
+  String get learnBook;
+
+  /// No description provided for @learnBookStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Words: {count} · {memorized} memorized'**
+  String learnBookStats(int count, int memorized);
+
+  /// No description provided for @learnTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Study type'**
+  String get learnTypes;
+
+  /// No description provided for @learnTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Word test'**
+  String get learnTest;
+
+  /// No description provided for @learnTestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the word from its meaning, or pick from choices'**
+  String get learnTestHint;
+
+  /// No description provided for @learnTestNeedWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Save at least one word to take it'**
+  String get learnTestNeedWords;
+
+  /// No description provided for @learnCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Flashcards'**
+  String get learnCards;
+
+  /// No description provided for @learnGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Mini games'**
+  String get learnGames;
+
+  /// No description provided for @learnComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get learnComingSoon;
+
+  /// No description provided for @testTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Word test'**
+  String get testTitle;
+
+  /// No description provided for @testStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get testStart;
+
+  /// No description provided for @testQuestionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions: {count}'**
+  String testQuestionCount(int count);
+
+  /// No description provided for @testMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get testMode;
+
+  /// No description provided for @testModeChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple choice'**
+  String get testModeChoice;
+
+  /// No description provided for @testModeTyping.
+  ///
+  /// In en, this message translates to:
+  /// **'Type it'**
+  String get testModeTyping;
+
+  /// No description provided for @testModeChoiceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See a word and pick its meaning from 4 choices'**
+  String get testModeChoiceHint;
+
+  /// No description provided for @testModeTypingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'See a meaning and type the word. Case and surrounding spaces are ignored'**
+  String get testModeTypingHint;
+
+  /// No description provided for @testChoiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple choice needs at least {min} words across your word lists'**
+  String testChoiceUnavailable(int min);
+
+  /// No description provided for @testCannotStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t make questions. Save more words first'**
+  String get testCannotStart;
+
+  /// No description provided for @testProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {total}'**
+  String testProgress(int current, int total);
+
+  /// No description provided for @testCorrectSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct: {count}'**
+  String testCorrectSoFar(int count);
+
+  /// No description provided for @testPromptMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Which word means this?'**
+  String get testPromptMeaning;
+
+  /// No description provided for @testPromptWord.
+  ///
+  /// In en, this message translates to:
+  /// **'What does this word mean?'**
+  String get testPromptWord;
+
+  /// No description provided for @testAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the word'**
+  String get testAnswerHint;
+
+  /// No description provided for @testSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get testSubmit;
+
+  /// No description provided for @testNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next question'**
+  String get testNext;
+
+  /// No description provided for @testSeeResult.
+  ///
+  /// In en, this message translates to:
+  /// **'See result'**
+  String get testSeeResult;
+
+  /// No description provided for @testCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct!'**
+  String get testCorrect;
+
+  /// No description provided for @testWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer: {answer}'**
+  String testWrong(String answer);
+
+  /// No description provided for @testResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Test result'**
+  String get testResultTitle;
+
+  /// No description provided for @testScore.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct} / {total}'**
+  String testScore(int correct, int total);
+
+  /// No description provided for @testPerfect.
+  ///
+  /// In en, this message translates to:
+  /// **'You got them all!'**
+  String get testPerfect;
+
+  /// No description provided for @testWrongCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed words: {count}'**
+  String testWrongCount(int count);
+
+  /// No description provided for @testWrongWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed words'**
+  String get testWrongWords;
+
+  /// No description provided for @testYourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answer: {answer}'**
+  String testYourAnswer(String answer);
+
+  /// No description provided for @testRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get testRetry;
+
+  /// No description provided for @testDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get testDone;
+
+  /// No description provided for @vocabStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Study words'**
+  String get vocabStudy;
+
+  /// No description provided for @vocabStudyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check what you know with a word test'**
+  String get vocabStudyHint;
 }
 
 class _AppLocalizationsDelegate
