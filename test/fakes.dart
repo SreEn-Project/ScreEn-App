@@ -118,6 +118,18 @@ class FakeSettingsRepository implements SettingsRepository {
   Future<void> setOnboardingCompleted(bool completed) async =>
       settings = settings.copyWith(onboardingCompleted: completed);
 
+  @override
+  Future<void> setAgeConfirmed(bool confirmed) async =>
+      settings = settings.copyWith(ageConfirmed: confirmed);
+
+  @override
+  Future<void> setAiTone(AiTone tone) async =>
+      settings = settings.copyWith(aiTone: tone);
+
+  @override
+  Future<void> setGlossary(List<GlossaryEntry> entries) async =>
+      settings = settings.copyWith(glossary: entries);
+
   String? apiKey;
 
   @override

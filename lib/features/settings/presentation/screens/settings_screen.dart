@@ -7,6 +7,7 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
+import '../view_models/ai_options_view_model.dart';
 import '../view_models/api_key_view_model.dart';
 import '../view_models/auto_translate_view_model.dart';
 import '../view_models/capture_settings_view_model.dart';
@@ -64,6 +65,8 @@ class _EngineSection extends ConsumerWidget {
         ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
     final viewModel = ref.read(engineViewModelProvider.notifier);
     final hasKey = ref.watch(apiKeyViewModelProvider).value != null;
+    final ageConfirmed =
+        ref.watch(aiOptionsViewModelProvider).value?.ageConfirmed ?? false;
     return AppSection(
       title: l10n.settingsSectionEngine,
       child: AppCard(
@@ -76,10 +79,13 @@ class _EngineSection extends ConsumerWidget {
               _EngineTile(
                 engine: engine,
                 selected: engine == selected,
-                // Gemini는 키가 있어야 고를 수 있다.
+                // Gemini는 만 18세 확인(FL-09)과 키가 있어야 고를 수 있다.
                 disabledReason: switch (engine) {
                   EngineType.mlKit => null,
-                  EngineType.gemini => hasKey ? null : l10n.engineNeedsKey,
+                  EngineType.gemini =>
+                    !ageConfirmed
+                        ? l10n.engineNeedsAge
+                        : (hasKey ? null : l10n.engineNeedsKey),
                 },
                 onTap: () => viewModel.select(engine),
               ),

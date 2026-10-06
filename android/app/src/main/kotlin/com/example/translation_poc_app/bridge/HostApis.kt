@@ -3,6 +3,7 @@ package com.example.translation_poc_app.bridge
 import android.content.Context
 import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.ApiKeyStore
+import com.example.translation_poc_app.data.settings.GlossaryEntry as NativeGlossaryEntry
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.translate.GeminiKeyTester
 import com.example.translation_poc_app.service.CaptureConsentActivity
@@ -47,6 +48,14 @@ class SettingsHostApiImpl(
 
     override suspend fun setOnboardingCompleted(completed: Boolean) =
         repository.setOnboardingCompleted(completed)
+
+    override suspend fun setAgeConfirmed(confirmed: Boolean) = repository.setAgeConfirmed(confirmed)
+
+    override suspend fun setAiTone(tone: com.example.translation_poc_app.bridge.AiTone) =
+        repository.setAiTone(tone.toNative())
+
+    override suspend fun setGlossary(entries: List<GlossaryEntry>) =
+        repository.setGlossary(entries.map { NativeGlossaryEntry(it.source, it.target) })
 
     override suspend fun getApiKey(): String? = apiKeys.get()
 

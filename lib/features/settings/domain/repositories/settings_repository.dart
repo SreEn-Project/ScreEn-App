@@ -20,6 +20,11 @@ abstract interface class SettingsRepository {
   Future<void> resetFixedRegion();
   Future<void> setOnboardingCompleted(bool completed);
 
+  /// 만 18세 이상 확인 (FL-09). 거두면 네이티브가 엔진을 ML Kit으로 되돌린다.
+  Future<void> setAgeConfirmed(bool confirmed);
+  Future<void> setAiTone(AiTone tone);
+  Future<void> setGlossary(List<GlossaryEntry> entries);
+
   /// AI 번역 API 키 (NA-13). 없으면 null.
   Future<String?> getApiKey();
   Future<void> setApiKey(String apiKey);

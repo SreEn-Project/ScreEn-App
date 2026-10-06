@@ -16,6 +16,12 @@ extension EnumLabels on AppLocalizations {
     EngineType.gemini => engineGeminiDetail,
   };
 
+  String aiToneName(AiTone tone) => switch (tone) {
+    AiTone.standard => aiToneStandard,
+    AiTone.formal => aiToneFormal,
+    AiTone.informal => aiToneInformal,
+  };
+
   String captureModeName(CaptureMode mode) => switch (mode) {
     CaptureMode.fullScreen => captureModeFull,
     CaptureMode.dragRegion => captureModeRegion,

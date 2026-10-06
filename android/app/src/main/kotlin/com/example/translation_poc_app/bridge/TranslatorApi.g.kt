@@ -236,6 +236,19 @@ enum class DisplayMode(val raw: Int) {
   }
 }
 
+/** AI 번역 말투 (FL-11). standard = 지정하지 않음(AI가 원문에 맞춤). */
+enum class AiTone(val raw: Int) {
+  STANDARD(0),
+  FORMAL(1),
+  INFORMAL(2);
+
+  companion object {
+    fun ofRaw(raw: Int): AiTone? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /**
  * 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
  * error = 시작 실패 (동의 후 서비스 시작 실패 등). 다시 시작하면 벗어난다.
@@ -250,6 +263,51 @@ enum class ServiceState(val raw: Int) {
     fun ofRaw(raw: Int): ServiceState? {
       return values().firstOrNull { it.raw == raw }
     }
+  }
+}
+
+/**
+ * AI 번역 용어집 한 줄 (FL-11): 원문 표현을 항상 이 번역어로 옮긴다.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class GlossaryEntry (
+  val source: String,
+  val target: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GlossaryEntry {
+      val source = pigeonVar_list[0] as String
+      val target = pigeonVar_list[1] as String
+      return GlossaryEntry(source, target)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      source,
+      target,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as GlossaryEntry
+    return TranslatorApiPigeonUtils.deepEquals(this.source, other.source) && TranslatorApiPigeonUtils.deepEquals(this.target, other.target)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.source)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.target)
+    return result
+  }
+  override fun toString(): String {
+    return "GlossaryEntry(source=$source, target=$target)"
   }
 }
 
@@ -283,7 +341,13 @@ data class AppSettings (
   /** 플로팅 버튼 불투명도 (%, FL-07). 100 = 불투명. */
   val buttonOpacityPercent: Long,
   /** 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용이다. */
-  val hasFixedRegion: Boolean
+  val hasFixedRegion: Boolean,
+  /** 만 18세 이상임을 확인했다 (FL-09). 확인하기 전에는 AI 엔진을 고를 수 없다. */
+  val ageConfirmed: Boolean,
+  /** AI 번역 말투 (FL-11). */
+  val aiTone: AiTone,
+  /** AI 번역 용어집 (FL-11). 입력 순서 유지. */
+  val glossary: List<GlossaryEntry>
 )
  {
   companion object {
@@ -301,7 +365,10 @@ data class AppSettings (
       val buttonSizeDp = pigeonVar_list[10] as Long
       val buttonOpacityPercent = pigeonVar_list[11] as Long
       val hasFixedRegion = pigeonVar_list[12] as Boolean
-      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs, wifiOnlyModelDownload, buttonSizeDp, buttonOpacityPercent, hasFixedRegion)
+      val ageConfirmed = pigeonVar_list[13] as Boolean
+      val aiTone = pigeonVar_list[14] as AiTone
+      val glossary = pigeonVar_list[15] as List<GlossaryEntry>
+      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs, wifiOnlyModelDownload, buttonSizeDp, buttonOpacityPercent, hasFixedRegion, ageConfirmed, aiTone, glossary)
     }
   }
   fun toList(): List<Any?> {
@@ -319,6 +386,9 @@ data class AppSettings (
       buttonSizeDp,
       buttonOpacityPercent,
       hasFixedRegion,
+      ageConfirmed,
+      aiTone,
+      glossary,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -329,7 +399,7 @@ data class AppSettings (
       return true
     }
     val other = other as AppSettings
-    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs) && TranslatorApiPigeonUtils.deepEquals(this.wifiOnlyModelDownload, other.wifiOnlyModelDownload) && TranslatorApiPigeonUtils.deepEquals(this.buttonSizeDp, other.buttonSizeDp) && TranslatorApiPigeonUtils.deepEquals(this.buttonOpacityPercent, other.buttonOpacityPercent) && TranslatorApiPigeonUtils.deepEquals(this.hasFixedRegion, other.hasFixedRegion)
+    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs) && TranslatorApiPigeonUtils.deepEquals(this.wifiOnlyModelDownload, other.wifiOnlyModelDownload) && TranslatorApiPigeonUtils.deepEquals(this.buttonSizeDp, other.buttonSizeDp) && TranslatorApiPigeonUtils.deepEquals(this.buttonOpacityPercent, other.buttonOpacityPercent) && TranslatorApiPigeonUtils.deepEquals(this.hasFixedRegion, other.hasFixedRegion) && TranslatorApiPigeonUtils.deepEquals(this.ageConfirmed, other.ageConfirmed) && TranslatorApiPigeonUtils.deepEquals(this.aiTone, other.aiTone) && TranslatorApiPigeonUtils.deepEquals(this.glossary, other.glossary)
   }
 
   override fun hashCode(): Int {
@@ -347,10 +417,13 @@ data class AppSettings (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.buttonSizeDp)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.buttonOpacityPercent)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.hasFixedRegion)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.ageConfirmed)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.aiTone)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.glossary)
     return result
   }
   override fun toString(): String {
-    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload, buttonSizeDp=$buttonSizeDp, buttonOpacityPercent=$buttonOpacityPercent, hasFixedRegion=$hasFixedRegion)"
+    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload, buttonSizeDp=$buttonSizeDp, buttonOpacityPercent=$buttonOpacityPercent, hasFixedRegion=$hasFixedRegion, ageConfirmed=$ageConfirmed, aiTone=$aiTone, glossary=$glossary)"
   }
 }
 
@@ -520,25 +593,35 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
       }
       132.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          ServiceState.ofRaw(it.toInt())
+          AiTone.ofRaw(it.toInt())
         }
       }
       133.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          AppSettings.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          ServiceState.ofRaw(it.toInt())
         }
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationRecord.fromList(it)
+          GlossaryEntry.fromList(it)
         }
       }
       135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ServiceStateChanged.fromList(it)
+          AppSettings.fromList(it)
         }
       }
       136.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TranslationRecord.fromList(it)
+        }
+      }
+      137.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ServiceStateChanged.fromList(it)
+        }
+      }
+      138.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SettingsChanged.fromList(it)
         }
@@ -560,24 +643,32 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
         stream.write(131)
         writeValue(stream, value.raw.toLong())
       }
-      is ServiceState -> {
+      is AiTone -> {
         stream.write(132)
         writeValue(stream, value.raw.toLong())
       }
-      is AppSettings -> {
+      is ServiceState -> {
         stream.write(133)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationRecord -> {
+      is GlossaryEntry -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is ServiceStateChanged -> {
+      is AppSettings -> {
         stream.write(135)
         writeValue(stream, value.toList())
       }
-      is SettingsChanged -> {
+      is TranslationRecord -> {
         stream.write(136)
+        writeValue(stream, value.toList())
+      }
+      is ServiceStateChanged -> {
+        stream.write(137)
+        writeValue(stream, value.toList())
+      }
+      is SettingsChanged -> {
+        stream.write(138)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -605,6 +696,11 @@ interface SettingsHostApi {
   /** 저장된 고정 영역을 지운다 (FL-08). 다음에 고정 영역 번역을 시작하면 영역을 새로 고른다. */
   suspend fun resetFixedRegion()
   suspend fun setOnboardingCompleted(completed: Boolean)
+  /** 만 18세 이상 확인을 기록한다 (FL-09). */
+  suspend fun setAgeConfirmed(confirmed: Boolean)
+  suspend fun setAiTone(tone: AiTone)
+  /** 용어집 전체를 바꾼다 (FL-11). 네이티브가 빈 칸 · 중복 · 개수를 정리해 저장한다. */
+  suspend fun setGlossary(entries: List<GlossaryEntry>)
   /** 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다. */
   suspend fun getApiKey(): String?
   /** API 키를 Keystore로 암호화해 기기에만 저장한다. */
@@ -886,6 +982,66 @@ interface SettingsHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.setOnboardingCompleted(completedArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAgeConfirmed$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val confirmedArg = args[0] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setAgeConfirmed(confirmedArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAiTone$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val toneArg = args[0] as AiTone
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setAiTone(toneArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setGlossary$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val entriesArg = args[0] as List<GlossaryEntry>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setGlossary(entriesArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

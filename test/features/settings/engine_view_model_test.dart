@@ -56,7 +56,7 @@ void main() {
 
   test('Gemini는 키가 없으면 선택해도 저장하지 않는다', () async {
     when(() => repository.getApiKey()).thenAnswer((_) async => null);
-    await ready();
+    await ready(const TranslatorSettings(ageConfirmed: true));
     final viewModel = container.read(engineViewModelProvider.notifier);
 
     await viewModel.select(EngineType.gemini);
@@ -64,9 +64,20 @@ void main() {
     verifyNever(() => repository.setEngine(any()));
   });
 
-  test('Gemini는 키가 있으면 선택된다', () async {
-    when(() => repository.getApiKey()).thenAnswer((_) async => "k");
+  test('Gemini는 연령 확인이 없으면 키가 있어도 저장하지 않는다 (FL-09)', () async {
+    when(() => repository.getApiKey()).thenAnswer((_) async => 'k');
     await ready();
+
+    await container
+        .read(engineViewModelProvider.notifier)
+        .select(EngineType.gemini);
+
+    verifyNever(() => repository.setEngine(any()));
+  });
+
+  test('Gemini는 연령 확인과 키가 있으면 선택된다', () async {
+    when(() => repository.getApiKey()).thenAnswer((_) async => "k");
+    await ready(const TranslatorSettings(ageConfirmed: true));
 
     await container
         .read(engineViewModelProvider.notifier)

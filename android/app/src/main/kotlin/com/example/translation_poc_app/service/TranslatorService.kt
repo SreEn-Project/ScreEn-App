@@ -166,7 +166,8 @@ class TranslatorService : LifecycleService() {
         ).also { mlKitEngine = it }
         return when (settings.engine) {
             Engine.ML_KIT -> mlKit
-            Engine.GEMINI -> FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit, ::notifyAiFallback)
+            // 설정이 연령 확인 전 Gemini를 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
+            Engine.GEMINI -> if (!settings.ageConfirmed) mlKit else FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit, ::notifyAiFallback)
         }
     }
 
@@ -226,7 +227,10 @@ class TranslatorService : LifecycleService() {
             sampleSignature = { region -> capturer?.captureSignature(region) },
             onStopRequested = { stopSelf() },
             onTranslated = ::recordHistory,
-            hasGeminiKey = { !AppGraph.apiKeyStore(this).get().isNullOrBlank() },
+            hasGeminiKey = {
+                AppGraph.settingsRepository(this).current().ageConfirmed &&
+                    !AppGraph.apiKeyStore(this).get().isNullOrBlank()
+            },
         ).takeIf { it.show() }
     }
 

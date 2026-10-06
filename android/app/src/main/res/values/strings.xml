@@ -33,7 +33,7 @@
     <string name="overlay_setting_engine">AI translation: %1$s</string>
     <string name="overlay_engine_ml_kit">ML Kit</string>
     <string name="overlay_engine_gemini">Gemini AI</string>
-    <string name="overlay_engine_needs_key">Gemini AI: add a key in app settings</string>
+    <string name="overlay_engine_needs_key">Gemini AI: confirm age and add a key in app settings</string>
     <string name="overlay_time_instant">Instantly</string>
     <string name="overlay_time_manual">Manual</string>
     <string name="overlay_time_seconds">After %1$ss</string>

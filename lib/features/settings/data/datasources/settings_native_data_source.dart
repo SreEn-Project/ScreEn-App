@@ -47,6 +47,14 @@ class SettingsNativeDataSource {
   Future<void> setOnboardingCompleted(bool completed) =>
       _api.setOnboardingCompleted(completed);
 
+  Future<void> setAgeConfirmed(bool confirmed) =>
+      _api.setAgeConfirmed(confirmed);
+
+  Future<void> setAiTone(pigeon.AiTone tone) => _api.setAiTone(tone);
+
+  Future<void> setGlossary(List<pigeon.GlossaryEntry> entries) =>
+      _api.setGlossary(entries);
+
   Future<String?> getApiKey() => _api.getApiKey();
 
   Future<void> setApiKey(String apiKey) => _api.setApiKey(apiKey);

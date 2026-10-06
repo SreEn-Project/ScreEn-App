@@ -1,5 +1,6 @@
 package com.example.translation_poc_app.bridge
 
+import com.example.translation_poc_app.data.settings.AiTone
 import com.example.translation_poc_app.data.settings.CaptureRange
 import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.ResultDisplay
@@ -22,7 +23,22 @@ fun Settings.toPigeon() = AppSettings(
     buttonSizeDp = buttonSizeDp.toLong(),
     buttonOpacityPercent = buttonOpacityPercent.toLong(),
     hasFixedRegion = fixedRegion != null,
+    ageConfirmed = ageConfirmed,
+    aiTone = aiTone.toPigeon(),
+    glossary = glossary.map { GlossaryEntry(it.source, it.target) },
 )
+
+fun AiTone.toPigeon() = when (this) {
+    AiTone.STANDARD -> com.example.translation_poc_app.bridge.AiTone.STANDARD
+    AiTone.FORMAL -> com.example.translation_poc_app.bridge.AiTone.FORMAL
+    AiTone.INFORMAL -> com.example.translation_poc_app.bridge.AiTone.INFORMAL
+}
+
+fun com.example.translation_poc_app.bridge.AiTone.toNative() = when (this) {
+    com.example.translation_poc_app.bridge.AiTone.STANDARD -> AiTone.STANDARD
+    com.example.translation_poc_app.bridge.AiTone.FORMAL -> AiTone.FORMAL
+    com.example.translation_poc_app.bridge.AiTone.INFORMAL -> AiTone.INFORMAL
+}
 
 fun com.example.translation_poc_app.data.history.TranslationRecord.toPigeon() = TranslationRecord(
     id = id,

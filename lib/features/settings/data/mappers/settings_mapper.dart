@@ -18,7 +18,34 @@ extension AppSettingsMapper on pigeon.AppSettings {
     buttonSizeDp: buttonSizeDp,
     buttonOpacityPercent: buttonOpacityPercent,
     hasFixedRegion: hasFixedRegion,
+    ageConfirmed: ageConfirmed,
+    aiTone: aiTone.toEntity(),
+    glossary: [
+      for (final e in glossary)
+        GlossaryEntry(source: e.source, target: e.target),
+    ],
   );
+}
+
+extension on pigeon.AiTone {
+  AiTone toEntity() => switch (this) {
+    pigeon.AiTone.standard => AiTone.standard,
+    pigeon.AiTone.formal => AiTone.formal,
+    pigeon.AiTone.informal => AiTone.informal,
+  };
+}
+
+extension AiToneToPigeon on AiTone {
+  pigeon.AiTone toPigeon() => switch (this) {
+    AiTone.standard => pigeon.AiTone.standard,
+    AiTone.formal => pigeon.AiTone.formal,
+    AiTone.informal => pigeon.AiTone.informal,
+  };
+}
+
+extension GlossaryEntryToPigeon on GlossaryEntry {
+  pigeon.GlossaryEntry toPigeon() =>
+      pigeon.GlossaryEntry(source: source, target: target);
 }
 
 extension on pigeon.EngineType {

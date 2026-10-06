@@ -106,9 +106,59 @@ enum CaptureMode { fullScreen, dragRegion, fixedRegion }
 /// 결과 표시 방식 (FL-07). list = 블록별 카드, paragraph = 나누지 않고 한 문단, overlay = 원문 위에 덮기(NA-22).
 enum DisplayMode { list, paragraph, overlay }
 
+/// AI 번역 말투 (FL-11). standard = 지정하지 않음(AI가 원문에 맞춤).
+enum AiTone { standard, formal, informal }
+
 /// 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
 /// error = 시작 실패 (동의 후 서비스 시작 실패 등). 다시 시작하면 벗어난다.
 enum ServiceState { stopped, starting, running, error }
+
+/// AI 번역 용어집 한 줄 (FL-11): 원문 표현을 항상 이 번역어로 옮긴다.
+class GlossaryEntry {
+  GlossaryEntry({required this.source, required this.target});
+
+  String source;
+
+  String target;
+
+  List<Object?> _toList() {
+    return <Object?>[source, target];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static GlossaryEntry decode(Object result) {
+    result as List<Object?>;
+    return GlossaryEntry(
+      source: result[0]! as String,
+      target: result[1]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! GlossaryEntry || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(source, other.source) &&
+        _deepEquals(target, other.target);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'GlossaryEntry(source: $source, target: $target)';
+  }
+}
 
 /// DataStore에 저장되는 설정 (NA-16).
 class AppSettings {
@@ -126,6 +176,9 @@ class AppSettings {
     required this.buttonSizeDp,
     required this.buttonOpacityPercent,
     required this.hasFixedRegion,
+    required this.ageConfirmed,
+    required this.aiTone,
+    required this.glossary,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -164,6 +217,15 @@ class AppSettings {
   /// 고정 영역이 저장돼 있다 (FL-08). 영역 자체는 네이티브 전용이다.
   bool hasFixedRegion;
 
+  /// 만 18세 이상임을 확인했다 (FL-09). 확인하기 전에는 AI 엔진을 고를 수 없다.
+  bool ageConfirmed;
+
+  /// AI 번역 말투 (FL-11).
+  AiTone aiTone;
+
+  /// AI 번역 용어집 (FL-11). 입력 순서 유지.
+  List<GlossaryEntry> glossary;
+
   List<Object?> _toList() {
     return <Object?>[
       targetLanguage,
@@ -179,6 +241,9 @@ class AppSettings {
       buttonSizeDp,
       buttonOpacityPercent,
       hasFixedRegion,
+      ageConfirmed,
+      aiTone,
+      glossary,
     ];
   }
 
@@ -202,6 +267,9 @@ class AppSettings {
       buttonSizeDp: result[10]! as int,
       buttonOpacityPercent: result[11]! as int,
       hasFixedRegion: result[12]! as bool,
+      ageConfirmed: result[13]! as bool,
+      aiTone: result[14]! as AiTone,
+      glossary: (result[15]! as List<Object?>).cast<GlossaryEntry>(),
     );
   }
 
@@ -226,7 +294,10 @@ class AppSettings {
         _deepEquals(wifiOnlyModelDownload, other.wifiOnlyModelDownload) &&
         _deepEquals(buttonSizeDp, other.buttonSizeDp) &&
         _deepEquals(buttonOpacityPercent, other.buttonOpacityPercent) &&
-        _deepEquals(hasFixedRegion, other.hasFixedRegion);
+        _deepEquals(hasFixedRegion, other.hasFixedRegion) &&
+        _deepEquals(ageConfirmed, other.ageConfirmed) &&
+        _deepEquals(aiTone, other.aiTone) &&
+        _deepEquals(glossary, other.glossary);
   }
 
   @override
@@ -235,7 +306,7 @@ class AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion)';
+    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion, ageConfirmed: $ageConfirmed, aiTone: $aiTone, glossary: $glossary)';
   }
 }
 
@@ -422,20 +493,26 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is DisplayMode) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    } else if (value is ServiceState) {
+    } else if (value is AiTone) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
-    } else if (value is AppSettings) {
+    } else if (value is ServiceState) {
       buffer.putUint8(133);
-      writeValue(buffer, value.encode());
-    } else if (value is TranslationRecord) {
+      writeValue(buffer, value.index);
+    } else if (value is GlossaryEntry) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    } else if (value is ServiceStateChanged) {
+    } else if (value is AppSettings) {
       buffer.putUint8(135);
       writeValue(buffer, value.encode());
-    } else if (value is SettingsChanged) {
+    } else if (value is TranslationRecord) {
       buffer.putUint8(136);
+      writeValue(buffer, value.encode());
+    } else if (value is ServiceStateChanged) {
+      buffer.putUint8(137);
+      writeValue(buffer, value.encode());
+    } else if (value is SettingsChanged) {
+      buffer.putUint8(138);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -456,14 +533,19 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : DisplayMode.values[value];
       case 132:
         final value = readValue(buffer) as int?;
-        return value == null ? null : ServiceState.values[value];
+        return value == null ? null : AiTone.values[value];
       case 133:
-        return AppSettings.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : ServiceState.values[value];
       case 134:
-        return TranslationRecord.decode(readValue(buffer)!);
+        return GlossaryEntry.decode(readValue(buffer)!);
       case 135:
-        return ServiceStateChanged.decode(readValue(buffer)!);
+        return AppSettings.decode(readValue(buffer)!);
       case 136:
+        return TranslationRecord.decode(readValue(buffer)!);
+      case 137:
+        return ServiceStateChanged.decode(readValue(buffer)!);
+      case 138:
         return SettingsChanged.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -760,6 +842,68 @@ class SettingsHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[completed],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 만 18세 이상 확인을 기록한다 (FL-09).
+  Future<void> setAgeConfirmed(bool confirmed) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAgeConfirmed$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[confirmed],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> setAiTone(AiTone tone) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setAiTone$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tone],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 용어집 전체를 바꾼다 (FL-11). 네이티브가 빈 칸 · 중복 · 개수를 정리해 저장한다.
+  Future<void> setGlossary(List<GlossaryEntry> entries) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setGlossary$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[entries],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

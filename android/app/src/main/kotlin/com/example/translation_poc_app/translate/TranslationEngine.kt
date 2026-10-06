@@ -1,5 +1,7 @@
 package com.example.translation_poc_app.translate
 
+import com.example.translation_poc_app.data.settings.AiTone
+import com.example.translation_poc_app.data.settings.GlossaryEntry
 import java.io.Closeable
 
 /** 번역 엔진 종류. 엔진이 늘면 여기에 추가한다 (NA-11). */
@@ -8,8 +10,23 @@ enum class EngineId { ML_KIT, GEMINI }
 /** 원문 언어를 엔진이 알아서 고르게 할 때 쓰는 값. */
 const val AUTO_LANGUAGE = "auto"
 
-/** @param source 언어 코드(ko, en …) 또는 [AUTO_LANGUAGE]. target은 항상 언어 코드. */
-data class TranslationRequest(val text: String, val source: String, val target: String)
+/** AI 번역에 덧붙이는 옵션 (FL-11): 말투 · 용어집. ML Kit은 무시한다. 캐시 키에도 들어간다. */
+data class AiStyle(val tone: AiTone = AiTone.STANDARD, val glossary: List<GlossaryEntry> = emptyList()) {
+    companion object {
+        val NONE = AiStyle()
+    }
+}
+
+/**
+ * @param source 언어 코드(ko, en …) 또는 [AUTO_LANGUAGE]. target은 항상 언어 코드.
+ * @param style AI 엔진에만 쓰는 말투 · 용어집.
+ */
+data class TranslationRequest(
+    val text: String,
+    val source: String,
+    val target: String,
+    val style: AiStyle = AiStyle.NONE,
+)
 
 data class TranslationResult(
     val text: String,
