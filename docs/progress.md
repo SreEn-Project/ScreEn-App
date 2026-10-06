@@ -461,3 +461,8 @@
 - 설계 D-052. Pigeon: `isApiKeyPinEnabled` · `verifyApiKeyPin` · `setApiKeyPin` · `clearApiKeyPin` · `resetApiKeyProtection`. 네이티브: `ApiKeyStore`에 PIN(salt + PBKDF2 해시, Keystore 암호화) 저장 · 검증. Flutter: 유스케이스 5개, `ApiKeyPinViewModel`, PIN 입력 시트 · 분실 초기화 시트, AI 번역 설정에 "키 잠금 PIN" 줄과 잠금 카드. 문구(ko/en) 추가.
 - 확인: `flutter analyze` 0, `flutter test`(ViewModel PIN 테스트 6개 추가), `flutter build apk --debug`. 기기 확인 전 — 확인 항목: PIN 켜기(두 번 입력) → 화면 나갔다 들어오면 잠김 → 틀린 PIN 오류 → 맞으면 키 보임 · 수정 · 삭제 → PIN 변경 · 끄기 → "PIN을 잊었어요"로 초기화(키 삭제 · ML Kit 복귀) → PIN 켠 채로도 번역이 정상 동작.
 - 새 의존성 없음.
+
+## 단어장 직접 추가 · 편집 시트 · 기록에서 추가 (AD-03, #126 — PR A)
+- 설계 D-053. 단어장 상세 "+"와 번역 기록 상세 시트의 "단어장에 추가"가 같은 편집 시트(`WordEditSheet`: 단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문 + 단어장 칩/새 단어장)를 거쳐 저장한다. Pigeon `saveWord`/`VocabWordInput` 추가, 유스케이스 `SaveWord`, `WordEditViewModel`, `AppTextField.maxLines`(design.md 갱신). 문구(ko/en) 추가.
+- 확인: `flutter analyze` 0, `flutter test` 통과(편집 시트 · 직접 추가 · 기록 연결 테스트 3개 추가), 네이티브 `flutter build apk --debug`. 기기 확인 전 — 확인 항목: 단어장 상세 "+" → 입력 → 저장 → 목록에 보임 / 새 단어장으로 저장 / 기록 카드 탭 → 글 드래그 선택 → "단어장에 추가" → 칸이 채워져 있음.
+- 남은 일(PR B): 오버레이 사전 카드 → 편집 → 단어장 선택, 문단형 결과에서 단어 고르기.

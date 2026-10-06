@@ -56,3 +56,28 @@ class VocabularyWord {
 
 /// 단어 목록 정렬 (AD-05).
 enum WordSort { newest, oldest, alphabetical }
+
+/// 저장할 단어 한 건 (AD-03): 직접 추가 · 번역 기록에서 추가에서 편집 시트가 만든다.
+class WordDraft {
+  const WordDraft({
+    required this.word,
+    required this.meaning,
+    this.pronunciation,
+    this.partOfSpeech,
+    this.contextMeaning,
+    this.sentence,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+  });
+
+  final String word;
+  final String meaning;
+  final String? pronunciation;
+  final String? partOfSpeech;
+  final String? contextMeaning;
+  final String? sentence;
+
+  /// BCP-47 언어 코드. 모르면 "und".
+  final String sourceLanguage;
+  final String targetLanguage;
+}

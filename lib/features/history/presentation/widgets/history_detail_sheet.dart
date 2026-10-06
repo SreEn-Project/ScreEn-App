@@ -7,6 +7,8 @@ import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/history_entry.dart';
+import '../../../vocabulary/domain/entities/vocabulary.dart';
+import '../../../vocabulary/presentation/widgets/word_edit_sheet.dart';
 import 'history_card.dart' show historyLanguageName;
 
 /// 기록 상세 바텀시트 (FL-13): 목록에서 줄여 보인 번역 · 원문을 전체로 보여 주고 복사한다.
@@ -30,8 +32,34 @@ class HistoryDetailSheet extends StatefulWidget {
 
 enum _Copied { translated, original }
 
+// 긴 글은 예문으로 넣지 않는다.
+const _maxSentenceLength = 200;
+
 class _HistoryDetailSheetState extends State<HistoryDetailSheet> {
   _Copied? _copied;
+
+  // 원문 · 번역에서 드래그로 고른 글. 단어 추가 시 단어 · 뜻 칸을 미리 채운다.
+  String _pickedOriginal = '';
+  String _pickedTranslated = '';
+
+  Future<void> _addWord() async {
+    final l10n = AppLocalizations.of(context);
+    final entry = widget.entry;
+    final saved = await showWordEditSheet(
+      context,
+      title: l10n.vocabHistoryAddTitle,
+      initial: WordDraft(
+        word: _pickedOriginal.trim(),
+        meaning: _pickedTranslated.trim(),
+        sentence: entry.original.length <= _maxSentenceLength
+            ? entry.original
+            : null,
+        sourceLanguage: entry.sourceLanguage,
+        targetLanguage: entry.targetLanguage,
+      ),
+    );
+    if (saved != null && mounted) Navigator.of(context).pop();
+  }
 
   Future<void> _copy(_Copied target, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
@@ -52,7 +80,13 @@ class _HistoryDetailSheetState extends State<HistoryDetailSheet> {
         '${historyLanguageName(entry.sourceLanguage, locale.languageCode)} → '
         '${historyLanguageName(entry.targetLanguage, locale.languageCode)} · $time';
 
-    Widget block(String title, String text, TextStyle? style, _Copied target) {
+    Widget block(
+      String title,
+      String text,
+      TextStyle? style,
+      _Copied target,
+      ValueChanged<String> onPicked,
+    ) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -74,7 +108,13 @@ class _HistoryDetailSheetState extends State<HistoryDetailSheet> {
             ],
           ),
           const SizedBox(height: AppTokens.space4),
-          SelectableText(text, style: style),
+          SelectableText(
+            text,
+            style: style,
+            onSelectionChanged: (selection, _) => onPicked(
+              selection.isCollapsed ? '' : selection.textInside(text),
+            ),
+          ),
         ],
       );
     }
@@ -98,6 +138,7 @@ class _HistoryDetailSheetState extends State<HistoryDetailSheet> {
               entry.translated,
               theme.textTheme.titleMedium,
               _Copied.translated,
+              (text) => _pickedTranslated = text,
             ),
             const SizedBox(height: AppTokens.sectionGap),
             block(
@@ -107,6 +148,13 @@ class _HistoryDetailSheetState extends State<HistoryDetailSheet> {
                 color: colors.onSurfaceVariant,
               ),
               _Copied.original,
+              (text) => _pickedOriginal = text,
+            ),
+            const SizedBox(height: AppTokens.sectionGap),
+            AppButton.secondary(
+              label: l10n.vocabAddToBook,
+              leading: const Icon(Symbols.menu_book_rounded, size: 20),
+              onPressed: _addWord,
             ),
           ],
         ),

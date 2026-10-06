@@ -430,3 +430,44 @@ final class SetWordMemorizedProvider
 }
 
 String _$setWordMemorizedHash() => r'e1f2729a8b69db6067743347e3c5200f8cf21efa';
+
+@ProviderFor(saveWord)
+final saveWordProvider = SaveWordProvider._();
+
+final class SaveWordProvider
+    extends $FunctionalProvider<SaveWord, SaveWord, SaveWord>
+    with $Provider<SaveWord> {
+  SaveWordProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'saveWordProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$saveWordHash();
+
+  @$internal
+  @override
+  $ProviderElement<SaveWord> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SaveWord create(Ref ref) {
+    return saveWord(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SaveWord value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SaveWord>(value),
+    );
+  }
+}
+
+String _$saveWordHash() => r'05f95ee736c1fe0c3d4d163be24754547a0f98f7';

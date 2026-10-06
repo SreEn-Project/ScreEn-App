@@ -583,6 +583,95 @@ class VocabWord {
   }
 }
 
+/// 앱에서 저장할 단어 한 건 (AD-03): 직접 추가 · 번역 기록에서 추가.
+class VocabWordInput {
+  VocabWordInput({
+    required this.word,
+    required this.meaning,
+    this.pronunciation,
+    this.partOfSpeech,
+    this.contextMeaning,
+    this.sentence,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+  });
+
+  String word;
+
+  String meaning;
+
+  String? pronunciation;
+
+  String? partOfSpeech;
+
+  String? contextMeaning;
+
+  String? sentence;
+
+  String sourceLanguage;
+
+  String targetLanguage;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      word,
+      meaning,
+      pronunciation,
+      partOfSpeech,
+      contextMeaning,
+      sentence,
+      sourceLanguage,
+      targetLanguage,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static VocabWordInput decode(Object result) {
+    result as List<Object?>;
+    return VocabWordInput(
+      word: result[0]! as String,
+      meaning: result[1]! as String,
+      pronunciation: result[2] as String?,
+      partOfSpeech: result[3] as String?,
+      contextMeaning: result[4] as String?,
+      sentence: result[5] as String?,
+      sourceLanguage: result[6]! as String,
+      targetLanguage: result[7]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! VocabWordInput || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(word, other.word) &&
+        _deepEquals(meaning, other.meaning) &&
+        _deepEquals(pronunciation, other.pronunciation) &&
+        _deepEquals(partOfSpeech, other.partOfSpeech) &&
+        _deepEquals(contextMeaning, other.contextMeaning) &&
+        _deepEquals(sentence, other.sentence) &&
+        _deepEquals(sourceLanguage, other.sourceLanguage) &&
+        _deepEquals(targetLanguage, other.targetLanguage);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'VocabWordInput(word: $word, meaning: $meaning, pronunciation: $pronunciation, partOfSpeech: $partOfSpeech, contextMeaning: $contextMeaning, sentence: $sentence, sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage)';
+  }
+}
+
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.
 sealed class TranslatorEvent {}
 
@@ -706,11 +795,14 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is VocabWord) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    } else if (value is ServiceStateChanged) {
+    } else if (value is VocabWordInput) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    } else if (value is SettingsChanged) {
+    } else if (value is ServiceStateChanged) {
       buffer.putUint8(141);
+      writeValue(buffer, value.encode());
+    } else if (value is SettingsChanged) {
+      buffer.putUint8(142);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -749,8 +841,10 @@ class _PigeonCodec extends StandardMessageCodec {
       case 139:
         return VocabWord.decode(readValue(buffer)!);
       case 140:
-        return ServiceStateChanged.decode(readValue(buffer)!);
+        return VocabWordInput.decode(readValue(buffer)!);
       case 141:
+        return ServiceStateChanged.decode(readValue(buffer)!);
+      case 142:
         return SettingsChanged.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -1546,7 +1640,7 @@ class HistoryHostApi {
   }
 }
 
-/// 단어장 관리 (AD-04 ~ AD-06). 단어 저장(AD-03)은 오버레이(네이티브)가 직접 한다.
+/// 단어장 관리 (AD-04 ~ AD-06). 오버레이는 저장소를 직접 부르고, 앱의 직접 추가 · 기록에서 추가는 [saveWord]로 한다.
 class VocabularyHostApi {
   /// Constructor for [VocabularyHostApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
@@ -1755,6 +1849,29 @@ class VocabularyHostApi {
       pigeonVar_channelName,
       isNullValid: true,
     );
+  }
+
+  /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
+  /// 저장한 단어의 id를 돌려준다.
+  Future<int?> saveWord(int wordbookId, VocabWordInput input) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.saveWord$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[wordbookId, input],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as int?;
   }
 }
 

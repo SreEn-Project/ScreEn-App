@@ -268,5 +268,19 @@
   "vocabSavedAt": "Saved on",
   "vocabDeleteWord": "Delete word",
   "vocabDeleteWordTitle": "Delete this word?",
-  "vocabWordGone": "This word was already deleted"
+  "vocabWordGone": "This word was already deleted",
+  "vocabAddWord": "Add word",
+  "vocabAddToBook": "Add to wordbook",
+  "vocabWordHint": "Word",
+  "vocabMeaningHint": "Meaning",
+  "vocabPronunciationHint": "Pronunciation (optional)",
+  "vocabPartOfSpeechHint": "Part of speech (optional)",
+  "vocabContextMeaningHint": "Meaning in context (optional)",
+  "vocabSentenceHint": "Example sentence (optional)",
+  "vocabSaveTo": "Save to",
+  "vocabNewBookChip": "New wordbook",
+  "vocabSavedTo": "Saved to ‘{name}’",
+  "@vocabSavedTo": { "placeholders": { "name": { "type": "String" } } },
+  "vocabSaveFailed": "Could not save. Check the word and meaning",
+  "vocabHistoryAddTitle": "Add a word from history"
 }

@@ -762,4 +762,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vocabWordGone => 'This word was already deleted';
+
+  @override
+  String get vocabAddWord => 'Add word';
+
+  @override
+  String get vocabAddToBook => 'Add to wordbook';
+
+  @override
+  String get vocabWordHint => 'Word';
+
+  @override
+  String get vocabMeaningHint => 'Meaning';
+
+  @override
+  String get vocabPronunciationHint => 'Pronunciation (optional)';
+
+  @override
+  String get vocabPartOfSpeechHint => 'Part of speech (optional)';
+
+  @override
+  String get vocabContextMeaningHint => 'Meaning in context (optional)';
+
+  @override
+  String get vocabSentenceHint => 'Example sentence (optional)';
+
+  @override
+  String get vocabSaveTo => 'Save to';
+
+  @override
+  String get vocabNewBookChip => 'New wordbook';
+
+  @override
+  String vocabSavedTo(String name) {
+    return 'Saved to ‘$name’';
+  }
+
+  @override
+  String get vocabSaveFailed => 'Could not save. Check the word and meaning';
+
+  @override
+  String get vocabHistoryAddTitle => 'Add a word from history';
 }

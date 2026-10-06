@@ -132,3 +132,26 @@ final class SetWordMemorized implements UseCase<void, SetMemorizedParams> {
   Future<void> call(SetMemorizedParams params) =>
       _repository.setMemorized(params.id, params.memorized);
 }
+
+class SaveWordParams {
+  const SaveWordParams(this.wordbookId, this.draft);
+
+  final int wordbookId;
+  final WordDraft draft;
+}
+
+/// 단어장에 단어 저장 (AD-03). 단어 · 뜻이 비어 있으면 null.
+final class SaveWord implements UseCase<int?, SaveWordParams> {
+  const SaveWord(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<int?> call(SaveWordParams params) {
+    final draft = params.draft;
+    if (draft.word.trim().isEmpty || draft.meaning.trim().isEmpty) {
+      return Future.value();
+    }
+    return _repository.saveWord(params.wordbookId, draft);
+  }
+}

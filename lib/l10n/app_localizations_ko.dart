@@ -745,4 +745,45 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vocabWordGone => '이미 지워진 단어예요';
+
+  @override
+  String get vocabAddWord => '단어 추가';
+
+  @override
+  String get vocabAddToBook => '단어장에 추가';
+
+  @override
+  String get vocabWordHint => '단어';
+
+  @override
+  String get vocabMeaningHint => '뜻';
+
+  @override
+  String get vocabPronunciationHint => '발음 (선택)';
+
+  @override
+  String get vocabPartOfSpeechHint => '품사 (선택)';
+
+  @override
+  String get vocabContextMeaningHint => '문맥 뜻 (선택)';
+
+  @override
+  String get vocabSentenceHint => '예문 (선택)';
+
+  @override
+  String get vocabSaveTo => '저장할 단어장';
+
+  @override
+  String get vocabNewBookChip => '새 단어장';
+
+  @override
+  String vocabSavedTo(String name) {
+    return '‘$name’에 저장했어요';
+  }
+
+  @override
+  String get vocabSaveFailed => '저장하지 못했어요. 단어와 뜻을 확인해 주세요';
+
+  @override
+  String get vocabHistoryAddTitle => '기록에서 단어 추가';
 }

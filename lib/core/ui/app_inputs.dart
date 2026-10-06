@@ -214,6 +214,7 @@ class AppTextField extends StatelessWidget {
     this.maxLength,
     this.autofocus = false,
     this.textAlign = TextAlign.start,
+    this.maxLines = 1,
   });
 
   final TextEditingController controller;
@@ -225,6 +226,9 @@ class AppTextField extends StatelessWidget {
   final int? maxLength;
   final bool autofocus;
   final TextAlign textAlign;
+
+  /// 여러 줄 입력이면 1보다 크게 (예문 등).
+  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -246,6 +250,8 @@ class AppTextField extends StatelessWidget {
         maxLength: maxLength,
         autofocus: autofocus,
         textAlign: textAlign,
+        minLines: 1,
+        maxLines: maxLines,
         autocorrect: false,
         enableSuggestions: false,
         style: theme.textTheme.bodyLarge,
