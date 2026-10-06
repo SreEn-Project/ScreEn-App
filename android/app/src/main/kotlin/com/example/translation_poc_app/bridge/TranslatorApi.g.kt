@@ -198,11 +198,10 @@ class FlutterError (
   val details: Any? = null
 ) : RuntimeException()
 
-/** 번역 엔진 (NA-11). AI 엔진은 3단계. */
+/** 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini = 내 API 키 (NA-13). */
 enum class EngineType(val raw: Int) {
   ML_KIT(0),
-  GEMINI(1),
-  FIREBASE_AI(2);
+  GEMINI(1);
 
   companion object {
     fun ofRaw(raw: Int): EngineType? {

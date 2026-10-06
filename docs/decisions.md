@@ -274,3 +274,8 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 
 ## D-BYOK. AI 번역 키는 사용자 본인 Gemini 키(BYOK)
 - 사용자 선택(1번). 서버 · 결제 없음, 약관(18세 이상)은 키 발급자 책임이라 개발 계정과 분리. 키는 기기 Keystore에만.
+
+## D-048 · 2026-10-06 · 구글 로그인 AI(Firebase AI Logic) 엔진 제거 (NA-14, FL-12, 이슈 #110)
+- AI 번역은 사용자 본인 Gemini 키(BYOK, D-BYOK)만 쓰기로 해서, 설정 화면의 "구글 로그인 AI" 항목과 그 뒤의 열거형 값 · 문구 · 매핑을 모두 걷어냈다. 엔진은 ML Kit(기본) · Gemini(내 키) 둘뿐이다.
+- 이미 저장된 `FIREBASE_AI` 값(보류 중이라 실제로 저장될 일은 없었다)은 DataStore 읽기에서 모르는 값으로 보고 기본 엔진(ML Kit)으로 돌아간다 (`enumOrDefault`).
+- Pigeon `EngineType`에서 `firebaseAi`가 빠지고(값 2) 생성 코드를 다시 만들었다. 되살리려면 새 결정으로 다시 추가한다.

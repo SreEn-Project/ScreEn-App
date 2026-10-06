@@ -81,8 +81,8 @@ void main() {
   test('도메인 값을 Pigeon 값으로 바꿔 저장한다', () async {
     when(() => api.setEngine(any())).thenAnswer((_) async {});
 
-    await repository.setEngine(EngineType.firebaseAi);
+    await repository.setEngine(EngineType.gemini);
 
-    verify(() => api.setEngine(pigeon.EngineType.firebaseAi)).called(1);
+    verify(() => api.setEngine(pigeon.EngineType.gemini)).called(1);
   });
 }

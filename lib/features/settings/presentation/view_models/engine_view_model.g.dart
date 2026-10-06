@@ -9,17 +9,17 @@ part of 'engine_view_model.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// 번역 엔진 선택 (FL-06). 네이티브 설정(DataStore)이 원본이라 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
-/// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13). Firebase AI는 보류.
+/// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13).
 
 @ProviderFor(EngineViewModel)
 final engineViewModelProvider = EngineViewModelProvider._();
 
 /// 번역 엔진 선택 (FL-06). 네이티브 설정(DataStore)이 원본이라 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
-/// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13). Firebase AI는 보류.
+/// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13).
 final class EngineViewModelProvider
     extends $StreamNotifierProvider<EngineViewModel, EngineType> {
   /// 번역 엔진 선택 (FL-06). 네이티브 설정(DataStore)이 원본이라 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
-  /// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13). Firebase AI는 보류.
+  /// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13).
   EngineViewModelProvider._()
     : super(
         from: null,
@@ -39,10 +39,10 @@ final class EngineViewModelProvider
   EngineViewModel create() => EngineViewModel();
 }
 
-String _$engineViewModelHash() => r'40333f96f83d1c7ecfda87c86e8cff1be519f176';
+String _$engineViewModelHash() => r'27f4ccbdcabb7f828e3b6e7a6a755931ee707536';
 
 /// 번역 엔진 선택 (FL-06). 네이티브 설정(DataStore)이 원본이라 바꾸면 이벤트로 다시 돌아와 화면이 갱신된다.
-/// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13). Firebase AI는 보류.
+/// Gemini는 API 키가 등록돼 있어야 고를 수 있다 (NA-13).
 
 abstract class _$EngineViewModel extends $StreamNotifier<EngineType> {
   Stream<EngineType> build();

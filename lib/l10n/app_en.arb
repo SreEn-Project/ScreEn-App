@@ -97,10 +97,7 @@
   "engineMlKitDetail": "ML Kit · offline · free",
   "engineGemini": "My Gemini key",
   "engineGeminiDetail": "More natural AI translation · API key needed",
-  "engineFirebase": "Google sign-in AI",
-  "engineFirebaseDetail": "AI translation with just a sign-in",
   "engineNeedsKey": "Add an API key to use this",
-  "engineNeedsLogin": "Requires Google sign-in and age check",
 
   "settingsTitle": "Settings",
   "settingsSectionTranslation": "Translation",

@@ -45,11 +45,11 @@ presentation ──▶ domain ◀── data
 네이티브 코드: 2~5는 `translate/TranslationPipeline`(서비스가 캡처 · OCR · 감지 · 엔진을 함수로 넘김), 1 · 6은 `overlay/OverlayController`(버튼 · 메뉴 · 닫기 영역 · 결과 시트 창). 둘 다 `TranslatorService`가 세션 동안 가진다 (D-024).
 
 ## 번역 엔진
-`TranslationEngine` 인터페이스 — ML Kit 온디바이스(기본), Gemini(내 키), Firebase AI Logic(구글 로그인). 실패 시 ML Kit 대체.
+`TranslationEngine` 인터페이스 — ML Kit 온디바이스(기본), Gemini(내 키). 실패 시 ML Kit 대체.
 
 ## 주요 패키지
-- Flutter: flutter_riverpod, riverpod_generator, go_router, freezed, json_serializable, pigeon(dev), permission_handler, url_launcher, flutter_localizations, intl, mocktail(dev). 3단계에 firebase_core · firebase_auth · google_sign_in.
-- 네이티브: lifecycle-service, WindowManager + Compose, mlkit text-recognition(+korean/japanese/chinese), language-id, translate, Room, DataStore, coroutines. 3단계에 OkHttp, kotlinx.serialization, firebase-ai.
+- Flutter: flutter_riverpod, riverpod_generator, go_router, freezed, json_serializable, pigeon(dev), permission_handler, url_launcher, flutter_localizations, intl, mocktail(dev).
+- 네이티브: lifecycle-service, WindowManager + Compose, mlkit text-recognition(+korean/japanese/chinese), language-id, translate, Room, DataStore, coroutines. 3단계에 OkHttp, kotlinx.serialization.
 
 ## 제약
 - Android 14+는 캡처 세션마다 사용자 동의, 포그라운드 서비스 유형 `mediaProjection`.

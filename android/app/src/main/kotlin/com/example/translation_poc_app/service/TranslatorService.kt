@@ -155,8 +155,7 @@ class TranslatorService : LifecycleService() {
     }
 
     /**
-     * 설정(FL-06)에서 고른 번역 엔진 (NA-11). 지금 구현된 엔진은 ML Kit(NA-12)뿐이다.
-     * AI 엔진(NA-13 · NA-14)은 아직 없어, 저장된 값이 AI여도 ML Kit으로 대체한다.
+     * 설정(FL-06)에서 고른 번역 엔진 (NA-11): ML Kit(NA-12) 또는 Gemini(NA-13, 실패 시 ML Kit으로 대체).
      * 엔진이 추가되면 [Engine]별 분기만 늘리면 된다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
@@ -168,10 +167,6 @@ class TranslatorService : LifecycleService() {
         return when (settings.engine) {
             Engine.ML_KIT -> mlKit
             Engine.GEMINI -> FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit, ::notifyAiFallback)
-            Engine.FIREBASE_AI -> {
-                Log.w(TAG, "FIREBASE_AI 엔진은 아직 없어 ML Kit으로 번역한다")
-                mlKit
-            }
         }
     }
 

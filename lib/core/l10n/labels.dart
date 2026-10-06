@@ -9,13 +9,11 @@ extension EnumLabels on AppLocalizations {
   String engineName(EngineType engine) => switch (engine) {
     EngineType.mlKit => engineMlKit,
     EngineType.gemini => engineGemini,
-    EngineType.firebaseAi => engineFirebase,
   };
 
   String engineDetail(EngineType engine) => switch (engine) {
     EngineType.mlKit => engineMlKitDetail,
     EngineType.gemini => engineGeminiDetail,
-    EngineType.firebaseAi => engineFirebaseDetail,
   };
 
   String captureModeName(CaptureMode mode) => switch (mode) {
@@ -34,7 +32,6 @@ extension EnumLabels on AppLocalizations {
 IconData engineIcon(EngineType engine) => switch (engine) {
   EngineType.mlKit => Symbols.offline_bolt_rounded,
   EngineType.gemini => Symbols.key_rounded,
-  EngineType.firebaseAi => Symbols.auto_awesome_rounded,
 };
 
 IconData captureModeIcon(CaptureMode mode) => switch (mode) {

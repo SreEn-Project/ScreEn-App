@@ -1,7 +1,7 @@
 package com.example.translation_poc_app.data.settings
 
-/** 번역 엔진 (NA-11). AI 엔진은 3단계. */
-enum class Engine { ML_KIT, GEMINI, FIREBASE_AI }
+/** 번역 엔진 (NA-11). ML_KIT = 기기 내 번역, GEMINI = 내 API 키 (NA-13). */
+enum class Engine { ML_KIT, GEMINI }
 
 /** 캡처 범위 (NA-06). */
 enum class CaptureRange { FULL_SCREEN, DRAG_REGION, FIXED_REGION }

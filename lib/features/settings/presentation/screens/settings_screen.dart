@@ -76,11 +76,10 @@ class _EngineSection extends ConsumerWidget {
               _EngineTile(
                 engine: engine,
                 selected: engine == selected,
-                // Gemini는 키가 있어야, Firebase AI는 아직 보류.
+                // Gemini는 키가 있어야 고를 수 있다.
                 disabledReason: switch (engine) {
                   EngineType.mlKit => null,
                   EngineType.gemini => hasKey ? null : l10n.engineNeedsKey,
-                  EngineType.firebaseAi => l10n.engineNeedsLogin,
                 },
                 onTap: () => viewModel.select(engine),
               ),

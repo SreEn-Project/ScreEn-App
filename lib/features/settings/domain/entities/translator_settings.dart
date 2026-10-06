@@ -2,8 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'translator_settings.freezed.dart';
 
-/// 번역 엔진 (NA-11). AI 엔진은 3단계.
-enum EngineType { mlKit, gemini, firebaseAi }
+/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini = 내 API 키 (NA-13).
+enum EngineType { mlKit, gemini }
 
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
