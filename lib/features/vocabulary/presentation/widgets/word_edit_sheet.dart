@@ -29,6 +29,28 @@ Future<String?> showWordEditSheet(
   );
 }
 
+/// 눌러야 나타나는 부가 항목.
+enum _Option {
+  pronunciation,
+  partOfSpeech,
+  contextMeaning,
+  sentence;
+
+  String label(AppLocalizations l10n) => switch (this) {
+    pronunciation => l10n.vocabOptPronunciation,
+    partOfSpeech => l10n.vocabOptPartOfSpeech,
+    contextMeaning => l10n.vocabOptContextMeaning,
+    sentence => l10n.vocabOptSentence,
+  };
+
+  String hint(AppLocalizations l10n) => switch (this) {
+    pronunciation => l10n.vocabPronunciationHint,
+    partOfSpeech => l10n.vocabPartOfSpeechHint,
+    contextMeaning => l10n.vocabContextMeaningHint,
+    sentence => l10n.vocabSentenceHint,
+  };
+}
+
 class WordEditSheet extends ConsumerStatefulWidget {
   const WordEditSheet({
     super.key,
@@ -68,11 +90,24 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
   bool _failed = false;
   String? _savedBookName;
 
+  /// 펼쳐진 부가 항목. 값이 이미 있는 항목은 처음부터 보인다.
+  late final Set<_Option> _shown = {
+    for (final o in _Option.values)
+      if (_controllerOf(o).text.trim().isNotEmpty) o,
+  };
+
   @override
   void initState() {
     super.initState();
     _bookId = widget.wordbookId;
   }
+
+  TextEditingController _controllerOf(_Option option) => switch (option) {
+    _Option.pronunciation => _pronunciation,
+    _Option.partOfSpeech => _partOfSpeech,
+    _Option.contextMeaning => _contextMeaning,
+    _Option.sentence => _sentence,
+  };
 
   @override
   void dispose() {
@@ -244,10 +279,42 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                     const SizedBox(height: AppTokens.space16),
                     field(_word, l10n.vocabWordHint),
                     field(_meaning, l10n.vocabMeaningHint, lines: 3),
-                    field(_pronunciation, l10n.vocabPronunciationHint),
-                    field(_partOfSpeech, l10n.vocabPartOfSpeechHint),
-                    field(_contextMeaning, l10n.vocabContextMeaningHint),
-                    field(_sentence, l10n.vocabSentenceHint, lines: 3),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOut,
+                      alignment: Alignment.topCenter,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (final o in _Option.values)
+                            if (_shown.contains(o))
+                              field(
+                                _controllerOf(o),
+                                o.hint(l10n),
+                                lines: o == _Option.sentence ? 3 : 1,
+                              ),
+                          if (_shown.length < _Option.values.length)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppTokens.space12,
+                              ),
+                              child: Wrap(
+                                spacing: AppTokens.space8,
+                                runSpacing: AppTokens.space8,
+                                children: [
+                                  for (final o in _Option.values)
+                                    if (!_shown.contains(o))
+                                      AppAddChip(
+                                        label: o.label(l10n),
+                                        onTap: () =>
+                                            setState(() => _shown.add(o)),
+                                      ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: AppTokens.space4),
                     Text(
                       l10n.vocabSaveTo,

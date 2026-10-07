@@ -38,6 +38,27 @@ void main() {
       expect(g.blocks.first.y, greaterThan(y));
     });
 
+    test('연달아 맞히면 콤보가 쌓이고 놓치면 끊긴다', () {
+      final g = game(FallingMode.spelling);
+      g.update(1);
+      final first = g.blocks.first;
+      expect(g.submit(first.answers.first), isTrue);
+      expect(g.combo, 1);
+      expect(g.lastDestroyed, same(first));
+      while (g.blocks.isEmpty) {
+        g.update(0.5);
+      }
+      expect(g.submit(g.blocks.first.answers.first), isTrue);
+      expect(g.combo, 2);
+      expect(g.bestCombo, 2);
+      // 아무것도 안 맞히고 기다리면 바닥에 떨어져 콤보가 끊긴다.
+      while (g.landedNow.isEmpty && !g.over) {
+        g.update(0.5);
+      }
+      expect(g.combo, 0);
+      expect(g.bestCombo, 2);
+    });
+
     test('같은 단어는 동시에 둘 이상 떨어지지 않는다', () {
       final g = game();
       for (var i = 0; i < 40; i++) {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -74,6 +75,8 @@ class _BoardState extends ConsumerState<_Board> {
   static const _columnGap = 56.0;
 
   final _stackKey = GlobalKey();
+  final _burst = GlobalKey<BurstLayerState>();
+  int _shake = 0;
   final _leftKeys = <int, GlobalKey>{};
   final _rightKeys = <int, GlobalKey>{};
 
@@ -149,7 +152,18 @@ class _BoardState extends ConsumerState<_Board> {
       _dragWordId = null;
       _flash = _Flash(wordId: wordId, meaningId: meaningId, correct: correct);
       _busy = true;
+      if (!correct) _shake++;
     });
+    // 맞으면 두 블록에서 조각이 터지고, 틀리면 흔들리며 묵직하게 진동한다.
+    if (correct) {
+      HapticFeedback.mediumImpact();
+      final color = Theme.of(context).colorScheme.primary;
+      _burst.currentState
+        ?..burstAt(_leftKeys[wordId]!, color: color, count: 16)
+        ..burstAt(_rightKeys[meaningId]!, color: color, count: 16);
+    } else {
+      HapticFeedback.heavyImpact();
+    }
     // 맞으면 블록이 깨지는 모습을 잠깐 보여 준 뒤 반영한다.
     await Future<void>.delayed(const Duration(milliseconds: 260));
     if (!mounted) return;
@@ -191,24 +205,27 @@ class _BoardState extends ConsumerState<_Board> {
           child: AnimatedOpacity(
             opacity: broken ? 0 : 1,
             duration: const Duration(milliseconds: 240),
-            child: SizedBox(
-              key: key,
-              height: _blockHeight,
-              child: AppCard(
-                color: fill,
-                radius: AppTokens.radiusInput,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTokens.space12,
-                ),
-                child: Center(
-                  child: Text(
-                    b.text,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: isWord
-                        ? theme.textTheme.titleMedium
-                        : theme.textTheme.bodyMedium,
+            child: ShakeEffect(
+              trigger: flashing && !_flash!.correct ? _shake : 0,
+              child: SizedBox(
+                key: key,
+                height: _blockHeight,
+                child: AppCard(
+                  color: fill,
+                  radius: AppTokens.radiusInput,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTokens.space12,
+                  ),
+                  child: Center(
+                    child: Text(
+                      b.text,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: isWord
+                          ? theme.textTheme.titleMedium
+                          : theme.textTheme.bodyMedium,
+                    ),
                   ),
                 ),
               ),
@@ -242,9 +259,12 @@ class _BoardState extends ConsumerState<_Board> {
       children: [
         Row(
           children: [
-            Text(
-              l10n.matchScore(game.score),
-              style: theme.textTheme.labelLarge,
+            PopEffect(
+              trigger: game.score,
+              child: Text(
+                l10n.matchScore(game.score),
+                style: theme.textTheme.titleMedium,
+              ),
             ),
             const Spacer(),
             Text(
@@ -253,11 +273,11 @@ class _BoardState extends ConsumerState<_Board> {
             ),
           ],
         ),
-        const SizedBox(height: AppTokens.space8),
+        const SizedBox(height: AppTokens.space12),
         AppProgressBar(value: game.matchedCount / game.total),
-        const SizedBox(height: AppTokens.space16),
+        const SizedBox(height: AppTokens.space12),
         Center(child: Text(l10n.matchHint, style: theme.textTheme.bodySmall)),
-        const SizedBox(height: AppTokens.space16),
+        const SizedBox(height: AppTokens.sectionTitleGap),
         // 포인터를 직접 받아 목록 스크롤과 겹치지 않게 한다.
         Listener(
           onPointerDown: _down,
@@ -300,6 +320,7 @@ class _BoardState extends ConsumerState<_Board> {
                     ),
                   ],
                 ),
+                Positioned.fill(child: BurstLayer(key: _burst)),
                 if (from != null && to != null)
                   Positioned.fill(
                     child: IgnorePointer(

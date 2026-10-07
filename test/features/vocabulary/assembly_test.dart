@@ -122,7 +122,7 @@ void main() {
     expect(container.read(provider).value!.correctCount, 1);
   });
 
-  test('ViewModel: 글자 정렬형은 끌어 옮겨 정답을 만든다', () async {
+  test('ViewModel: 글자 정렬형은 끌어 넣고 옮겨 정답을 만든다', () async {
     final repository = FakeVocabularyRepository(
       books: [_book()],
       words: [_word(1, 'abc', '에이비씨')],
@@ -138,13 +138,21 @@ void main() {
     await model.start();
 
     final q = container.read(provider).value!.current!;
-    // 선택 정렬하듯 reorder로 a, b, c 순서를 맞춘다.
-    for (var target = 0; target < 3; target++) {
-      final placed = container.read(provider).value!.placed;
-      final want = 'abc'[target];
-      final from = placed.indexWhere((id) => q.tile(id).text == want);
-      model.reorder(from, target);
-    }
+    // c, a, b 순서로 놓은 뒤 b를 맨 앞(자리 0)으로 끌어 옮겨 a, b, c... 가 아닌 b, c, a를 만들고,
+    // 다시 한 장씩 자리 지정으로 a, b, c를 맞춘다.
+    expect(container.read(provider).value!.placed, isEmpty);
+    int idOf(String t) => q.tiles.firstWhere((x) => x.text == t).id;
+    model.place(idOf('c'));
+    model.place(idOf('a'));
+    model.place(idOf('b'), at: 0);
+    expect(
+      container.read(provider).value!.placed.map((id) => q.tile(id).text),
+      ['b', 'c', 'a'],
+    );
+    // 이미 놓인 카드를 다른 자리로 옮긴다.
+    model.place(idOf('a'), at: 0);
+    model.place(idOf('b'), at: 1);
+    model.place(idOf('c'), at: 3);
     expect(
       container.read(provider).value!.placed.map((id) => q.tile(id).text),
       ['a', 'b', 'c'],
@@ -192,5 +200,59 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('단어 조립 결과'), findsOneWidget);
     expect(find.text('모두 맞혔어요!'), findsOneWidget);
+  });
+
+  testWidgets('카드를 완성 칸으로 끌어 넣고, 끌어서 순서를 바꾼다', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.75;
+    addTearDown(tester.view.reset);
+    final repository = FakeVocabularyRepository(
+      books: [_book()],
+      words: [_word(1, 'cat', '고양이')],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: fakeNativeOverrides(vocabulary: repository),
+        child: MaterialApp.router(
+          theme: AppTheme.light,
+          locale: const Locale('ko'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: createRouter(
+            initialLocation: AppRoutes.assemblyPath(1),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('시작하기'));
+    await tester.pumpAndSettle();
+
+    final slot = tester.getCenter(find.text('카드를 여기로 끌어 넣어요'));
+    Future<void> dragToSlot(String text) async {
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text(text)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+      await gesture.moveTo(slot + const Offset(0, 60));
+      await tester.pump(const Duration(milliseconds: 50));
+      await gesture.moveTo(slot);
+      await tester.pump(const Duration(milliseconds: 50));
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    await dragToSlot('t');
+    expect(find.text('카드를 여기로 끌어 넣어요'), findsNothing);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(Scaffold).first),
+    );
+    final provider = assemblyViewModelProvider(1);
+    List<String> placed() {
+      final st = container.read(provider).value!;
+      return [for (final id in st.placed) st.current!.tile(id).text];
+    }
+
+    expect(placed(), ['t']);
   });
 }
