@@ -966,6 +966,9 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get fallSend => '보내기';
+
+  @override
   String fallCombo(int count) {
     return '$count콤보';
   }
@@ -983,14 +986,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assembleModePieces => '조각 고르기';
 
   @override
-  String get assembleModeLetters => '글자 정렬';
+  String get assembleModeLetters => '글자 순서 맞추기';
 
   @override
   String get assembleModePiecesHint =>
-      '뜻을 보고 조각 카드를 끌어 넣어 단어를 만들어요. 다른 단어의 조각도 섞여 있어요';
+      '빈 칸에서 시작해요. 조각 카드를 골라 단어를 만들어요. 다른 단어의 조각(함정)도 섞여 있어요';
 
   @override
-  String get assembleModeLettersHint => '뜻을 보고 섞인 글자 카드를 끌어 넣어 올바른 순서로 맞춰요';
+  String get assembleModeLettersHint =>
+      '섞인 글자가 한 줄로 놓여 있어요. 글자를 끌어 자리를 바꿔 단어를 맞춰요. 카드를 고르지 않아요';
 
   @override
   String get assembleSlot => '완성할 단어';
@@ -1000,6 +1004,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assembleCards => '카드';
+
+  @override
+  String get assembleSortTitle => '글자 순서 맞추기';
+
+  @override
+  String get assembleSortHint => '글자를 끌어서 자리를 바꿔요. 두 글자를 차례로 눌러도 바뀌어요';
 
   @override
   String get assembleUndo => '되돌리기';
@@ -1086,6 +1096,12 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get testCorrect => '정답이에요!';
+
+  @override
+  String get testWrongTitle => '아쉬워요';
+
+  @override
+  String get testAnswerLabel => '정답';
 
   @override
   String testWrong(String answer) {

@@ -989,6 +989,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get fallSend => 'Send';
+
+  @override
   String fallCombo(int count) {
     return '$count combo';
   }
@@ -1006,15 +1009,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assembleModePieces => 'Pick pieces';
 
   @override
-  String get assembleModeLetters => 'Sort letters';
+  String get assembleModeLetters => 'Order letters';
 
   @override
   String get assembleModePiecesHint =>
-      'Drag piece cards into the slot to build the word for the meaning. Pieces of other words are mixed in';
+      'Start from an empty slot and pick piece cards to build the word. Pieces of other words are mixed in as decoys';
 
   @override
   String get assembleModeLettersHint =>
-      'Drag the shuffled letter cards into the slot in the right order';
+      'Shuffled letters sit in one row. Drag letters to swap places until the word is right. No cards to pick';
 
   @override
   String get assembleSlot => 'Your word';
@@ -1024,6 +1027,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assembleCards => 'Cards';
+
+  @override
+  String get assembleSortTitle => 'Put the letters in order';
+
+  @override
+  String get assembleSortHint =>
+      'Drag letters to swap places, or tap two letters in turn';
 
   @override
   String get assembleUndo => 'Undo';
@@ -1114,6 +1124,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get testCorrect => 'Correct!';
+
+  @override
+  String get testWrongTitle => 'Not quite';
+
+  @override
+  String get testAnswerLabel => 'Answer';
 
   @override
   String testWrong(String answer) {

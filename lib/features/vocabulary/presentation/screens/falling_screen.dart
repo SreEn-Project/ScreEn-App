@@ -106,6 +106,8 @@ class _PlayingState extends ConsumerState<_Playing>
   Size _area = Size.zero;
   int _shake = 0;
   int _lives = 0;
+  int _wrong = 0;
+  final _focus = FocusNode();
 
   @override
   void initState() {
@@ -118,6 +120,7 @@ class _PlayingState extends ConsumerState<_Playing>
   void dispose() {
     _ticker.dispose();
     _input.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -154,21 +157,37 @@ class _PlayingState extends ConsumerState<_Playing>
     _burst.currentState?.burst(center, color: color, count: count);
   }
 
-  /// 글자가 바뀔 때마다 맞는지 본다 (제출 키 없이 바로 파괴, 키보드도 안 닫힌다).
-  void _onChanged(String text) {
-    if (widget.game.submit(text)) {
-      _input.clear();
-      final hit = widget.game.lastDestroyed;
-      if (hit != null) {
-        _burstBlock(
-          hit,
-          Theme.of(context).colorScheme.primary,
-          count: 18 + widget.game.combo.clamp(0, 10) * 3,
-        );
-      }
-      HapticFeedback.lightImpact();
-      setState(() {});
+  /// 글자가 바뀔 때마다 맞는지 본다 (맞으면 바로 파괴).
+  void _onChanged(String text) => _submit(text, explicit: false);
+
+  /// 전송 버튼 · 엔터로도 낸다. 직접 낸 오답은 입력창과 화면이 흔들린다.
+  void _submit(String text, {required bool explicit}) {
+    if (text.trim().isEmpty) {
+      if (explicit) _focus.requestFocus();
+      return;
     }
+    if (!widget.game.submit(text)) {
+      if (explicit) {
+        HapticFeedback.heavyImpact();
+        setState(() {
+          _wrong++;
+          _shake++;
+        });
+        _focus.requestFocus();
+      }
+      return;
+    }
+    _input.clear();
+    final hit = widget.game.lastDestroyed;
+    if (hit != null) {
+      _burstBlock(
+        hit,
+        Theme.of(context).colorScheme.primary,
+        count: 18 + widget.game.combo.clamp(0, 10) * 3,
+      );
+    }
+    HapticFeedback.lightImpact();
+    setState(() {});
   }
 
   @override
@@ -297,13 +316,32 @@ class _PlayingState extends ConsumerState<_Playing>
                 AppTokens.pagePadding,
                 AppTokens.space16,
               ),
-              child: AppTextField(
-                controller: _input,
-                hint: game.mode == FallingMode.meaning
-                    ? l10n.fallInputMeaning
-                    : l10n.fallInputSpelling,
-                autofocus: true,
-                onChanged: _onChanged,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ShakeEffect(
+                      trigger: _wrong,
+                      child: AppTextField(
+                        controller: _input,
+                        focusNode: _focus,
+                        textInputAction: TextInputAction.send,
+                        hint: game.mode == FallingMode.meaning
+                            ? l10n.fallInputMeaning
+                            : l10n.fallInputSpelling,
+                        autofocus: true,
+                        onChanged: _onChanged,
+                        onSubmitted: (t) => _submit(t, explicit: true),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppTokens.space8),
+                  AppIconButton(
+                    icon: Symbols.send_rounded,
+                    tooltip: l10n.fallSend,
+                    filled: true,
+                    onPressed: () => _submit(_input.text, explicit: true),
+                  ),
+                ],
               ),
             ),
           ],

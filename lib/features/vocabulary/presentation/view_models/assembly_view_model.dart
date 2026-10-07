@@ -30,7 +30,7 @@ class AssemblyState {
   /// 지금까지 푼 결과.
   final List<AssemblyResult> results;
 
-  /// 지금 문제에서 완성 칸에 놓인 카드 번호 (순서대로).
+  /// 지금 문제에서 완성 칸에 놓인 카드 번호 (순서대로). 글자 정렬형은 처음부터 모든 카드가 들어 있다.
   final List<int> placed;
 
   /// 방금 확인한 결과를 보여 주는 중 (다음 버튼을 기다린다).
@@ -90,6 +90,12 @@ class AssemblyViewModel extends _$AssemblyViewModel {
     state = AsyncData(current.copyWith(mode: mode, failedToStart: false));
   }
 
+  /// 글자 정렬형은 섞인 글자가 처음부터 한 줄에 놓여 있고, 조각 고르기는 빈 칸에서 시작한다.
+  List<int> _initialPlaced(AssemblyQuestion question) =>
+      question.mode == AssemblyMode.letters
+      ? [for (final t in question.tiles) t.id]
+      : const [];
+
   Future<void> start() async {
     final current = state.value;
     if (current == null) return;
@@ -103,7 +109,7 @@ class AssemblyViewModel extends _$AssemblyViewModel {
               phase: AssemblyPhase.running,
               questions: questions,
               results: const [],
-              placed: const [],
+              placed: _initialPlaced(questions.first),
               revealed: false,
               failedToStart: false,
             ),
@@ -134,6 +140,8 @@ class AssemblyViewModel extends _$AssemblyViewModel {
   void remove(int tileId) {
     final current = state.value;
     if (current == null || current.revealed) return;
+    // 글자 정렬형은 카드를 빼지 않고 자리만 바꾼다.
+    if (current.current?.mode == AssemblyMode.letters) return;
     state = AsyncData(
       current.copyWith(placed: [...current.placed]..remove(tileId)),
     );
@@ -173,7 +181,9 @@ class AssemblyViewModel extends _$AssemblyViewModel {
       current.copyWith(
         revealed: false,
         phase: done ? AssemblyPhase.finished : AssemblyPhase.running,
-        placed: const [],
+        placed: done
+            ? const []
+            : _initialPlaced(current.questions[current.results.length]),
       ),
     );
   }

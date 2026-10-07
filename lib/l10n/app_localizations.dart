@@ -1910,6 +1910,12 @@ abstract class AppLocalizations {
   /// **'{count} destroyed'**
   String fallDestroyed(int count);
 
+  /// No description provided for @fallSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get fallSend;
+
   /// No description provided for @fallCombo.
   ///
   /// In en, this message translates to:
@@ -1943,19 +1949,19 @@ abstract class AppLocalizations {
   /// No description provided for @assembleModeLetters.
   ///
   /// In en, this message translates to:
-  /// **'Sort letters'**
+  /// **'Order letters'**
   String get assembleModeLetters;
 
   /// No description provided for @assembleModePiecesHint.
   ///
   /// In en, this message translates to:
-  /// **'Drag piece cards into the slot to build the word for the meaning. Pieces of other words are mixed in'**
+  /// **'Start from an empty slot and pick piece cards to build the word. Pieces of other words are mixed in as decoys'**
   String get assembleModePiecesHint;
 
   /// No description provided for @assembleModeLettersHint.
   ///
   /// In en, this message translates to:
-  /// **'Drag the shuffled letter cards into the slot in the right order'**
+  /// **'Shuffled letters sit in one row. Drag letters to swap places until the word is right. No cards to pick'**
   String get assembleModeLettersHint;
 
   /// No description provided for @assembleSlot.
@@ -1975,6 +1981,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cards'**
   String get assembleCards;
+
+  /// No description provided for @assembleSortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the letters in order'**
+  String get assembleSortTitle;
+
+  /// No description provided for @assembleSortHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag letters to swap places, or tap two letters in turn'**
+  String get assembleSortHint;
 
   /// No description provided for @assembleUndo.
   ///
@@ -2131,6 +2149,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Correct!'**
   String get testCorrect;
+
+  /// No description provided for @testWrongTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not quite'**
+  String get testWrongTitle;
+
+  /// No description provided for @testAnswerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get testAnswerLabel;
 
   /// No description provided for @testWrong.
   ///
