@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -9,6 +10,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/word_test.dart';
 import '../../domain/usecases/vocabulary_usecases.dart';
 import '../view_models/word_test_view_model.dart';
+import '../widgets/study_widgets.dart';
 
 /// 암기 테스트 (L-03, AD-09): 방식 고르기 → 한 문제씩 풀고 바로 정답 확인 → 점수와 틀린 단어.
 class WordTestScreen extends ConsumerWidget {
@@ -52,29 +54,6 @@ class _BottomBar extends StatelessWidget {
   }
 }
 
-class _Note extends StatelessWidget {
-  const _Note(this.text, {this.error = false});
-
-  final String text;
-  final bool error;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.sectionTitleIndent,
-      ),
-      child: Text(
-        text,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: error ? theme.colorScheme.error : null,
-        ),
-      ),
-    );
-  }
-}
-
 class _Setup extends ConsumerWidget {
   const _Setup({required this.wordbookId, required this.state});
 
@@ -84,7 +63,6 @@ class _Setup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final model = ref.read(wordTestViewModelProvider(wordbookId).notifier);
     final book = state.book;
     final count = book?.wordCount ?? 0;
@@ -103,55 +81,32 @@ class _Setup extends ConsumerWidget {
         ],
       ),
       children: [
-        AppCard(
-          child: Row(
-            children: [
-              const IconBadge(icon: Symbols.menu_book_rounded, size: 44),
-              const SizedBox(width: AppTokens.space12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(book?.name ?? '', style: theme.textTheme.titleMedium),
-                    const SizedBox(height: AppTokens.space4),
-                    Text(
-                      l10n.testQuestionCount(questionCount),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        StudySetupHeader(
+          icon: Symbols.menu_book_rounded,
+          title: book?.name ?? '',
+          subtitle: l10n.testQuestionCount(questionCount),
         ),
         const SizedBox(height: AppTokens.sectionGap),
-        SectionTitle(l10n.testMode),
-        const SizedBox(height: AppTokens.sectionTitleGap),
-        AppSegmented<WordTestMode>(
+        StudyModeCard<WordTestMode>(
           values: const [WordTestMode.choice, WordTestMode.typing],
           selected: state.mode,
           label: (m) => m == WordTestMode.choice
               ? l10n.testModeChoice
               : l10n.testModeTyping,
-          onChanged: model.setMode,
-        ),
-        const SizedBox(height: AppTokens.space12),
-        _Note(
-          state.mode == WordTestMode.choice
+          hint: state.mode == WordTestMode.choice
               ? l10n.testModeChoiceHint
               : l10n.testModeTypingHint,
+          onChanged: model.setMode,
+          notes: [
+            if (!state.choiceAvailable)
+              StudyNote(
+                l10n.testChoiceUnavailable(CreateWordTest.minWordsForChoice),
+                error: true,
+              ),
+            if (state.failedToStart)
+              StudyNote(l10n.testCannotStart, error: true),
+          ],
         ),
-        if (!state.choiceAvailable) ...[
-          const SizedBox(height: AppTokens.space8),
-          _Note(
-            l10n.testChoiceUnavailable(CreateWordTest.minWordsForChoice),
-            error: true,
-          ),
-        ],
-        if (state.failedToStart) ...[
-          const SizedBox(height: AppTokens.space8),
-          _Note(l10n.testCannotStart, error: true),
-        ],
       ],
     );
   }
@@ -169,6 +124,7 @@ class _Running extends ConsumerStatefulWidget {
 
 class _RunningState extends ConsumerState<_Running> {
   final _input = TextEditingController();
+  int _shake = 0;
 
   @override
   void dispose() {
@@ -181,6 +137,15 @@ class _RunningState extends ConsumerState<_Running> {
     super.didUpdateWidget(old);
     // 다음 문제로 넘어가면 입력창을 비운다.
     if (old.state.index != widget.state.index) _input.clear();
+    // 답을 낸 순간: 맞으면 가볍게, 틀리면 묵직하게 진동하고 틀린 카드가 흔들린다.
+    if (!old.state.revealed && widget.state.revealed) {
+      if (widget.state.lastAnswer?.correct ?? false) {
+        HapticFeedback.mediumImpact();
+      } else {
+        HapticFeedback.heavyImpact();
+        _shake++;
+      }
+    }
   }
 
   @override
@@ -213,23 +178,40 @@ class _RunningState extends ConsumerState<_Running> {
           ? colors.errorContainer
           : null;
       return Padding(
-        padding: const EdgeInsets.only(bottom: AppTokens.space8),
-        child: AppCard(
-          onTap: revealed ? null : () => model.submit(text),
-          color: fill,
-          shadow: fill == null,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTokens.rowPaddingH,
-            vertical: AppTokens.space16,
-          ),
-          child: Row(
-            children: [
-              Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
-              if (revealed && isAnswer)
-                Icon(Symbols.check_rounded, color: colors.primary, size: 22)
-              else if (isPicked)
-                Icon(Symbols.close_rounded, color: colors.error, size: 22),
-            ],
+        padding: const EdgeInsets.only(bottom: AppTokens.space12),
+        child: ShakeEffect(
+          trigger: isPicked && !isAnswer ? _shake : 0,
+          child: PopEffect(
+            trigger: revealed && isAnswer ? 1 : 0,
+            scale: 1.04,
+            child: AppCard(
+              onTap: revealed ? null : () => model.submit(text),
+              color: fill,
+              shadow: fill == null,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTokens.rowPaddingH,
+                vertical: AppTokens.space16,
+              ),
+              child: Row(
+                children: [
+                  Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
+                  if (revealed && isAnswer)
+                    Icon(
+                      Symbols.check_circle_rounded,
+                      fill: 1,
+                      color: colors.primary,
+                      size: 22,
+                    )
+                  else if (isPicked)
+                    Icon(
+                      Symbols.cancel_rounded,
+                      fill: 1,
+                      color: colors.error,
+                      size: 22,
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       );
@@ -257,105 +239,41 @@ class _RunningState extends ConsumerState<_Running> {
             )
           : null,
       children: [
-        Row(
-          children: [
-            Text(
-              l10n.testProgress(state.index + 1, state.questions.length),
-              style: theme.textTheme.labelLarge,
-            ),
-            const Spacer(),
-            Text(
-              l10n.testCorrectSoFar(state.correctCount),
-              style: theme.textTheme.bodySmall,
-            ),
-          ],
-        ),
-        const SizedBox(height: AppTokens.space8),
-        AppProgressBar(
-          value: (state.index + (revealed ? 1 : 0)) / state.questions.length,
+        StudyProgress(
+          index: state.index,
+          total: state.questions.length,
+          correct: state.correctCount,
+          revealed: revealed,
         ),
         const SizedBox(height: AppTokens.sectionGap),
-        AppCard(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTokens.pagePadding,
-            vertical: AppTokens.sectionGap,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                Text(
-                  typing ? l10n.testPromptMeaning : l10n.testPromptWord,
-                  style: theme.textTheme.bodySmall,
-                ),
-                const SizedBox(height: AppTokens.space8),
-                Text(
-                  question.prompt,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall,
-                ),
-              ],
-            ),
-          ),
+        StudyPrompt(
+          label: typing ? l10n.testPromptMeaning : l10n.testPromptWord,
+          text: question.prompt,
         ),
         const SizedBox(height: AppTokens.sectionGap),
         if (typing) ...[
-          AppTextField(
-            controller: _input,
-            hint: l10n.testAnswerHint,
-            autofocus: true,
-            enabled: !revealed,
-            onSubmitted: model.submit,
+          ShakeEffect(
+            trigger: _shake,
+            child: AppTextField(
+              controller: _input,
+              hint: l10n.testAnswerHint,
+              autofocus: true,
+              enabled: !revealed,
+              onSubmitted: model.submit,
+            ),
           ),
           if (revealed) ...[
             const SizedBox(height: AppTokens.space16),
-            _Feedback(correct: correct, expected: question.expected),
+            StudyFeedback(correct: correct, expected: question.expected),
           ],
         ] else ...[
           for (final text in question.choices) choice(text),
-          if (revealed && !correct) ...[
-            const SizedBox(height: AppTokens.space8),
-            _Feedback(correct: false, expected: question.expected),
+          if (revealed) ...[
+            const SizedBox(height: AppTokens.space4),
+            StudyFeedback(correct: correct, expected: question.expected),
           ],
         ],
       ],
-    );
-  }
-}
-
-/// 제출 직후 "정답이에요" / "정답: …".
-class _Feedback extends StatelessWidget {
-  const _Feedback({required this.correct, required this.expected});
-
-  final bool correct;
-  final String expected;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppTokens.space8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            correct ? Symbols.check_circle_rounded : Symbols.cancel_rounded,
-            color: correct ? colors.primary : colors.error,
-            size: 22,
-          ),
-          const SizedBox(width: AppTokens.space8),
-          Expanded(
-            child: Text(
-              correct ? l10n.testCorrect : l10n.testWrong(expected),
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: correct ? colors.primary : colors.error,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -387,27 +305,12 @@ class _Result extends ConsumerWidget {
         ],
       ),
       children: [
-        AppCard(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                const IconBadge(icon: Symbols.emoji_events_rounded, size: 56),
-                const SizedBox(height: AppTokens.space16),
-                Text(
-                  l10n.testScore(state.correctCount, total),
-                  style: theme.textTheme.headlineMedium,
-                ),
-                const SizedBox(height: AppTokens.space4),
-                Text(
-                  wrong.isEmpty
-                      ? l10n.testPerfect
-                      : l10n.testWrongCount(wrong.length),
-                  style: theme.textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
+        StudyResultHero(
+          score: l10n.testScore(state.correctCount, total),
+          caption: wrong.isEmpty
+              ? l10n.testPerfect
+              : l10n.testWrongCount(wrong.length),
+          celebrate: total > 0 && state.correctCount * 2 >= total,
         ),
         if (wrong.isNotEmpty) ...[
           const SizedBox(height: AppTokens.sectionGap),

@@ -1568,6 +1568,30 @@ abstract class AppLocalizations {
   /// **'Example sentence (optional)'**
   String get vocabSentenceHint;
 
+  /// No description provided for @vocabOptPronunciation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronunciation'**
+  String get vocabOptPronunciation;
+
+  /// No description provided for @vocabOptPartOfSpeech.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of speech'**
+  String get vocabOptPartOfSpeech;
+
+  /// No description provided for @vocabOptContextMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Context meaning'**
+  String get vocabOptContextMeaning;
+
+  /// No description provided for @vocabOptSentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get vocabOptSentence;
+
   /// No description provided for @vocabSaveTo.
   ///
   /// In en, this message translates to:
@@ -1886,6 +1910,12 @@ abstract class AppLocalizations {
   /// **'{count} destroyed'**
   String fallDestroyed(int count);
 
+  /// No description provided for @fallCombo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} combo'**
+  String fallCombo(int count);
+
   /// No description provided for @fallMissedWords.
   ///
   /// In en, this message translates to:
@@ -1919,13 +1949,13 @@ abstract class AppLocalizations {
   /// No description provided for @assembleModePiecesHint.
   ///
   /// In en, this message translates to:
-  /// **'Pick piece cards in order to build the word for the meaning. Pieces of other words are mixed in'**
+  /// **'Drag piece cards into the slot to build the word for the meaning. Pieces of other words are mixed in'**
   String get assembleModePiecesHint;
 
   /// No description provided for @assembleModeLettersHint.
   ///
   /// In en, this message translates to:
-  /// **'Drag the shuffled letter cards into the right order for the meaning'**
+  /// **'Drag the shuffled letter cards into the slot in the right order'**
   String get assembleModeLettersHint;
 
   /// No description provided for @assembleSlot.
@@ -1937,7 +1967,7 @@ abstract class AppLocalizations {
   /// No description provided for @assembleSlotHint.
   ///
   /// In en, this message translates to:
-  /// **'Tap the cards below to fill this in'**
+  /// **'Drag cards in here'**
   String get assembleSlotHint;
 
   /// No description provided for @assembleCards.
@@ -1955,7 +1985,7 @@ abstract class AppLocalizations {
   /// No description provided for @assembleDragHint.
   ///
   /// In en, this message translates to:
-  /// **'Drag cards to swap their places'**
+  /// **'Drag cards in, or tap to fill. Drag a placed card to reorder'**
   String get assembleDragHint;
 
   /// No description provided for @assembleResultTitle.

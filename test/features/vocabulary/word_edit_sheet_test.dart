@@ -72,8 +72,15 @@ void main() {
       of: find.byType(WordEditSheet),
       matching: find.byType(TextField),
     );
+    // 처음엔 단어 · 뜻만 보이고 발음 등은 + 칩을 눌러야 나타난다.
+    expect(fields, findsNWidgets(2));
+    expect(find.text('발음'), findsOneWidget);
     await tester.enterText(fields.at(0), 'apple');
     await tester.enterText(fields.at(1), '사과');
+    await tester.tap(find.text('발음'));
+    await tester.pumpAndSettle();
+    expect(fields, findsNWidgets(3));
+    expect(find.text('발음'), findsNothing); // 펼친 항목은 칩에서 빠진다.
     await tester.enterText(fields.at(2), '/ˈæp.əl/');
     await tester.pump();
     await tester.tap(find.text('저장').last);

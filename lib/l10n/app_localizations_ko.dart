@@ -777,6 +777,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vocabSentenceHint => '예문 (선택)';
 
   @override
+  String get vocabOptPronunciation => '발음';
+
+  @override
+  String get vocabOptPartOfSpeech => '품사';
+
+  @override
+  String get vocabOptContextMeaning => '문맥 뜻';
+
+  @override
+  String get vocabOptSentence => '예문';
+
+  @override
   String get vocabSaveTo => '저장할 단어장';
 
   @override
@@ -954,6 +966,11 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String fallCombo(int count) {
+    return '$count콤보';
+  }
+
+  @override
   String get fallMissedWords => '놓친 단어';
 
   @override
@@ -970,16 +987,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get assembleModePiecesHint =>
-      '뜻을 보고 조각 카드를 순서대로 골라 단어를 만들어요. 다른 단어의 조각도 섞여 있어요';
+      '뜻을 보고 조각 카드를 끌어 넣어 단어를 만들어요. 다른 단어의 조각도 섞여 있어요';
 
   @override
-  String get assembleModeLettersHint => '뜻을 보고 섞인 글자 카드를 끌어서 올바른 순서로 맞춰요';
+  String get assembleModeLettersHint => '뜻을 보고 섞인 글자 카드를 끌어 넣어 올바른 순서로 맞춰요';
 
   @override
   String get assembleSlot => '완성할 단어';
 
   @override
-  String get assembleSlotHint => '아래 카드를 눌러 채워 보세요';
+  String get assembleSlotHint => '카드를 여기로 끌어 넣어요';
 
   @override
   String get assembleCards => '카드';
@@ -988,7 +1005,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get assembleUndo => '되돌리기';
 
   @override
-  String get assembleDragHint => '카드를 끌어서 자리를 바꿔요';
+  String get assembleDragHint => '끌어서 넣거나 눌러서 채워요. 놓은 카드를 끌면 순서를 바꿔요';
 
   @override
   String get assembleResultTitle => '단어 조립 결과';

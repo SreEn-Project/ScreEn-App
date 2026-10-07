@@ -30,7 +30,7 @@ class AssemblyState {
   /// 지금까지 푼 결과.
   final List<AssemblyResult> results;
 
-  /// 지금 문제에서 완성 칸에 놓인 카드 번호 (순서대로). 글자 정렬형은 처음부터 모든 카드가 들어 있다.
+  /// 지금 문제에서 완성 칸에 놓인 카드 번호 (순서대로).
   final List<int> placed;
 
   /// 방금 확인한 결과를 보여 주는 중 (다음 버튼을 기다린다).
@@ -90,11 +90,6 @@ class AssemblyViewModel extends _$AssemblyViewModel {
     state = AsyncData(current.copyWith(mode: mode, failedToStart: false));
   }
 
-  List<int> _initialPlaced(AssemblyQuestion question) =>
-      question.mode == AssemblyMode.letters
-      ? [for (final t in question.tiles) t.id]
-      : const [];
-
   Future<void> start() async {
     final current = state.value;
     if (current == null) return;
@@ -108,49 +103,47 @@ class AssemblyViewModel extends _$AssemblyViewModel {
               phase: AssemblyPhase.running,
               questions: questions,
               results: const [],
-              placed: _initialPlaced(questions.first),
+              placed: const [],
               revealed: false,
               failedToStart: false,
             ),
     );
   }
 
-  /// 조각 선택형: 카드를 완성 칸 끝에 놓는다.
-  void place(int tileId) {
+  /// 카드를 완성 칸에 놓는다. [at]이 있으면 그 자리에 끼우고, 없으면 끝에 붙인다.
+  /// 이미 놓인 카드면 그 자리로 옮긴다 (끌어서 순서 바꾸기).
+  void place(int tileId, {int? at}) {
     final current = state.value;
     final question = current?.current;
     if (current == null || question == null || current.revealed) return;
-    if (question.mode != AssemblyMode.pieces) return;
-    if (current.placed.contains(tileId)) return;
-    state = AsyncData(current.copyWith(placed: [...current.placed, tileId]));
+    if (!question.tiles.any((t) => t.id == tileId)) return;
+    final list = [...current.placed];
+    final already = list.contains(tileId);
+    if (already && at == null) return;
+    var index = at ?? list.length;
+    if (already) {
+      final from = list.indexOf(tileId);
+      list.removeAt(from);
+      if (from < index) index--;
+    }
+    list.insert(index.clamp(0, list.length), tileId);
+    state = AsyncData(current.copyWith(placed: list));
   }
 
-  /// 조각 선택형: 놓인 카드를 다시 뺀다.
+  /// 놓인 카드를 다시 뺀다.
   void remove(int tileId) {
     final current = state.value;
     if (current == null || current.revealed) return;
-    if (current.current?.mode != AssemblyMode.pieces) return;
     state = AsyncData(
       current.copyWith(placed: [...current.placed]..remove(tileId)),
     );
   }
 
-  /// 조각 선택형: 마지막으로 놓은 카드를 뺀다.
+  /// 마지막으로 놓은 카드를 뺀다.
   void undo() {
     final current = state.value;
     if (current == null || current.placed.isEmpty) return;
     remove(current.placed.last);
-  }
-
-  /// 글자 정렬형: [from] 자리의 카드를 [to] 자리로 옮긴다 (둘 다 현재 배열 기준 번호).
-  void reorder(int from, int to) {
-    final current = state.value;
-    if (current == null || current.revealed) return;
-    if (current.current?.mode != AssemblyMode.letters) return;
-    final list = [...current.placed];
-    if (from < 0 || from >= list.length || to < 0 || to >= list.length) return;
-    list.insert(to, list.removeAt(from));
-    state = AsyncData(current.copyWith(placed: list));
   }
 
   /// 지금까지 만든 글로 확인한다. 비어 있으면 무시.
@@ -180,9 +173,7 @@ class AssemblyViewModel extends _$AssemblyViewModel {
       current.copyWith(
         revealed: false,
         phase: done ? AssemblyPhase.finished : AssemblyPhase.running,
-        placed: done
-            ? const []
-            : _initialPlaced(current.questions[current.results.length]),
+        placed: const [],
       ),
     );
   }

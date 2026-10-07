@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -9,6 +10,7 @@ import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/falling_game.dart';
 import '../view_models/falling_view_model.dart';
+import '../widgets/study_widgets.dart';
 
 /// 하강형 타이핑 (L-06, AD-12): 방식 고르기 → 떨어지는 블록을 입력으로 파괴 → 결과.
 class FallingScreen extends ConsumerWidget {
@@ -45,7 +47,6 @@ class _Setup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final model = ref.read(fallingViewModelProvider(wordbookId).notifier);
     final count = state.book?.wordCount ?? 0;
 
@@ -56,64 +57,27 @@ class _Setup extends ConsumerWidget {
         onPressed: count == 0 ? null : model.start,
       ),
       children: [
-        AppCard(
-          child: Row(
-            children: [
-              const IconBadge(icon: Symbols.keyboard_rounded, size: 44),
-              const SizedBox(width: AppTokens.space12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.book?.name ?? '',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppTokens.space4),
-                    Text(l10n.fallRules, style: theme.textTheme.bodySmall),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        StudySetupHeader(
+          icon: Symbols.keyboard_rounded,
+          title: state.book?.name ?? '',
+          subtitle: l10n.fallRules,
         ),
         const SizedBox(height: AppTokens.sectionGap),
-        SectionTitle(l10n.testMode),
-        const SizedBox(height: AppTokens.sectionTitleGap),
-        AppSegmented<FallingMode>(
+        StudyModeCard<FallingMode>(
           values: FallingMode.values,
           selected: state.mode,
           label: (m) => m == FallingMode.meaning
               ? l10n.fallModeMeaning
               : l10n.fallModeSpelling,
+          hint: state.mode == FallingMode.meaning
+              ? l10n.fallModeMeaningHint
+              : l10n.fallModeSpellingHint,
           onChanged: model.setMode,
+          notes: [
+            if (state.failedToStart)
+              StudyNote(l10n.testCannotStart, error: true),
+          ],
         ),
-        const SizedBox(height: AppTokens.space12),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTokens.sectionTitleIndent,
-          ),
-          child: Text(
-            state.mode == FallingMode.meaning
-                ? l10n.fallModeMeaningHint
-                : l10n.fallModeSpellingHint,
-            style: theme.textTheme.bodySmall,
-          ),
-        ),
-        if (state.failedToStart) ...[
-          const SizedBox(height: AppTokens.space8),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTokens.sectionTitleIndent,
-            ),
-            child: Text(
-              l10n.testCannotStart,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }
@@ -136,12 +100,17 @@ class _PlayingState extends ConsumerState<_Playing>
 
   late final Ticker _ticker;
   final _input = TextEditingController();
+  final _burst = GlobalKey<BurstLayerState>();
   Duration _last = Duration.zero;
   bool _finishing = false;
+  Size _area = Size.zero;
+  int _shake = 0;
+  int _lives = 0;
 
   @override
   void initState() {
     super.initState();
+    _lives = widget.game.lives;
     _ticker = createTicker(_onTick)..start();
   }
 
@@ -157,6 +126,15 @@ class _PlayingState extends ConsumerState<_Playing>
     final dt = ((elapsed - _last).inMicroseconds / 1e6).clamp(0.0, 0.1);
     _last = elapsed;
     widget.game.update(dt);
+    // 바닥에 떨어진 블록은 붉은 조각으로 깨지고 화면이 흔들린다.
+    for (final b in widget.game.landedNow) {
+      _burstBlock(b, Theme.of(context).colorScheme.error, count: 14);
+    }
+    if (widget.game.lives != _lives) {
+      _lives = widget.game.lives;
+      _shake++;
+      HapticFeedback.heavyImpact();
+    }
     setState(() {});
     if (widget.game.over && !_finishing) {
       _finishing = true;
@@ -165,10 +143,30 @@ class _PlayingState extends ConsumerState<_Playing>
     }
   }
 
+  /// 블록이 있던 자리에서 [color] 조각을 터뜨린다.
+  void _burstBlock(FallingBlock b, Color color, {int count = 22}) {
+    if (_area.isEmpty) return;
+    final width = (_area.width / 2.2).clamp(0.0, _blockMaxWidth);
+    final center = Offset(
+      b.lane * (_area.width - width) + width / 2,
+      b.y.clamp(0.0, 1.0) * (_area.height - _blockHeight) + _blockHeight / 2,
+    );
+    _burst.currentState?.burst(center, color: color, count: count);
+  }
+
   /// 글자가 바뀔 때마다 맞는지 본다 (제출 키 없이 바로 파괴, 키보드도 안 닫힌다).
   void _onChanged(String text) {
     if (widget.game.submit(text)) {
       _input.clear();
+      final hit = widget.game.lastDestroyed;
+      if (hit != null) {
+        _burstBlock(
+          hit,
+          Theme.of(context).colorScheme.primary,
+          count: 18 + widget.game.combo.clamp(0, 10) * 3,
+        );
+      }
+      HapticFeedback.lightImpact();
       setState(() {});
     }
   }
@@ -191,21 +189,36 @@ class _PlayingState extends ConsumerState<_Playing>
               ),
               child: Row(
                 children: [
-                  Text(
-                    l10n.matchScore(game.score),
-                    style: theme.textTheme.labelLarge,
+                  PopEffect(
+                    trigger: game.score,
+                    child: Text(
+                      l10n.matchScore(game.score),
+                      style: theme.textTheme.titleMedium,
+                    ),
                   ),
+                  const SizedBox(width: AppTokens.space12),
+                  if (game.combo >= 2)
+                    PopEffect(
+                      trigger: game.combo,
+                      scale: 1.5,
+                      child: AppBadge(label: l10n.fallCombo(game.combo)),
+                    ),
                   const Spacer(),
                   for (var i = 0; i < game.maxLives; i++)
                     Padding(
                       padding: const EdgeInsets.only(left: AppTokens.space4),
-                      child: Icon(
-                        Symbols.favorite_rounded,
-                        fill: i < game.lives ? 1 : 0,
-                        size: 22,
-                        color: i < game.lives
-                            ? colors.error
-                            : colors.outlineVariant,
+                      child: AnimatedScale(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutBack,
+                        scale: i < game.lives ? 1 : 0.8,
+                        child: Icon(
+                          Symbols.favorite_rounded,
+                          fill: i < game.lives ? 1 : 0,
+                          size: 22,
+                          color: i < game.lives
+                              ? colors.error
+                              : colors.outlineVariant,
+                        ),
                       ),
                     ),
                 ],
@@ -219,45 +232,59 @@ class _PlayingState extends ConsumerState<_Playing>
                 ),
                 child: LayoutBuilder(
                   builder: (context, box) {
+                    _area = Size(box.maxWidth, box.maxHeight);
                     final blockWidth = (box.maxWidth / 2.2).clamp(
                       0.0,
                       _blockMaxWidth,
                     );
-                    return Stack(
-                      clipBehavior: Clip.hardEdge,
-                      children: [
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            height: 3,
-                            color: colors.error.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        for (final b in game.blocks)
+                    return ShakeEffect(
+                      trigger: _shake,
+                      amplitude: 8,
+                      child: Stack(
+                        clipBehavior: Clip.hardEdge,
+                        children: [
+                          // 목숨을 잃으면 바닥이 붉게 번쩍인다.
                           Positioned(
-                            key: ValueKey(b.id),
-                            left: b.lane * (box.maxWidth - blockWidth),
-                            top: b.y * (box.maxHeight - _blockHeight),
-                            width: blockWidth,
-                            height: _blockHeight,
-                            child: AppCard(
-                              radius: AppTokens.radiusInput,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppTokens.space8,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  b.text,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.titleMedium,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: TweenAnimationBuilder<double>(
+                              key: ValueKey(_shake),
+                              tween: Tween(begin: 1, end: 0),
+                              duration: const Duration(milliseconds: 500),
+                              builder: (context, t, _) => Container(
+                                height: 3 + 22 * t,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                    colors: [
+                                      colors.error.withValues(
+                                        alpha: 0.4 + 0.4 * t,
+                                      ),
+                                      colors.error.withValues(alpha: 0),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                      ],
+                          for (final b in game.blocks)
+                            Positioned(
+                              key: ValueKey(b.id),
+                              left: b.lane * (box.maxWidth - blockWidth),
+                              top: b.y * (box.maxHeight - _blockHeight),
+                              width: blockWidth,
+                              height: _blockHeight,
+                              child: _BlockCard(
+                                text: b.text,
+                                // 바닥에 가까워질수록 붉게 달아오른다.
+                                danger: ((b.y - 0.6) / 0.35).clamp(0.0, 1.0),
+                              ),
+                            ),
+                          Positioned.fill(child: BurstLayer(key: _burst)),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -280,6 +307,44 @@ class _PlayingState extends ConsumerState<_Playing>
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 떨어지는 블록 하나. 나타날 때 커지며 등장하고, 바닥에 가까우면 붉어진다.
+class _BlockCard extends StatelessWidget {
+  const _BlockCard({required this.text, required this.danger});
+
+  final String text;
+  final double danger;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutBack,
+      builder: (context, t, child) => Opacity(
+        opacity: t.clamp(0.0, 1.0),
+        child: Transform.scale(scale: 0.6 + 0.4 * t, child: child),
+      ),
+      child: AppCard(
+        radius: AppTokens.radiusInput,
+        color: Color.lerp(colors.surface, colors.errorContainer, danger),
+        padding: const EdgeInsets.symmetric(horizontal: AppTokens.space8),
+        child: Center(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: Color.lerp(colors.onSurface, colors.error, danger * 0.8),
+            ),
+          ),
         ),
       ),
     );
@@ -314,25 +379,10 @@ class _Result extends ConsumerWidget {
         ],
       ),
       children: [
-        AppCard(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                const IconBadge(icon: Symbols.emoji_events_rounded, size: 56),
-                const SizedBox(height: AppTokens.space16),
-                Text(
-                  l10n.matchScore(game.score),
-                  style: theme.textTheme.headlineMedium,
-                ),
-                const SizedBox(height: AppTokens.space4),
-                Text(
-                  l10n.fallDestroyed(game.destroyed),
-                  style: theme.textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
+        StudyResultHero(
+          score: l10n.matchScore(game.score),
+          caption: l10n.fallDestroyed(game.destroyed),
+          celebrate: game.destroyed >= 5,
         ),
         if (missed.isNotEmpty) ...[
           const SizedBox(height: AppTokens.sectionGap),

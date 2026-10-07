@@ -71,6 +71,16 @@ class FallingGame {
 
   /// 파괴한 블록 수.
   int destroyed = 0;
+
+  /// 이어서 맞힌 수 (놓치면 0으로 돌아간다) · 가장 길었던 기록.
+  int combo = 0;
+  int bestCombo = 0;
+
+  /// 방금 [submit]으로 파괴한 블록 (효과를 그릴 위치용).
+  FallingBlock? lastDestroyed;
+
+  /// 직전 [update]에서 바닥에 떨어진 블록들.
+  final List<FallingBlock> landedNow = [];
   int _nextBlockId = 0;
   double _untilSpawn = 0.6;
 
@@ -133,15 +143,18 @@ class FallingGame {
 
   /// [seconds]만큼 시간을 흘린다.
   void update(double seconds) {
+    landedNow.clear();
     if (over) return;
     for (final b in blocks) {
       b.y += speed * seconds;
     }
     final landed = blocks.where((b) => b.y >= 1).toList();
+    landedNow.addAll(landed);
     for (final b in landed) {
       blocks.remove(b);
       missedIds.add(b.wordId);
       lives--;
+      combo = 0;
     }
     if (over) {
       blocks.clear();
@@ -167,6 +180,9 @@ class FallingGame {
     }
     if (hit == null) return false;
     blocks.remove(hit);
+    lastDestroyed = hit;
+    combo++;
+    if (combo > bestCombo) bestCombo = combo;
     destroyed++;
     score += pointsPerWord;
     return true;

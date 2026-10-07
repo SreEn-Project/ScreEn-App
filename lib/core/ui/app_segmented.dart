@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import 'pressable.dart';
 
@@ -114,6 +115,47 @@ class AppChip extends StatelessWidget {
             fontSize: 14,
             color: selected ? colors.onPrimary : colors.onSurfaceVariant,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "+ 발음" 같은 작은 추가 칩. 눌러서 선택 항목을 펼칠 때 쓴다.
+class AppAddChip extends StatelessWidget {
+  const AppAddChip({super.key, required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Pressable(
+      onTap: onTap,
+      scale: 0.95,
+      semanticLabel: label,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 6, 14, 6),
+        decoration: ShapeDecoration(
+          shape: const StadiumBorder(),
+          color: colors.surfaceContainerHigh,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Symbols.add_rounded, size: 16, color: colors.primary),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontSize: 13,
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
       ),
     );

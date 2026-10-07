@@ -794,6 +794,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabSentenceHint => 'Example sentence (optional)';
 
   @override
+  String get vocabOptPronunciation => 'Pronunciation';
+
+  @override
+  String get vocabOptPartOfSpeech => 'Part of speech';
+
+  @override
+  String get vocabOptContextMeaning => 'Context meaning';
+
+  @override
+  String get vocabOptSentence => 'Example';
+
+  @override
   String get vocabSaveTo => 'Save to';
 
   @override
@@ -977,6 +989,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String fallCombo(int count) {
+    return '$count combo';
+  }
+
+  @override
   String get fallMissedWords => 'Missed words';
 
   @override
@@ -993,17 +1010,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get assembleModePiecesHint =>
-      'Pick piece cards in order to build the word for the meaning. Pieces of other words are mixed in';
+      'Drag piece cards into the slot to build the word for the meaning. Pieces of other words are mixed in';
 
   @override
   String get assembleModeLettersHint =>
-      'Drag the shuffled letter cards into the right order for the meaning';
+      'Drag the shuffled letter cards into the slot in the right order';
 
   @override
   String get assembleSlot => 'Your word';
 
   @override
-  String get assembleSlotHint => 'Tap the cards below to fill this in';
+  String get assembleSlotHint => 'Drag cards in here';
 
   @override
   String get assembleCards => 'Cards';
@@ -1012,7 +1029,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get assembleUndo => 'Undo';
 
   @override
-  String get assembleDragHint => 'Drag cards to swap their places';
+  String get assembleDragHint =>
+      'Drag cards in, or tap to fill. Drag a placed card to reorder';
 
   @override
   String get assembleResultTitle => 'Word assembly results';
