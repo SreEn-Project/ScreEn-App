@@ -195,14 +195,16 @@ class _RunningState extends ConsumerState<_Running> {
               child: Row(
                 children: [
                   Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
-                  if (revealed && isAnswer)
+                  if (revealed && isAnswer) ...[
+                    AppBadge(label: l10n.testAnswerLabel),
+                    const SizedBox(width: AppTokens.space8),
                     Icon(
                       Symbols.check_circle_rounded,
                       fill: 1,
                       color: colors.primary,
                       size: 22,
-                    )
-                  else if (isPicked)
+                    ),
+                  ] else if (isPicked)
                     Icon(
                       Symbols.cancel_rounded,
                       fill: 1,

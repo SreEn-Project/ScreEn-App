@@ -217,6 +217,8 @@ class AppTextField extends StatelessWidget {
     this.maxLines = 1,
     this.onSubmitted,
     this.enabled = true,
+    this.focusNode,
+    this.textInputAction,
   });
 
   final TextEditingController controller;
@@ -238,6 +240,10 @@ class AppTextField extends StatelessWidget {
   /// false면 입력할 수 없다 (정답을 보여 주는 동안 등).
   final bool enabled;
 
+  /// 제출 뒤에도 키보드를 유지하려는 화면이 직접 포커스를 다룰 때.
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -251,6 +257,8 @@ class AppTextField extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
+        textInputAction: textInputAction,
         onChanged: onChanged,
         onSubmitted: onSubmitted,
         enabled: enabled,

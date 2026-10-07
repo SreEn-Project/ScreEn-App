@@ -74,6 +74,7 @@ class _BoardState extends ConsumerState<_Board> {
   static const _rowGap = AppTokens.space12;
   static const _columnGap = 56.0;
 
+  static const _dotSize = 14.0;
   final _stackKey = GlobalKey();
   final _burst = GlobalKey<BurstLayerState>();
   int _shake = 0;
@@ -210,23 +211,47 @@ class _BoardState extends ConsumerState<_Board> {
               child: SizedBox(
                 key: key,
                 height: _blockHeight,
-                child: AppCard(
-                  color: fill,
-                  radius: AppTokens.radiusInput,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTokens.space12,
-                  ),
-                  child: Center(
-                    child: Text(
-                      b.text,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: isWord
-                          ? theme.textTheme.titleMedium
-                          : theme.textTheme.bodyMedium,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned.fill(
+                      child: AppCard(
+                        color: fill,
+                        radius: AppTokens.radiusInput,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTokens.space12,
+                        ),
+                        child: Center(
+                          child: Text(
+                            b.text,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: isWord
+                                ? theme.textTheme.titleMedium
+                                : theme.textTheme.bodyMedium,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    // 이어 붙이는 자리: 단어는 오른쪽, 뜻은 왼쪽 가장자리의 동그라미.
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      right: isWord ? -_dotSize / 2 : null,
+                      left: isWord ? null : -_dotSize / 2,
+                      child: Center(
+                        child: _PortDot(
+                          size: _dotSize,
+                          color: !flashing && !active
+                              ? colors.outlineVariant
+                              : flashing && !_flash!.correct
+                              ? colors.error
+                              : colors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -342,6 +367,28 @@ class _BoardState extends ConsumerState<_Board> {
   }
 }
 
+/// 블록 가장자리의 이음 동그라미.
+class _PortDot extends StatelessWidget {
+  const _PortDot({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+    );
+  }
+}
+
 class _LinePainter extends CustomPainter {
   const _LinePainter({
     required this.from,
@@ -360,7 +407,13 @@ class _LinePainter extends CustomPainter {
       ..strokeWidth = 4
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(from, to, paint);
-    canvas.drawCircle(from, 6, paint);
+    // 양 끝에 동그라미: 안쪽은 흰색으로 비워 "꽂힌" 느낌을 준다.
+    final ring = Paint()..color = color;
+    final hole = Paint()..color = Colors.white;
+    for (final end in [from, to]) {
+      canvas.drawCircle(end, 9, ring);
+      canvas.drawCircle(end, 4, hole);
+    }
   }
 
   @override

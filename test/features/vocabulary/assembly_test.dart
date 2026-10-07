@@ -138,18 +138,9 @@ void main() {
     await model.start();
 
     final q = container.read(provider).value!.current!;
-    // c, a, b 순서로 놓은 뒤 b를 맨 앞(자리 0)으로 끌어 옮겨 a, b, c... 가 아닌 b, c, a를 만들고,
-    // 다시 한 장씩 자리 지정으로 a, b, c를 맞춘다.
-    expect(container.read(provider).value!.placed, isEmpty);
+    // 글자는 처음부터 모두 한 줄에 섞여 있다. 자리 지정으로 a, b, c 순서를 맞춘다.
+    expect(container.read(provider).value!.placed, hasLength(3));
     int idOf(String t) => q.tiles.firstWhere((x) => x.text == t).id;
-    model.place(idOf('c'));
-    model.place(idOf('a'));
-    model.place(idOf('b'), at: 0);
-    expect(
-      container.read(provider).value!.placed.map((id) => q.tile(id).text),
-      ['b', 'c', 'a'],
-    );
-    // 이미 놓인 카드를 다른 자리로 옮긴다.
     model.place(idOf('a'), at: 0);
     model.place(idOf('b'), at: 1);
     model.place(idOf('c'), at: 3);
@@ -157,6 +148,9 @@ void main() {
       container.read(provider).value!.placed.map((id) => q.tile(id).text),
       ['a', 'b', 'c'],
     );
+    // 글자 정렬형은 카드를 뺄 수 없다.
+    model.remove(idOf('a'));
+    expect(container.read(provider).value!.placed, hasLength(3));
     model.check();
     expect(container.read(provider).value!.lastResult!.correct, isTrue);
   });

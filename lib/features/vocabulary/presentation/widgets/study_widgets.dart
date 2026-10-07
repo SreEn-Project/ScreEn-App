@@ -242,28 +242,45 @@ class StudyFeedback extends StatelessWidget {
         child: Transform.scale(scale: 0.9 + 0.1 * t, child: child),
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppTokens.space16,
-          vertical: AppTokens.space12,
-        ),
+        width: double.infinity,
+        padding: const EdgeInsets.all(AppTokens.space16),
         decoration: BoxDecoration(
           color: correct ? colors.primaryContainer : colors.errorContainer,
           borderRadius: BorderRadius.circular(AppTokens.radiusInput),
         ),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              correct ? Symbols.check_circle_rounded : Symbols.cancel_rounded,
-              fill: 1,
-              color: tone,
-              size: 22,
+            Row(
+              children: [
+                Icon(
+                  correct
+                      ? Symbols.check_circle_rounded
+                      : Symbols.cancel_rounded,
+                  fill: 1,
+                  color: tone,
+                  size: 22,
+                ),
+                const SizedBox(width: AppTokens.space8),
+                Text(
+                  correct ? l10n.testCorrect : l10n.testWrongTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(color: tone),
+                ),
+              ],
             ),
-            const SizedBox(width: AppTokens.space8),
-            Expanded(
-              child: Text(
-                correct ? l10n.testCorrect : l10n.testWrong(expected),
-                style: theme.textTheme.titleMedium?.copyWith(color: tone),
+            const SizedBox(height: AppTokens.space12),
+            // 정답은 맞았을 때도 틀렸을 때도 큰 글씨로 따로 보여 준다.
+            Text(
+              l10n.testAnswerLabel,
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppTokens.space4),
+            Text(
+              expected,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: colors.onSurface,
               ),
             ),
           ],

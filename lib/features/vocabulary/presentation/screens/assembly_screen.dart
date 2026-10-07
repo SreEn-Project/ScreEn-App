@@ -165,24 +165,6 @@ class _DraggableTile extends StatelessWidget {
   }
 }
 
-/// 완성 칸에서 카드가 놓일 자리를 알려 주는 빈 칸 모양.
-class _EmptySlot extends StatelessWidget {
-  const _EmptySlot();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      width: 44,
-      height: 48,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppTokens.radiusInput),
-        border: Border.all(color: colors.outlineVariant, width: 1.5),
-      ),
-    );
-  }
-}
-
 class _Running extends ConsumerStatefulWidget {
   const _Running({required this.wordbookId, required this.state});
 
@@ -198,6 +180,9 @@ class _RunningState extends ConsumerState<_Running> {
   final _burst = GlobalKey<BurstLayerState>();
   final _slotKey = GlobalKey();
   int _shake = 0;
+
+  /// 글자 정렬형에서 눌러 고른 카드 (다음에 누른 자리로 옮긴다).
+  int? _selected;
 
   @override
   void dispose() {
@@ -235,7 +220,16 @@ class _RunningState extends ConsumerState<_Running> {
   /// 카드를 [at] 자리에 끼운다 (없으면 끝).
   void _drop(_DragTile drag, {int? at}) {
     HapticFeedback.lightImpact();
+    _selected = null;
     _model.place(drag.id, at: at);
+  }
+
+  /// 글자 정렬형: 한 장을 누르고 다른 장을 누르면 그 자리로 옮긴다.
+  void _tapLetter(int id, int index) {
+    HapticFeedback.selectionClick();
+    final from = _selected;
+    setState(() => _selected = from == id ? null : (from == null ? id : null));
+    if (from != null && from != id) _model.place(from, at: index);
   }
 
   @override
@@ -258,10 +252,6 @@ class _RunningState extends ConsumerState<_Running> {
         : correct
         ? colors.primaryContainer
         : colors.errorContainer;
-    // 글자 정렬형은 필요한 글자 수만큼 빈 칸을 보여 준다.
-    final remaining = letters
-        ? (question.answer.length - state.placed.length).clamp(0, 99)
-        : 0;
 
     Widget placedChip(int i) {
       final id = state.placed[i];
@@ -280,10 +270,15 @@ class _RunningState extends ConsumerState<_Running> {
           child: _DraggableTile(
             data: _DragTile(id, fromSlot: true),
             text: question.tile(id).text,
-            color: slotColor,
+            color:
+                slotColor ?? (_selected == id ? colors.primaryContainer : null),
             minWidth: letters ? 44 : 48,
             enabled: !revealed,
-            onTap: revealed ? null : () => model.remove(id),
+            onTap: revealed
+                ? null
+                : letters
+                ? () => _tapLetter(id, i)
+                : () => model.remove(id),
           ),
         ),
       );
@@ -294,7 +289,9 @@ class _RunningState extends ConsumerState<_Running> {
       trigger: _shake,
       child: DragTarget<_DragTile>(
         onWillAcceptWithDetails: (_) => !revealed,
-        onAcceptWithDetails: (d) => _drop(d.data),
+        // 글자 정렬형에서 칸 빈 곳에 놓으면 맨 뒤로 보낸다.
+        onAcceptWithDetails: (d) =>
+            _drop(d.data, at: letters ? state.placed.length : null),
         builder: (context, candidates, _) => AnimatedContainer(
           key: _slotKey,
           duration: const Duration(milliseconds: 160),
@@ -324,11 +321,6 @@ class _RunningState extends ConsumerState<_Running> {
                     children: [
                       for (var i = 0; i < state.placed.length; i++)
                         placedChip(i),
-                      for (var i = 0; i < remaining; i++)
-                        const Padding(
-                          padding: EdgeInsets.only(right: AppTokens.space8),
-                          child: _EmptySlot(),
-                        ),
                       if (state.placed.isEmpty && !letters)
                         Text(
                           l10n.assembleSlotHint,
@@ -409,13 +401,15 @@ class _RunningState extends ConsumerState<_Running> {
             const SizedBox(height: AppTokens.sectionGap),
             StudyPrompt(label: l10n.testPromptMeaning, text: question.meaning),
             const SizedBox(height: AppTokens.sectionGap),
-            SectionTitle(l10n.assembleSlot),
+            SectionTitle(letters ? l10n.assembleSortTitle : l10n.assembleSlot),
             const SizedBox(height: AppTokens.sectionTitleGap),
             slot,
-            const SizedBox(height: AppTokens.sectionGap),
-            SectionTitle(l10n.assembleCards),
-            const SizedBox(height: AppTokens.sectionTitleGap),
-            pool,
+            if (!letters) ...[
+              const SizedBox(height: AppTokens.sectionGap),
+              SectionTitle(l10n.assembleCards),
+              const SizedBox(height: AppTokens.sectionTitleGap),
+              pool,
+            ],
             if (!revealed) ...[
               const SizedBox(height: AppTokens.space8),
               Padding(
@@ -426,11 +420,11 @@ class _RunningState extends ConsumerState<_Running> {
                   children: [
                     Expanded(
                       child: Text(
-                        l10n.assembleDragHint,
+                        letters ? l10n.assembleSortHint : l10n.assembleDragHint,
                         style: theme.textTheme.bodySmall,
                       ),
                     ),
-                    if (state.placed.isNotEmpty)
+                    if (!letters && state.placed.isNotEmpty)
                       AppButton.text(
                         label: l10n.assembleUndo,
                         onPressed: model.undo,
