@@ -53,11 +53,13 @@ fun com.example.translation_poc_app.data.history.TranslationRecord.toPigeon() = 
 fun Engine.toPigeon() = when (this) {
     Engine.ML_KIT -> EngineType.ML_KIT
     Engine.GEMINI -> EngineType.GEMINI
+    Engine.GROQ -> EngineType.GROQ
 }
 
 fun EngineType.toNative() = when (this) {
     EngineType.ML_KIT -> Engine.ML_KIT
     EngineType.GEMINI -> Engine.GEMINI
+    EngineType.GROQ -> Engine.GROQ
 }
 
 fun CaptureRange.toPigeon() = when (this) {

@@ -5,14 +5,16 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
+import '../../../../core/l10n/labels.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../domain/entities/translator_settings.dart';
 import '../view_models/ai_options_view_model.dart';
 import '../view_models/api_key_pin_view_model.dart';
 import '../view_models/api_key_view_model.dart';
 import '../widgets/ai_options_section.dart';
 import '../widgets/pin_sheets.dart';
 
-/// AI 번역 설정 (S-06): 만 18세 확인(FL-09), 본인 Gemini API 키(NA-13), 말투 · 용어집(FL-11), 데이터 전송 고지.
+/// AI 번역 설정 (S-06): 만 18세 확인(FL-09), 본인 Gemini · Groq API 키(NA-13), 말투 · 용어집(FL-11), 데이터 전송 고지.
 /// 연령 확인 전에는 키 입력 · 옵션을 보여 주지 않는다.
 /// 등록된 키가 있으면 입력창에 가려서 채워 두고, 보기 · 수정 · 삭제를 할 수 있다.
 /// 키 접근 PIN을 켜 두면(NA-13) PIN을 넣기 전에는 키 영역 대신 잠금 카드만 보인다.
@@ -23,10 +25,17 @@ class AiSetupScreen extends ConsumerStatefulWidget {
   ConsumerState<AiSetupScreen> createState() => _AiSetupScreenState();
 }
 
-final _studioUrl = Uri.parse('https://aistudio.google.com/apikey');
+/// 엔진별 키 발급 페이지.
+final _keyUrls = {
+  EngineType.gemini: Uri.parse('https://aistudio.google.com/apikey'),
+  EngineType.groq: Uri.parse('https://console.groq.com/keys'),
+};
 
 class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
   final _controller = TextEditingController();
+
+  /// 지금 키를 다루는 AI 엔진 (Gemini · Groq 탭).
+  EngineType _engine = EngineType.gemini;
   bool _revealed = false;
   bool _filled = false;
   bool _testing = false;
@@ -40,14 +49,16 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
   }
 
   Future<void> _save() async {
-    await ref.read(apiKeyViewModelProvider.notifier).save(_controller.text);
+    await ref
+        .read(apiKeyViewModelProvider(_engine).notifier)
+        .save(_controller.text);
     if (!mounted) return;
     setState(() {});
     AppToast.show(context, AppLocalizations.of(context).apiKeySavedToast);
   }
 
   Future<void> _remove() async {
-    await ref.read(apiKeyViewModelProvider.notifier).clear();
+    await ref.read(apiKeyViewModelProvider(_engine).notifier).clear();
     _controller.clear();
     if (!mounted) return;
     setState(() => _revealed = false);
@@ -61,7 +72,7 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
     });
     final l10n = AppLocalizations.of(context);
     final reason = await ref
-        .read(apiKeyViewModelProvider.notifier)
+        .read(apiKeyViewModelProvider(_engine).notifier)
         .test(_controller.text);
     if (!mounted) return;
     setState(() {
@@ -136,8 +147,19 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
     if (mounted) setState(() => _filled = false);
   }
 
-  Future<void> _openStudio() =>
-      launchUrl(_studioUrl, mode: LaunchMode.externalApplication);
+  Future<void> _openKeyPage() =>
+      launchUrl(_keyUrls[_engine]!, mode: LaunchMode.externalApplication);
+
+  void _selectEngine(EngineType engine) {
+    if (engine == _engine) return;
+    setState(() {
+      _engine = engine;
+      _controller.clear();
+      _filled = false;
+      _revealed = false;
+      _testMessage = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +167,7 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
     final theme = Theme.of(context);
     final options = ref.watch(aiOptionsViewModelProvider).value;
     final ageConfirmed = options?.ageConfirmed ?? false;
-    final saved = ref.watch(apiKeyViewModelProvider).value;
+    final saved = ref.watch(apiKeyViewModelProvider(_engine)).value;
     final pinState = ref.watch(apiKeyPinViewModelProvider).value;
     final pinEnabled = pinState?.enabled ?? false;
     // PIN 상태를 읽기 전에도 잠긴 것처럼 둬서 키가 잠깐 비치지 않게 한다.
@@ -165,7 +187,10 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(AppTokens.pagePadding),
                 children: [
-                  Text(l10n.apiKeyIntro, style: theme.textTheme.bodyMedium),
+                  Text(
+                    l10n.apiKeyIntroFor(_engine),
+                    style: theme.textTheme.bodyMedium,
+                  ),
                   const SizedBox(height: 16),
                   AiAgeCard(confirmed: ageConfirmed),
                   const SizedBox(height: 12),
@@ -174,6 +199,13 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                   if (ageConfirmed && locked)
                     _LockedCard(onUnlock: _unlock, onForgot: _forgotPin)
                   else if (ageConfirmed) ...[
+                    AppSegmented<EngineType>(
+                      values: const [EngineType.gemini, EngineType.groq],
+                      selected: _engine,
+                      label: l10n.engineBrand,
+                      onChanged: _selectEngine,
+                    ),
+                    const SizedBox(height: 16),
                     if (saved != null) ...[
                       Text(
                         l10n.apiKeyRegistered,
@@ -185,7 +217,7 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                     ],
                     AppTextField(
                       controller: _controller,
-                      hint: l10n.apiKeyHint,
+                      hint: l10n.apiKeyHintFor(_engine),
                       obscure: !_revealed,
                       onChanged: (_) => setState(() {}),
                     ),
@@ -217,8 +249,8 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                       onPressed: text.isEmpty || text == saved ? null : _save,
                     ),
                     AppButton.text(
-                      label: l10n.apiKeyGet,
-                      onPressed: _openStudio,
+                      label: l10n.apiKeyGetFor(_engine),
+                      onPressed: _openKeyPage,
                     ),
                     if (saved != null) ...[
                       const SizedBox(height: 8),

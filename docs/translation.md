@@ -30,3 +30,11 @@
 | 3 | ✅ 바뀐 영역만 다시 인식 (#43) | 자동 번역에서 직전 화면과 밝기 격자를 견줘 변한 칸 주변만 잘라 읽고 안 바뀐 블록은 재사용. 많이 바뀌면 전체 인식. 기기 실측 전. |
 | 4 | ✅ 인식 후처리 (#45) | `OcrPostProcessor`: 글자 사이에 낀 0·1·5·|와 소문자 사이 I를 글자로, 숫자 사이 O·l을 숫자로, 문장 첫머리 l'm·`| am`·lt를 I'm·I am·It로, 합자(ﬁ 등) 풀기, 줄 전체가 짧은 UI 단어(OK · Cancel · Settings 등 영어 약 70개)면 사전으로 바로잡기. 주소 · 파일 이름 · 코드 조각과 한·중·일 글자는 건드리지 않는다. 영어(라틴)만. 기기 실측 전. |
 | 진행 | AI 번역 (3단계, #94) | `GeminiTranslationEngine`(REST) + `FallbackTranslationEngine`(오류 · 오프라인 · 키 없음이면 ML Kit)까지 완료. **BYOK 결정(사용자가 본인 Gemini 키를 입력, #96)**: 설정 > AI 번역 설정에서 키를 붙여 넣으면 `ApiKeyStore`(Android Keystore AES-GCM)에 암호화해 기기에만 저장하고, 키가 있어야 Gemini 엔진을 고를 수 있다. 키를 지우면 ML Kit으로 되돌린다. 남은 것: ML Kit 먼저 보여 주고 AI로 교체, 블록 묶어 1회 호출, 캐시 키에 모델 · 프롬프트 버전(`PROMPT_VERSION`). 주의: 대체된 ML Kit 결과가 Gemini 키로 캐시된다. **옵션(#118, D-049)**: 만 18세 확인 후에만 Gemini 사용, 말투(존댓말 · 반말)와 용어집(글에 나온 항목만)을 프롬프트에 넣고 캐시 키에 포함. |
+
+## Groq 엔진 (NA-13, #167, D-066)
+Gemini와 같은 BYOK 방식의 두 번째 AI 엔진. 공식 문서 확인일 2026-10-08.
+- **연령**: Groq Services Agreement — "You must be 18 years of age or older to access or use the Cloud Services." → Gemini와 같은 만 18세 확인(FL-09) 적용.
+- **무료 한도**: 무료 플랜이 있고 모델별 분당 · 일일 요청 / 토큰 제한이 있다. 정확한 수치는 계정의 Limits 페이지에서만 확인되고 문서 표(console.groq.com/docs/rate-limits)에는 Llama 모델이 없다. 초과하면 429 → "AI 한도 초과" 안내 후 ML Kit으로 대체. 무료/체험 서비스는 AS IS이며 변경 · 중단될 수 있다.
+- **데이터**: 번역할 글자가 Groq로 전송된다(DPA 적용). 설정의 데이터 전송 고지에 Groq를 포함했다.
+- **모델**: `llama-3.3-70b-versatile` 우선, 없으면 `llama-3.1-8b-instant`. 한국어 번역 품질은 70B가 안정적이어서.
+- **호출**: `POST https://api.groq.com/openai/v1/chat/completions`, 헤더 `Authorization: Bearer <키>`, system(번역 지시) + user(원문), `temperature 0`. 단어 사전은 `response_format: json_object`.

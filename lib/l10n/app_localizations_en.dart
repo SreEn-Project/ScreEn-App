@@ -295,6 +295,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'More natural AI translation · API key needed';
 
   @override
+  String get engineGroq => 'My Groq key';
+
+  @override
+  String get engineGroqDetail => 'Fast AI translation (Llama) · API key needed';
+
+  @override
   String get engineNeedsKey => 'Add an API key to use this';
 
   @override
@@ -324,7 +330,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAiSetup => 'AI translation setup';
 
   @override
-  String get settingsAiSetupDetail => 'Gemini API key';
+  String get settingsAiSetupDetail => 'Gemini · Groq API keys';
 
   @override
   String get apiKeyTitle => 'AI translation setup';
@@ -367,6 +373,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String apiKeyTestFailed(String reason) {
     return 'Rejected: $reason';
   }
+
+  @override
+  String get apiKeyHintGroq => 'Paste your Groq API key (gsk_...)';
+
+  @override
+  String get apiKeyIntroGroq =>
+      'Get your own key from the Groq Console and paste it here. It is encrypted and stored only on this device. Translated text is sent to Groq; if anything fails, ML Kit takes over.';
+
+  @override
+  String get apiKeyGetGroq => 'Get a key from the Groq Console';
 
   @override
   String get apiKeyGet => 'Get a key from Google AI Studio';
@@ -435,14 +451,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aiAgeDetail =>
-      'Under the Gemini API terms, AI translation is only for people 18 or older. Confirm to turn it on.';
+      'Under the Gemini and Groq terms, AI translation is only for people 18 or older. Confirm to turn it on.';
 
   @override
   String get aiNoticeTitle => 'About data sent';
 
   @override
   String get aiNoticeBody =>
-      'When AI translation is on, the text read from your screen is sent to the AI provider you chose (Google Gemini). On the free tier, Google may use it to improve and review its services. Don\'t translate screens that show passwords or personal information.';
+      'When AI translation is on, the text read from your screen is sent to the AI provider you chose (Google Gemini or Groq). On the Gemini free tier, Google may use it to improve and review its services. Don\'t translate screens that show passwords or personal information.';
 
   @override
   String get aiOptionsTitle => 'Translation options';

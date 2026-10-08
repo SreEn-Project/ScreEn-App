@@ -133,21 +133,28 @@ class FakeSettingsRepository implements SettingsRepository {
   Future<void> setGlossary(List<GlossaryEntry> entries) async =>
       settings = settings.copyWith(glossary: entries);
 
-  String? apiKey;
+  /// 엔진별 저장된 키.
+  final apiKeys = <EngineType, String?>{};
+
+  /// Gemini 키 (기존 테스트용 바로가기).
+  String? get apiKey => apiKeys[EngineType.gemini];
+  set apiKey(String? value) => apiKeys[EngineType.gemini] = value;
 
   @override
-  Future<String?> getApiKey() async => apiKey;
+  Future<String?> getApiKey(EngineType engine) async => apiKeys[engine];
 
   @override
-  Future<void> setApiKey(String apiKey) async => this.apiKey = apiKey;
+  Future<void> setApiKey(EngineType engine, String apiKey) async =>
+      apiKeys[engine] = apiKey;
 
   @override
-  Future<void> clearApiKey() async => apiKey = null;
+  Future<void> clearApiKey(EngineType engine) async => apiKeys[engine] = null;
 
   String? testResult;
 
   @override
-  Future<String?> testApiKey(String apiKey) async => testResult;
+  Future<String?> testApiKey(EngineType engine, String apiKey) async =>
+      testResult;
 
   /// null이면 PIN이 꺼진 상태.
   String? apiKeyPin;
@@ -175,7 +182,7 @@ class FakeSettingsRepository implements SettingsRepository {
 
   @override
   Future<void> resetApiKeyProtection() async {
-    apiKey = null;
+    apiKeys.clear();
     apiKeyPin = null;
   }
 }

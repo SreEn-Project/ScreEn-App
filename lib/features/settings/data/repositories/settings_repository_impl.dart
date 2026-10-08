@@ -77,16 +77,20 @@ class SettingsRepositoryImpl implements SettingsRepository {
       _dataSource.setGlossary([for (final e in entries) e.toPigeon()]);
 
   @override
-  Future<String?> getApiKey() => _dataSource.getApiKey();
+  Future<String?> getApiKey(EngineType engine) =>
+      _dataSource.getApiKey(engine.toPigeon());
 
   @override
-  Future<void> setApiKey(String apiKey) => _dataSource.setApiKey(apiKey);
+  Future<void> setApiKey(EngineType engine, String apiKey) =>
+      _dataSource.setApiKey(engine.toPigeon(), apiKey);
 
   @override
-  Future<void> clearApiKey() => _dataSource.clearApiKey();
+  Future<void> clearApiKey(EngineType engine) =>
+      _dataSource.clearApiKey(engine.toPigeon());
 
   @override
-  Future<String?> testApiKey(String apiKey) => _dataSource.testApiKey(apiKey);
+  Future<String?> testApiKey(EngineType engine, String apiKey) =>
+      _dataSource.testApiKey(engine.toPigeon(), apiKey);
 
   @override
   Future<bool> isApiKeyPinEnabled() => _dataSource.isApiKeyPinEnabled();

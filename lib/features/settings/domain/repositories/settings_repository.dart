@@ -25,13 +25,13 @@ abstract interface class SettingsRepository {
   Future<void> setAiTone(AiTone tone);
   Future<void> setGlossary(List<GlossaryEntry> entries);
 
-  /// AI 번역 API 키 (NA-13). 없으면 null.
-  Future<String?> getApiKey();
-  Future<void> setApiKey(String apiKey);
-  Future<void> clearApiKey();
+  /// AI 번역 API 키 (NA-13). 엔진마다 따로 보관한다. 없으면 null.
+  Future<String?> getApiKey(EngineType engine);
+  Future<void> setApiKey(EngineType engine, String apiKey);
+  Future<void> clearApiKey(EngineType engine);
 
-  /// 키를 실제로 호출해 본다. 성공이면 null, 실패면 구글이 알려 준 이유.
-  Future<String?> testApiKey(String apiKey);
+  /// 키를 실제로 호출해 본다. 성공이면 null, 실패면 서비스가 알려 준 이유.
+  Future<String?> testApiKey(EngineType engine, String apiKey);
 
   /// API 키 접근 PIN (NA-13). 켜져 있는지.
   Future<bool> isApiKeyPinEnabled();

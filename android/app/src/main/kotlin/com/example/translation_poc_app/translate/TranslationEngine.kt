@@ -1,11 +1,18 @@
 package com.example.translation_poc_app.translate
 
 import com.example.translation_poc_app.data.settings.AiTone
+import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.GlossaryEntry
 import java.io.Closeable
 
 /** 번역 엔진 종류. 엔진이 늘면 여기에 추가한다 (NA-11). */
-enum class EngineId { ML_KIT, GEMINI }
+enum class EngineId { ML_KIT, GEMINI, GROQ }
+
+fun Engine.toEngineId(): EngineId = when (this) {
+    Engine.ML_KIT -> EngineId.ML_KIT
+    Engine.GEMINI -> EngineId.GEMINI
+    Engine.GROQ -> EngineId.GROQ
+}
 
 /** 원문 언어를 엔진이 알아서 고르게 할 때 쓰는 값. */
 const val AUTO_LANGUAGE = "auto"

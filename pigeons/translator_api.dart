@@ -13,8 +13,8 @@ import 'package:pigeon/pigeon.dart';
     dartPackageName: 'translation_poc_app',
   ),
 )
-/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini = 내 API 키 (NA-13).
-enum EngineType { mlKit, gemini }
+/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13).
+enum EngineType { mlKit, gemini, groq }
 
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
@@ -158,18 +158,18 @@ abstract class SettingsHostApi {
 
   /// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다.
   @async
-  String? getApiKey();
+  String? getApiKey(EngineType engine);
 
   /// API 키를 Keystore로 암호화해 기기에만 저장한다.
   @async
-  void setApiKey(String apiKey);
+  void setApiKey(EngineType engine, String apiKey);
 
   @async
-  void clearApiKey();
+  void clearApiKey(EngineType engine);
 
-  /// 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 구글이 알려 준 이유(사람이 읽는 문장).
+  /// 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 서비스가 알려 준 이유(사람이 읽는 문장).
   @async
-  String? testApiKey(String apiKey);
+  String? testApiKey(EngineType engine, String apiKey);
 
   /// API 키 접근 PIN이 켜져 있는지 (NA-13).
   @async

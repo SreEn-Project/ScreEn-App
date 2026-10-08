@@ -55,7 +55,7 @@ void main() {
   });
 
   test('Gemini는 키가 없으면 선택해도 저장하지 않는다', () async {
-    when(() => repository.getApiKey()).thenAnswer((_) async => null);
+    when(() => repository.getApiKey(any())).thenAnswer((_) async => null);
     await ready(const TranslatorSettings(ageConfirmed: true));
     final viewModel = container.read(engineViewModelProvider.notifier);
 
@@ -65,7 +65,7 @@ void main() {
   });
 
   test('Gemini는 연령 확인이 없으면 키가 있어도 저장하지 않는다 (FL-09)', () async {
-    when(() => repository.getApiKey()).thenAnswer((_) async => 'k');
+    when(() => repository.getApiKey(any())).thenAnswer((_) async => 'k');
     await ready();
 
     await container
@@ -75,8 +75,32 @@ void main() {
     verifyNever(() => repository.setEngine(any()));
   });
 
+  test('Groq는 자기 키가 없으면 Gemini 키가 있어도 저장하지 않는다', () async {
+    when(() => repository.getApiKey(any())).thenAnswer((_) async => null);
+    when(() => repository.getApiKey(EngineType.gemini))
+        .thenAnswer((_) async => 'k');
+    await ready(const TranslatorSettings(ageConfirmed: true));
+
+    await container
+        .read(engineViewModelProvider.notifier)
+        .select(EngineType.groq);
+
+    verifyNever(() => repository.setEngine(any()));
+  });
+
+  test('Groq는 연령 확인과 키가 있으면 선택된다', () async {
+    when(() => repository.getApiKey(any())).thenAnswer((_) async => 'gsk_k');
+    await ready(const TranslatorSettings(ageConfirmed: true));
+
+    await container
+        .read(engineViewModelProvider.notifier)
+        .select(EngineType.groq);
+
+    verify(() => repository.setEngine(EngineType.groq)).called(1);
+  });
+
   test('Gemini는 연령 확인과 키가 있으면 선택된다', () async {
-    when(() => repository.getApiKey()).thenAnswer((_) async => "k");
+    when(() => repository.getApiKey(any())).thenAnswer((_) async => "k");
     await ready(const TranslatorSettings(ageConfirmed: true));
 
     await container

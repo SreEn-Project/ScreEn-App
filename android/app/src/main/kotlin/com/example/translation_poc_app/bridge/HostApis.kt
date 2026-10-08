@@ -3,12 +3,14 @@ package com.example.translation_poc_app.bridge
 import android.content.Context
 import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.ApiKeyStore
+import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.GlossaryEntry as NativeGlossaryEntry
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.data.vocabulary.VocabularyRepository
 import com.example.translation_poc_app.data.vocabulary.WordDraft
 import com.example.translation_poc_app.data.vocabulary.WordSort
 import com.example.translation_poc_app.translate.GeminiKeyTester
+import com.example.translation_poc_app.translate.GroqKeyTester
 import com.example.translation_poc_app.service.CaptureConsentActivity
 import com.example.translation_poc_app.service.RunState
 import com.example.translation_poc_app.service.TranslatorService
@@ -60,13 +62,16 @@ class SettingsHostApiImpl(
     override suspend fun setGlossary(entries: List<GlossaryEntry>) =
         repository.setGlossary(entries.map { NativeGlossaryEntry(it.source, it.target) })
 
-    override suspend fun getApiKey(): String? = apiKeys.get()
+    override suspend fun getApiKey(engine: EngineType): String? = apiKeys.get(engine.toNative())
 
-    override suspend fun setApiKey(apiKey: String) = apiKeys.set(apiKey)
+    override suspend fun setApiKey(engine: EngineType, apiKey: String) = apiKeys.set(engine.toNative(), apiKey)
 
-    override suspend fun clearApiKey() = apiKeys.clear()
+    override suspend fun clearApiKey(engine: EngineType) = apiKeys.clear(engine.toNative())
 
-    override suspend fun testApiKey(apiKey: String): String? = GeminiKeyTester.test(apiKey)
+    override suspend fun testApiKey(engine: EngineType, apiKey: String): String? = when (engine.toNative()) {
+        Engine.GROQ -> GroqKeyTester.test(apiKey)
+        else -> GeminiKeyTester.test(apiKey)
+    }
 
     override suspend fun isApiKeyPinEnabled(): Boolean = apiKeys.isPinEnabled()
 

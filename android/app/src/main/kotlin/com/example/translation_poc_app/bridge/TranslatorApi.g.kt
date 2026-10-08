@@ -198,10 +198,11 @@ class FlutterError (
   val details: Any? = null
 ) : RuntimeException()
 
-/** 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini = 내 API 키 (NA-13). */
+/** 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13). */
 enum class EngineType(val raw: Int) {
   ML_KIT(0),
-  GEMINI(1);
+  GEMINI(1),
+  GROQ(2);
 
   companion object {
     fun ofRaw(raw: Int): EngineType? {
@@ -1040,12 +1041,12 @@ interface SettingsHostApi {
   /** 용어집 전체를 바꾼다 (FL-11). 네이티브가 빈 칸 · 중복 · 개수를 정리해 저장한다. */
   suspend fun setGlossary(entries: List<GlossaryEntry>)
   /** 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다. */
-  suspend fun getApiKey(): String?
+  suspend fun getApiKey(engine: EngineType): String?
   /** API 키를 Keystore로 암호화해 기기에만 저장한다. */
-  suspend fun setApiKey(apiKey: String)
-  suspend fun clearApiKey()
-  /** 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 구글이 알려 준 이유(사람이 읽는 문장). */
-  suspend fun testApiKey(apiKey: String): String?
+  suspend fun setApiKey(engine: EngineType, apiKey: String)
+  suspend fun clearApiKey(engine: EngineType)
+  /** 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 서비스가 알려 준 이유(사람이 읽는 문장). */
+  suspend fun testApiKey(engine: EngineType, apiKey: String): String?
   /** API 키 접근 PIN이 켜져 있는지 (NA-13). */
   suspend fun isApiKeyPinEnabled(): Boolean
   /** 4자리 PIN이 맞는지. PIN이 없으면 true. */
@@ -1404,10 +1405,12 @@ interface SettingsHostApi {
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.getApiKey$separatedMessageChannelSuffix", codec)
         if (api != null) {
-          channel.setMessageHandler { _, reply ->
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val engineArg = args[0] as EngineType
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                listOf(api.getApiKey())
+                listOf(api.getApiKey(engineArg))
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
               }
@@ -1423,10 +1426,11 @@ interface SettingsHostApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val apiKeyArg = args[0] as String
+            val engineArg = args[0] as EngineType
+            val apiKeyArg = args[1] as String
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.setApiKey(apiKeyArg)
+                api.setApiKey(engineArg, apiKeyArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
@@ -1441,10 +1445,12 @@ interface SettingsHostApi {
       run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.clearApiKey$separatedMessageChannelSuffix", codec)
         if (api != null) {
-          channel.setMessageHandler { _, reply ->
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val engineArg = args[0] as EngineType
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.clearApiKey()
+                api.clearApiKey(engineArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
@@ -1461,10 +1467,11 @@ interface SettingsHostApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val apiKeyArg = args[0] as String
+            val engineArg = args[0] as EngineType
+            val apiKeyArg = args[1] as String
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                listOf(api.testApiKey(apiKeyArg))
+                listOf(api.testApiKey(engineArg, apiKeyArg))
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
               }

@@ -23,7 +23,7 @@ class QuickSettingChoicesTest {
     }
 
     @Test
-    fun `엔진 선택지는 ML Kit과 Gemini`() {
-        assertEquals(listOf(Engine.ML_KIT, Engine.GEMINI), QuickSettingChoices.engines())
+    fun `엔진 선택지는 ML Kit, Gemini, Groq`() {
+        assertEquals(listOf(Engine.ML_KIT, Engine.GEMINI, Engine.GROQ), QuickSettingChoices.engines())
     }
 }

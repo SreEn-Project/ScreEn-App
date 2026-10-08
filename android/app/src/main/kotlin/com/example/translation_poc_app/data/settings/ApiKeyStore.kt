@@ -16,18 +16,29 @@ import javax.crypto.spec.GCMParameterSpec
 
 /**
  * AI 번역 API 키 보관 (NA-13). Android Keystore의 AES 키로 암호화해 앱 전용 저장소에만 둔다.
- * 키 접근 PIN(4자리)은 salt + PBKDF2 해시만 같은 Keystore 키로 암호화해 두고, 원문은 저장하지 않는다.
+ * 엔진(Gemini · Groq)마다 따로 두고, 키 접근 PIN(4자리)은 두 키가 같이 쓴다. PIN은 salt + PBKDF2 해시만 같은 Keystore 키로 암호화해 두고, 원문은 저장하지 않는다.
  * 키 값은 로그 · 설정 이벤트로 내보내지 않는다. 설정 화면이 가려서 보여 주려고 Flutter로는 [get]으로만 준다.
  */
 class ApiKeyStore(context: Context) {
     private val prefs = context.applicationContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
-    fun get(): String? = decrypt(ENTRY)?.let { String(it) }
+    /** 엔진마다 키를 따로 보관한다. AI 엔진이 아니면 항상 null. */
+    fun get(engine: Engine): String? = entry(engine)?.let { decrypt(it) }?.let { String(it) }
 
-    fun set(key: String) = encrypt(ENTRY, key.filterNot { it.isWhitespace() }.toByteArray())
+    fun set(engine: Engine, key: String) {
+        val entry = entry(engine) ?: return
+        encrypt(entry, key.filterNot { it.isWhitespace() }.toByteArray())
+    }
 
-    fun clear() {
-        prefs.edit().remove(ENTRY).apply()
+    fun clear(engine: Engine) {
+        val entry = entry(engine) ?: return
+        prefs.edit().remove(entry).apply()
+    }
+
+    private fun entry(engine: Engine): String? = when (engine) {
+        Engine.GEMINI -> GEMINI_ENTRY
+        Engine.GROQ -> GROQ_ENTRY
+        Engine.ML_KIT -> null
     }
 
     /** 키 접근 PIN이 켜져 있는지. PIN 자료가 있으나 읽을 수 없으면(Keystore 키 분실) 켜진 것으로 본다. */
@@ -60,7 +71,7 @@ class ApiKeyStore(context: Context) {
 
     /** PIN 분실: 키와 PIN을 함께 지운다. */
     fun reset() {
-        prefs.edit().remove(ENTRY).remove(PIN_ENTRY).apply()
+        prefs.edit().remove(GEMINI_ENTRY).remove(GROQ_ENTRY).remove(PIN_ENTRY).apply()
     }
 
     private fun isValidPin(pin: String) = pin.length == PIN_LENGTH && pin.all { it in '0'..'9' }
@@ -105,7 +116,8 @@ class ApiKeyStore(context: Context) {
 
     private companion object {
         const val FILE = "api_key_store"
-        const val ENTRY = "gemini"
+        const val GEMINI_ENTRY = "gemini"
+        const val GROQ_ENTRY = "groq"
         const val PIN_ENTRY = "pin"
         const val PIN_LENGTH = 4
         const val SALT_BYTES = 16

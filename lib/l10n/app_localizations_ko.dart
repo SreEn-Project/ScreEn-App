@@ -287,6 +287,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get engineGeminiDetail => '더 자연스러운 AI 번역 · API 키 필요';
 
   @override
+  String get engineGroq => '내 Groq 키';
+
+  @override
+  String get engineGroqDetail => '빠른 AI 번역(Llama) · API 키 필요';
+
+  @override
   String get engineNeedsKey => 'API 키를 등록해야 쓸 수 있어요';
 
   @override
@@ -314,7 +320,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settingsAiSetup => 'AI 번역 설정';
 
   @override
-  String get settingsAiSetupDetail => 'Gemini API 키 등록';
+  String get settingsAiSetupDetail => 'Gemini · Groq API 키 등록';
 
   @override
   String get apiKeyTitle => 'AI 번역 설정';
@@ -357,6 +363,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String apiKeyTestFailed(String reason) {
     return '실패: $reason';
   }
+
+  @override
+  String get apiKeyHintGroq => 'Groq API 키(gsk_...)를 붙여 넣으세요';
+
+  @override
+  String get apiKeyIntroGroq =>
+      'Groq Console에서 본인 키를 발급받아 여기에 붙여 넣으세요. 키는 암호화되어 이 기기에만 저장돼요. 번역할 글자는 Groq로 보내지고, 실패하면 ML Kit으로 대신 번역해요.';
+
+  @override
+  String get apiKeyGetGroq => 'Groq Console에서 키 발급받기';
 
   @override
   String get apiKeyGet => 'Google AI Studio에서 키 발급받기';
@@ -424,14 +440,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get aiAgeDetail =>
-      'Gemini API 약관상 만 18세 미만은 AI 번역을 쓸 수 없어요. 확인해야 AI 번역을 켤 수 있어요.';
+      'Gemini · Groq 약관상 만 18세 미만은 AI 번역을 쓸 수 없어요. 확인해야 AI 번역을 켤 수 있어요.';
 
   @override
   String get aiNoticeTitle => '데이터 전송 안내';
 
   @override
   String get aiNoticeBody =>
-      'AI 번역을 켜면 화면에서 읽은 글자가 내가 고른 AI 제공자(Google Gemini)로 전송돼요. 무료 등급에서는 구글이 이 글을 서비스 개선과 검토에 쓸 수 있어요. 비밀번호나 개인정보가 보이는 화면은 번역하지 마세요.';
+      'AI 번역을 켜면 화면에서 읽은 글자가 내가 고른 AI 제공자(Google Gemini 또는 Groq)로 전송돼요. Gemini 무료 등급에서는 구글이 이 글을 서비스 개선과 검토에 쓸 수 있어요. 비밀번호나 개인정보가 보이는 화면은 번역하지 마세요.';
 
   @override
   String get aiOptionsTitle => '번역 옵션';

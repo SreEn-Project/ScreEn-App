@@ -64,7 +64,11 @@ class _EngineSection extends ConsumerWidget {
     final selected =
         ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
     final viewModel = ref.read(engineViewModelProvider.notifier);
-    final hasKey = ref.watch(apiKeyViewModelProvider).value != null;
+    final hasKey = {
+      for (final e in EngineType.values)
+        if (e.needsApiKey)
+          e: ref.watch(apiKeyViewModelProvider(e)).value != null,
+    };
     final ageConfirmed =
         ref.watch(aiOptionsViewModelProvider).value?.ageConfirmed ?? false;
     return AppSection(
@@ -79,14 +83,12 @@ class _EngineSection extends ConsumerWidget {
               _EngineTile(
                 engine: engine,
                 selected: engine == selected,
-                // Gemini는 만 18세 확인(FL-09)과 키가 있어야 고를 수 있다.
-                disabledReason: switch (engine) {
-                  EngineType.mlKit => null,
-                  EngineType.gemini =>
-                    !ageConfirmed
-                        ? l10n.engineNeedsAge
-                        : (hasKey ? null : l10n.engineNeedsKey),
-                },
+                // AI 엔진은 만 18세 확인(FL-09)과 그 엔진의 키가 있어야 고를 수 있다.
+                disabledReason: !engine.needsApiKey
+                    ? null
+                    : !ageConfirmed
+                    ? l10n.engineNeedsAge
+                    : (hasKey[engine]! ? null : l10n.engineNeedsKey),
                 onTap: () => viewModel.select(engine),
               ),
               const AppDivider(),
