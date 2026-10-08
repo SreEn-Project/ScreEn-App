@@ -11,6 +11,7 @@ import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/line_match.dart';
 import '../view_models/line_match_view_model.dart';
+import '../widgets/study_widgets.dart';
 
 /// 선 잇기 매칭 (L-05, AD-11): 단어 블록에서 뜻 블록으로 드래그해 선을 잇는다.
 class LineMatchScreen extends ConsumerWidget {
@@ -193,7 +194,7 @@ class _BoardState extends ConsumerState<_Board> {
           (isWord ? _flash!.wordId == b.wordId : _flash!.meaningId == b.wordId);
       final broken = flashing && _flash!.correct;
       final Color? fill = flashing
-          ? (_flash!.correct ? colors.primaryContainer : colors.errorContainer)
+          ? studyFill(colors, correct: _flash!.correct)
           : active
           ? colors.primaryContainer
           : null;

@@ -173,9 +173,9 @@ class _RunningState extends ConsumerState<_Running> {
       final Color? fill = !revealed
           ? null
           : isAnswer
-          ? colors.primaryContainer
+          ? studyFill(colors, correct: true)
           : isPicked
-          ? colors.errorContainer
+          ? studyFill(colors, correct: false)
           : null;
       return Padding(
         padding: const EdgeInsets.only(bottom: AppTokens.space12),
@@ -253,6 +253,11 @@ class _RunningState extends ConsumerState<_Running> {
           text: question.prompt,
         ),
         const SizedBox(height: AppTokens.sectionGap),
+        // 답을 낸 뒤 결과(정답이에요 / 오답이에요 + 정답)를 문제 바로 아래 맨 위에 보여 준다.
+        if (revealed) ...[
+          StudyFeedback(correct: correct, expected: question.expected),
+          const SizedBox(height: AppTokens.sectionGap),
+        ],
         if (typing) ...[
           ShakeEffect(
             trigger: _shake,
@@ -264,16 +269,8 @@ class _RunningState extends ConsumerState<_Running> {
               onSubmitted: model.submit,
             ),
           ),
-          if (revealed) ...[
-            const SizedBox(height: AppTokens.space16),
-            StudyFeedback(correct: correct, expected: question.expected),
-          ],
         ] else ...[
           for (final text in question.choices) choice(text),
-          if (revealed) ...[
-            const SizedBox(height: AppTokens.space4),
-            StudyFeedback(correct: correct, expected: question.expected),
-          ],
         ],
       ],
     );

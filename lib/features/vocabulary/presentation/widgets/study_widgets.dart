@@ -7,6 +7,11 @@ import '../../../../l10n/app_localizations.dart';
 
 /// 학습 · 테스트 화면이 같이 쓰는 조각 (AD-15). 화면마다 배치가 제각각이던 것을 한 모양으로 맞춘다.
 
+/// 정답 · 오답 표시 배경. 밝은 테마 · 어두운 테마 모두에서 글자가 읽히도록
+/// 컨테이너 색 대신 primary / error를 옅게 깐다 (design.md 알림 색 규칙).
+Color studyFill(ColorScheme colors, {required bool correct}) =>
+    (correct ? colors.primary : colors.error).withValues(alpha: 0.16);
+
 /// 시작 화면 맨 위: 단어장 이름과 한 줄 설명.
 class StudySetupHeader extends StatelessWidget {
   const StudySetupHeader({
@@ -245,7 +250,7 @@ class StudyFeedback extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(AppTokens.space16),
         decoration: BoxDecoration(
-          color: correct ? colors.primaryContainer : colors.errorContainer,
+          color: studyFill(colors, correct: correct),
           borderRadius: BorderRadius.circular(AppTokens.radiusInput),
         ),
         child: Column(

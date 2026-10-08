@@ -414,7 +414,10 @@ class _BlockCard extends StatelessWidget {
       ),
       child: AppCard(
         radius: AppTokens.radiusInput,
-        color: Color.lerp(colors.surface, colors.errorContainer, danger),
+        color: Color.alphaBlend(
+          colors.error.withValues(alpha: 0.22 * danger),
+          colors.surface,
+        ),
         padding: const EdgeInsets.symmetric(horizontal: AppTokens.space8),
         child: Center(
           child: Text(

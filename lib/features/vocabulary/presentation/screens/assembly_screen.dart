@@ -250,8 +250,8 @@ class _RunningState extends ConsumerState<_Running> {
     final slotColor = !revealed
         ? null
         : correct
-        ? colors.primaryContainer
-        : colors.errorContainer;
+        ? studyFill(colors, correct: true)
+        : studyFill(colors, correct: false);
 
     Widget placedChip(int i) {
       final id = state.placed[i];
