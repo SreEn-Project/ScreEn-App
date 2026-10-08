@@ -38,7 +38,7 @@ void main() {
       overrides: fakeNativeOverrides(vocabulary: repository),
     );
     addTearDown(container.dispose);
-    final provider = flashcardsViewModelProvider(1);
+    final provider = flashcardsViewModelProvider(WordbookSelection([1]));
     await container.read(provider.future);
     final model = container.read(provider.notifier);
 
@@ -78,7 +78,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: createRouter(
-            initialLocation: AppRoutes.flashcardsPath(1),
+            initialLocation: AppRoutes.flashcardsPath([1]),
           ),
         ),
       ),

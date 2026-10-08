@@ -869,6 +869,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get learnNoBooksHint => '번역 결과나 기록에서 단어를 저장하면 여기서 학습할 수 있어요';
 
   @override
+  String get learnPickBookHint => '함께 학습할 단어장을 하나 이상 고르세요.';
+
+  @override
+  String learnPickBookDone(int count) {
+    return '$count개 선택해 학습';
+  }
+
+  @override
   String get learnBook => '단어장';
 
   @override

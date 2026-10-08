@@ -224,10 +224,22 @@ final class UpdateWord implements UseCase<bool, UpdateWordParams> {
   }
 }
 
-class CreateWordTestParams {
-  const CreateWordTestParams(this.wordbookId, this.mode, {this.random});
+/// 고른 단어장들의 단어를 하나로 합친다 (AD-07). 단어 id는 단어장과 상관없이 유일하다.
+Future<List<VocabularyWord>> _wordsOf(
+  VocabularyRepository repository,
+  WordbookSelection selection,
+) async {
+  final all = <VocabularyWord>[];
+  for (final id in selection.ids) {
+    all.addAll(await repository.words(id));
+  }
+  return all;
+}
 
-  final int wordbookId;
+class CreateWordTestParams {
+  const CreateWordTestParams(this.selection, this.mode, {this.random});
+
+  final WordbookSelection selection;
   final WordTestMode mode;
 
   /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
@@ -252,7 +264,7 @@ final class CreateWordTest
   @override
   Future<List<WordTestQuestion>> call(CreateWordTestParams params) async {
     final random = params.random ?? Random();
-    final own = await _repository.words(params.wordbookId);
+    final own = await _wordsOf(_repository, params.selection);
     if (own.isEmpty) return const [];
     final picked = [...own]..shuffle(random);
     final targets = picked.take(maxQuestions).toList();
@@ -272,7 +284,7 @@ final class CreateWordTest
     // 같은 단어장 → 다른 단어장 순으로 오답 후보를 모은다.
     final others = <VocabularyWord>[];
     for (final book in await _repository.wordbooks()) {
-      if (book.id == params.wordbookId) continue;
+      if (params.selection.contains(book.id)) continue;
       others.addAll(await _repository.words(book.id));
     }
     final questions = <WordTestQuestion>[];
@@ -308,9 +320,9 @@ final class CreateWordTest
 }
 
 class CreateFlashcardDeckParams {
-  const CreateFlashcardDeckParams(this.wordbookId, {this.random});
+  const CreateFlashcardDeckParams(this.selection, {this.random});
 
-  final int wordbookId;
+  final WordbookSelection selection;
 
   /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
   final Random? random;
@@ -325,15 +337,15 @@ final class CreateFlashcardDeck
 
   @override
   Future<List<VocabularyWord>> call(CreateFlashcardDeckParams params) async {
-    final words = await _repository.words(params.wordbookId);
+    final words = await _wordsOf(_repository, params.selection);
     return [...words]..shuffle(params.random ?? Random());
   }
 }
 
 class CreateLineMatchGameParams {
-  const CreateLineMatchGameParams(this.wordbookId, {this.random});
+  const CreateLineMatchGameParams(this.selection, {this.random});
 
-  final int wordbookId;
+  final WordbookSelection selection;
 
   /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
   final Random? random;
@@ -348,7 +360,7 @@ final class CreateLineMatchGame
 
   @override
   Future<LineMatchGame?> call(CreateLineMatchGameParams params) async {
-    final words = await _repository.words(params.wordbookId);
+    final words = await _wordsOf(_repository, params.selection);
     if (words.isEmpty) return null;
     return LineMatchGame.start(words, random: params.random);
   }
@@ -356,13 +368,13 @@ final class CreateLineMatchGame
 
 class CreateFallingGameParams {
   const CreateFallingGameParams(
-    this.wordbookId,
+    this.selection,
     this.mode, {
     this.random,
     this.speedScale = 1.0,
   });
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final FallingMode mode;
 
   /// 낙하 속도 배율 (0.5 ~ 2.0).
@@ -381,7 +393,7 @@ final class CreateFallingGame
 
   @override
   Future<FallingGame?> call(CreateFallingGameParams params) async {
-    final words = await _repository.words(params.wordbookId);
+    final words = await _wordsOf(_repository, params.selection);
     if (words.isEmpty) return null;
     return FallingGame(
       words: words,
@@ -393,9 +405,9 @@ final class CreateFallingGame
 }
 
 class CreateAssemblyGameParams {
-  const CreateAssemblyGameParams(this.wordbookId, this.mode, {this.random});
+  const CreateAssemblyGameParams(this.selection, this.mode, {this.random});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final AssemblyMode mode;
 
   /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
@@ -414,7 +426,7 @@ final class CreateAssemblyGame
   @override
   Future<List<AssemblyQuestion>> call(CreateAssemblyGameParams params) async {
     final random = params.random ?? Random();
-    final words = await _repository.words(params.wordbookId);
+    final words = await _wordsOf(_repository, params.selection);
     if (words.isEmpty) return const [];
     final targets = ([...words]..shuffle(random)).take(maxQuestions);
     return [

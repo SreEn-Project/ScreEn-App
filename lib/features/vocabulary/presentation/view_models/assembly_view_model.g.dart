@@ -19,7 +19,7 @@ final class AssemblyViewModelProvider
   /// 단어 조립 (AD-13): 방식 고르기 → 한 문제씩 조립하고 확인 → 점수와 틀린 단어.
   AssemblyViewModelProvider._({
     required AssemblyViewModelFamily super.from,
-    required int super.argument,
+    required WordbookSelection super.argument,
   }) : super(
          retry: null,
          name: r'assemblyViewModelProvider',
@@ -53,7 +53,7 @@ final class AssemblyViewModelProvider
   }
 }
 
-String _$assemblyViewModelHash() => r'ce7125fef6e2f7ab65d360640b033d578f2dff9e';
+String _$assemblyViewModelHash() => r'48bbb03a18ee4ee937ee208f54bb2a545050c97f';
 
 /// 단어 조립 (AD-13): 방식 고르기 → 한 문제씩 조립하고 확인 → 점수와 틀린 단어.
 
@@ -64,7 +64,7 @@ final class AssemblyViewModelFamily extends $Family
           AsyncValue<AssemblyState>,
           AssemblyState,
           FutureOr<AssemblyState>,
-          int
+          WordbookSelection
         > {
   AssemblyViewModelFamily._()
     : super(
@@ -77,8 +77,8 @@ final class AssemblyViewModelFamily extends $Family
 
   /// 단어 조립 (AD-13): 방식 고르기 → 한 문제씩 조립하고 확인 → 점수와 틀린 단어.
 
-  AssemblyViewModelProvider call(int wordbookId) =>
-      AssemblyViewModelProvider._(argument: wordbookId, from: this);
+  AssemblyViewModelProvider call(WordbookSelection selection) =>
+      AssemblyViewModelProvider._(argument: selection, from: this);
 
   @override
   String toString() => r'assemblyViewModelProvider';
@@ -87,10 +87,10 @@ final class AssemblyViewModelFamily extends $Family
 /// 단어 조립 (AD-13): 방식 고르기 → 한 문제씩 조립하고 확인 → 점수와 틀린 단어.
 
 abstract class _$AssemblyViewModel extends $AsyncNotifier<AssemblyState> {
-  late final _$args = ref.$arg as int;
-  int get wordbookId => _$args;
+  late final _$args = ref.$arg as WordbookSelection;
+  WordbookSelection get selection => _$args;
 
-  FutureOr<AssemblyState> build(int wordbookId);
+  FutureOr<AssemblyState> build(WordbookSelection selection);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

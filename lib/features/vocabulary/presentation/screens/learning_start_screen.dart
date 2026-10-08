@@ -26,25 +26,35 @@ class LearningStartScreen extends ConsumerStatefulWidget {
 }
 
 class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
-  int? _selectedId;
+  Set<int> _selectedIds = {};
 
   @override
   void initState() {
     super.initState();
-    _selectedId = widget.initialWordbookId;
+    final initial = widget.initialWordbookId;
+    if (initial != null) _selectedIds = {initial};
   }
 
-  Wordbook? _selected(List<Wordbook> books) =>
-      books.where((b) => b.id == _selectedId).firstOrNull ?? books.firstOrNull;
+  /// 고른 단어장 중 실제로 있는 것. 하나도 없으면 첫 단어장.
+  WordbookSelection _selection(List<Wordbook> books) {
+    final ids = {
+      for (final b in books)
+        if (_selectedIds.contains(b.id)) b.id,
+    };
+    if (ids.isEmpty && books.isNotEmpty) ids.add(books.first.id);
+    return WordbookSelection(ids);
+  }
 
-  Future<void> _pick(List<Wordbook> books, Wordbook? selected) async {
-    final picked = await showWordbookPickerSheet(
+  Future<void> _pick(List<Wordbook> books, WordbookSelection selection) async {
+    final picked = await showWordbookMultiPickerSheet(
       context,
       books: books,
-      selectedId: selected?.id,
+      selectedIds: selection.ids.toSet(),
       title: AppLocalizations.of(context).learnPickBook,
     );
-    if (picked != null && mounted) setState(() => _selectedId = picked);
+    if (picked != null && mounted) {
+      setState(() => _selectedIds = picked.toSet());
+    }
   }
 
   @override
@@ -52,7 +62,8 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final books = ref.watch(wordbooksViewModelProvider).value;
-    final selected = books == null ? null : _selected(books);
+    final selection = books == null ? null : _selection(books);
+    final selected = books == null ? null : selection!.summarize(books);
 
     Widget body;
     if (books == null) {
@@ -84,7 +95,7 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
           WordbookSelector(
             label: selected?.name ?? '',
             count: selected?.wordCount,
-            onTap: () => _pick(books, selected),
+            onTap: () => _pick(books, selection!),
           ),
           if (selected != null) ...[
             const SizedBox(height: AppTokens.space12),
@@ -119,7 +130,9 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                   enabled: count > 0,
                   onTap: selected == null
                       ? null
-                      : () => context.push(AppRoutes.wordTestPath(selected.id)),
+                      : () => context.push(
+                          AppRoutes.wordTestPath(selection!.ids),
+                        ),
                 ),
                 const AppDivider(),
                 AppListTile(
@@ -131,8 +144,9 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                   enabled: count > 0,
                   onTap: selected == null
                       ? null
-                      : () =>
-                            context.push(AppRoutes.flashcardsPath(selected.id)),
+                      : () => context.push(
+                          AppRoutes.flashcardsPath(selection!.ids),
+                        ),
                 ),
               ],
             ),
@@ -155,8 +169,9 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                   enabled: count > 0,
                   onTap: selected == null
                       ? null
-                      : () =>
-                            context.push(AppRoutes.lineMatchPath(selected.id)),
+                      : () => context.push(
+                          AppRoutes.lineMatchPath(selection!.ids),
+                        ),
                 ),
                 const AppDivider(),
                 AppListTile(
@@ -168,7 +183,8 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                   enabled: count > 0,
                   onTap: selected == null
                       ? null
-                      : () => context.push(AppRoutes.fallingPath(selected.id)),
+                      : () =>
+                            context.push(AppRoutes.fallingPath(selection!.ids)),
                 ),
                 const AppDivider(),
                 AppListTile(
@@ -180,7 +196,9 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                   enabled: count > 0,
                   onTap: selected == null
                       ? null
-                      : () => context.push(AppRoutes.assemblyPath(selected.id)),
+                      : () => context.push(
+                          AppRoutes.assemblyPath(selection!.ids),
+                        ),
                 ),
               ],
             ),

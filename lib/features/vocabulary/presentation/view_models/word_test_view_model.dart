@@ -83,10 +83,10 @@ class WordTestState {
 @riverpod
 class WordTestViewModel extends _$WordTestViewModel {
   @override
-  Future<WordTestState> build(int wordbookId) async {
+  Future<WordTestState> build(WordbookSelection selection) async {
     final books = await ref.watch(getWordbooksProvider)();
     final total = books.fold<int>(0, (sum, b) => sum + b.wordCount);
-    final book = books.where((b) => b.id == wordbookId).firstOrNull;
+    final book = selection.summarize(books);
     final choiceAvailable = total >= CreateWordTest.minWordsForChoice;
     return WordTestState(
       book: book,
@@ -106,7 +106,7 @@ class WordTestViewModel extends _$WordTestViewModel {
     final current = state.value;
     if (current == null) return;
     final questions = await ref.read(createWordTestProvider)(
-      CreateWordTestParams(wordbookId, current.mode),
+      CreateWordTestParams(selection, current.mode),
     );
     state = AsyncData(
       questions.isEmpty

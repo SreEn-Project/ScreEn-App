@@ -47,11 +47,11 @@ class FlashcardsState {
 @riverpod
 class FlashcardsViewModel extends _$FlashcardsViewModel {
   @override
-  Future<FlashcardsState> build(int wordbookId) async {
+  Future<FlashcardsState> build(WordbookSelection selection) async {
     final books = await ref.watch(getWordbooksProvider)();
-    final book = books.where((b) => b.id == wordbookId).firstOrNull;
+    final book = selection.summarize(books);
     final deck = await ref.read(createFlashcardDeckProvider)(
-      CreateFlashcardDeckParams(wordbookId),
+      CreateFlashcardDeckParams(selection),
     );
     return FlashcardsState(bookName: book?.name ?? '', deck: deck);
   }
@@ -88,7 +88,7 @@ class FlashcardsViewModel extends _$FlashcardsViewModel {
     final current = state.value;
     if (current == null) return;
     final deck = await ref.read(createFlashcardDeckProvider)(
-      CreateFlashcardDeckParams(wordbookId),
+      CreateFlashcardDeckParams(selection),
     );
     state = AsyncData(FlashcardsState(bookName: current.bookName, deck: deck));
   }

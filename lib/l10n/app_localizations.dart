@@ -1736,6 +1736,18 @@ abstract class AppLocalizations {
   /// **'Save words from a translation result or history and you can study them here'**
   String get learnNoBooksHint;
 
+  /// No description provided for @learnPickBookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one or more word lists to study together.'**
+  String get learnPickBookHint;
+
+  /// No description provided for @learnPickBookDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Study {count} selected'**
+  String learnPickBookDone(int count);
+
   /// No description provided for @learnBook.
   ///
   /// In en, this message translates to:

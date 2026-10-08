@@ -51,11 +51,9 @@ class FallingState {
 @riverpod
 class FallingViewModel extends _$FallingViewModel {
   @override
-  Future<FallingState> build(int wordbookId) async {
+  Future<FallingState> build(WordbookSelection selection) async {
     final books = await ref.watch(getWordbooksProvider)();
-    return FallingState(
-      book: books.where((b) => b.id == wordbookId).firstOrNull,
-    );
+    return FallingState(book: selection.summarize(books));
   }
 
   void setMode(FallingMode mode) {
@@ -75,7 +73,7 @@ class FallingViewModel extends _$FallingViewModel {
     if (current == null) return;
     final game = await ref.read(createFallingGameProvider)(
       CreateFallingGameParams(
-        wordbookId,
+        selection,
         current.mode,
         speedScale: current.speedScale,
       ),

@@ -147,7 +147,9 @@ void main() {
           locale: const Locale('ko'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: createRouter(initialLocation: AppRoutes.fallingPath(1)),
+          routerConfig: createRouter(
+            initialLocation: AppRoutes.fallingPath([1]),
+          ),
         ),
       ),
     );

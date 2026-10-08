@@ -888,6 +888,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Save words from a translation result or history and you can study them here';
 
   @override
+  String get learnPickBookHint =>
+      'Pick one or more word lists to study together.';
+
+  @override
+  String learnPickBookDone(int count) {
+    return 'Study $count selected';
+  }
+
+  @override
   String get learnBook => 'Word list';
 
   @override

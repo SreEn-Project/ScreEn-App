@@ -49,7 +49,11 @@ void main() {
   group('CreateWordTest', () {
     test('입력형은 단어장의 단어 수만큼 문제를 낸다 (10개까지)', () async {
       final questions = await CreateWordTest(repository)(
-        CreateWordTestParams(1, WordTestMode.typing, random: Random(1)),
+        CreateWordTestParams(
+          WordbookSelection([1]),
+          WordTestMode.typing,
+          random: Random(1),
+        ),
       );
       expect(questions.map((q) => q.word).toSet(), {'apple', 'banana'});
       expect(questions.every((q) => q.choices.isEmpty), isTrue);
@@ -57,7 +61,11 @@ void main() {
 
     test('4지선다는 같은 단어장이 모자라면 다른 단어장에서 보기를 채운다', () async {
       final questions = await CreateWordTest(repository)(
-        CreateWordTestParams(1, WordTestMode.choice, random: Random(1)),
+        CreateWordTestParams(
+          WordbookSelection([1]),
+          WordTestMode.choice,
+          random: Random(1),
+        ),
       );
       expect(questions, hasLength(2));
       for (final q in questions) {
@@ -70,17 +78,43 @@ void main() {
     test('보기에 정답과 같은 뜻이 겹쳐 들어가지 않는다', () async {
       repository.savedWords.add(_word(6, 2, 'apple', '사과'));
       final questions = await CreateWordTest(repository)(
-        CreateWordTestParams(1, WordTestMode.choice, random: Random(2)),
+        CreateWordTestParams(
+          WordbookSelection([1]),
+          WordTestMode.choice,
+          random: Random(2),
+        ),
       );
       for (final q in questions) {
         expect(q.choices.where((c) => c == q.meaning), hasLength(1));
       }
     });
 
+    test('단어장 여러 개를 고르면 단어를 합쳐 문제를 낸다 (AD-07)', () async {
+      final questions = await CreateWordTest(repository)(
+        CreateWordTestParams(
+          WordbookSelection([1, 2]),
+          WordTestMode.typing,
+          random: Random(1),
+        ),
+      );
+      expect(questions.map((q) => q.word).toSet(), {
+        'apple',
+        'banana',
+        'cherry',
+        'grape',
+        'melon',
+      });
+    });
+
+    test('같은 단어장 id를 여러 번 줘도 한 번만 센다', () {
+      expect(WordbookSelection([2, 1, 2]), WordbookSelection([1, 2]));
+      expect(WordbookSelection([2, 1, 2]).ids, [1, 2]);
+    });
+
     test('단어가 없는 단어장은 문제가 없다', () async {
       repository.books.add(_book(3, '빈 단어장'));
       final questions = await CreateWordTest(repository)(
-        const CreateWordTestParams(3, WordTestMode.typing),
+        CreateWordTestParams(WordbookSelection([3]), WordTestMode.typing),
       );
       expect(questions, isEmpty);
     });
@@ -120,24 +154,33 @@ void main() {
       container = ProviderContainer(
         overrides: [vocabularyRepositoryProvider.overrideWithValue(repository)],
       );
-      container.listen(wordTestViewModelProvider(1), (_, _) {});
+      container.listen(
+        wordTestViewModelProvider(WordbookSelection([1])),
+        (_, _) {},
+      );
     });
 
     tearDown(() => container.dispose());
 
-    WordTestViewModel model() =>
-        container.read(wordTestViewModelProvider(1).notifier);
-    WordTestState now() =>
-        container.read(wordTestViewModelProvider(1)).requireValue;
+    WordTestViewModel model() => container.read(
+      wordTestViewModelProvider(WordbookSelection([1])).notifier,
+    );
+    WordTestState now() => container
+        .read(wordTestViewModelProvider(WordbookSelection([1])))
+        .requireValue;
 
     test('단어가 4개 이상이면 4지선다가 기본이고, 모자라면 입력형만 된다', () async {
-      await container.read(wordTestViewModelProvider(1).future);
+      await container.read(
+        wordTestViewModelProvider(WordbookSelection([1])).future,
+      );
       expect(now().choiceAvailable, isTrue);
       expect(now().mode, WordTestMode.choice);
 
       repository.savedWords.removeRange(2, 5);
-      container.invalidate(wordTestViewModelProvider(1));
-      await container.read(wordTestViewModelProvider(1).future);
+      container.invalidate(wordTestViewModelProvider(WordbookSelection([1])));
+      await container.read(
+        wordTestViewModelProvider(WordbookSelection([1])).future,
+      );
       expect(now().choiceAvailable, isFalse);
       expect(now().mode, WordTestMode.typing);
       model().setMode(WordTestMode.choice);
@@ -145,7 +188,9 @@ void main() {
     });
 
     test('끝까지 풀면 점수와 틀린 단어가 나온다', () async {
-      await container.read(wordTestViewModelProvider(1).future);
+      await container.read(
+        wordTestViewModelProvider(WordbookSelection([1])).future,
+      );
       model().setMode(WordTestMode.typing);
       await model().start();
       expect(now().phase, WordTestPhase.running);
@@ -169,7 +214,9 @@ void main() {
     });
 
     test('다시 풀면 새 문제로 처음부터 시작한다', () async {
-      await container.read(wordTestViewModelProvider(1).future);
+      await container.read(
+        wordTestViewModelProvider(WordbookSelection([1])).future,
+      );
       model().setMode(WordTestMode.typing);
       await model().start();
       model().submit('x');

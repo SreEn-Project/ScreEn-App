@@ -541,3 +541,8 @@
 - 단어장 상세의 단어 ⋮ 메뉴에 "단어 수정", 단어 상세에 "단어 수정" 버튼. 단어 추가 시트를 수정 모드로 재사용(단어장 선택 없이 기존 내용 채움). 단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문을 고칠 수 있고, 외운 표시 · 정답률 · 저장 시각 · 출처 앱 · 언어는 유지. 같은 단어장의 다른 단어와 겹치게 고치면 저장하지 않고 안내.
 - 코드 변경: Pigeon `VocabularyHostApi.updateWord` 추가(재생성), 네이티브 `VocabularyDatabase.kt`(`editWord`) · `VocabularyRepository.kt` · `HostApis.kt`, Flutter `UpdateWord` 유스케이스 · 시트 · 화면, ARB 문구 3개. 새 의존성 없음.
 - 확인: `flutter analyze` 0, `flutter test` 통과(수정 테스트 추가), `flutter build apk --debug` 성공. 기기 확인 전.
+
+## 단어장 여러 개 선택 학습 (AD-07, #159, 묶음 브랜치 batch/wordbook-polish)
+- 학습 시작 화면에서 단어장을 여러 개 골라(시트에서 체크, 하나 이상 필수) 카드 학습 · 테스트 · 선 잇기 · 하강형 · 조립을 한 번에 진행. 선택한 단어장의 단어를 합쳐 쓰고, 테스트의 문제 수 · 오답 보기도 합친 단어 기준(선택에 없는 단어장에서 보기를 채움). 정답률 기록은 단어(id)별 그대로.
+- 코드 변경: 도메인 `WordbookSelection`(값 비교, family 인자) 추가, 유스케이스 5개 파라미터 `wordbookId` → `selection`, 뷰모델 · 화면 · 라우터(`/learning/test/1,2`처럼 id를 쉼표로 이음), 다중 선택 시트, ARB 문구 2개. 새 의존성 · 네이티브 변경 없음.
+- 확인: `flutter analyze` 0, `flutter test` 통과(여러 단어장 문제 · 선택 동등성 테스트 추가), `flutter build apk --debug` 성공.

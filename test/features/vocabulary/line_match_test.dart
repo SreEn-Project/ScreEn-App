@@ -105,7 +105,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: createRouter(
-            initialLocation: AppRoutes.lineMatchPath(1),
+            initialLocation: AppRoutes.lineMatchPath([1]),
           ),
         ),
       ),
