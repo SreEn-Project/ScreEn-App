@@ -719,6 +719,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabSortAlphabetical => 'A–Z';
 
   @override
+  String get vocabSortAccuracyHigh => 'Accuracy: high to low';
+
+  @override
+  String get vocabSortAccuracyLow => 'Accuracy: low to high';
+
+  @override
+  String get vocabSortLabel => 'Sort';
+
+  @override
+  String get vocabFilterLabel => 'Filter';
+
+  @override
+  String get vocabFilterAll => 'All';
+
+  @override
+  String get vocabFilterNotStudied => 'Not studied yet';
+
+  @override
+  String get vocabFilterLow => 'Under 50%';
+
+  @override
+  String get vocabFilterMid => '50-80%';
+
+  @override
+  String get vocabFilterHigh => '80% or more';
+
+  @override
+  String vocabAccuracy(int percent) {
+    return '$percent% correct';
+  }
+
+  @override
+  String vocabAccuracyDetail(int correct, int attempt) {
+    return '$correct/$attempt';
+  }
+
+  @override
+  String vocabBookAccuracy(int percent, int correct, int attempt) {
+    return 'Overall $percent% correct ($correct/$attempt)';
+  }
+
+  @override
   String get vocabNoWords => 'This list is empty';
 
   @override

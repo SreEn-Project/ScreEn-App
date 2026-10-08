@@ -264,6 +264,8 @@ class Wordbook {
     required this.name,
     required this.wordCount,
     required this.memorizedCount,
+    required this.correctCount,
+    required this.attemptCount,
     required this.createdAtMs,
   });
 
@@ -271,6 +273,10 @@ class Wordbook {
   String name;
   int wordCount;
   int memorizedCount;
+
+  /// 단어장 안 모든 단어의 맞힌 횟수 · 푼 횟수 합 (AD-18).
+  int correctCount;
+  int attemptCount;
   int createdAtMs;
 }
 
@@ -290,6 +296,8 @@ class VocabWord {
     required this.targetLanguage,
     required this.memorized,
     required this.createdAtMs,
+    required this.correctCount,
+    required this.attemptCount,
   });
 
   int id;
@@ -311,6 +319,18 @@ class VocabWord {
 
   /// 저장한 시각 (epoch ms).
   int createdAtMs;
+
+  /// 테스트 · 게임에서 맞힌 횟수와 푼 횟수 (AD-18).
+  int correctCount;
+  int attemptCount;
+}
+
+/// 단어 하나를 푼 결과 (AD-18).
+class WordAnswer {
+  WordAnswer({required this.wordId, required this.correct});
+
+  int wordId;
+  bool correct;
 }
 
 enum VocabSort { newest, oldest, alphabetical }
@@ -373,6 +393,10 @@ abstract class VocabularyHostApi {
 
   @async
   void setMemorized(int id, bool memorized);
+
+  /// 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18).
+  @async
+  void recordAnswers(List<WordAnswer> answers);
 
   /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
   /// 저장한 단어의 id를 돌려준다.

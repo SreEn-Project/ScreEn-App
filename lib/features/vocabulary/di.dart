@@ -45,6 +45,10 @@ DeleteWord deleteWord(Ref ref) =>
     DeleteWord(ref.watch(vocabularyRepositoryProvider));
 
 @riverpod
+RecordWordAnswers recordWordAnswers(Ref ref) =>
+    RecordWordAnswers(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
 SetWordMemorized setWordMemorized(Ref ref) =>
     SetWordMemorized(ref.watch(vocabularyRepositoryProvider));
 

@@ -63,11 +63,13 @@ class GetWordsParams {
     this.wordbookId, {
     this.query = '',
     this.sort = WordSort.newest,
+    this.filter = WordFilter.all,
   });
 
   final int wordbookId;
   final String query;
   final WordSort sort;
+  final WordFilter filter;
 }
 
 /// 단어장 안 단어 조회 · 검색 · 정렬 (AD-05).
@@ -77,11 +79,46 @@ final class GetWords implements UseCase<List<VocabularyWord>, GetWordsParams> {
   final VocabularyRepository _repository;
 
   @override
-  Future<List<VocabularyWord>> call(GetWordsParams params) => _repository.words(
-    params.wordbookId,
-    query: params.query.trim(),
-    sort: params.sort,
-  );
+  Future<List<VocabularyWord>> call(GetWordsParams params) async {
+    final accuracySort =
+        params.sort == WordSort.accuracyHigh ||
+        params.sort == WordSort.accuracyLow;
+    final words = await _repository.words(
+      params.wordbookId,
+      query: params.query.trim(),
+      // 정답률 정렬은 저장소가 모르므로 최신순으로 받아 여기서 정렬한다.
+      sort: accuracySort ? WordSort.newest : params.sort,
+    );
+    final kept = [
+      for (final w in words)
+        if (params.filter.matches(w)) w,
+    ];
+    if (accuracySort) {
+      final high = params.sort == WordSort.accuracyHigh;
+      // 안 푼 단어는 방향과 상관없이 맨 뒤. 같은 정답률이면 많이 푼 쪽이 앞(높은순) / 뒤.
+      kept.sort((a, b) {
+        final x = a.accuracy;
+        final y = b.accuracy;
+        if (x == null && y == null) return 0;
+        if (x == null) return 1;
+        if (y == null) return -1;
+        final byRate = high ? y.compareTo(x) : x.compareTo(y);
+        return byRate != 0 ? byRate : b.attemptCount.compareTo(a.attemptCount);
+      });
+    }
+    return kept;
+  }
+}
+
+/// 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18).
+final class RecordWordAnswers implements UseCase<void, List<WordAnswer>> {
+  const RecordWordAnswers(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<void> call(List<WordAnswer> answers) =>
+      answers.isEmpty ? Future.value() : _repository.recordAnswers(answers);
 }
 
 /// 단어 하나 조회 (AD-06). 없으면 null.

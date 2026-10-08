@@ -515,6 +515,9 @@ data class Wordbook (
   val name: String,
   val wordCount: Long,
   val memorizedCount: Long,
+  /** 단어장 안 모든 단어의 맞힌 횟수 · 푼 횟수 합 (AD-18). */
+  val correctCount: Long,
+  val attemptCount: Long,
   val createdAtMs: Long
 )
  {
@@ -524,8 +527,10 @@ data class Wordbook (
       val name = pigeonVar_list[1] as String
       val wordCount = pigeonVar_list[2] as Long
       val memorizedCount = pigeonVar_list[3] as Long
-      val createdAtMs = pigeonVar_list[4] as Long
-      return Wordbook(id, name, wordCount, memorizedCount, createdAtMs)
+      val correctCount = pigeonVar_list[4] as Long
+      val attemptCount = pigeonVar_list[5] as Long
+      val createdAtMs = pigeonVar_list[6] as Long
+      return Wordbook(id, name, wordCount, memorizedCount, correctCount, attemptCount, createdAtMs)
     }
   }
   fun toList(): List<Any?> {
@@ -534,6 +539,8 @@ data class Wordbook (
       name,
       wordCount,
       memorizedCount,
+      correctCount,
+      attemptCount,
       createdAtMs,
     )
   }
@@ -545,7 +552,7 @@ data class Wordbook (
       return true
     }
     val other = other as Wordbook
-    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.name, other.name) && TranslatorApiPigeonUtils.deepEquals(this.wordCount, other.wordCount) && TranslatorApiPigeonUtils.deepEquals(this.memorizedCount, other.memorizedCount) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs)
+    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.name, other.name) && TranslatorApiPigeonUtils.deepEquals(this.wordCount, other.wordCount) && TranslatorApiPigeonUtils.deepEquals(this.memorizedCount, other.memorizedCount) && TranslatorApiPigeonUtils.deepEquals(this.correctCount, other.correctCount) && TranslatorApiPigeonUtils.deepEquals(this.attemptCount, other.attemptCount) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs)
   }
 
   override fun hashCode(): Int {
@@ -554,11 +561,13 @@ data class Wordbook (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.name)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wordCount)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.memorizedCount)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.correctCount)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.attemptCount)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.createdAtMs)
     return result
   }
   override fun toString(): String {
-    return "Wordbook(id=$id, name=$name, wordCount=$wordCount, memorizedCount=$memorizedCount, createdAtMs=$createdAtMs)"
+    return "Wordbook(id=$id, name=$name, wordCount=$wordCount, memorizedCount=$memorizedCount, correctCount=$correctCount, attemptCount=$attemptCount, createdAtMs=$createdAtMs)"
   }
 }
 
@@ -583,7 +592,10 @@ data class VocabWord (
   val targetLanguage: String,
   val memorized: Boolean,
   /** 저장한 시각 (epoch ms). */
-  val createdAtMs: Long
+  val createdAtMs: Long,
+  /** 테스트 · 게임에서 맞힌 횟수와 푼 횟수 (AD-18). */
+  val correctCount: Long,
+  val attemptCount: Long
 )
  {
   companion object {
@@ -601,7 +613,9 @@ data class VocabWord (
       val targetLanguage = pigeonVar_list[10] as String
       val memorized = pigeonVar_list[11] as Boolean
       val createdAtMs = pigeonVar_list[12] as Long
-      return VocabWord(id, wordbookId, word, meaning, pronunciation, partOfSpeech, contextMeaning, sentence, sourceApp, sourceLanguage, targetLanguage, memorized, createdAtMs)
+      val correctCount = pigeonVar_list[13] as Long
+      val attemptCount = pigeonVar_list[14] as Long
+      return VocabWord(id, wordbookId, word, meaning, pronunciation, partOfSpeech, contextMeaning, sentence, sourceApp, sourceLanguage, targetLanguage, memorized, createdAtMs, correctCount, attemptCount)
     }
   }
   fun toList(): List<Any?> {
@@ -619,6 +633,8 @@ data class VocabWord (
       targetLanguage,
       memorized,
       createdAtMs,
+      correctCount,
+      attemptCount,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -629,7 +645,7 @@ data class VocabWord (
       return true
     }
     val other = other as VocabWord
-    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.wordbookId, other.wordbookId) && TranslatorApiPigeonUtils.deepEquals(this.word, other.word) && TranslatorApiPigeonUtils.deepEquals(this.meaning, other.meaning) && TranslatorApiPigeonUtils.deepEquals(this.pronunciation, other.pronunciation) && TranslatorApiPigeonUtils.deepEquals(this.partOfSpeech, other.partOfSpeech) && TranslatorApiPigeonUtils.deepEquals(this.contextMeaning, other.contextMeaning) && TranslatorApiPigeonUtils.deepEquals(this.sentence, other.sentence) && TranslatorApiPigeonUtils.deepEquals(this.sourceApp, other.sourceApp) && TranslatorApiPigeonUtils.deepEquals(this.sourceLanguage, other.sourceLanguage) && TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.memorized, other.memorized) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs)
+    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.wordbookId, other.wordbookId) && TranslatorApiPigeonUtils.deepEquals(this.word, other.word) && TranslatorApiPigeonUtils.deepEquals(this.meaning, other.meaning) && TranslatorApiPigeonUtils.deepEquals(this.pronunciation, other.pronunciation) && TranslatorApiPigeonUtils.deepEquals(this.partOfSpeech, other.partOfSpeech) && TranslatorApiPigeonUtils.deepEquals(this.contextMeaning, other.contextMeaning) && TranslatorApiPigeonUtils.deepEquals(this.sentence, other.sentence) && TranslatorApiPigeonUtils.deepEquals(this.sourceApp, other.sourceApp) && TranslatorApiPigeonUtils.deepEquals(this.sourceLanguage, other.sourceLanguage) && TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.memorized, other.memorized) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs) && TranslatorApiPigeonUtils.deepEquals(this.correctCount, other.correctCount) && TranslatorApiPigeonUtils.deepEquals(this.attemptCount, other.attemptCount)
   }
 
   override fun hashCode(): Int {
@@ -647,10 +663,57 @@ data class VocabWord (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.targetLanguage)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.memorized)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.createdAtMs)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.correctCount)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.attemptCount)
     return result
   }
   override fun toString(): String {
-    return "VocabWord(id=$id, wordbookId=$wordbookId, word=$word, meaning=$meaning, pronunciation=$pronunciation, partOfSpeech=$partOfSpeech, contextMeaning=$contextMeaning, sentence=$sentence, sourceApp=$sourceApp, sourceLanguage=$sourceLanguage, targetLanguage=$targetLanguage, memorized=$memorized, createdAtMs=$createdAtMs)"
+    return "VocabWord(id=$id, wordbookId=$wordbookId, word=$word, meaning=$meaning, pronunciation=$pronunciation, partOfSpeech=$partOfSpeech, contextMeaning=$contextMeaning, sentence=$sentence, sourceApp=$sourceApp, sourceLanguage=$sourceLanguage, targetLanguage=$targetLanguage, memorized=$memorized, createdAtMs=$createdAtMs, correctCount=$correctCount, attemptCount=$attemptCount)"
+  }
+}
+
+/**
+ * 단어 하나를 푼 결과 (AD-18).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class WordAnswer (
+  val wordId: Long,
+  val correct: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): WordAnswer {
+      val wordId = pigeonVar_list[0] as Long
+      val correct = pigeonVar_list[1] as Boolean
+      return WordAnswer(wordId, correct)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      wordId,
+      correct,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as WordAnswer
+    return TranslatorApiPigeonUtils.deepEquals(this.wordId, other.wordId) && TranslatorApiPigeonUtils.deepEquals(this.correct, other.correct)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wordId)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.correct)
+    return result
+  }
+  override fun toString(): String {
+    return "WordAnswer(wordId=$wordId, correct=$correct)"
   }
 }
 
@@ -863,15 +926,20 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
       }
       140.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VocabWordInput.fromList(it)
+          WordAnswer.fromList(it)
         }
       }
       141.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ServiceStateChanged.fromList(it)
+          VocabWordInput.fromList(it)
         }
       }
       142.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ServiceStateChanged.fromList(it)
+        }
+      }
+      143.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SettingsChanged.fromList(it)
         }
@@ -925,16 +993,20 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
         stream.write(139)
         writeValue(stream, value.toList())
       }
-      is VocabWordInput -> {
+      is WordAnswer -> {
         stream.write(140)
         writeValue(stream, value.toList())
       }
-      is ServiceStateChanged -> {
+      is VocabWordInput -> {
         stream.write(141)
         writeValue(stream, value.toList())
       }
-      is SettingsChanged -> {
+      is ServiceStateChanged -> {
         stream.write(142)
+        writeValue(stream, value.toList())
+      }
+      is SettingsChanged -> {
+        stream.write(143)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -1757,6 +1829,8 @@ interface VocabularyHostApi {
   suspend fun moveWord(id: Long, wordbookId: Long)
   suspend fun deleteWord(id: Long)
   suspend fun setMemorized(id: Long, memorized: Boolean)
+  /** 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18). */
+  suspend fun recordAnswers(answers: List<WordAnswer>)
   /**
    * 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
    * 저장한 단어의 id를 돌려준다.
@@ -1939,6 +2013,26 @@ interface VocabularyHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.setMemorized(idArg, memorizedArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.recordAnswers$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val answersArg = args[0] as List<WordAnswer>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.recordAnswers(answersArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

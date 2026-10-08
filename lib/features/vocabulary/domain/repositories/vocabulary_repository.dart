@@ -30,6 +30,9 @@ abstract interface class VocabularyRepository {
 
   Future<void> setMemorized(int id, bool memorized);
 
+  /// 테스트 · 게임에서 푼 결과를 단어별로 쌓는다 (AD-18).
+  Future<void> recordAnswers(List<WordAnswer> answers);
+
   /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
   Future<int?> saveWord(int wordbookId, WordDraft draft);
 }

@@ -90,6 +90,7 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 | `AppToast` | 잠깐 뜨는 한 줄 메시지: 흰 알약 + 그림자 + 성격 아이콘(성공 · 안내 primary, 오류 error). 탭바 위, 2.4초, 한 번에 하나. `AppToast.show(context, 문구, kind:)`. SnackBar 금지 |
 | `AppNotice` | 화면 안 안내 배너: 둥근 16dp 사각형 + 아이콘 + 글자. info(회색) · success(primaryContainer) · error(error 10%). 테스트 결과 · 입력 오류 · 안내 문구 |
 | `AppEmptyState` | 빈 목록 · 검색 결과 없음: 연한 초록 원 아이콘 + 제목 + (설명) + (동작 버튼) |
+| `AppPopupMenu` | 정렬 · 필터용 알약 메뉴: 흰 알약(켜지면 primaryContainer) + 아이콘 + 글자 + 화살표, 누르면 흰 둥근 카드 목록 팝업(고른 항목에 체크) |
 | `AppAddChip` | 작은 "+ 발음" 칩(옅은 회색 알약 + 연두 + 아이콘). 눌러서 선택 항목 입력칸을 펼칠 때 |
 | `AppScrollBar` | 가로 스크롤 아래의 잡기 쉬운 막대(트랙 8dp · 막대 12dp, 끌기 · 트랙 누르기). 넘칠 때만 보인다 |
 | `ShakeEffect` · `PopEffect` · `BurstLayer` | 게임 효과: 좌우 흔들림(오답 · 목숨 잃음) / 커졌다 돌아오는 팝(점수 · 콤보) / 부서지는 조각(맞힘 · 결과 축하). 의존성 없이 Flutter 애니메이션만 |

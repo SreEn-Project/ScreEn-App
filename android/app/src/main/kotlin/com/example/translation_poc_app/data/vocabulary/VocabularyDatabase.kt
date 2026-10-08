@@ -1,5 +1,6 @@
 package com.example.translation_poc_app.data.vocabulary
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -55,6 +56,9 @@ data class WordEntity(
     val targetLanguage: String,
     val memorized: Boolean = false,
     val createdAt: Long,
+    /** 테스트 · 게임에서 맞힌 횟수와 푼 횟수 (AD-18). */
+    @ColumnInfo(defaultValue = "0") val correctCount: Int = 0,
+    @ColumnInfo(defaultValue = "0") val attemptCount: Int = 0,
 )
 
 /** 목록용: 단어장 + 단어 수 · 외운 단어 수. */
@@ -64,13 +68,16 @@ data class WordbookRow(
     val createdAt: Long,
     val wordCount: Int,
     val memorizedCount: Int,
+    val correctCount: Int,
+    val attemptCount: Int,
 )
 
 @Dao
 interface VocabularyDao {
     @Query(
         "SELECT b.id AS id, b.name AS name, b.createdAt AS createdAt, " +
-            "COUNT(w.id) AS wordCount, COALESCE(SUM(w.memorized), 0) AS memorizedCount " +
+            "COUNT(w.id) AS wordCount, COALESCE(SUM(w.memorized), 0) AS memorizedCount, " +
+            "COALESCE(SUM(w.correctCount), 0) AS correctCount, COALESCE(SUM(w.attemptCount), 0) AS attemptCount " +
             "FROM wordbooks b LEFT JOIN vocabulary_words w ON w.wordbookId = b.id " +
             "GROUP BY b.id ORDER BY b.createdAt ASC, b.id ASC",
     )
@@ -128,6 +135,12 @@ interface VocabularyDao {
 
     @Query("DELETE FROM vocabulary_words WHERE id = :id")
     suspend fun deleteWord(id: Long)
+
+    /** 한 번 푼 결과를 더한다 (AD-18). [correct]는 맞으면 1, 틀리면 0. */
+    @Query(
+        "UPDATE vocabulary_words SET attemptCount = attemptCount + 1, correctCount = correctCount + :correct WHERE id = :id",
+    )
+    suspend fun addAnswer(id: Long, correct: Int)
 
     /** 같은 단어면 내용만 새로 고치고(외운 표시 · 저장 시각은 유지), 없으면 넣는다. 단어 id를 돌려준다. */
     @Transaction

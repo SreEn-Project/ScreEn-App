@@ -96,6 +96,8 @@ fun com.example.translation_poc_app.data.vocabulary.WordbookRow.toPigeon() = Wor
     name = name,
     wordCount = wordCount.toLong(),
     memorizedCount = memorizedCount.toLong(),
+    correctCount = correctCount.toLong(),
+    attemptCount = attemptCount.toLong(),
     createdAtMs = createdAt,
 )
 
@@ -113,6 +115,8 @@ fun com.example.translation_poc_app.data.vocabulary.WordEntity.toPigeon() = Voca
     targetLanguage = targetLanguage,
     memorized = memorized,
     createdAtMs = createdAt,
+    correctCount = correctCount.toLong(),
+    attemptCount = attemptCount.toLong(),
 )
 
 fun VocabSort.toNative() = when (this) {

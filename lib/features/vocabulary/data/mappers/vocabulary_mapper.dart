@@ -9,6 +9,8 @@ extension WordbookMapper on pigeon.Wordbook {
     name: name,
     wordCount: wordCount,
     memorizedCount: memorizedCount,
+    correctCount: correctCount,
+    attemptCount: attemptCount,
     createdAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
   );
 }
@@ -28,6 +30,8 @@ extension VocabWordMapper on pigeon.VocabWord {
     targetLanguage: targetLanguage,
     memorized: memorized,
     savedAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
+    correctCount: correctCount,
+    attemptCount: attemptCount,
   );
 }
 
@@ -36,6 +40,8 @@ extension WordSortMapper on WordSort {
     WordSort.newest => pigeon.VocabSort.newest,
     WordSort.oldest => pigeon.VocabSort.oldest,
     WordSort.alphabetical => pigeon.VocabSort.alphabetical,
+    // 정답률 정렬은 GetWords 유스케이스가 하므로 저장소에는 최신순으로 요청한다.
+    WordSort.accuracyHigh || WordSort.accuracyLow => pigeon.VocabSort.newest,
   };
 }
 
@@ -50,4 +56,9 @@ extension WordDraftMapper on WordDraft {
     sourceLanguage: sourceLanguage,
     targetLanguage: targetLanguage,
   );
+}
+
+extension WordAnswerMapper on WordAnswer {
+  pigeon.WordAnswer toPigeon() =>
+      pigeon.WordAnswer(wordId: wordId, correct: correct);
 }

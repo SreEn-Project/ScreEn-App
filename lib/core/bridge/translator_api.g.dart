@@ -403,6 +403,8 @@ class Wordbook {
     required this.name,
     required this.wordCount,
     required this.memorizedCount,
+    required this.correctCount,
+    required this.attemptCount,
     required this.createdAtMs,
   });
 
@@ -414,10 +416,23 @@ class Wordbook {
 
   int memorizedCount;
 
+  /// 단어장 안 모든 단어의 맞힌 횟수 · 푼 횟수 합 (AD-18).
+  int correctCount;
+
+  int attemptCount;
+
   int createdAtMs;
 
   List<Object?> _toList() {
-    return <Object?>[id, name, wordCount, memorizedCount, createdAtMs];
+    return <Object?>[
+      id,
+      name,
+      wordCount,
+      memorizedCount,
+      correctCount,
+      attemptCount,
+      createdAtMs,
+    ];
   }
 
   Object encode() {
@@ -431,7 +446,9 @@ class Wordbook {
       name: result[1]! as String,
       wordCount: result[2]! as int,
       memorizedCount: result[3]! as int,
-      createdAtMs: result[4]! as int,
+      correctCount: result[4]! as int,
+      attemptCount: result[5]! as int,
+      createdAtMs: result[6]! as int,
     );
   }
 
@@ -448,6 +465,8 @@ class Wordbook {
         _deepEquals(name, other.name) &&
         _deepEquals(wordCount, other.wordCount) &&
         _deepEquals(memorizedCount, other.memorizedCount) &&
+        _deepEquals(correctCount, other.correctCount) &&
+        _deepEquals(attemptCount, other.attemptCount) &&
         _deepEquals(createdAtMs, other.createdAtMs);
   }
 
@@ -457,7 +476,7 @@ class Wordbook {
 
   @override
   String toString() {
-    return 'Wordbook(id: $id, name: $name, wordCount: $wordCount, memorizedCount: $memorizedCount, createdAtMs: $createdAtMs)';
+    return 'Wordbook(id: $id, name: $name, wordCount: $wordCount, memorizedCount: $memorizedCount, correctCount: $correctCount, attemptCount: $attemptCount, createdAtMs: $createdAtMs)';
   }
 }
 
@@ -477,6 +496,8 @@ class VocabWord {
     required this.targetLanguage,
     required this.memorized,
     required this.createdAtMs,
+    required this.correctCount,
+    required this.attemptCount,
   });
 
   int id;
@@ -508,6 +529,11 @@ class VocabWord {
   /// 저장한 시각 (epoch ms).
   int createdAtMs;
 
+  /// 테스트 · 게임에서 맞힌 횟수와 푼 횟수 (AD-18).
+  int correctCount;
+
+  int attemptCount;
+
   List<Object?> _toList() {
     return <Object?>[
       id,
@@ -523,6 +549,8 @@ class VocabWord {
       targetLanguage,
       memorized,
       createdAtMs,
+      correctCount,
+      attemptCount,
     ];
   }
 
@@ -546,6 +574,8 @@ class VocabWord {
       targetLanguage: result[10]! as String,
       memorized: result[11]! as bool,
       createdAtMs: result[12]! as int,
+      correctCount: result[13]! as int,
+      attemptCount: result[14]! as int,
     );
   }
 
@@ -570,7 +600,9 @@ class VocabWord {
         _deepEquals(sourceLanguage, other.sourceLanguage) &&
         _deepEquals(targetLanguage, other.targetLanguage) &&
         _deepEquals(memorized, other.memorized) &&
-        _deepEquals(createdAtMs, other.createdAtMs);
+        _deepEquals(createdAtMs, other.createdAtMs) &&
+        _deepEquals(correctCount, other.correctCount) &&
+        _deepEquals(attemptCount, other.attemptCount);
   }
 
   @override
@@ -579,7 +611,51 @@ class VocabWord {
 
   @override
   String toString() {
-    return 'VocabWord(id: $id, wordbookId: $wordbookId, word: $word, meaning: $meaning, pronunciation: $pronunciation, partOfSpeech: $partOfSpeech, contextMeaning: $contextMeaning, sentence: $sentence, sourceApp: $sourceApp, sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage, memorized: $memorized, createdAtMs: $createdAtMs)';
+    return 'VocabWord(id: $id, wordbookId: $wordbookId, word: $word, meaning: $meaning, pronunciation: $pronunciation, partOfSpeech: $partOfSpeech, contextMeaning: $contextMeaning, sentence: $sentence, sourceApp: $sourceApp, sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage, memorized: $memorized, createdAtMs: $createdAtMs, correctCount: $correctCount, attemptCount: $attemptCount)';
+  }
+}
+
+/// 단어 하나를 푼 결과 (AD-18).
+class WordAnswer {
+  WordAnswer({required this.wordId, required this.correct});
+
+  int wordId;
+
+  bool correct;
+
+  List<Object?> _toList() {
+    return <Object?>[wordId, correct];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static WordAnswer decode(Object result) {
+    result as List<Object?>;
+    return WordAnswer(wordId: result[0]! as int, correct: result[1]! as bool);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! WordAnswer || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(wordId, other.wordId) &&
+        _deepEquals(correct, other.correct);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'WordAnswer(wordId: $wordId, correct: $correct)';
   }
 }
 
@@ -795,14 +871,17 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is VocabWord) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    } else if (value is VocabWordInput) {
+    } else if (value is WordAnswer) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    } else if (value is ServiceStateChanged) {
+    } else if (value is VocabWordInput) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    } else if (value is SettingsChanged) {
+    } else if (value is ServiceStateChanged) {
       buffer.putUint8(142);
+      writeValue(buffer, value.encode());
+    } else if (value is SettingsChanged) {
+      buffer.putUint8(143);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -841,10 +920,12 @@ class _PigeonCodec extends StandardMessageCodec {
       case 139:
         return VocabWord.decode(readValue(buffer)!);
       case 140:
-        return VocabWordInput.decode(readValue(buffer)!);
+        return WordAnswer.decode(readValue(buffer)!);
       case 141:
-        return ServiceStateChanged.decode(readValue(buffer)!);
+        return VocabWordInput.decode(readValue(buffer)!);
       case 142:
+        return ServiceStateChanged.decode(readValue(buffer)!);
+      case 143:
         return SettingsChanged.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -1841,6 +1922,27 @@ class VocabularyHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[id, memorized],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18).
+  Future<void> recordAnswers(List<WordAnswer> answers) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.recordAnswers$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[answers],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

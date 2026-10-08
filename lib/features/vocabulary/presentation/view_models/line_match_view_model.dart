@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../di.dart';
 import '../../domain/entities/line_match.dart';
+import '../../domain/entities/vocabulary.dart';
 import '../../domain/usecases/vocabulary_usecases.dart';
 
 part 'line_match_view_model.g.dart';
@@ -34,6 +37,11 @@ class LineMatchViewModel extends _$LineMatchViewModel {
     if (current == null || game == null) return MatchOutcome.wrong;
     final (next, outcome) = game.attempt(wordId, meaningOwnerId);
     state = AsyncData(LineMatchState(bookName: current.bookName, game: next));
+    unawaited(
+      ref.read(recordWordAnswersProvider)([
+        WordAnswer(wordId, correct: outcome == MatchOutcome.correct),
+      ]),
+    );
     return outcome;
   }
 

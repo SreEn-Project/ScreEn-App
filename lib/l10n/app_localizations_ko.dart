@@ -702,6 +702,48 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vocabSortAlphabetical => '이름순';
 
   @override
+  String get vocabSortAccuracyHigh => '정답률 높은순';
+
+  @override
+  String get vocabSortAccuracyLow => '정답률 낮은순';
+
+  @override
+  String get vocabSortLabel => '정렬';
+
+  @override
+  String get vocabFilterLabel => '필터';
+
+  @override
+  String get vocabFilterAll => '전체';
+
+  @override
+  String get vocabFilterNotStudied => '아직 안 푼 단어';
+
+  @override
+  String get vocabFilterLow => '정답률 50% 미만';
+
+  @override
+  String get vocabFilterMid => '정답률 50~80%';
+
+  @override
+  String get vocabFilterHigh => '정답률 80% 이상';
+
+  @override
+  String vocabAccuracy(int percent) {
+    return '정답률 $percent%';
+  }
+
+  @override
+  String vocabAccuracyDetail(int correct, int attempt) {
+    return '$correct/$attempt';
+  }
+
+  @override
+  String vocabBookAccuracy(int percent, int correct, int attempt) {
+    return '전체 정답률 $percent% ($correct/$attempt)';
+  }
+
+  @override
   String get vocabNoWords => '이 단어장은 비어 있어요';
 
   @override

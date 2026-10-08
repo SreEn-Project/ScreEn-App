@@ -54,6 +54,10 @@ class VocabularyRepositoryImpl implements VocabularyRepository {
       _dataSource.setMemorized(id, memorized);
 
   @override
+  Future<void> recordAnswers(List<WordAnswer> answers) =>
+      _dataSource.recordAnswers([for (final a in answers) a.toPigeon()]);
+
+  @override
   Future<int?> saveWord(int wordbookId, WordDraft draft) =>
       _dataSource.saveWord(wordbookId, draft.toPigeon());
 }

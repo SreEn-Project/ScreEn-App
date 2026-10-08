@@ -38,7 +38,23 @@ class WordbookDetailScreen extends ConsumerWidget {
       WordSort.newest: l10n.vocabSortNewest,
       WordSort.oldest: l10n.vocabSortOldest,
       WordSort.alphabetical: l10n.vocabSortAlphabetical,
+      WordSort.accuracyHigh: l10n.vocabSortAccuracyHigh,
+      WordSort.accuracyLow: l10n.vocabSortAccuracyLow,
     };
+    final filters = {
+      WordFilter.all: l10n.vocabFilterAll,
+      WordFilter.notStudied: l10n.vocabFilterNotStudied,
+      WordFilter.low: l10n.vocabFilterLow,
+      WordFilter.mid: l10n.vocabFilterMid,
+      WordFilter.high: l10n.vocabFilterHigh,
+    };
+    final sort = state?.sort ?? WordSort.newest;
+    final filter = state?.filter ?? WordFilter.all;
+    final book = ref
+        .watch(wordbooksViewModelProvider)
+        .value
+        ?.where((b) => b.id == wordbookId)
+        .firstOrNull;
 
     return Scaffold(
       body: SafeArea(
@@ -70,19 +86,44 @@ class WordbookDetailScreen extends ConsumerWidget {
                 AppTokens.pagePadding,
                 AppTokens.space8,
               ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Wrap(
-                  spacing: AppTokens.space8,
-                  children: [
-                    for (final sort in WordSort.values)
-                      AppChip(
-                        label: sorts[sort]!,
-                        selected: (state?.sort ?? WordSort.newest) == sort,
-                        onTap: () => model.setSort(sort),
+              child: Row(
+                children: [
+                  AppPopupMenu<WordSort>(
+                    icon: Symbols.swap_vert_rounded,
+                    label: sorts[sort]!,
+                    values: WordSort.values,
+                    selected: sort,
+                    itemLabel: (v) => sorts[v]!,
+                    onSelected: model.setSort,
+                  ),
+                  const SizedBox(width: AppTokens.space8),
+                  AppPopupMenu<WordFilter>(
+                    icon: Symbols.filter_list_rounded,
+                    label: filter == WordFilter.all
+                        ? l10n.vocabFilterLabel
+                        : filters[filter]!,
+                    values: WordFilter.values,
+                    selected: filter,
+                    itemLabel: (v) => filters[v]!,
+                    onSelected: model.setFilter,
+                    active: filter != WordFilter.all,
+                  ),
+                  if (book != null && book.accuracy != null) ...[
+                    const Spacer(),
+                    Flexible(
+                      child: Text(
+                        l10n.vocabBookAccuracy(
+                          (book.accuracy! * 100).round(),
+                          book.correctCount,
+                          book.attemptCount,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall,
                       ),
+                    ),
                   ],
-                ),
+                ],
               ),
             ),
             Expanded(

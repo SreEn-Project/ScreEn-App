@@ -62,6 +62,11 @@ class VocabularyRepository(
 
     suspend fun setMemorized(id: Long, memorized: Boolean) = dao.setMemorized(id, memorized)
 
+    /** 테스트 · 게임에서 푼 결과를 단어별로 쌓는다 (AD-18). */
+    suspend fun recordAnswers(answers: List<Pair<Long, Boolean>>) {
+        for ((id, correct) in answers) dao.addAnswer(id, if (correct) 1 else 0)
+    }
+
     companion object {
         const val MAX_NAME_LENGTH = 30
 
