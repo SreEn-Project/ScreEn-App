@@ -59,6 +59,29 @@ void main() {
       expect(g.bestCombo, 2);
     });
 
+    test('난이도는 낙하 속도를 바꾸고 제한 시간이 지나면 끝난다', () {
+      FallingGame make(FallingDifficulty d, int limit) => FallingGame(
+        words: words,
+        mode: FallingMode.meaning,
+        random: Random(1),
+        difficulty: d,
+        timeLimit: limit,
+      );
+      expect(
+        make(FallingDifficulty.hard, 0).speed,
+        greaterThan(make(FallingDifficulty.easy, 0).speed),
+      );
+      final g = make(FallingDifficulty.normal, 5);
+      expect(g.secondsLeft, 5);
+      for (var i = 0; i < 60 && !g.over; i++) {
+        g.update(0.1);
+      }
+      expect(g.timeUp, isTrue);
+      expect(g.over, isTrue);
+      expect(g.lives, g.maxLives);
+      expect(make(FallingDifficulty.normal, 0).secondsLeft, isNull);
+    });
+
     test('같은 단어는 동시에 둘 이상 떨어지지 않는다', () {
       final g = game();
       for (var i = 0; i < 40; i++) {

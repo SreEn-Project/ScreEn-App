@@ -789,6 +789,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vocabOptSentence => '예문';
 
   @override
+  String get vocabOptRemove => '빼기';
+
+  @override
   String get vocabSaveTo => '저장할 단어장';
 
   @override
@@ -969,6 +972,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fallSend => '보내기';
 
   @override
+  String get fallDifficulty => '난이도';
+
+  @override
+  String get fallEasy => '쉬움';
+
+  @override
+  String get fallNormal => '보통';
+
+  @override
+  String get fallHard => '어려움';
+
+  @override
+  String get fallTimeLimit => '제한 시간';
+
+  @override
+  String get fallNoLimit => '없음';
+
+  @override
+  String fallMinutes(int count) {
+    return '$count분';
+  }
+
+  @override
   String fallCombo(int count) {
     return '$count콤보';
   }
@@ -1098,7 +1124,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get testCorrect => '정답이에요!';
 
   @override
-  String get testWrongTitle => '아쉬워요';
+  String get testWrongTitle => '오답이에요';
 
   @override
   String get testAnswerLabel => '정답';

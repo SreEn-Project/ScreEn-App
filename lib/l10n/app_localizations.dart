@@ -1592,6 +1592,12 @@ abstract class AppLocalizations {
   /// **'Example'**
   String get vocabOptSentence;
 
+  /// No description provided for @vocabOptRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get vocabOptRemove;
+
   /// No description provided for @vocabSaveTo.
   ///
   /// In en, this message translates to:
@@ -1916,6 +1922,48 @@ abstract class AppLocalizations {
   /// **'Send'**
   String get fallSend;
 
+  /// No description provided for @fallDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty'**
+  String get fallDifficulty;
+
+  /// No description provided for @fallEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get fallEasy;
+
+  /// No description provided for @fallNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get fallNormal;
+
+  /// No description provided for @fallHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get fallHard;
+
+  /// No description provided for @fallTimeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Time limit'**
+  String get fallTimeLimit;
+
+  /// No description provided for @fallNoLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get fallNoLimit;
+
+  /// No description provided for @fallMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String fallMinutes(int count);
+
   /// No description provided for @fallCombo.
   ///
   /// In en, this message translates to:
@@ -2153,7 +2201,7 @@ abstract class AppLocalizations {
   /// No description provided for @testWrongTitle.
   ///
   /// In en, this message translates to:
-  /// **'Not quite'**
+  /// **'Incorrect'**
   String get testWrongTitle;
 
   /// No description provided for @testAnswerLabel.

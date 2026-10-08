@@ -146,7 +146,6 @@ class _SwipeCard extends StatefulWidget {
 }
 
 class _SwipeCardState extends State<_SwipeCard> with TickerProviderStateMixin {
-  static const _cardHeight = 320.0;
   static const _commitFraction = 0.3;
   static const _flingVelocity = 700.0;
 
@@ -206,6 +205,11 @@ class _SwipeCardState extends State<_SwipeCard> with TickerProviderStateMixin {
     final colors = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
+    // 화면 높이의 절반 이상을 카드가 차지한다.
+    final cardHeight = (MediaQuery.sizeOf(context).height * 0.52).clamp(
+      320.0,
+      640.0,
+    );
     final tilt = (_dx / width) * 0.35;
     final progress = (_dx.abs() / (width * _commitFraction)).clamp(0.0, 1.0);
     final known = _dx > 0;
@@ -221,7 +225,7 @@ class _SwipeCardState extends State<_SwipeCard> with TickerProviderStateMixin {
         child: Transform.rotate(
           angle: tilt,
           child: SizedBox(
-            height: _cardHeight,
+            height: cardHeight,
             child: Stack(
               children: [
                 AnimatedBuilder(
@@ -294,7 +298,9 @@ class _Face extends StatelessWidget {
             Text(
               back ? word.meaning : word.word,
               textAlign: TextAlign.center,
-              style: theme.textTheme.headlineMedium,
+              style: back
+                  ? theme.textTheme.headlineMedium
+                  : theme.textTheme.displaySmall,
             ),
             if (back && extra.isNotEmpty) ...[
               const SizedBox(height: AppTokens.space8),
