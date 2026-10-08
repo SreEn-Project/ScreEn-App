@@ -42,10 +42,19 @@ class AppPopupMenu<T> extends StatelessWidget {
       shadowColor: Colors.black26,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTokens.radiusInput),
+        side: BorderSide(color: colors.outline),
       ),
+      clipBehavior: Clip.antiAlias,
       onSelected: onSelected,
       itemBuilder: (context) => [
-        for (final v in values)
+        for (final (i, v) in values.indexed) ...[
+          if (i > 0)
+            PopupMenuDivider(
+              height: 1,
+              color: colors.outlineVariant,
+              indent: 12,
+              endIndent: 12,
+            ),
           PopupMenuItem<T>(
             value: v,
             child: Row(
@@ -64,6 +73,7 @@ class AppPopupMenu<T> extends StatelessWidget {
               ],
             ),
           ),
+        ],
       ],
       child: Container(
         padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
