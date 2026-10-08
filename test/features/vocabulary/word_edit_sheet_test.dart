@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/app/router.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
+import 'package:translation_poc_app/core/ui/ui.dart';
 import 'package:translation_poc_app/features/history/domain/entities/history_entry.dart';
 import 'package:translation_poc_app/features/history/presentation/widgets/history_detail_sheet.dart';
 import 'package:translation_poc_app/features/vocabulary/domain/entities/vocabulary.dart';
@@ -74,20 +75,22 @@ void main() {
     );
     // 처음엔 단어 · 뜻만 보이고 발음 등은 + 칩을 눌러야 나타난다.
     expect(fields, findsNWidgets(2));
-    expect(find.text('발음'), findsOneWidget);
+    expect(find.widgetWithText(AppAddChip, '발음'), findsOneWidget);
     await tester.enterText(fields.at(0), 'apple');
     await tester.enterText(fields.at(1), '사과');
-    await tester.tap(find.text('발음'));
+    await tester.tap(find.widgetWithText(AppAddChip, '발음'));
     await tester.pumpAndSettle();
     expect(fields, findsNWidgets(3));
-    expect(find.text('발음'), findsNothing); // 펼친 항목은 칩에서 빠진다.
+    // 펼친 항목은 칩에서 빠지고 입력칸 위에 이름 줄(+ ×)이 생긴다.
+    expect(find.widgetWithText(AppAddChip, '발음'), findsNothing);
+    expect(find.byTooltip('빼기'), findsOneWidget);
     await tester.enterText(fields.at(2), '/ˈæp.əl/');
     // 추가한 항목은 ×로 비우고 접어 추가하기 전으로 돌릴 수 있다.
     await tester.tap(find.byTooltip('빼기'));
     await tester.pumpAndSettle();
     expect(fields, findsNWidgets(2));
-    expect(find.text('발음'), findsOneWidget);
-    await tester.tap(find.text('발음'));
+    expect(find.widgetWithText(AppAddChip, '발음'), findsOneWidget);
+    await tester.tap(find.widgetWithText(AppAddChip, '발음'));
     await tester.pumpAndSettle();
     await tester.enterText(fields.at(2), '/ˈæp.əl/');
     await tester.pump();

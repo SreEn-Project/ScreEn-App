@@ -163,9 +163,17 @@ interface VocabularyDao {
     @Query("DELETE FROM vocabulary_words WHERE id = :id")
     suspend fun deleteWord(id: Long)
 
-    /** 한 번 푼 결과를 더한다 (AD-18). [correct]는 맞으면 1, 틀리면 0. */
+    /**
+     * 한 번 푼 결과를 더한다 (AD-18). [correct]는 맞으면 1, 틀리면 0.
+     * 최근 10번 기준으로 보려고 10번을 넘기면 지난 기록을 9/10로 줄이고 새 결과를 더한다
+     * (예전에 많이 틀려도 계속 맞히면 정답률이 오른다).
+     */
     @Query(
-        "UPDATE vocabulary_words SET attemptCount = attemptCount + 1, correctCount = correctCount + :correct WHERE id = :id",
+        "UPDATE vocabulary_words SET " +
+            "correctCount = CASE WHEN attemptCount >= 10 " +
+            "THEN CAST(ROUND(correctCount * 9.0 / attemptCount) AS INTEGER) + :correct " +
+            "ELSE correctCount + :correct END, " +
+            "attemptCount = MIN(attemptCount + 1, 10) WHERE id = :id",
     )
     suspend fun addAnswer(id: Long, correct: Int)
 

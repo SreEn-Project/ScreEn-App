@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../di.dart';
 import '../../domain/entities/vocabulary.dart';
 import '../../domain/usecases/vocabulary_usecases.dart';
+import 'wordbooks_view_model.dart';
 
 part 'wordbook_detail_view_model.g.dart';
 
@@ -43,6 +44,10 @@ class WordbookDetailViewModel extends _$WordbookDetailViewModel {
 
   @override
   Future<WordbookDetailState> build(int wordbookId) async {
+    // 위쪽 전체 정답률이 방금 푼 결과를 반영하도록 단어장 목록도 다시 읽는다.
+    Future.microtask(
+      () => ref.read(wordbooksViewModelProvider.notifier).refresh(),
+    );
     final words = await ref.watch(getWordsProvider)(GetWordsParams(wordbookId));
     return WordbookDetailState(words: words);
   }
