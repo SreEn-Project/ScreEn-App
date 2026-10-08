@@ -1994,47 +1994,29 @@ abstract class AppLocalizations {
   /// **'Send'**
   String get fallSend;
 
-  /// No description provided for @fallDifficulty.
+  /// No description provided for @fallSpeed.
   ///
   /// In en, this message translates to:
-  /// **'Difficulty'**
-  String get fallDifficulty;
+  /// **'Falling speed'**
+  String get fallSpeed;
 
-  /// No description provided for @fallEasy.
+  /// No description provided for @fallSpeedValue.
   ///
   /// In en, this message translates to:
-  /// **'Easy'**
-  String get fallEasy;
+  /// **'{value}x'**
+  String fallSpeedValue(String value);
 
-  /// No description provided for @fallNormal.
+  /// No description provided for @fallSlow.
   ///
   /// In en, this message translates to:
-  /// **'Normal'**
-  String get fallNormal;
+  /// **'Slower'**
+  String get fallSlow;
 
-  /// No description provided for @fallHard.
+  /// No description provided for @fallFast.
   ///
   /// In en, this message translates to:
-  /// **'Hard'**
-  String get fallHard;
-
-  /// No description provided for @fallTimeLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'Time limit'**
-  String get fallTimeLimit;
-
-  /// No description provided for @fallNoLimit.
-  ///
-  /// In en, this message translates to:
-  /// **'None'**
-  String get fallNoLimit;
-
-  /// No description provided for @fallMinutes.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} min'**
-  String fallMinutes(int count);
+  /// **'Faster'**
+  String get fallFast;
 
   /// No description provided for @fallCombo.
   ///

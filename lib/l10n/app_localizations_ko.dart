@@ -1014,27 +1014,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get fallSend => '보내기';
 
   @override
-  String get fallDifficulty => '난이도';
+  String get fallSpeed => '낙하 속도';
 
   @override
-  String get fallEasy => '쉬움';
-
-  @override
-  String get fallNormal => '보통';
-
-  @override
-  String get fallHard => '어려움';
-
-  @override
-  String get fallTimeLimit => '제한 시간';
-
-  @override
-  String get fallNoLimit => '없음';
-
-  @override
-  String fallMinutes(int count) {
-    return '$count분';
+  String fallSpeedValue(String value) {
+    return '$value배';
   }
+
+  @override
+  String get fallSlow => '느리게';
+
+  @override
+  String get fallFast => '빠르게';
 
   @override
   String fallCombo(int count) {

@@ -17,8 +17,7 @@ class FallingState {
     required this.book,
     this.phase = FallingPhase.setup,
     this.mode = FallingMode.meaning,
-    this.difficulty = FallingDifficulty.normal,
-    this.timeLimit = 0,
+    this.speedScale = 1.0,
     this.game,
     this.failedToStart = false,
   });
@@ -26,26 +25,23 @@ class FallingState {
   final Wordbook? book;
   final FallingPhase phase;
   final FallingMode mode;
-  final FallingDifficulty difficulty;
 
-  /// 제한 시간(초), 0이면 없음.
-  final int timeLimit;
+  /// 낙하 속도 배율 (0.5 ~ 2.0).
+  final double speedScale;
   final FallingGame? game;
   final bool failedToStart;
 
   FallingState copyWith({
     FallingPhase? phase,
     FallingMode? mode,
-    FallingDifficulty? difficulty,
-    int? timeLimit,
+    double? speedScale,
     FallingGame? game,
     bool? failedToStart,
   }) => FallingState(
     book: book,
     phase: phase ?? this.phase,
     mode: mode ?? this.mode,
-    difficulty: difficulty ?? this.difficulty,
-    timeLimit: timeLimit ?? this.timeLimit,
+    speedScale: speedScale ?? this.speedScale,
     game: game ?? this.game,
     failedToStart: failedToStart ?? this.failedToStart,
   );
@@ -68,16 +64,10 @@ class FallingViewModel extends _$FallingViewModel {
     state = AsyncData(current.copyWith(mode: mode));
   }
 
-  void setDifficulty(FallingDifficulty difficulty) {
+  void setSpeed(double scale) {
     final current = state.value;
     if (current == null || current.phase != FallingPhase.setup) return;
-    state = AsyncData(current.copyWith(difficulty: difficulty));
-  }
-
-  void setTimeLimit(int seconds) {
-    final current = state.value;
-    if (current == null || current.phase != FallingPhase.setup) return;
-    state = AsyncData(current.copyWith(timeLimit: seconds));
+    state = AsyncData(current.copyWith(speedScale: scale));
   }
 
   Future<void> start() async {
@@ -87,8 +77,7 @@ class FallingViewModel extends _$FallingViewModel {
       CreateFallingGameParams(
         wordbookId,
         current.mode,
-        difficulty: current.difficulty,
-        timeLimit: current.timeLimit,
+        speedScale: current.speedScale,
       ),
     );
     state = AsyncData(

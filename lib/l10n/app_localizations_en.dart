@@ -1037,27 +1037,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fallSend => 'Send';
 
   @override
-  String get fallDifficulty => 'Difficulty';
+  String get fallSpeed => 'Falling speed';
 
   @override
-  String get fallEasy => 'Easy';
-
-  @override
-  String get fallNormal => 'Normal';
-
-  @override
-  String get fallHard => 'Hard';
-
-  @override
-  String get fallTimeLimit => 'Time limit';
-
-  @override
-  String get fallNoLimit => 'None';
-
-  @override
-  String fallMinutes(int count) {
-    return '$count min';
+  String fallSpeedValue(String value) {
+    return '${value}x';
   }
+
+  @override
+  String get fallSlow => 'Slower';
+
+  @override
+  String get fallFast => 'Faster';
 
   @override
   String fallCombo(int count) {

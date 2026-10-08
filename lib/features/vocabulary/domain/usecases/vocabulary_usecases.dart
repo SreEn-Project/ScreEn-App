@@ -335,16 +335,14 @@ class CreateFallingGameParams {
     this.wordbookId,
     this.mode, {
     this.random,
-    this.difficulty = FallingDifficulty.normal,
-    this.timeLimit = 0,
+    this.speedScale = 1.0,
   });
 
   final int wordbookId;
   final FallingMode mode;
-  final FallingDifficulty difficulty;
 
-  /// 제한 시간(초), 0이면 없음.
-  final int timeLimit;
+  /// 낙하 속도 배율 (0.5 ~ 2.0).
+  final double speedScale;
 
   /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
   final Random? random;
@@ -365,8 +363,7 @@ final class CreateFallingGame
       words: words,
       mode: params.mode,
       random: params.random,
-      difficulty: params.difficulty,
-      timeLimit: params.timeLimit,
+      speedScale: params.speedScale,
     );
   }
 }
