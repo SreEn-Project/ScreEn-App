@@ -261,30 +261,45 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
       _Option? option,
     }) => Padding(
       padding: const EdgeInsets.only(bottom: AppTokens.space12),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 선택 항목은 위에 이름 줄을 두고 오른쪽 끝에 × (비우고 접어 추가하기 전으로).
+          if (option != null)
+            Padding(
+              padding: const EdgeInsets.only(
+                left: AppTokens.sectionTitleIndent,
+                bottom: AppTokens.space4,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      option.label(l10n),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  AppIconButton(
+                    icon: Symbols.close_rounded,
+                    tooltip: l10n.vocabOptRemove,
+                    plain: true,
+                    size: 32,
+                    onPressed: () => setState(() {
+                      c.clear();
+                      _shown.remove(option);
+                    }),
+                  ),
+                ],
+              ),
+            ),
           AppTextField(
             controller: c,
             hint: hint,
             maxLines: lines,
             onChanged: (_) => setState(() => _failed = false),
           ),
-          // 추가했던 선택 항목을 비우고 다시 접는다 (추가하기 전 상태로).
-          if (option != null)
-            Positioned(
-              top: 0,
-              right: 4,
-              child: AppIconButton(
-                icon: Symbols.close_rounded,
-                tooltip: l10n.vocabOptRemove,
-                plain: true,
-                size: 40,
-                onPressed: () => setState(() {
-                  c.clear();
-                  _shown.remove(option);
-                }),
-              ),
-            ),
         ],
       ),
     );
