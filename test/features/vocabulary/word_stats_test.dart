@@ -83,7 +83,7 @@ void main() {
       overrides: fakeNativeOverrides(vocabulary: repository),
     );
     addTearDown(container.dispose);
-    final provider = wordTestViewModelProvider(1);
+    final provider = wordTestViewModelProvider(WordbookSelection([1]));
     await container.read(provider.future);
     final model = container.read(provider.notifier);
     model.setMode(WordTestMode.typing);

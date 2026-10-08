@@ -94,7 +94,7 @@ void main() {
       overrides: fakeNativeOverrides(vocabulary: repository),
     );
     addTearDown(container.dispose);
-    final provider = assemblyViewModelProvider(1);
+    final provider = assemblyViewModelProvider(WordbookSelection([1]));
     await container.read(provider.future);
     final model = container.read(provider.notifier);
 
@@ -131,7 +131,7 @@ void main() {
       overrides: fakeNativeOverrides(vocabulary: repository),
     );
     addTearDown(container.dispose);
-    final provider = assemblyViewModelProvider(1);
+    final provider = assemblyViewModelProvider(WordbookSelection([1]));
     await container.read(provider.future);
     final model = container.read(provider.notifier);
     model.setMode(AssemblyMode.letters);
@@ -172,7 +172,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: createRouter(
-            initialLocation: AppRoutes.assemblyPath(1),
+            initialLocation: AppRoutes.assemblyPath([1]),
           ),
         ),
       ),
@@ -213,7 +213,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: createRouter(
-            initialLocation: AppRoutes.assemblyPath(1),
+            initialLocation: AppRoutes.assemblyPath([1]),
           ),
         ),
       ),
@@ -241,7 +241,7 @@ void main() {
     final container = ProviderScope.containerOf(
       tester.element(find.byType(Scaffold).first),
     );
-    final provider = assemblyViewModelProvider(1);
+    final provider = assemblyViewModelProvider(WordbookSelection([1]));
     List<String> placed() {
       final st = container.read(provider).value!;
       return [for (final id in st.placed) st.current!.tile(id).text];

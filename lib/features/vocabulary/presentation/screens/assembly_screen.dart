@@ -9,40 +9,41 @@ import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/word_assembly.dart';
 import '../../domain/usecases/vocabulary_usecases.dart';
+import '../../domain/entities/vocabulary.dart';
 import '../view_models/assembly_view_model.dart';
 import '../widgets/study_widgets.dart';
 
 /// 단어 조립 (L-07, AD-13): 뜻을 보고 조각 · 글자 카드를 끌어 넣어(또는 눌러서) 단어를 완성한다.
 class AssemblyScreen extends ConsumerWidget {
-  const AssemblyScreen({super.key, required this.wordbookId});
+  const AssemblyScreen({super.key, required this.selection});
 
-  final int wordbookId;
+  final WordbookSelection selection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(assemblyViewModelProvider(wordbookId)).value;
+    final state = ref.watch(assemblyViewModelProvider(selection)).value;
     if (state == null) {
       return AppPage(title: l10n.assembleTitle, children: const []);
     }
     return switch (state.phase) {
-      AssemblyPhase.setup => _Setup(wordbookId: wordbookId, state: state),
-      AssemblyPhase.running => _Running(wordbookId: wordbookId, state: state),
-      AssemblyPhase.finished => _Result(wordbookId: wordbookId, state: state),
+      AssemblyPhase.setup => _Setup(selection: selection, state: state),
+      AssemblyPhase.running => _Running(selection: selection, state: state),
+      AssemblyPhase.finished => _Result(selection: selection, state: state),
     };
   }
 }
 
 class _Setup extends ConsumerWidget {
-  const _Setup({required this.wordbookId, required this.state});
+  const _Setup({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final AssemblyState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final model = ref.read(assemblyViewModelProvider(wordbookId).notifier);
+    final model = ref.read(assemblyViewModelProvider(selection).notifier);
     final count = state.book?.wordCount ?? 0;
     final questionCount = count < CreateAssemblyGame.maxQuestions
         ? count
@@ -166,9 +167,9 @@ class _DraggableTile extends StatelessWidget {
 }
 
 class _Running extends ConsumerStatefulWidget {
-  const _Running({required this.wordbookId, required this.state});
+  const _Running({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final AssemblyState state;
 
   @override
@@ -215,7 +216,7 @@ class _RunningState extends ConsumerState<_Running> {
   }
 
   AssemblyViewModel get _model =>
-      ref.read(assemblyViewModelProvider(widget.wordbookId).notifier);
+      ref.read(assemblyViewModelProvider(widget.selection).notifier);
 
   /// 카드를 [at] 자리에 끼운다 (없으면 끝).
   void _drop(_DragTile drag, {int? at}) {
@@ -445,16 +446,16 @@ class _RunningState extends ConsumerState<_Running> {
 }
 
 class _Result extends ConsumerWidget {
-  const _Result({required this.wordbookId, required this.state});
+  const _Result({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final AssemblyState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final model = ref.read(assemblyViewModelProvider(wordbookId).notifier);
+    final model = ref.read(assemblyViewModelProvider(selection).notifier);
     final wrong = state.wrongResults;
     final total = state.questions.length;
 

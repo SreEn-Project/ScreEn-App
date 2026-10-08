@@ -79,11 +79,9 @@ class AssemblyState {
 @riverpod
 class AssemblyViewModel extends _$AssemblyViewModel {
   @override
-  Future<AssemblyState> build(int wordbookId) async {
+  Future<AssemblyState> build(WordbookSelection selection) async {
     final books = await ref.watch(getWordbooksProvider)();
-    return AssemblyState(
-      book: books.where((b) => b.id == wordbookId).firstOrNull,
-    );
+    return AssemblyState(book: selection.summarize(books));
   }
 
   void setMode(AssemblyMode mode) {
@@ -102,7 +100,7 @@ class AssemblyViewModel extends _$AssemblyViewModel {
     final current = state.value;
     if (current == null) return;
     final questions = await ref.read(createAssemblyGameProvider)(
-      CreateAssemblyGameParams(wordbookId, current.mode),
+      CreateAssemblyGameParams(selection, current.mode),
     );
     state = AsyncData(
       questions.isEmpty

@@ -21,11 +21,11 @@ class LineMatchState {
 @riverpod
 class LineMatchViewModel extends _$LineMatchViewModel {
   @override
-  Future<LineMatchState> build(int wordbookId) async {
+  Future<LineMatchState> build(WordbookSelection selection) async {
     final books = await ref.watch(getWordbooksProvider)();
-    final book = books.where((b) => b.id == wordbookId).firstOrNull;
+    final book = selection.summarize(books);
     final game = await ref.read(createLineMatchGameProvider)(
-      CreateLineMatchGameParams(wordbookId),
+      CreateLineMatchGameParams(selection),
     );
     return LineMatchState(bookName: book?.name ?? '', game: game);
   }
@@ -50,7 +50,7 @@ class LineMatchViewModel extends _$LineMatchViewModel {
     final current = state.value;
     if (current == null) return;
     final game = await ref.read(createLineMatchGameProvider)(
-      CreateLineMatchGameParams(wordbookId),
+      CreateLineMatchGameParams(selection),
     );
     state = AsyncData(LineMatchState(bookName: current.bookName, game: game));
   }

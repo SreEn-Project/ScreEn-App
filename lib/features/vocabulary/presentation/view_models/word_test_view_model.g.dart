@@ -19,7 +19,7 @@ final class WordTestViewModelProvider
   /// 암기 테스트 (AD-09, L-03): 방식 고르기 → 문제 풀기(제출하면 바로 정답 · 오답) → 점수와 틀린 단어.
   WordTestViewModelProvider._({
     required WordTestViewModelFamily super.from,
-    required int super.argument,
+    required WordbookSelection super.argument,
   }) : super(
          retry: null,
          name: r'wordTestViewModelProvider',
@@ -53,7 +53,7 @@ final class WordTestViewModelProvider
   }
 }
 
-String _$wordTestViewModelHash() => r'8b5a05d87c50a21b41c95657733275978cba669f';
+String _$wordTestViewModelHash() => r'7be634472b5c33c23fd7c57118f508d94f9dcc96';
 
 /// 암기 테스트 (AD-09, L-03): 방식 고르기 → 문제 풀기(제출하면 바로 정답 · 오답) → 점수와 틀린 단어.
 
@@ -64,7 +64,7 @@ final class WordTestViewModelFamily extends $Family
           AsyncValue<WordTestState>,
           WordTestState,
           FutureOr<WordTestState>,
-          int
+          WordbookSelection
         > {
   WordTestViewModelFamily._()
     : super(
@@ -77,8 +77,8 @@ final class WordTestViewModelFamily extends $Family
 
   /// 암기 테스트 (AD-09, L-03): 방식 고르기 → 문제 풀기(제출하면 바로 정답 · 오답) → 점수와 틀린 단어.
 
-  WordTestViewModelProvider call(int wordbookId) =>
-      WordTestViewModelProvider._(argument: wordbookId, from: this);
+  WordTestViewModelProvider call(WordbookSelection selection) =>
+      WordTestViewModelProvider._(argument: selection, from: this);
 
   @override
   String toString() => r'wordTestViewModelProvider';
@@ -87,10 +87,10 @@ final class WordTestViewModelFamily extends $Family
 /// 암기 테스트 (AD-09, L-03): 방식 고르기 → 문제 풀기(제출하면 바로 정답 · 오답) → 점수와 틀린 단어.
 
 abstract class _$WordTestViewModel extends $AsyncNotifier<WordTestState> {
-  late final _$args = ref.$arg as int;
-  int get wordbookId => _$args;
+  late final _$args = ref.$arg as WordbookSelection;
+  WordbookSelection get selection => _$args;
 
-  FutureOr<WordTestState> build(int wordbookId);
+  FutureOr<WordTestState> build(WordbookSelection selection);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

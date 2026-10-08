@@ -12,6 +12,11 @@ class WordDetailViewModel extends _$WordDetailViewModel {
   @override
   Future<VocabularyWord?> build(int id) => ref.watch(getWordProvider)(id);
 
+  /// 수정 뒤 새로 읽는다.
+  Future<void> reload() async {
+    state = AsyncData(await ref.read(getWordProvider)(id));
+  }
+
   Future<void> delete() => ref.read(deleteWordProvider)(id);
 
   /// 다른 단어장으로 옮기고 새로 읽는다.

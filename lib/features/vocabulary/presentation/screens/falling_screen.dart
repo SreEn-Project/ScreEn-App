@@ -9,45 +9,46 @@ import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/falling_game.dart';
+import '../../domain/entities/vocabulary.dart';
 import '../view_models/falling_view_model.dart';
 import '../widgets/study_widgets.dart';
 
 /// 하강형 타이핑 (L-06, AD-12): 방식 고르기 → 떨어지는 블록을 입력으로 파괴 → 결과.
 class FallingScreen extends ConsumerWidget {
-  const FallingScreen({super.key, required this.wordbookId});
+  const FallingScreen({super.key, required this.selection});
 
-  final int wordbookId;
+  final WordbookSelection selection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(fallingViewModelProvider(wordbookId)).value;
+    final state = ref.watch(fallingViewModelProvider(selection)).value;
     if (state == null) {
       return AppPage(title: l10n.fallTitle, children: const []);
     }
     return switch (state.phase) {
-      FallingPhase.setup => _Setup(wordbookId: wordbookId, state: state),
+      FallingPhase.setup => _Setup(selection: selection, state: state),
       FallingPhase.playing => _Playing(
-        wordbookId: wordbookId,
+        selection: selection,
         // 새 판마다 새 상태로 시작하려고 게임 객체를 키로 쓴다.
         key: ObjectKey(state.game),
         game: state.game!,
       ),
-      FallingPhase.over => _Result(wordbookId: wordbookId, state: state),
+      FallingPhase.over => _Result(selection: selection, state: state),
     };
   }
 }
 
 class _Setup extends ConsumerWidget {
-  const _Setup({required this.wordbookId, required this.state});
+  const _Setup({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final FallingState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final model = ref.read(fallingViewModelProvider(wordbookId).notifier);
+    final model = ref.read(fallingViewModelProvider(selection).notifier);
     final count = state.book?.wordCount ?? 0;
 
     return AppPage(
@@ -126,9 +127,9 @@ class _Setup extends ConsumerWidget {
 }
 
 class _Playing extends ConsumerStatefulWidget {
-  const _Playing({super.key, required this.wordbookId, required this.game});
+  const _Playing({super.key, required this.selection, required this.game});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final FallingGame game;
 
   @override
@@ -184,7 +185,7 @@ class _PlayingState extends ConsumerState<_Playing>
     if (widget.game.over && !_finishing) {
       _finishing = true;
       _ticker.stop();
-      ref.read(fallingViewModelProvider(widget.wordbookId).notifier).finish();
+      ref.read(fallingViewModelProvider(widget.selection).notifier).finish();
     }
   }
 
@@ -435,16 +436,16 @@ class _BlockCard extends StatelessWidget {
 }
 
 class _Result extends ConsumerWidget {
-  const _Result({required this.wordbookId, required this.state});
+  const _Result({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final FallingState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final model = ref.read(fallingViewModelProvider(wordbookId).notifier);
+    final model = ref.read(fallingViewModelProvider(selection).notifier);
     final game = state.game!;
     final missed = game.missedWords;
 

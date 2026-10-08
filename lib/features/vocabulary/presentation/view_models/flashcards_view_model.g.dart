@@ -19,7 +19,7 @@ final class FlashcardsViewModelProvider
   /// 카드 학습 (AD-08): 카드를 한 장씩 넘기며 외움 · 못 외움을 기록하고, 결과에서 못 외운 단어만 다시 본다.
   FlashcardsViewModelProvider._({
     required FlashcardsViewModelFamily super.from,
-    required int super.argument,
+    required WordbookSelection super.argument,
   }) : super(
          retry: null,
          name: r'flashcardsViewModelProvider',
@@ -54,7 +54,7 @@ final class FlashcardsViewModelProvider
 }
 
 String _$flashcardsViewModelHash() =>
-    r'080d2a2bd7968f3146027f99f6d67714826f3ac4';
+    r'590a870fb79edd2acd168af24789d4acce1c4b54';
 
 /// 카드 학습 (AD-08): 카드를 한 장씩 넘기며 외움 · 못 외움을 기록하고, 결과에서 못 외운 단어만 다시 본다.
 
@@ -65,7 +65,7 @@ final class FlashcardsViewModelFamily extends $Family
           AsyncValue<FlashcardsState>,
           FlashcardsState,
           FutureOr<FlashcardsState>,
-          int
+          WordbookSelection
         > {
   FlashcardsViewModelFamily._()
     : super(
@@ -78,8 +78,8 @@ final class FlashcardsViewModelFamily extends $Family
 
   /// 카드 학습 (AD-08): 카드를 한 장씩 넘기며 외움 · 못 외움을 기록하고, 결과에서 못 외운 단어만 다시 본다.
 
-  FlashcardsViewModelProvider call(int wordbookId) =>
-      FlashcardsViewModelProvider._(argument: wordbookId, from: this);
+  FlashcardsViewModelProvider call(WordbookSelection selection) =>
+      FlashcardsViewModelProvider._(argument: selection, from: this);
 
   @override
   String toString() => r'flashcardsViewModelProvider';
@@ -88,10 +88,10 @@ final class FlashcardsViewModelFamily extends $Family
 /// 카드 학습 (AD-08): 카드를 한 장씩 넘기며 외움 · 못 외움을 기록하고, 결과에서 못 외운 단어만 다시 본다.
 
 abstract class _$FlashcardsViewModel extends $AsyncNotifier<FlashcardsState> {
-  late final _$args = ref.$arg as int;
-  int get wordbookId => _$args;
+  late final _$args = ref.$arg as WordbookSelection;
+  WordbookSelection get selection => _$args;
 
-  FutureOr<FlashcardsState> build(int wordbookId);
+  FutureOr<FlashcardsState> build(WordbookSelection selection);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

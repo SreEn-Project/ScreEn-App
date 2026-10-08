@@ -1975,6 +1975,29 @@ class VocabularyHostApi {
     );
     return pigeonVar_replyValue as int?;
   }
+
+  /// 저장된 단어의 내용(단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문)을 고친다. 외운 표시 · 정답률 · 저장 시각 · 언어는 유지한다.
+  /// 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
+  Future<bool> updateWord(int id, VocabWordInput input) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.updateWord$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id, input],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
 }
 
 /// Returns a broadcast [Stream] of events from the `events` event channel.

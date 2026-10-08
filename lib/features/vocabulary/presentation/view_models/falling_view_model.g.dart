@@ -19,7 +19,7 @@ final class FallingViewModelProvider
   /// 하강형 타이핑 (AD-12): 방식 고르기 → 게임 → 결과.
   FallingViewModelProvider._({
     required FallingViewModelFamily super.from,
-    required int super.argument,
+    required WordbookSelection super.argument,
   }) : super(
          retry: null,
          name: r'fallingViewModelProvider',
@@ -53,7 +53,7 @@ final class FallingViewModelProvider
   }
 }
 
-String _$fallingViewModelHash() => r'03959ea75d4f09d2b42d194fb94eb8b0392f9bcd';
+String _$fallingViewModelHash() => r'a54007281246b175011b10749d2da9f38728a285';
 
 /// 하강형 타이핑 (AD-12): 방식 고르기 → 게임 → 결과.
 
@@ -64,7 +64,7 @@ final class FallingViewModelFamily extends $Family
           AsyncValue<FallingState>,
           FallingState,
           FutureOr<FallingState>,
-          int
+          WordbookSelection
         > {
   FallingViewModelFamily._()
     : super(
@@ -77,8 +77,8 @@ final class FallingViewModelFamily extends $Family
 
   /// 하강형 타이핑 (AD-12): 방식 고르기 → 게임 → 결과.
 
-  FallingViewModelProvider call(int wordbookId) =>
-      FallingViewModelProvider._(argument: wordbookId, from: this);
+  FallingViewModelProvider call(WordbookSelection selection) =>
+      FallingViewModelProvider._(argument: selection, from: this);
 
   @override
   String toString() => r'fallingViewModelProvider';
@@ -87,10 +87,10 @@ final class FallingViewModelFamily extends $Family
 /// 하강형 타이핑 (AD-12): 방식 고르기 → 게임 → 결과.
 
 abstract class _$FallingViewModel extends $AsyncNotifier<FallingState> {
-  late final _$args = ref.$arg as int;
-  int get wordbookId => _$args;
+  late final _$args = ref.$arg as WordbookSelection;
+  WordbookSelection get selection => _$args;
 
-  FutureOr<FallingState> build(int wordbookId);
+  FutureOr<FallingState> build(WordbookSelection selection);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

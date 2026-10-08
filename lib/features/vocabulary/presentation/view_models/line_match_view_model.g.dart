@@ -19,7 +19,7 @@ final class LineMatchViewModelProvider
   /// 선 잇기 매칭 (AD-11).
   LineMatchViewModelProvider._({
     required LineMatchViewModelFamily super.from,
-    required int super.argument,
+    required WordbookSelection super.argument,
   }) : super(
          retry: null,
          name: r'lineMatchViewModelProvider',
@@ -54,7 +54,7 @@ final class LineMatchViewModelProvider
 }
 
 String _$lineMatchViewModelHash() =>
-    r'288c2e5ea228705225e0e80d46fab26e60c2be0b';
+    r'a3f67c5357fffd568c536c9f02db52913df6be26';
 
 /// 선 잇기 매칭 (AD-11).
 
@@ -65,7 +65,7 @@ final class LineMatchViewModelFamily extends $Family
           AsyncValue<LineMatchState>,
           LineMatchState,
           FutureOr<LineMatchState>,
-          int
+          WordbookSelection
         > {
   LineMatchViewModelFamily._()
     : super(
@@ -78,8 +78,8 @@ final class LineMatchViewModelFamily extends $Family
 
   /// 선 잇기 매칭 (AD-11).
 
-  LineMatchViewModelProvider call(int wordbookId) =>
-      LineMatchViewModelProvider._(argument: wordbookId, from: this);
+  LineMatchViewModelProvider call(WordbookSelection selection) =>
+      LineMatchViewModelProvider._(argument: selection, from: this);
 
   @override
   String toString() => r'lineMatchViewModelProvider';
@@ -88,10 +88,10 @@ final class LineMatchViewModelFamily extends $Family
 /// 선 잇기 매칭 (AD-11).
 
 abstract class _$LineMatchViewModel extends $AsyncNotifier<LineMatchState> {
-  late final _$args = ref.$arg as int;
-  int get wordbookId => _$args;
+  late final _$args = ref.$arg as WordbookSelection;
+  WordbookSelection get selection => _$args;
 
-  FutureOr<LineMatchState> build(int wordbookId);
+  FutureOr<LineMatchState> build(WordbookSelection selection);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {

@@ -10,19 +10,20 @@ import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/line_match.dart';
+import '../../domain/entities/vocabulary.dart';
 import '../view_models/line_match_view_model.dart';
 import '../widgets/study_widgets.dart';
 
 /// 선 잇기 매칭 (L-05, AD-11): 단어 블록에서 뜻 블록으로 드래그해 선을 잇는다.
 class LineMatchScreen extends ConsumerWidget {
-  const LineMatchScreen({super.key, required this.wordbookId});
+  const LineMatchScreen({super.key, required this.selection});
 
-  final int wordbookId;
+  final WordbookSelection selection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(lineMatchViewModelProvider(wordbookId)).value;
+    final state = ref.watch(lineMatchViewModelProvider(selection)).value;
     final game = state?.game;
     if (state == null || game == null) {
       return AppPage(
@@ -42,8 +43,8 @@ class LineMatchScreen extends ConsumerWidget {
       );
     }
     return game.finished
-        ? _Result(wordbookId: wordbookId, game: game)
-        : _Board(wordbookId: wordbookId, game: game);
+        ? _Result(selection: selection, game: game)
+        : _Board(selection: selection, game: game);
   }
 }
 
@@ -61,9 +62,9 @@ class _Flash {
 }
 
 class _Board extends ConsumerStatefulWidget {
-  const _Board({required this.wordbookId, required this.game});
+  const _Board({required this.selection, required this.game});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final LineMatchGame game;
 
   @override
@@ -145,7 +146,7 @@ class _BoardState extends ConsumerState<_Board> {
       return;
     }
     final model = ref.read(
-      lineMatchViewModelProvider(widget.wordbookId).notifier,
+      lineMatchViewModelProvider(widget.selection).notifier,
     );
     // 이어 본 결과를 먼저 알아야 선 색을 정한다 (게임은 바뀌지 않는 값이라 미리 시험해 볼 수 있다).
     final (_, outcome) = widget.game.attempt(wordId, meaningId);
@@ -423,16 +424,16 @@ class _LinePainter extends CustomPainter {
 }
 
 class _Result extends ConsumerWidget {
-  const _Result({required this.wordbookId, required this.game});
+  const _Result({required this.selection, required this.game});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final LineMatchGame game;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final model = ref.read(lineMatchViewModelProvider(wordbookId).notifier);
+    final model = ref.read(lineMatchViewModelProvider(selection).notifier);
     final missed = game.missedWords;
 
     return AppPage(

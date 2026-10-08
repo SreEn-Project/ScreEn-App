@@ -213,6 +213,15 @@ class WordbookDetailScreen extends ConsumerWidget {
     final action = await showWordActionsSheet(context);
     if (action == null || !context.mounted) return;
     switch (action) {
+      case WordAction.edit:
+        final l10n = AppLocalizations.of(context);
+        final edited = await showWordEditSheet(
+          context,
+          title: l10n.vocabEditWord,
+          initial: word.toDraft(),
+          editingId: word.id,
+        );
+        if (edited != null) await model.refresh();
       case WordAction.move:
         final books = await ref.read(wordbooksViewModelProvider.future);
         if (!context.mounted) return;

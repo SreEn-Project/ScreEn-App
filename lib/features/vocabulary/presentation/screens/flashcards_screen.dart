@@ -13,27 +13,27 @@ import '../view_models/flashcards_view_model.dart';
 
 /// 카드 학습 (L-02, AD-08): 카드를 탭해 뒤집고, 좌우로 밀어 외움 · 못 외움을 기록한다.
 class FlashcardsScreen extends ConsumerWidget {
-  const FlashcardsScreen({super.key, required this.wordbookId});
+  const FlashcardsScreen({super.key, required this.selection});
 
-  final int wordbookId;
+  final WordbookSelection selection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(flashcardsViewModelProvider(wordbookId)).value;
+    final state = ref.watch(flashcardsViewModelProvider(selection)).value;
     if (state == null) {
       return AppPage(title: l10n.cardsTitle, children: const []);
     }
     return state.finished
-        ? _Result(wordbookId: wordbookId, state: state)
-        : _Deck(wordbookId: wordbookId, state: state);
+        ? _Result(selection: selection, state: state)
+        : _Deck(selection: selection, state: state);
   }
 }
 
 class _Deck extends ConsumerStatefulWidget {
-  const _Deck({required this.wordbookId, required this.state});
+  const _Deck({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final FlashcardsState state;
 
   @override
@@ -50,7 +50,7 @@ class _DeckState extends ConsumerState<_Deck> {
     final theme = Theme.of(context);
     final state = widget.state;
     final model = ref.read(
-      flashcardsViewModelProvider(widget.wordbookId).notifier,
+      flashcardsViewModelProvider(widget.selection).notifier,
     );
     final word = state.current;
     // 카드마다 새 상태(뒤집힘 · 드래그 위치 초기화)로 시작한다.
@@ -337,16 +337,16 @@ class _Face extends StatelessWidget {
 }
 
 class _Result extends ConsumerWidget {
-  const _Result({required this.wordbookId, required this.state});
+  const _Result({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final FlashcardsState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final model = ref.read(flashcardsViewModelProvider(wordbookId).notifier);
+    final model = ref.read(flashcardsViewModelProvider(selection).notifier);
     final unknown = state.unknown;
 
     return AppPage(

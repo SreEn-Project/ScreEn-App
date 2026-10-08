@@ -35,4 +35,8 @@ abstract interface class VocabularyRepository {
 
   /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
   Future<int?> saveWord(int wordbookId, WordDraft draft);
+
+  /// 저장된 단어의 내용을 고친다. 외운 표시 · 정답률 · 저장 시각은 유지한다.
+  /// 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
+  Future<bool> updateWord(int id, WordDraft draft);
 }

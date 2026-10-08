@@ -9,27 +9,28 @@ import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/word_test.dart';
 import '../../domain/usecases/vocabulary_usecases.dart';
+import '../../domain/entities/vocabulary.dart';
 import '../view_models/word_test_view_model.dart';
 import '../widgets/study_widgets.dart';
 
 /// 암기 테스트 (L-03, AD-09): 방식 고르기 → 한 문제씩 풀고 바로 정답 확인 → 점수와 틀린 단어.
 class WordTestScreen extends ConsumerWidget {
-  const WordTestScreen({super.key, required this.wordbookId});
+  const WordTestScreen({super.key, required this.selection});
 
-  final int wordbookId;
+  final WordbookSelection selection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final state = ref.watch(wordTestViewModelProvider(wordbookId)).value;
+    final state = ref.watch(wordTestViewModelProvider(selection)).value;
 
     if (state == null) {
       return AppPage(title: l10n.testTitle, children: const []);
     }
     return switch (state.phase) {
-      WordTestPhase.setup => _Setup(wordbookId: wordbookId, state: state),
-      WordTestPhase.running => _Running(wordbookId: wordbookId, state: state),
-      WordTestPhase.finished => _Result(wordbookId: wordbookId, state: state),
+      WordTestPhase.setup => _Setup(selection: selection, state: state),
+      WordTestPhase.running => _Running(selection: selection, state: state),
+      WordTestPhase.finished => _Result(selection: selection, state: state),
     };
   }
 }
@@ -55,15 +56,15 @@ class _BottomBar extends StatelessWidget {
 }
 
 class _Setup extends ConsumerWidget {
-  const _Setup({required this.wordbookId, required this.state});
+  const _Setup({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final WordTestState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final model = ref.read(wordTestViewModelProvider(wordbookId).notifier);
+    final model = ref.read(wordTestViewModelProvider(selection).notifier);
     final book = state.book;
     final count = book?.wordCount ?? 0;
     final questionCount = count < CreateWordTest.maxQuestions
@@ -113,9 +114,9 @@ class _Setup extends ConsumerWidget {
 }
 
 class _Running extends ConsumerStatefulWidget {
-  const _Running({required this.wordbookId, required this.state});
+  const _Running({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final WordTestState state;
 
   @override
@@ -155,7 +156,7 @@ class _RunningState extends ConsumerState<_Running> {
     final colors = theme.colorScheme;
     final state = widget.state;
     final model = ref.read(
-      wordTestViewModelProvider(widget.wordbookId).notifier,
+      wordTestViewModelProvider(widget.selection).notifier,
     );
     final question = state.current;
     if (question == null) {
@@ -278,16 +279,16 @@ class _RunningState extends ConsumerState<_Running> {
 }
 
 class _Result extends ConsumerWidget {
-  const _Result({required this.wordbookId, required this.state});
+  const _Result({required this.selection, required this.state});
 
-  final int wordbookId;
+  final WordbookSelection selection;
   final WordTestState state;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final model = ref.read(wordTestViewModelProvider(wordbookId).notifier);
+    final model = ref.read(wordTestViewModelProvider(selection).notifier);
     final wrong = state.wrongAnswers;
     final total = state.questions.length;
 

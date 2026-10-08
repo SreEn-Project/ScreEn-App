@@ -25,6 +25,48 @@ class Wordbook {
       attemptCount == 0 ? null : correctCount / attemptCount;
 }
 
+/// 한 번에 학습할 단어장 모음 (AD-07). 값으로 비교하므로 Riverpod family 인자로 쓴다.
+class WordbookSelection {
+  WordbookSelection(Iterable<int> ids)
+    : ids = List.unmodifiable({...ids}.toList()..sort());
+
+  /// 정렬된 단어장 id (중복 없음).
+  final List<int> ids;
+
+  bool get isEmpty => ids.isEmpty;
+
+  bool contains(int id) => ids.contains(id);
+
+  /// 고른 단어장들을 합친 하나의 단어장처럼 요약한다 (이름은 쉼표로 이음). 하나도 없으면 null.
+  Wordbook? summarize(List<Wordbook> books) {
+    final picked = [
+      for (final book in books)
+        if (contains(book.id)) book,
+    ];
+    if (picked.isEmpty) return null;
+    if (picked.length == 1) return picked.first;
+    return Wordbook(
+      id: picked.first.id,
+      name: picked.map((b) => b.name).join(', '),
+      wordCount: picked.fold(0, (sum, b) => sum + b.wordCount),
+      memorizedCount: picked.fold(0, (sum, b) => sum + b.memorizedCount),
+      createdAt: picked.first.createdAt,
+      correctCount: picked.fold(0, (sum, b) => sum + b.correctCount),
+      attemptCount: picked.fold(0, (sum, b) => sum + b.attemptCount),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is WordbookSelection &&
+      other.ids.length == ids.length &&
+      [for (var i = 0; i < ids.length; i++) other.ids[i] == ids[i]]
+          .every((e) => e);
+
+  @override
+  int get hashCode => Object.hashAll(ids);
+}
+
 /// 저장한 단어 (AD-03, AD-05, AD-06).
 class VocabularyWord {
   const VocabularyWord({
@@ -72,6 +114,18 @@ class VocabularyWord {
   /// 정답률 0~1. 아직 푼 적이 없으면 null.
   double? get accuracy =>
       attemptCount == 0 ? null : correctCount / attemptCount;
+
+  /// 수정 시트에 채울 내용.
+  WordDraft toDraft() => WordDraft(
+    word: word,
+    meaning: meaning,
+    pronunciation: pronunciation,
+    partOfSpeech: partOfSpeech,
+    contextMeaning: contextMeaning,
+    sentence: sentence,
+    sourceLanguage: sourceLanguage,
+    targetLanguage: targetLanguage,
+  );
 }
 
 /// 단어 목록 정렬 (AD-05).

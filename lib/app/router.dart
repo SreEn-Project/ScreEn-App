@@ -18,6 +18,7 @@ import '../features/vocabulary/presentation/screens/falling_screen.dart';
 import '../features/vocabulary/presentation/screens/flashcards_screen.dart';
 import '../features/vocabulary/presentation/screens/learning_start_screen.dart';
 import '../features/vocabulary/presentation/screens/line_match_screen.dart';
+import '../features/vocabulary/domain/entities/vocabulary.dart';
 import '../features/vocabulary/presentation/screens/word_detail_screen.dart';
 import '../features/vocabulary/presentation/screens/word_test_screen.dart';
 import '../features/vocabulary/presentation/screens/wordbook_detail_screen.dart';
@@ -46,13 +47,22 @@ abstract final class AppRoutes {
   static String wordbookPath(int id) => '/vocabulary/book/$id';
   static String wordPath(int id) => '/vocabulary/word/$id';
   static const learning = '/learning';
-  static String wordTestPath(int wordbookId) => '/learning/test/$wordbookId';
-  static String flashcardsPath(int wordbookId) => '/learning/cards/$wordbookId';
-  static String lineMatchPath(int wordbookId) => '/learning/match/$wordbookId';
-  static String fallingPath(int wordbookId) => '/learning/falling/$wordbookId';
-  static String assemblyPath(int wordbookId) =>
-      '/learning/assembly/$wordbookId';
+  static String wordTestPath(List<int> ids) =>
+      '/learning/test/${ids.join(',')}';
+  static String flashcardsPath(List<int> ids) =>
+      '/learning/cards/${ids.join(',')}';
+  static String lineMatchPath(List<int> ids) =>
+      '/learning/match/${ids.join(',')}';
+  static String fallingPath(List<int> ids) =>
+      '/learning/falling/${ids.join(',')}';
+  static String assemblyPath(List<int> ids) =>
+      '/learning/assembly/${ids.join(',')}';
 }
+
+/// 학습 경로의 `:id`(쉼표로 이은 단어장 id들)를 읽는다 (AD-07).
+WordbookSelection _selection(GoRouterState state) => WordbookSelection(
+  (state.pathParameters['id'] ?? '').split(',').map(int.tryParse).nonNulls,
+);
 
 /// 첫 실행이면 온보딩, 이미 마쳤으면 홈에서 시작한다 (FL-01). 저장된 설정을 한 번 읽는다.
 @Riverpod(keepAlive: true)
@@ -137,33 +147,28 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
         routes: [
           GoRoute(
             path: 'cards/:id',
-            builder: (context, state) => FlashcardsScreen(
-              wordbookId: int.parse(state.pathParameters['id']!),
-            ),
+            builder: (context, state) =>
+                FlashcardsScreen(selection: _selection(state)),
           ),
           GoRoute(
             path: 'match/:id',
-            builder: (context, state) => LineMatchScreen(
-              wordbookId: int.parse(state.pathParameters['id']!),
-            ),
+            builder: (context, state) =>
+                LineMatchScreen(selection: _selection(state)),
           ),
           GoRoute(
             path: 'falling/:id',
-            builder: (context, state) => FallingScreen(
-              wordbookId: int.parse(state.pathParameters['id']!),
-            ),
+            builder: (context, state) =>
+                FallingScreen(selection: _selection(state)),
           ),
           GoRoute(
             path: 'assembly/:id',
-            builder: (context, state) => AssemblyScreen(
-              wordbookId: int.parse(state.pathParameters['id']!),
-            ),
+            builder: (context, state) =>
+                AssemblyScreen(selection: _selection(state)),
           ),
           GoRoute(
             path: 'test/:id',
-            builder: (context, state) => WordTestScreen(
-              wordbookId: int.parse(state.pathParameters['id']!),
-            ),
+            builder: (context, state) =>
+                WordTestScreen(selection: _selection(state)),
           ),
         ],
       ),

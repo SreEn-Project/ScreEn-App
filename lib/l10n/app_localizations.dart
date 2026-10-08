@@ -1682,6 +1682,24 @@ abstract class AppLocalizations {
   /// **'Saved to ‘{name}’'**
   String vocabSavedTo(String name);
 
+  /// No description provided for @vocabEditWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit word'**
+  String get vocabEditWord;
+
+  /// No description provided for @vocabEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Word updated'**
+  String get vocabEdited;
+
+  /// No description provided for @vocabEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update. Check whether this word already exists in the wordbook'**
+  String get vocabEditFailed;
+
   /// No description provided for @vocabSaveFailed.
   ///
   /// In en, this message translates to:
@@ -1717,6 +1735,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save words from a translation result or history and you can study them here'**
   String get learnNoBooksHint;
+
+  /// No description provided for @learnPickBookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick one or more word lists to study together.'**
+  String get learnPickBookHint;
+
+  /// No description provided for @learnPickBookDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Study {count} selected'**
+  String learnPickBookDone(int count);
 
   /// No description provided for @learnBook.
   ///

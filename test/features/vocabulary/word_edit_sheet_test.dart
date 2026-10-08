@@ -245,4 +245,86 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.savedWords.single.wordbookId, 2);
   });
+
+  testWidgets('단어 상세에서 수정하면 내용은 바뀌고 정답률은 유지된다', (tester) async {
+    final repository = FakeVocabularyRepository(
+      books: [_book],
+      words: [
+        VocabularyWord(
+          id: 7,
+          wordbookId: 1,
+          word: 'aple',
+          meaning: '사과',
+          sourceLanguage: 'en',
+          targetLanguage: 'ko',
+          memorized: true,
+          savedAt: DateTime(2026, 10, 1),
+          correctCount: 3,
+          attemptCount: 4,
+        ),
+        VocabularyWord(
+          id: 8,
+          wordbookId: 1,
+          word: 'banana',
+          meaning: '바나나',
+          sourceLanguage: 'en',
+          targetLanguage: 'ko',
+          memorized: false,
+          savedAt: DateTime(2026, 10, 2),
+        ),
+      ],
+    );
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.75;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: fakeNativeOverrides(vocabulary: repository),
+        child: MaterialApp.router(
+          theme: AppTheme.light,
+          locale: const Locale('ko'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: createRouter(initialLocation: AppRoutes.wordPath(7)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('단어 수정'));
+    await tester.pumpAndSettle();
+    // 수정 시트에는 단어장 선택이 없고, 기존 내용이 채워져 있다.
+    expect(find.text('저장할 단어장'), findsNothing);
+    final fields = find.descendant(
+      of: find.byType(WordEditSheet),
+      matching: find.byType(TextField),
+    );
+    expect(find.widgetWithText(TextField, 'aple'), findsOneWidget);
+
+    // 다른 단어와 겹치면 저장하지 못한다.
+    await tester.enterText(fields.at(0), 'banana');
+    await tester.pump();
+    await tester.tap(find.text('저장').last);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('수정하지 못했어요'), findsOneWidget);
+    expect(repository.savedWords.first.word, 'aple');
+
+    await tester.enterText(fields.at(0), 'apple');
+    await tester.enterText(fields.at(1), '사과나무 열매');
+    await tester.pump();
+    await tester.tap(find.text('저장').last);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(find.text('단어를 수정했어요'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    final edited = repository.savedWords.first;
+    expect(edited.word, 'apple');
+    expect(edited.meaning, '사과나무 열매');
+    expect(edited.memorized, isTrue);
+    expect(edited.correctCount, 3);
+    expect(edited.attemptCount, 4);
+    // 상세 화면도 새 내용으로 바뀐다.
+    expect(find.text('apple'), findsOneWidget);
+  });
 }

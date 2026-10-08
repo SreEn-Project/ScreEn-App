@@ -98,7 +98,7 @@ interface VocabularyDao {
     /** [pattern]은 LIKE 패턴 (빈 문자열이면 전부). [sort]는 [WordSort.code]. */
     @Query(
         "SELECT * FROM vocabulary_words WHERE wordbookId = :wordbookId AND " +
-            "(:pattern = '' OR word LIKE :pattern ESCAPE '\' OR meaning LIKE :pattern ESCAPE '\') " +
+            "(:pattern = '' OR word LIKE :pattern ESCAPE '\\' OR meaning LIKE :pattern ESCAPE '\\') " +
             "ORDER BY (CASE WHEN :sort = 2 THEN word END) COLLATE NOCASE ASC, " +
             "(CASE WHEN :sort = 1 THEN createdAt END) ASC, createdAt DESC, id DESC",
     )
@@ -126,6 +126,33 @@ interface VocabularyDao {
         sentence: String?,
         sourceApp: String?,
     )
+
+    @Query(
+        "UPDATE vocabulary_words SET word = :word, meaning = :meaning, pronunciation = :pronunciation, " +
+            "partOfSpeech = :partOfSpeech, contextMeaning = :contextMeaning, sentence = :sentence WHERE id = :id",
+    )
+    suspend fun updateWordFields(
+        id: Long,
+        word: String,
+        meaning: String,
+        pronunciation: String?,
+        partOfSpeech: String?,
+        contextMeaning: String?,
+        sentence: String?,
+    )
+
+    /** 단어의 내용을 고친다. 외운 표시 · 정답률 · 저장 시각 · 출처는 그대로. 같은 단어장의 다른 단어와 겹치면 false. */
+    @Transaction
+    suspend fun editWord(id: Long, edited: WordEntity): Boolean {
+        val current = word(id) ?: return false
+        val clash = wordByText(current.wordbookId, edited.word)
+        if (clash != null && clash.id != id) return false
+        updateWordFields(
+            id, edited.word, edited.meaning, edited.pronunciation, edited.partOfSpeech,
+            edited.contextMeaning, edited.sentence,
+        )
+        return true
+    }
 
     @Query("UPDATE vocabulary_words SET wordbookId = :wordbookId WHERE id = :id")
     suspend fun moveWord(id: Long, wordbookId: Long)
