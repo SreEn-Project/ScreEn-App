@@ -112,19 +112,25 @@ class GeminiDictionary(
         }
 
     companion object {
-        internal fun buildBody(word: String, sentence: String?, source: String, target: String): String {
+        internal fun systemPrompt(source: String, target: String): String {
             val from = if (source == AUTO_LANGUAGE) "the word's own language (detect it)" else source
-            val system = "You are a bilingual dictionary. Explain one word for a language learner. " +
+            return "You are a bilingual dictionary. Explain one word for a language learner. " +
                 "The word is in $from; write every field in $target. " +
                 "Reply with a single JSON object and nothing else, with these string fields: " +
                 "\"meaning\" (short dictionary meaning), " +
                 "\"pronunciation\" (IPA, or the reading for Japanese/Chinese; empty if not applicable), " +
                 "\"partOfSpeech\" (short, for example noun or verb), " +
                 "\"contextMeaning\" (the meaning in the given sentence; empty if no sentence is given)."
-            val user = buildString {
-                append("Word: ").append(word)
-                if (!sentence.isNullOrBlank()) append("\nSentence: ").append(sentence)
-            }
+        }
+
+        internal fun userPrompt(word: String, sentence: String?): String = buildString {
+            append("Word: ").append(word)
+            if (!sentence.isNullOrBlank()) append("\nSentence: ").append(sentence)
+        }
+
+        internal fun buildBody(word: String, sentence: String?, source: String, target: String): String {
+            val system = systemPrompt(source, target)
+            val user = userPrompt(word, sentence)
             return JSONObject()
                 .put(
                     "systemInstruction",
@@ -146,6 +152,11 @@ class GeminiDictionary(
         /** 응답 → 풀이. 코드 펜스(```json)가 붙어 와도 읽는다. 뜻이 하나도 없으면 null. */
         internal fun parse(response: String): WordDefinition? {
             val text = GeminiTranslationEngine.parse(response) ?: return null
+            return parseText(text)
+        }
+
+        /** 모델이 쓴 글 → 풀이. [parse]와 Groq가 같이 쓴다. */
+        internal fun parseText(text: String): WordDefinition? {
             val json = runCatching { JSONObject(stripFence(text)) }.getOrNull() ?: return null
             val definition = WordDefinition(
                 meaning = json.field("meaning"),
@@ -160,5 +171,43 @@ class GeminiDictionary(
             text.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
 
         private fun JSONObject.field(name: String): String? = optString(name, "").trim().takeIf { it.isNotEmpty() }
+    }
+}
+
+/** Groq로 단어 풀이를 받는다 (AD-02). 번역과 같은 키 · 모델 · 전송을 쓰고, 지시문은 [GeminiDictionary]와 같다. */
+class GroqDictionary(
+    private val keys: ApiKeyProvider,
+    private val transport: GroqTransport = GroqHttpTransport(),
+    private val models: List<String> = GroqTranslationEngine.MODELS,
+) : WordDictionary {
+
+    override suspend fun define(word: String, sentence: String?, source: String, target: String): EngineResult<WordDefinition> =
+        try {
+            val key = keys.key()?.takeIf { it.isNotBlank() }
+                ?: return EngineResult.Err(TranslationError.NoApiKey)
+            val response = chatWithFallback(transport, key, models) { buildBody(word, sentence, source, target, it) }
+            parse(response)?.let { EngineResult.Ok(it) }
+                ?: EngineResult.Err(TranslationError.Unknown("풀이를 읽지 못함"))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: GroqHttpException) {
+            EngineResult.Err(GroqTranslationEngine.classify(e))
+        } catch (e: IOException) {
+            EngineResult.Err(TranslationError.Network)
+        } catch (e: Exception) {
+            EngineResult.Err(TranslationError.Unknown(e.message))
+        }
+
+    companion object {
+        internal fun buildBody(word: String, sentence: String?, source: String, target: String, model: String): String =
+            GroqTranslationEngine.chatBody(
+                model,
+                GeminiDictionary.systemPrompt(source, target),
+                GeminiDictionary.userPrompt(word, sentence),
+                json = true,
+            )
+
+        internal fun parse(response: String): WordDefinition? =
+            GroqTranslationEngine.parse(response)?.let { GeminiDictionary.parseText(it) }
     }
 }

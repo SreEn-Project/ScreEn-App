@@ -52,6 +52,7 @@ extension on pigeon.EngineType {
   EngineType toEntity() => switch (this) {
     pigeon.EngineType.mlKit => EngineType.mlKit,
     pigeon.EngineType.gemini => EngineType.gemini,
+    pigeon.EngineType.groq => EngineType.groq,
   };
 }
 
@@ -75,6 +76,7 @@ extension EngineTypeToPigeon on EngineType {
   pigeon.EngineType toPigeon() => switch (this) {
     EngineType.mlKit => pigeon.EngineType.mlKit,
     EngineType.gemini => pigeon.EngineType.gemini,
+    EngineType.groq => pigeon.EngineType.groq,
   };
 }
 

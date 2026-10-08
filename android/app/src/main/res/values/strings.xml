@@ -33,7 +33,8 @@
     <string name="overlay_setting_engine">AI translation: %1$s</string>
     <string name="overlay_engine_ml_kit">ML Kit</string>
     <string name="overlay_engine_gemini">Gemini AI</string>
-    <string name="overlay_engine_needs_key">Gemini AI: confirm age and add a key in app settings</string>
+    <string name="overlay_engine_groq">Groq AI</string>
+    <string name="overlay_engine_needs_key">%1$s: confirm age and add a key in app settings</string>
     <string name="overlay_time_instant">Instantly</string>
     <string name="overlay_time_manual">Manual</string>
     <string name="overlay_time_seconds">After %1$ss</string>
@@ -76,9 +77,10 @@
     <string name="result_no_model_body">Download the language in the app\'s Language tab.</string>
     <string name="engine_ml_kit">ML Kit</string>
     <string name="engine_gemini">Gemini</string>
+    <string name="engine_groq">Groq</string>
     <string name="ai_fallback_no_key">No AI key set. Translated with ML Kit.</string>
     <string name="ai_fallback_invalid_key">AI key was rejected. Translated with ML Kit.</string>
-    <string name="ai_fallback_denied">This key can2019t use Gemini (account, region or age limit). Translated with ML Kit.</string>
+    <string name="ai_fallback_denied">This key can’t be used (account, region or age limit). Translated with ML Kit.</string>
     <string name="ai_fallback_busy">AI limit reached or server error. Translated with ML Kit.</string>
     <string name="ai_fallback_offline">AI unreachable (offline). Translated with ML Kit.</string>
     <string name="ai_fallback_failed">AI translation failed. Translated with ML Kit.</string>

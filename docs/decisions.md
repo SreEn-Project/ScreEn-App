@@ -396,3 +396,10 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 
 ## D-065. 정답률은 최근 10번 기준 (AD-22)
 - 누적 평균은 예전 오답이 계속 남아 오르기 어려워서, 단어당 10번을 넘으면 지난 기록을 9/10로 줄이고 새 결과를 더한다(열 2개 그대로, 마이그레이션 없음). 기존에 10번을 넘게 쌓인 값은 다음에 풀 때 10번 기준으로 줄어든다.
+
+## D-066. Groq를 두 번째 AI 엔진으로 (NA-13, #167)
+- Gemini와 같은 BYOK: 사용자가 Groq Console에서 받은 키(`gsk_...`)를 붙여 넣고, 앱이 기기에서 `https://api.groq.com/openai/v1/chat/completions`로 직접 요청한다(백엔드 없음). 키는 엔진마다 따로 Keystore AES-GCM으로 암호화해 기기에만 보관하고, 접근 PIN은 두 키가 같이 쓴다. 실패(키 없음 · 거부 · 한도 · 오프라인)는 기존 `FallbackTranslationEngine`으로 ML Kit 대체 + 안내.
+- **연령**: Groq Services Agreement가 "18세 이상"을 요구하므로 Gemini와 같은 18세 확인(FL-09)을 쓴다. 확인 전에는 Groq도 고를 수 없다.
+- **모델**: `llama-3.3-70b-versatile`을 먼저, 없으면(404 · model_decommissioned) `llama-3.1-8b-instant`. 이유: 한국어 · 일본어 번역은 70B가 8B보다 안정적이고, 8B는 한도가 넉넉한 예비.
+- 프롬프트(말투 · 용어집 포함)와 단어 사전(AD-02) 지시문은 Gemini와 같은 것을 쓰고, 캐시 키는 엔진 id가 달라 서로 섞이지 않는다.
+- Pigeon 키 API(`getApiKey` · `setApiKey` · `clearApiKey` · `testApiKey`)에 `EngineType` 인자를 추가했다.

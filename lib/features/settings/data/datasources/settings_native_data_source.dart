@@ -55,13 +55,16 @@ class SettingsNativeDataSource {
   Future<void> setGlossary(List<pigeon.GlossaryEntry> entries) =>
       _api.setGlossary(entries);
 
-  Future<String?> getApiKey() => _api.getApiKey();
+  Future<String?> getApiKey(pigeon.EngineType engine) => _api.getApiKey(engine);
 
-  Future<void> setApiKey(String apiKey) => _api.setApiKey(apiKey);
+  Future<void> setApiKey(pigeon.EngineType engine, String apiKey) =>
+      _api.setApiKey(engine, apiKey);
 
-  Future<void> clearApiKey() => _api.clearApiKey();
+  Future<void> clearApiKey(pigeon.EngineType engine) =>
+      _api.clearApiKey(engine);
 
-  Future<String?> testApiKey(String apiKey) => _api.testApiKey(apiKey);
+  Future<String?> testApiKey(pigeon.EngineType engine, String apiKey) =>
+      _api.testApiKey(engine, apiKey);
 
   Future<bool> isApiKeyPinEnabled() => _api.isApiKeyPinEnabled();
 

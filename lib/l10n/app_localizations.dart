@@ -638,6 +638,18 @@ abstract class AppLocalizations {
   /// **'More natural AI translation · API key needed'**
   String get engineGeminiDetail;
 
+  /// No description provided for @engineGroq.
+  ///
+  /// In en, this message translates to:
+  /// **'My Groq key'**
+  String get engineGroq;
+
+  /// No description provided for @engineGroqDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast AI translation (Llama) · API key needed'**
+  String get engineGroqDetail;
+
   /// No description provided for @engineNeedsKey.
   ///
   /// In en, this message translates to:
@@ -695,7 +707,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAiSetupDetail.
   ///
   /// In en, this message translates to:
-  /// **'Gemini API key'**
+  /// **'Gemini · Groq API keys'**
   String get settingsAiSetupDetail;
 
   /// No description provided for @apiKeyTitle.
@@ -775,6 +787,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rejected: {reason}'**
   String apiKeyTestFailed(String reason);
+
+  /// No description provided for @apiKeyHintGroq.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your Groq API key (gsk_...)'**
+  String get apiKeyHintGroq;
+
+  /// No description provided for @apiKeyIntroGroq.
+  ///
+  /// In en, this message translates to:
+  /// **'Get your own key from the Groq Console and paste it here. It is encrypted and stored only on this device. Translated text is sent to Groq; if anything fails, ML Kit takes over.'**
+  String get apiKeyIntroGroq;
+
+  /// No description provided for @apiKeyGetGroq.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a key from the Groq Console'**
+  String get apiKeyGetGroq;
 
   /// No description provided for @apiKeyGet.
   ///
@@ -905,7 +935,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiAgeDetail.
   ///
   /// In en, this message translates to:
-  /// **'Under the Gemini API terms, AI translation is only for people 18 or older. Confirm to turn it on.'**
+  /// **'Under the Gemini and Groq terms, AI translation is only for people 18 or older. Confirm to turn it on.'**
   String get aiAgeDetail;
 
   /// No description provided for @aiNoticeTitle.
@@ -917,7 +947,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiNoticeBody.
   ///
   /// In en, this message translates to:
-  /// **'When AI translation is on, the text read from your screen is sent to the AI provider you chose (Google Gemini). On the free tier, Google may use it to improve and review its services. Don\'t translate screens that show passwords or personal information.'**
+  /// **'When AI translation is on, the text read from your screen is sent to the AI provider you chose (Google Gemini or Groq). On the Gemini free tier, Google may use it to improve and review its services. Don\'t translate screens that show passwords or personal information.'**
   String get aiNoticeBody;
 
   /// No description provided for @aiOptionsTitle.

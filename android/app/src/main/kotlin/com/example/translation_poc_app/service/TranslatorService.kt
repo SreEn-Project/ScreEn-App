@@ -36,6 +36,8 @@ import com.example.translation_poc_app.translate.GeminiDictionary
 import com.example.translation_poc_app.translate.WordLookup
 import com.example.translation_poc_app.translate.WordLookupOutcome
 import com.example.translation_poc_app.translate.GeminiTranslationEngine
+import com.example.translation_poc_app.translate.GroqDictionary
+import com.example.translation_poc_app.translate.GroqTranslationEngine
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
 import com.example.translation_poc_app.translate.ModelDownloadPolicy
 import com.example.translation_poc_app.translate.TranslationEngine
@@ -163,15 +165,16 @@ class TranslatorService : LifecycleService() {
     }
 
     /**
-     * 설정(FL-06)에서 고른 번역 엔진 (NA-11): ML Kit(NA-12) 또는 Gemini(NA-13, 실패 시 ML Kit으로 대체).
+     * 설정(FL-06)에서 고른 번역 엔진 (NA-11): ML Kit(NA-12) 또는 Gemini · Groq(NA-13, 실패 시 ML Kit으로 대체).
      * 엔진이 추가되면 [Engine]별 분기만 늘리면 된다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
         val mlKit = mlKit()
         return when (settings.engine) {
             Engine.ML_KIT -> mlKit
-            // 설정이 연령 확인 전 Gemini를 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
-            Engine.GEMINI -> if (!settings.ageConfirmed) mlKit else FallbackTranslationEngine(GeminiTranslationEngine(geminiKeys), mlKit, ::notifyAiFallback)
+            // 설정이 연령 확인 전 AI 엔진을 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
+            Engine.GEMINI -> if (!settings.ageConfirmed) mlKit else FallbackTranslationEngine(GeminiTranslationEngine(keysFor(Engine.GEMINI)), mlKit, ::notifyAiFallback)
+            Engine.GROQ -> if (!settings.ageConfirmed) mlKit else FallbackTranslationEngine(GroqTranslationEngine(keysFor(Engine.GROQ)), mlKit, ::notifyAiFallback)
         }
     }
 
@@ -186,9 +189,14 @@ class TranslatorService : LifecycleService() {
      */
     private suspend fun lookupWord(target: WordTarget, targetLanguage: String): WordLookupOutcome {
         val settings = AppGraph.settingsRepository(this).current()
-        val useAi = settings.engine == Engine.GEMINI && settings.ageConfirmed &&
-            withContext(Dispatchers.IO) { !AppGraph.apiKeyStore(this@TranslatorService).get().isNullOrBlank() }
-        return WordLookup(mlKit(), if (useAi) GeminiDictionary(geminiKeys) else null)
+        val useAi = settings.engine.isAi && settings.ageConfirmed &&
+            withContext(Dispatchers.IO) { !AppGraph.apiKeyStore(this@TranslatorService).get(settings.engine).isNullOrBlank() }
+        val dictionary = when {
+            !useAi -> null
+            settings.engine == Engine.GROQ -> GroqDictionary(keysFor(Engine.GROQ))
+            else -> GeminiDictionary(keysFor(Engine.GEMINI))
+        }
+        return WordLookup(mlKit(), dictionary)
             .lookup(target.word, target.sentence, target.sourceLanguage, targetLanguage)
     }
 
@@ -211,7 +219,7 @@ class TranslatorService : LifecycleService() {
         Handler(Looper.getMainLooper()).post { toast.show(getString(message), ToastKind.INFO) }
     }
 
-    private val geminiKeys = ApiKeyProvider { AppGraph.apiKeyStore(this).get() }
+    private fun keysFor(engine: Engine) = ApiKeyProvider { AppGraph.apiKeyStore(this).get(engine) }
 
     /** 번역 결과를 기록에 남긴다 (NA-23). 실패해도 번역에는 영향이 없다. */
     private fun recordHistory(outcome: TranslationOutcome.Translated) {
@@ -246,9 +254,9 @@ class TranslatorService : LifecycleService() {
             sampleSignature = { region -> capturer?.captureSignature(region) },
             onStopRequested = { stopSelf() },
             onTranslated = ::recordHistory,
-            hasGeminiKey = {
+            hasAiKey = { engine ->
                 AppGraph.settingsRepository(this).current().ageConfirmed &&
-                    !AppGraph.apiKeyStore(this).get().isNullOrBlank()
+                    !AppGraph.apiKeyStore(this).get(engine).isNullOrBlank()
             },
             vocabulary = AppGraph.vocabularyRepository(this),
             lookupWord = ::lookupWord,

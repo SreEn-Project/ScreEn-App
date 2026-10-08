@@ -227,43 +227,48 @@ final class ChangeGlossary implements UseCase<void, List<GlossaryEntry>> {
 }
 
 /// 저장된 AI 번역 API 키 (NA-13). 없으면 null.
-final class GetApiKey implements NoParamsUseCase<String?> {
+final class GetApiKey implements UseCase<String?, EngineType> {
   const GetApiKey(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<String?> call() => _repository.getApiKey();
+  Future<String?> call(EngineType engine) => _repository.getApiKey(engine);
 }
 
+/// [SaveApiKey] · [TestApiKey] 입력: 어느 엔진의 키인지와 키 값.
+typedef ApiKeyParams = ({EngineType engine, String apiKey});
+
 /// AI 번역 API 키 저장 (NA-13). 공백은 걷어 낸다.
-final class SaveApiKey implements UseCase<void, String> {
+final class SaveApiKey implements UseCase<void, ApiKeyParams> {
   const SaveApiKey(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<void> call(String apiKey) => _repository.setApiKey(apiKey.trim());
+  Future<void> call(ApiKeyParams params) =>
+      _repository.setApiKey(params.engine, params.apiKey.trim());
 }
 
 /// AI 번역 API 키 삭제 (NA-13).
-final class ClearApiKey implements NoParamsUseCase<void> {
+final class ClearApiKey implements UseCase<void, EngineType> {
   const ClearApiKey(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<void> call() => _repository.clearApiKey();
+  Future<void> call(EngineType engine) => _repository.clearApiKey(engine);
 }
 
 /// 입력한 AI 번역 API 키를 실제로 호출해 본다 (NA-13). 성공이면 null, 실패면 이유.
-final class TestApiKey implements UseCase<String?, String> {
+final class TestApiKey implements UseCase<String?, ApiKeyParams> {
   const TestApiKey(this._repository);
 
   final SettingsRepository _repository;
 
   @override
-  Future<String?> call(String apiKey) => _repository.testApiKey(apiKey.trim());
+  Future<String?> call(ApiKeyParams params) =>
+      _repository.testApiKey(params.engine, params.apiKey.trim());
 }
 
 /// API 키 접근 PIN이 켜져 있는지 (NA-13).

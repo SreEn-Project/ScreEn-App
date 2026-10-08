@@ -171,7 +171,7 @@ class TranslationPipeline(
             val detectMs = lap()
             val engine = engineFor(current)
             // 말투 · 용어집은 AI 엔진에만 쓴다 (FL-11). ML Kit에는 넣지 않아 캐시도 나뉘지 않는다.
-            val style = if (current.engine == Engine.GEMINI) AiStyle(current.aiTone, current.glossary) else AiStyle.NONE
+            val style = if (current.engine.isAi) AiStyle(current.aiTone, current.glossary) else AiStyle.NONE
             val requests = TranslationAssembler.requests(detected, current.targetLanguage, style)
             val lineHeight = { block: OcrBlock -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } }
             val bounds = { block: OcrBlock ->

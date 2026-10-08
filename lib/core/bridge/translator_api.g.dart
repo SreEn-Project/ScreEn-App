@@ -97,8 +97,8 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
-/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini = 내 API 키 (NA-13).
-enum EngineType { mlKit, gemini }
+/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13).
+enum EngineType { mlKit, gemini, groq }
 
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
@@ -1295,7 +1295,7 @@ class SettingsHostApi {
   }
 
   /// 저장된 AI 번역 API 키 (NA-13). 없으면 null. 설정 화면에서 가려서 보여 주고 고치게 하려고 내보낸다.
-  Future<String?> getApiKey() async {
+  Future<String?> getApiKey(EngineType engine) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.getApiKey$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -1303,7 +1303,9 @@ class SettingsHostApi {
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[engine],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
@@ -1315,7 +1317,7 @@ class SettingsHostApi {
   }
 
   /// API 키를 Keystore로 암호화해 기기에만 저장한다.
-  Future<void> setApiKey(String apiKey) async {
+  Future<void> setApiKey(EngineType engine, String apiKey) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setApiKey$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -1324,7 +1326,7 @@ class SettingsHostApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[apiKey],
+      <Object?>[engine, apiKey],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -1335,7 +1337,7 @@ class SettingsHostApi {
     );
   }
 
-  Future<void> clearApiKey() async {
+  Future<void> clearApiKey(EngineType engine) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.clearApiKey$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -1343,7 +1345,9 @@ class SettingsHostApi {
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[engine],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
@@ -1353,8 +1357,8 @@ class SettingsHostApi {
     );
   }
 
-  /// 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 구글이 알려 준 이유(사람이 읽는 문장).
-  Future<String?> testApiKey(String apiKey) async {
+  /// 입력한 키로 아주 짧은 번역을 해 본다 (NA-13). 성공이면 null, 실패면 서비스가 알려 준 이유(사람이 읽는 문장).
+  Future<String?> testApiKey(EngineType engine, String apiKey) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.testApiKey$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -1363,7 +1367,7 @@ class SettingsHostApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[apiKey],
+      <Object?>[engine, apiKey],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

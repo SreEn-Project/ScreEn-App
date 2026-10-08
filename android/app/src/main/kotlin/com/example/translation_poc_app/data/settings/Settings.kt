@@ -1,7 +1,15 @@
 package com.example.translation_poc_app.data.settings
 
-/** 번역 엔진 (NA-11). ML_KIT = 기기 내 번역, GEMINI = 내 API 키 (NA-13). */
-enum class Engine { ML_KIT, GEMINI }
+/** 번역 엔진 (NA-11). ML_KIT = 기기 내 번역, GEMINI · GROQ = 내 API 키 (NA-13). */
+enum class Engine {
+    ML_KIT,
+    GEMINI,
+    GROQ,
+    ;
+
+    /** 사용자가 발급한 API 키가 있어야 쓰는 AI 엔진인가. 만 18세 확인(FL-09)도 필요하다. */
+    val isAi: Boolean get() = this != ML_KIT
+}
 
 /** 캡처 범위 (NA-06). */
 enum class CaptureRange { FULL_SCREEN, DRAG_REGION, FIXED_REGION }
