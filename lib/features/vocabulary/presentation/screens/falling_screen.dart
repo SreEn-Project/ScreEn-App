@@ -83,33 +83,39 @@ class _Setup extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l10n.fallDifficulty,
-                style: Theme.of(context).textTheme.labelLarge,
+              Row(
+                children: [
+                  Text(
+                    l10n.fallSpeed,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const Spacer(),
+                  Text(
+                    l10n.fallSpeedValue(state.speedScale.toStringAsFixed(1)),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
               ),
-              const SizedBox(height: AppTokens.space12),
-              AppSegmented<FallingDifficulty>(
-                values: FallingDifficulty.values,
-                selected: state.difficulty,
-                label: (d) => switch (d) {
-                  FallingDifficulty.easy => l10n.fallEasy,
-                  FallingDifficulty.normal => l10n.fallNormal,
-                  FallingDifficulty.hard => l10n.fallHard,
-                },
-                onChanged: model.setDifficulty,
+              const SizedBox(height: AppTokens.space8),
+              AppSlider(
+                value: state.speedScale,
+                min: 0.5,
+                max: 2.0,
+                divisions: 15,
+                onChanged: model.setSpeed,
               ),
-              const SizedBox(height: AppTokens.sectionGap),
-              Text(
-                l10n.fallTimeLimit,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: AppTokens.space12),
-              AppSegmented<int>(
-                values: const [0, 60, 120, 180],
-                selected: state.timeLimit,
-                label: (t) =>
-                    t == 0 ? l10n.fallNoLimit : l10n.fallMinutes(t ~/ 60),
-                onChanged: model.setTimeLimit,
+              Row(
+                children: [
+                  Text(
+                    l10n.fallSlow,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const Spacer(),
+                  Text(
+                    l10n.fallFast,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
               ),
             ],
           ),
@@ -259,23 +265,6 @@ class _PlayingState extends ConsumerState<_Playing>
                       child: AppBadge(label: l10n.fallCombo(game.combo)),
                     ),
                   const Spacer(),
-                  if (game.secondsLeft case final left?) ...[
-                    Icon(
-                      Symbols.timer_rounded,
-                      size: 18,
-                      color: left <= 10
-                          ? colors.error
-                          : colors.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: AppTokens.space4),
-                    Text(
-                      '${left ~/ 60}:${(left % 60).toString().padLeft(2, '0')}',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: left <= 10 ? colors.error : null,
-                      ),
-                    ),
-                    const SizedBox(width: AppTokens.space12),
-                  ],
                   for (var i = 0; i < game.maxLives; i++)
                     Padding(
                       padding: const EdgeInsets.only(left: AppTokens.space4),
