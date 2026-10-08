@@ -98,7 +98,7 @@ interface VocabularyDao {
     /** [pattern]은 LIKE 패턴 (빈 문자열이면 전부). [sort]는 [WordSort.code]. */
     @Query(
         "SELECT * FROM vocabulary_words WHERE wordbookId = :wordbookId AND " +
-            "(:pattern = '' OR word LIKE :pattern ESCAPE '\' OR meaning LIKE :pattern ESCAPE '\') " +
+            "(:pattern = '' OR word LIKE :pattern ESCAPE '\\' OR meaning LIKE :pattern ESCAPE '\\') " +
             "ORDER BY (CASE WHEN :sort = 2 THEN word END) COLLATE NOCASE ASC, " +
             "(CASE WHEN :sort = 1 THEN createdAt END) ASC, createdAt DESC, id DESC",
     )
