@@ -14,12 +14,16 @@ class AppHeader extends StatelessWidget {
     this.leading,
     this.trailing,
     this.showBack = true,
+    this.large = false,
   });
 
   final String title;
   final Widget? leading;
   final Widget? trailing;
   final bool showBack;
+
+  /// 제목과 아이콘 버튼을 키운다 (목록처럼 헤더가 화면의 중심인 곳).
+  final bool large;
 
   /// 제목 양옆으로 비워 두는 폭 (아이콘 버튼 하나가 들어가는 크기).
   static const double _sideSlot = 56;
@@ -35,7 +39,7 @@ class AppHeader extends StatelessWidget {
                 icon: Symbols.arrow_back_rounded,
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                 plain: true,
-                size: 44,
+                size: large ? 52 : 44,
                 onPressed: () => context.pop(),
               )
             : null);
@@ -49,13 +53,17 @@ class AppHeader extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: _sideSlot),
+              padding: EdgeInsets.symmetric(
+                horizontal: large ? _sideSlot + 8 : _sideSlot,
+              ),
               child: Text(
                 title,
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleLarge,
+                style: large
+                    ? theme.textTheme.headlineSmall
+                    : theme.textTheme.titleLarge,
               ),
             ),
             if (start != null)

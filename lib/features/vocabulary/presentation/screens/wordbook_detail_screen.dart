@@ -62,11 +62,12 @@ class WordbookDetailScreen extends ConsumerWidget {
           children: [
             AppHeader(
               title: name ?? l10n.vocabTitle,
+              large: true,
               trailing: AppIconButton(
                 icon: Symbols.add_rounded,
                 tooltip: l10n.vocabAddWord,
                 plain: true,
-                size: 44,
+                size: 52,
                 onPressed: () => _addWord(context, model),
               ),
             ),
