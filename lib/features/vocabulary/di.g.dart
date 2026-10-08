@@ -385,6 +385,53 @@ final class DeleteWordProvider
 
 String _$deleteWordHash() => r'6fb02d488bdf69cccf5de9d363aa3115510ab0a9';
 
+@ProviderFor(recordWordAnswers)
+final recordWordAnswersProvider = RecordWordAnswersProvider._();
+
+final class RecordWordAnswersProvider
+    extends
+        $FunctionalProvider<
+          RecordWordAnswers,
+          RecordWordAnswers,
+          RecordWordAnswers
+        >
+    with $Provider<RecordWordAnswers> {
+  RecordWordAnswersProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'recordWordAnswersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$recordWordAnswersHash();
+
+  @$internal
+  @override
+  $ProviderElement<RecordWordAnswers> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  RecordWordAnswers create(Ref ref) {
+    return recordWordAnswers(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RecordWordAnswers value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RecordWordAnswers>(value),
+    );
+  }
+}
+
+String _$recordWordAnswersHash() => r'6f94d16f0a20e989288bf0a86056be42cce344ad';
+
 @ProviderFor(setWordMemorized)
 final setWordMemorizedProvider = SetWordMemorizedProvider._();
 

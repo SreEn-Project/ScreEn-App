@@ -124,6 +124,9 @@ class VocabularyHostApiImpl(private val repository: VocabularyRepository) : Voca
 
     override suspend fun setMemorized(id: Long, memorized: Boolean) = repository.setMemorized(id, memorized)
 
+    override suspend fun recordAnswers(answers: List<WordAnswer>) =
+        repository.recordAnswers(answers.map { it.wordId to it.correct })
+
     override suspend fun saveWord(wordbookId: Long, input: VocabWordInput): Long? =
         repository.saveWord(
             wordbookId,

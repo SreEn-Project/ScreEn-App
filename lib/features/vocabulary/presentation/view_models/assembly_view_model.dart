@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../di.dart';
@@ -161,14 +163,14 @@ class AssemblyViewModel extends _$AssemblyViewModel {
     if (current == null || question == null || current.revealed) return;
     if (current.placed.isEmpty) return;
     final given = current.placed.map((id) => question.tile(id).text).join();
+    final result = AssemblyResult(question: question, given: given);
     state = AsyncData(
-      current.copyWith(
-        results: [
-          ...current.results,
-          AssemblyResult(question: question, given: given),
-        ],
-        revealed: true,
-      ),
+      current.copyWith(results: [...current.results, result], revealed: true),
+    );
+    unawaited(
+      ref.read(recordWordAnswersProvider)([
+        WordAnswer(question.wordId, correct: result.correct),
+      ]),
     );
   }
 

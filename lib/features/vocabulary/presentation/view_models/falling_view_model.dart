@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../di.dart';
@@ -105,5 +107,9 @@ class FallingViewModel extends _$FallingViewModel {
     final current = state.value;
     if (current == null || current.phase != FallingPhase.playing) return;
     state = AsyncData(current.copyWith(phase: FallingPhase.over));
+    final game = current.game;
+    if (game != null) {
+      unawaited(ref.read(recordWordAnswersProvider)(game.answers));
+    }
   }
 }

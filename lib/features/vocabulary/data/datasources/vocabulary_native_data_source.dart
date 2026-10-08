@@ -32,6 +32,9 @@ class VocabularyNativeDataSource {
   Future<void> setMemorized(int id, bool memorized) =>
       _api.setMemorized(id, memorized);
 
+  Future<void> recordAnswers(List<pigeon.WordAnswer> answers) =>
+      _api.recordAnswers(answers);
+
   Future<int?> saveWord(int wordbookId, pigeon.VocabWordInput input) =>
       _api.saveWord(wordbookId, input);
 }

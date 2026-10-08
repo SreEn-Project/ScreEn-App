@@ -53,7 +53,7 @@ final class AssemblyViewModelProvider
   }
 }
 
-String _$assemblyViewModelHash() => r'0e52a424be307de810de98c2c6bc86e18be084de';
+String _$assemblyViewModelHash() => r'ce7125fef6e2f7ab65d360640b033d578f2dff9e';
 
 /// 단어 조립 (AD-13): 방식 고르기 → 한 문제씩 조립하고 확인 → 점수와 틀린 단어.
 

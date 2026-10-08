@@ -56,6 +56,24 @@ class WordCard extends StatelessWidget {
                     color: colors.onSurfaceVariant,
                   ),
                 ),
+                if (word.accuracy case final accuracy?) ...[
+                  const SizedBox(height: AppTokens.space8),
+                  Row(
+                    children: [
+                      AppBadge(
+                        label: l10n.vocabAccuracy((accuracy * 100).round()),
+                      ),
+                      const SizedBox(width: AppTokens.space8),
+                      Text(
+                        l10n.vocabAccuracyDetail(
+                          word.correctCount,
+                          word.attemptCount,
+                        ),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

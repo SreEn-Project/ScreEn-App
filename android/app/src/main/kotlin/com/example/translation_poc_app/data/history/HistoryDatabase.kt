@@ -89,12 +89,12 @@ interface HistoryDao {
     suspend fun trim(keep: Int)
 }
 
-/** 버전 2: 단어장 표 추가 (AD-03). 기존 표는 그대로라 자동 마이그레이션. */
+/** 버전 2: 단어장 표 추가 (AD-03). 버전 3: 단어별 정답 · 시도 횟수 열 추가 (AD-18). 둘 다 자동 마이그레이션. */
 @Database(
     entities = [TranslationRecord::class, WordbookEntity::class, WordEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun history(): HistoryDao

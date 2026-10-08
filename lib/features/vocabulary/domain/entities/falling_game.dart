@@ -99,6 +99,9 @@ class FallingGame {
   /// 방금 [submit]으로 파괴한 블록 (효과를 그릴 위치용).
   FallingBlock? lastDestroyed;
 
+  /// 이번 판에서 단어별로 맞히거나 놓친 기록 (끝나면 정답률에 쌓는다, AD-18).
+  final List<WordAnswer> answers = [];
+
   /// 직전 [update]에서 바닥에 떨어진 블록들.
   final List<FallingBlock> landedNow = [];
   int _nextBlockId = 0;
@@ -182,6 +185,7 @@ class FallingGame {
     for (final b in landed) {
       blocks.remove(b);
       missedIds.add(b.wordId);
+      answers.add(WordAnswer(b.wordId, correct: false));
       lives--;
       combo = 0;
     }
@@ -210,6 +214,7 @@ class FallingGame {
     if (hit == null) return false;
     blocks.remove(hit);
     lastDestroyed = hit;
+    answers.add(WordAnswer(hit.wordId, correct: true));
     combo++;
     if (combo > bestCombo) bestCombo = combo;
     destroyed++;

@@ -263,6 +263,8 @@ class FakeVocabularyRepository implements VocabularyRepository {
       wordCount: inBook.length,
       memorizedCount: inBook.where((w) => w.memorized).length,
       createdAt: book.createdAt,
+      correctCount: inBook.fold(0, (a, w) => a + w.correctCount),
+      attemptCount: inBook.fold(0, (a, w) => a + w.attemptCount),
     );
   }
 
@@ -335,6 +337,8 @@ class FakeVocabularyRepository implements VocabularyRepository {
         WordSort.alphabetical => a.word.toLowerCase().compareTo(
           b.word.toLowerCase(),
         ),
+        WordSort.accuracyHigh ||
+        WordSort.accuracyLow => b.savedAt.compareTo(a.savedAt),
       },
     );
     return found;
@@ -344,22 +348,29 @@ class FakeVocabularyRepository implements VocabularyRepository {
   Future<VocabularyWord?> word(int id) async =>
       savedWords.where((w) => w.id == id).firstOrNull;
 
-  VocabularyWord _copy(VocabularyWord w, {int? wordbookId, bool? memorized}) =>
-      VocabularyWord(
-        id: w.id,
-        wordbookId: wordbookId ?? w.wordbookId,
-        word: w.word,
-        meaning: w.meaning,
-        pronunciation: w.pronunciation,
-        partOfSpeech: w.partOfSpeech,
-        contextMeaning: w.contextMeaning,
-        sentence: w.sentence,
-        sourceApp: w.sourceApp,
-        sourceLanguage: w.sourceLanguage,
-        targetLanguage: w.targetLanguage,
-        memorized: memorized ?? w.memorized,
-        savedAt: w.savedAt,
-      );
+  VocabularyWord _copy(
+    VocabularyWord w, {
+    int? wordbookId,
+    bool? memorized,
+    int? correctCount,
+    int? attemptCount,
+  }) => VocabularyWord(
+    id: w.id,
+    wordbookId: wordbookId ?? w.wordbookId,
+    word: w.word,
+    meaning: w.meaning,
+    pronunciation: w.pronunciation,
+    partOfSpeech: w.partOfSpeech,
+    contextMeaning: w.contextMeaning,
+    sentence: w.sentence,
+    sourceApp: w.sourceApp,
+    sourceLanguage: w.sourceLanguage,
+    targetLanguage: w.targetLanguage,
+    memorized: memorized ?? w.memorized,
+    savedAt: w.savedAt,
+    correctCount: correctCount ?? w.correctCount,
+    attemptCount: attemptCount ?? w.attemptCount,
+  );
 
   @override
   Future<void> moveWord(int id, int wordbookId) async {
@@ -383,6 +394,24 @@ class FakeVocabularyRepository implements VocabularyRepository {
   Future<void> setMemorized(int id, bool memorized) async {
     final index = savedWords.indexWhere((w) => w.id == id);
     savedWords[index] = _copy(savedWords[index], memorized: memorized);
+  }
+
+  /// 테스트에서 확인하려고 받은 결과를 모아 둔다.
+  final List<WordAnswer> recorded = [];
+
+  @override
+  Future<void> recordAnswers(List<WordAnswer> answers) async {
+    recorded.addAll(answers);
+    for (final a in answers) {
+      final i = savedWords.indexWhere((w) => w.id == a.wordId);
+      if (i < 0) continue;
+      final w = savedWords[i];
+      savedWords[i] = _copy(
+        w,
+        correctCount: w.correctCount + (a.correct ? 1 : 0),
+        attemptCount: w.attemptCount + 1,
+      );
+    }
   }
 
   @override

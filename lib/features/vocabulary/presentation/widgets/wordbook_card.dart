@@ -27,6 +27,8 @@ class WordbookCard extends StatelessWidget {
     final theme = Theme.of(context);
     final counts = [
       l10n.vocabWordCount(book.wordCount),
+      if (book.accuracy case final accuracy?)
+        l10n.vocabAccuracy((accuracy * 100).round()),
       if (book.memorizedCount > 0)
         l10n.vocabMemorizedCount(book.memorizedCount),
     ].join(' · ');

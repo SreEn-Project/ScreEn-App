@@ -11,23 +11,27 @@ class WordbookDetailState {
   const WordbookDetailState({
     this.query = '',
     this.sort = WordSort.newest,
+    this.filter = WordFilter.all,
     this.words = const [],
   });
 
   final String query;
   final WordSort sort;
+  final WordFilter filter;
   final List<VocabularyWord> words;
 
   /// 검색어를 걸어서 비어 보이는 상태인지 (단어장이 비어 있는 것과 구분해 안내하려고).
-  bool get filtered => query.trim().isNotEmpty;
+  bool get filtered => query.trim().isNotEmpty || filter != WordFilter.all;
 
   WordbookDetailState copyWith({
     String? query,
     WordSort? sort,
+    WordFilter? filter,
     List<VocabularyWord>? words,
   }) => WordbookDetailState(
     query: query ?? this.query,
     sort: sort ?? this.sort,
+    filter: filter ?? this.filter,
     words: words ?? this.words,
   );
 }
@@ -51,6 +55,9 @@ class WordbookDetailViewModel extends _$WordbookDetailViewModel {
 
   Future<void> setSort(WordSort sort) => _reload(_current.copyWith(sort: sort));
 
+  Future<void> setFilter(WordFilter filter) =>
+      _reload(_current.copyWith(filter: filter));
+
   /// 단어 상세에서 지우거나 옮기고 돌아왔을 때 등, 조건은 그대로 두고 다시 읽는다.
   Future<void> refresh() => _reload(_current);
 
@@ -59,7 +66,12 @@ class WordbookDetailViewModel extends _$WordbookDetailViewModel {
     // 목록은 그대로 두고 조건만 먼저 반영한다 (입력이 끊기지 않게).
     state = AsyncData(next);
     final words = await ref.read(getWordsProvider)(
-      GetWordsParams(wordbookId, query: next.query, sort: next.sort),
+      GetWordsParams(
+        wordbookId,
+        query: next.query,
+        sort: next.sort,
+        filter: next.filter,
+      ),
     );
     if (request != _request) return;
     state = AsyncData(next.copyWith(words: words));
@@ -114,5 +126,7 @@ class WordbookDetailViewModel extends _$WordbookDetailViewModel {
         targetLanguage: word.targetLanguage,
         memorized: memorized,
         savedAt: word.savedAt,
+        correctCount: word.correctCount,
+        attemptCount: word.attemptCount,
       );
 }

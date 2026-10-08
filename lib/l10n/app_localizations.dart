@@ -1418,6 +1418,78 @@ abstract class AppLocalizations {
   /// **'A–Z'**
   String get vocabSortAlphabetical;
 
+  /// No description provided for @vocabSortAccuracyHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy: high to low'**
+  String get vocabSortAccuracyHigh;
+
+  /// No description provided for @vocabSortAccuracyLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy: low to high'**
+  String get vocabSortAccuracyLow;
+
+  /// No description provided for @vocabSortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get vocabSortLabel;
+
+  /// No description provided for @vocabFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get vocabFilterLabel;
+
+  /// No description provided for @vocabFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get vocabFilterAll;
+
+  /// No description provided for @vocabFilterNotStudied.
+  ///
+  /// In en, this message translates to:
+  /// **'Not studied yet'**
+  String get vocabFilterNotStudied;
+
+  /// No description provided for @vocabFilterLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Under 50%'**
+  String get vocabFilterLow;
+
+  /// No description provided for @vocabFilterMid.
+  ///
+  /// In en, this message translates to:
+  /// **'50-80%'**
+  String get vocabFilterMid;
+
+  /// No description provided for @vocabFilterHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'80% or more'**
+  String get vocabFilterHigh;
+
+  /// No description provided for @vocabAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% correct'**
+  String vocabAccuracy(int percent);
+
+  /// No description provided for @vocabAccuracyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{correct}/{attempt}'**
+  String vocabAccuracyDetail(int correct, int attempt);
+
+  /// No description provided for @vocabBookAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall {percent}% correct ({correct}/{attempt})'**
+  String vocabBookAccuracy(int percent, int correct, int attempt);
+
   /// No description provided for @vocabNoWords.
   ///
   /// In en, this message translates to:

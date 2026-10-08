@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../di.dart';
@@ -124,14 +126,15 @@ class WordTestViewModel extends _$WordTestViewModel {
     final current = state.value;
     final question = current?.current;
     if (current == null || question == null || current.revealed) return;
+    final given = WordTestAnswer(question: question, answer: answer);
     state = AsyncData(
-      current.copyWith(
-        answers: [
-          ...current.answers,
-          WordTestAnswer(question: question, answer: answer),
-        ],
-        revealed: true,
-      ),
+      current.copyWith(answers: [...current.answers, given], revealed: true),
+    );
+    // 단어별 정답률에 쌓는다 (AD-18).
+    unawaited(
+      ref.read(recordWordAnswersProvider)([
+        WordAnswer(question.wordId, correct: given.correct),
+      ]),
     );
   }
 
