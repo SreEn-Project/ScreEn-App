@@ -225,16 +225,40 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
     final creating = _creating(books);
     final selectedId = _effectiveBookId(books);
 
-    Widget field(TextEditingController c, String hint, {int lines = 1}) =>
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppTokens.space12),
-          child: AppTextField(
+    Widget field(
+      TextEditingController c,
+      String hint, {
+      int lines = 1,
+      _Option? option,
+    }) => Padding(
+      padding: const EdgeInsets.only(bottom: AppTokens.space12),
+      child: Stack(
+        children: [
+          AppTextField(
             controller: c,
             hint: hint,
             maxLines: lines,
             onChanged: (_) => setState(() => _failed = false),
           ),
-        );
+          // 추가했던 선택 항목을 비우고 다시 접는다 (추가하기 전 상태로).
+          if (option != null)
+            Positioned(
+              top: 0,
+              right: 4,
+              child: AppIconButton(
+                icon: Symbols.close_rounded,
+                tooltip: l10n.vocabOptRemove,
+                plain: true,
+                size: 40,
+                onPressed: () => setState(() {
+                  c.clear();
+                  _shown.remove(option);
+                }),
+              ),
+            ),
+        ],
+      ),
+    );
 
     final saved = _savedBookName;
     return SafeArea(
@@ -292,6 +316,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                                 _controllerOf(o),
                                 o.hint(l10n),
                                 lines: o == _Option.sentence ? 3 : 1,
+                                option: o,
                               ),
                           if (_shown.length < _Option.values.length)
                             Padding(

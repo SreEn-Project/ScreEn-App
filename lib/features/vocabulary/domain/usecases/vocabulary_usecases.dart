@@ -294,10 +294,20 @@ final class CreateLineMatchGame
 }
 
 class CreateFallingGameParams {
-  const CreateFallingGameParams(this.wordbookId, this.mode, {this.random});
+  const CreateFallingGameParams(
+    this.wordbookId,
+    this.mode, {
+    this.random,
+    this.difficulty = FallingDifficulty.normal,
+    this.timeLimit = 0,
+  });
 
   final int wordbookId;
   final FallingMode mode;
+  final FallingDifficulty difficulty;
+
+  /// 제한 시간(초), 0이면 없음.
+  final int timeLimit;
 
   /// 테스트에서 순서를 고정하려고 바꿔 끼운다.
   final Random? random;
@@ -314,7 +324,13 @@ final class CreateFallingGame
   Future<FallingGame?> call(CreateFallingGameParams params) async {
     final words = await _repository.words(params.wordbookId);
     if (words.isEmpty) return null;
-    return FallingGame(words: words, mode: params.mode, random: params.random);
+    return FallingGame(
+      words: words,
+      mode: params.mode,
+      random: params.random,
+      difficulty: params.difficulty,
+      timeLimit: params.timeLimit,
+    );
   }
 }
 

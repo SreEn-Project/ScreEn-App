@@ -806,6 +806,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabOptSentence => 'Example';
 
   @override
+  String get vocabOptRemove => 'Remove';
+
+  @override
   String get vocabSaveTo => 'Save to';
 
   @override
@@ -992,6 +995,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fallSend => 'Send';
 
   @override
+  String get fallDifficulty => 'Difficulty';
+
+  @override
+  String get fallEasy => 'Easy';
+
+  @override
+  String get fallNormal => 'Normal';
+
+  @override
+  String get fallHard => 'Hard';
+
+  @override
+  String get fallTimeLimit => 'Time limit';
+
+  @override
+  String get fallNoLimit => 'None';
+
+  @override
+  String fallMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
   String fallCombo(int count) {
     return '$count combo';
   }
@@ -1126,7 +1152,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get testCorrect => 'Correct!';
 
   @override
-  String get testWrongTitle => 'Not quite';
+  String get testWrongTitle => 'Incorrect';
 
   @override
   String get testAnswerLabel => 'Answer';

@@ -11,6 +11,17 @@ enum FallingMode {
   spelling,
 }
 
+/// 하강형 난이도 (AD-17): 낙하 속도와 블록이 나오는 간격에 곱한다.
+enum FallingDifficulty {
+  easy(0.7),
+  normal(1.0),
+  hard(1.45);
+
+  const FallingDifficulty(this.factor);
+
+  final double factor;
+}
+
 /// 떨어지는 블록 하나 (AD-12).
 class FallingBlock {
   FallingBlock({
@@ -45,6 +56,8 @@ class FallingGame {
     required this.mode,
     Random? random,
     this.maxLives = 3,
+    this.difficulty = FallingDifficulty.normal,
+    this.timeLimit = 0,
   }) : _random = random ?? Random(),
        lives = maxLives {
     assert(words.isNotEmpty);
@@ -62,6 +75,13 @@ class FallingGame {
   final FallingMode mode;
   final int maxLives;
   final Random _random;
+  final FallingDifficulty difficulty;
+
+  /// 제한 시간(초). 0이면 목숨이 다 떨어질 때까지.
+  final int timeLimit;
+
+  /// 지금까지 흐른 시간(초).
+  double elapsed = 0;
 
   final List<FallingBlock> blocks = [];
   final List<VocabularyWord> _queue = [];
@@ -84,7 +104,13 @@ class FallingGame {
   int _nextBlockId = 0;
   double _untilSpawn = 0.6;
 
-  bool get over => lives <= 0;
+  bool get timeUp => timeLimit > 0 && elapsed >= timeLimit;
+
+  bool get over => lives <= 0 || timeUp;
+
+  /// 남은 시간(초, 올림). 제한이 없으면 null.
+  int? get secondsLeft =>
+      timeLimit == 0 ? null : (timeLimit - elapsed).ceil().clamp(0, timeLimit);
 
   List<VocabularyWord> get missedWords => [
     for (final w in words)
@@ -92,9 +118,11 @@ class FallingGame {
   ];
 
   /// 진행할수록 빨라지는 낙하 속도 (화면 높이 / 초).
-  double get speed => baseSpeed * min(maxSpeedFactor, 1 + destroyed * 0.06);
+  double get speed =>
+      baseSpeed * difficulty.factor * min(maxSpeedFactor, 1 + destroyed * 0.06);
 
-  double get _spawnInterval => max(1.1, 2.6 - destroyed * 0.08);
+  double get _spawnInterval =>
+      max(1.1, 2.6 - destroyed * 0.08) / difficulty.factor;
 
   void _refill() => _queue
     ..addAll(words)
@@ -145,6 +173,7 @@ class FallingGame {
   void update(double seconds) {
     landedNow.clear();
     if (over) return;
+    elapsed += seconds;
     for (final b in blocks) {
       b.y += speed * seconds;
     }

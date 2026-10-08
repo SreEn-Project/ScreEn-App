@@ -82,6 +82,14 @@ void main() {
     expect(fields, findsNWidgets(3));
     expect(find.text('발음'), findsNothing); // 펼친 항목은 칩에서 빠진다.
     await tester.enterText(fields.at(2), '/ˈæp.əl/');
+    // 추가한 항목은 ×로 비우고 접어 추가하기 전으로 돌릴 수 있다.
+    await tester.tap(find.byTooltip('빼기'));
+    await tester.pumpAndSettle();
+    expect(fields, findsNWidgets(2));
+    expect(find.text('발음'), findsOneWidget);
+    await tester.tap(find.text('발음'));
+    await tester.pumpAndSettle();
+    await tester.enterText(fields.at(2), '/ˈæp.əl/');
     await tester.pump();
     await tester.tap(find.text('저장').last);
     await tester.pump(const Duration(milliseconds: 200));
