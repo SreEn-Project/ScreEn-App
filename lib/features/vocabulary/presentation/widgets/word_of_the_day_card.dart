@@ -32,13 +32,13 @@ class WordOfTheDayCard extends ConsumerWidget {
           ? colors.primaryContainer
           : isPicked
           ? colors.errorContainer
-          : null;
+          : colors.surfaceContainerHigh;
       return Padding(
         padding: const EdgeInsets.only(bottom: AppTokens.space8),
         child: AppCard(
           onTap: state.answered ? null : () => model.answer(text),
           color: fill,
-          shadow: fill == null,
+          shadow: false,
           radius: AppTokens.radiusInput,
           padding: const EdgeInsets.symmetric(
             horizontal: AppTokens.rowPaddingH,
