@@ -56,6 +56,13 @@ class VocabularyRepository(
         return id.takeIf { it != -1L }
     }
 
+    /** 저장된 단어의 내용을 고친다. 비어 있는 단어 · 뜻이거나 같은 단어장의 다른 단어와 겹치면 false. */
+    suspend fun updateWord(id: Long, draft: WordDraft): Boolean {
+        val current = dao.word(id) ?: return false
+        val entity = entityOf(current.wordbookId, draft, current.createdAt) ?: return false
+        return dao.editWord(id, entity)
+    }
+
     suspend fun moveWord(id: Long, wordbookId: Long) = dao.moveOrMerge(id, wordbookId)
 
     suspend fun deleteWord(id: Long) = dao.deleteWord(id)

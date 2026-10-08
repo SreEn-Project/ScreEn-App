@@ -72,6 +72,18 @@ class VocabularyWord {
   /// 정답률 0~1. 아직 푼 적이 없으면 null.
   double? get accuracy =>
       attemptCount == 0 ? null : correctCount / attemptCount;
+
+  /// 수정 시트에 채울 내용.
+  WordDraft toDraft() => WordDraft(
+    word: word,
+    meaning: meaning,
+    pronunciation: pronunciation,
+    partOfSpeech: partOfSpeech,
+    contextMeaning: contextMeaning,
+    sentence: sentence,
+    sourceLanguage: sourceLanguage,
+    targetLanguage: targetLanguage,
+  );
 }
 
 /// 단어 목록 정렬 (AD-05).

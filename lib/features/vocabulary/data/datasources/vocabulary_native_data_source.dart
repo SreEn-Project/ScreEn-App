@@ -37,4 +37,7 @@ class VocabularyNativeDataSource {
 
   Future<int?> saveWord(int wordbookId, pigeon.VocabWordInput input) =>
       _api.saveWord(wordbookId, input);
+
+  Future<bool> updateWord(int id, pigeon.VocabWordInput input) =>
+      _api.updateWord(id, input);
 }

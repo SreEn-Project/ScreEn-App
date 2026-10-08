@@ -141,6 +141,21 @@ class VocabularyHostApiImpl(private val repository: VocabularyRepository) : Voca
                 targetLanguage = input.targetLanguage,
             ),
         )
+
+    override suspend fun updateWord(id: Long, input: VocabWordInput): Boolean =
+        repository.updateWord(
+            id,
+            WordDraft(
+                word = input.word,
+                meaning = input.meaning,
+                pronunciation = input.pronunciation,
+                partOfSpeech = input.partOfSpeech,
+                contextMeaning = input.contextMeaning,
+                sentence = input.sentence,
+                sourceLanguage = input.sourceLanguage,
+                targetLanguage = input.targetLanguage,
+            ),
+        )
 }
 
 /** 서비스 상태 조회 · 시작 · 중지 (NA-01, NA-02). */

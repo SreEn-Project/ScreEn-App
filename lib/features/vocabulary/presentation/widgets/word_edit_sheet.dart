@@ -14,18 +14,24 @@ import 'wordbook_selector.dart';
 /// 단어 편집 시트 (AD-03): 단어장에 저장하기 전에 단어 · 뜻 · 발음 등을 고친다.
 /// 직접 추가 · 번역 기록에서 추가가 같이 쓴다. 저장하면 단어장 이름을 돌려주고, 닫으면 null.
 /// [wordbookId]를 주면 그 단어장이 미리 골라진다.
+/// [editingId]를 주면 저장된 그 단어를 고치는 모드다: 단어장 선택 없이, 정답률 등 기록은 유지한 채 내용만 바꾼다.
 Future<String?> showWordEditSheet(
   BuildContext context, {
   required String title,
   required WordDraft initial,
   int? wordbookId,
+  int? editingId,
 }) {
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) =>
-        WordEditSheet(title: title, initial: initial, wordbookId: wordbookId),
+    builder: (_) => WordEditSheet(
+      title: title,
+      initial: initial,
+      wordbookId: wordbookId,
+      editingId: editingId,
+    ),
   );
 }
 
@@ -57,11 +63,15 @@ class WordEditSheet extends ConsumerStatefulWidget {
     required this.title,
     required this.initial,
     this.wordbookId,
+    this.editingId,
   });
 
   final String title;
   final WordDraft initial;
   final int? wordbookId;
+
+  /// 저장된 단어를 고칠 때 그 단어 id.
+  final int? editingId;
 
   @override
   ConsumerState<WordEditSheet> createState() => _WordEditSheetState();
@@ -146,8 +156,11 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
     });
   }
 
+  bool get _editing => widget.editingId != null;
+
   bool _canSave(List<Wordbook> books) {
     if (_word.text.trim().isEmpty || _meaning.text.trim().isEmpty) return false;
+    if (_editing) return !_busy;
     final hasBook = _creating(books)
         ? _newBookName.text.trim().isNotEmpty
         : books.any((b) => b.id == _effectiveBookId(books));
@@ -167,12 +180,40 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
     return text.isEmpty ? null : text;
   }
 
+  WordDraft _draft() => WordDraft(
+    word: _word.text.trim(),
+    meaning: _meaning.text.trim(),
+    pronunciation: _blankToNull(_pronunciation),
+    partOfSpeech: _blankToNull(_partOfSpeech),
+    contextMeaning: _blankToNull(_contextMeaning),
+    sentence: _blankToNull(_sentence),
+    sourceLanguage: widget.initial.sourceLanguage,
+    targetLanguage: widget.initial.targetLanguage,
+  );
+
   Future<void> _save(List<Wordbook> books) async {
     if (!_canSave(books)) return;
     setState(() {
       _busy = true;
       _failed = false;
     });
+    if (_editing) {
+      final ok = await ref
+          .read(wordEditViewModelProvider.notifier)
+          .update(widget.editingId!, _draft());
+      if (!mounted) return;
+      if (!ok) {
+        setState(() {
+          _busy = false;
+          _failed = true;
+        });
+        return;
+      }
+      setState(() => _savedBookName = '');
+      await Future<void>.delayed(const Duration(milliseconds: 900));
+      if (mounted) Navigator.of(context).pop('');
+      return;
+    }
     final booksModel = ref.read(wordbooksViewModelProvider.notifier);
     int? bookId;
     String? bookName;
@@ -188,19 +229,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
         bookId != null &&
         await ref
             .read(wordEditViewModelProvider.notifier)
-            .save(
-              bookId,
-              WordDraft(
-                word: _word.text.trim(),
-                meaning: _meaning.text.trim(),
-                pronunciation: _blankToNull(_pronunciation),
-                partOfSpeech: _blankToNull(_partOfSpeech),
-                contextMeaning: _blankToNull(_contextMeaning),
-                sentence: _blankToNull(_sentence),
-                sourceLanguage: widget.initial.sourceLanguage,
-                targetLanguage: widget.initial.targetLanguage,
-              ),
-            );
+            .save(bookId, _draft());
     if (!mounted) return;
     if (!saved) {
       setState(() {
@@ -280,7 +309,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                     const IconBadge(icon: Symbols.check_rounded, size: 56),
                     const SizedBox(height: AppTokens.space16),
                     Text(
-                      l10n.vocabSavedTo(saved),
+                      _editing ? l10n.vocabEdited : l10n.vocabSavedTo(saved),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleLarge,
                     ),
@@ -340,43 +369,45 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: AppTokens.space4),
-                    Text(
-                      l10n.vocabSaveTo,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                    if (!_editing) ...[
+                      const SizedBox(height: AppTokens.space4),
+                      Text(
+                        l10n.vocabSaveTo,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppTokens.space8),
-                    WordbookSelector(
-                      label: creating
-                          ? l10n.vocabNewBook
-                          : books
-                                    .where((b) => b.id == selectedId)
-                                    .firstOrNull
-                                    ?.name ??
-                                '',
-                      count: creating
-                          ? null
-                          : books
-                                .where((b) => b.id == selectedId)
-                                .firstOrNull
-                                ?.wordCount,
-                      onTap: () => _pickBook(books, creating, selectedId),
-                    ),
-                    if (creating) ...[
-                      const SizedBox(height: AppTokens.space12),
-                      AppTextField(
-                        controller: _newBookName,
-                        hint: l10n.vocabNameHint,
-                        maxLength: 30,
-                        onChanged: (_) => setState(() {}),
+                      const SizedBox(height: AppTokens.space8),
+                      WordbookSelector(
+                        label: creating
+                            ? l10n.vocabNewBook
+                            : books
+                                      .where((b) => b.id == selectedId)
+                                      .firstOrNull
+                                      ?.name ??
+                                  '',
+                        count: creating
+                            ? null
+                            : books
+                                  .where((b) => b.id == selectedId)
+                                  .firstOrNull
+                                  ?.wordCount,
+                        onTap: () => _pickBook(books, creating, selectedId),
                       ),
+                      if (creating) ...[
+                        const SizedBox(height: AppTokens.space12),
+                        AppTextField(
+                          controller: _newBookName,
+                          hint: l10n.vocabNameHint,
+                          maxLength: 30,
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ],
                     ],
                     if (_failed) ...[
                       const SizedBox(height: AppTokens.space12),
                       Text(
-                        l10n.vocabSaveFailed,
+                        _editing ? l10n.vocabEditFailed : l10n.vocabSaveFailed,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.error,
                         ),

@@ -519,6 +519,47 @@ final class SaveWordProvider
 
 String _$saveWordHash() => r'05f95ee736c1fe0c3d4d163be24754547a0f98f7';
 
+@ProviderFor(updateWord)
+final updateWordProvider = UpdateWordProvider._();
+
+final class UpdateWordProvider
+    extends $FunctionalProvider<UpdateWord, UpdateWord, UpdateWord>
+    with $Provider<UpdateWord> {
+  UpdateWordProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'updateWordProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$updateWordHash();
+
+  @$internal
+  @override
+  $ProviderElement<UpdateWord> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UpdateWord create(Ref ref) {
+    return updateWord(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UpdateWord value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UpdateWord>(value),
+    );
+  }
+}
+
+String _$updateWordHash() => r'7e9f3a6ad30b080ba067d88ccf68b09d24a3ac9e';
+
 @ProviderFor(createWordTest)
 final createWordTestProvider = CreateWordTestProvider._();
 

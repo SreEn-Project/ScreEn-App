@@ -1836,6 +1836,11 @@ interface VocabularyHostApi {
    * 저장한 단어의 id를 돌려준다.
    */
   suspend fun saveWord(wordbookId: Long, input: VocabWordInput): Long?
+  /**
+   * 저장된 단어의 내용(단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문)을 고친다. 외운 표시 · 정답률 · 저장 시각 · 언어는 유지한다.
+   * 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
+   */
+  suspend fun updateWord(id: Long, input: VocabWordInput): Boolean
 
   companion object {
     /** The codec used by VocabularyHostApi. */
@@ -2054,6 +2059,26 @@ interface VocabularyHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 listOf(api.saveWord(wordbookIdArg, inputArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.updateWord$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val inputArg = args[1] as VocabWordInput
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.updateWord(idArg, inputArg))
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
               }

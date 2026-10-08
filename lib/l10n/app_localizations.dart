@@ -1682,6 +1682,24 @@ abstract class AppLocalizations {
   /// **'Saved to ‘{name}’'**
   String vocabSavedTo(String name);
 
+  /// No description provided for @vocabEditWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit word'**
+  String get vocabEditWord;
+
+  /// No description provided for @vocabEdited.
+  ///
+  /// In en, this message translates to:
+  /// **'Word updated'**
+  String get vocabEdited;
+
+  /// No description provided for @vocabEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update. Check whether this word already exists in the wordbook'**
+  String get vocabEditFailed;
+
   /// No description provided for @vocabSaveFailed.
   ///
   /// In en, this message translates to:

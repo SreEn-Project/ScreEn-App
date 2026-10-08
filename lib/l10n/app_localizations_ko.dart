@@ -842,6 +842,15 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get vocabEditWord => '단어 수정';
+
+  @override
+  String get vocabEdited => '단어를 수정했어요';
+
+  @override
+  String get vocabEditFailed => '수정하지 못했어요. 같은 단어가 이미 있는지 확인해 주세요';
+
+  @override
   String get vocabSaveFailed => '저장하지 못했어요. 단어와 뜻을 확인해 주세요';
 
   @override

@@ -402,6 +402,11 @@ abstract class VocabularyHostApi {
   /// 저장한 단어의 id를 돌려준다.
   @async
   int? saveWord(int wordbookId, VocabWordInput input);
+
+  /// 저장된 단어의 내용(단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문)을 고친다. 외운 표시 · 정답률 · 저장 시각 · 언어는 유지한다.
+  /// 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
+  @async
+  bool updateWord(int id, VocabWordInput input);
 }
 
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.

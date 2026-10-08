@@ -439,6 +439,37 @@ class FakeVocabularyRepository implements VocabularyRepository {
     );
     return id;
   }
+
+  @override
+  Future<bool> updateWord(int id, WordDraft draft) async {
+    final i = savedWords.indexWhere((w) => w.id == id);
+    final word = draft.word.trim();
+    if (i < 0 || word.isEmpty || draft.meaning.trim().isEmpty) return false;
+    final w = savedWords[i];
+    if (savedWords.any(
+      (o) => o.id != id && o.wordbookId == w.wordbookId && o.word == word,
+    )) {
+      return false;
+    }
+    savedWords[i] = VocabularyWord(
+      id: w.id,
+      wordbookId: w.wordbookId,
+      word: word,
+      meaning: draft.meaning.trim(),
+      pronunciation: draft.pronunciation,
+      partOfSpeech: draft.partOfSpeech,
+      contextMeaning: draft.contextMeaning,
+      sentence: draft.sentence,
+      sourceApp: w.sourceApp,
+      sourceLanguage: w.sourceLanguage,
+      targetLanguage: w.targetLanguage,
+      memorized: w.memorized,
+      savedAt: w.savedAt,
+      correctCount: w.correctCount,
+      attemptCount: w.attemptCount,
+    );
+    return true;
+  }
 }
 
 /// 네이티브 연결 provider를 가짜로 바꾼다.

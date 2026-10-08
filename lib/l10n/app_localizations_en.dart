@@ -859,6 +859,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get vocabEditWord => 'Edit word';
+
+  @override
+  String get vocabEdited => 'Word updated';
+
+  @override
+  String get vocabEditFailed =>
+      'Couldn\'t update. Check whether this word already exists in the wordbook';
+
+  @override
   String get vocabSaveFailed => 'Could not save. Check the word and meaning';
 
   @override

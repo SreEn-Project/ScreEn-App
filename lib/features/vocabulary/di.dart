@@ -56,6 +56,10 @@ SetWordMemorized setWordMemorized(Ref ref) =>
 SaveWord saveWord(Ref ref) => SaveWord(ref.watch(vocabularyRepositoryProvider));
 
 @riverpod
+UpdateWord updateWord(Ref ref) =>
+    UpdateWord(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
 CreateWordTest createWordTest(Ref ref) =>
     CreateWordTest(ref.watch(vocabularyRepositoryProvider));
 

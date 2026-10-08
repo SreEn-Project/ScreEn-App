@@ -11,6 +11,7 @@ import '../../domain/entities/vocabulary.dart';
 import '../view_models/word_detail_view_model.dart';
 import '../view_models/wordbooks_view_model.dart';
 import '../widgets/vocabulary_sheets.dart';
+import '../widgets/word_edit_sheet.dart';
 
 /// 단어 상세 (X-05, AD-06): 뜻 · 발음 · 품사 · 문맥 뜻 · 문맥 예문 · 저장 날짜, 이동 · 삭제.
 class WordDetailScreen extends ConsumerWidget {
@@ -97,6 +98,20 @@ class WordDetailScreen extends ConsumerWidget {
       if (w.sourceApp != null) block(l10n.vocabSourceApp, w.sourceApp!),
       block(l10n.vocabSavedAt, saved),
       const SizedBox(height: AppTokens.sectionGap + AppTokens.space8),
+      AppButton.secondary(
+        label: l10n.vocabEditWord,
+        leading: const Icon(Symbols.edit_rounded, size: 20),
+        onPressed: () async {
+          final edited = await showWordEditSheet(
+            context,
+            title: l10n.vocabEditWord,
+            initial: w.toDraft(),
+            editingId: w.id,
+          );
+          if (edited != null) await model.reload();
+        },
+      ),
+      const SizedBox(height: AppTokens.space8),
       AppButton.secondary(
         label: l10n.vocabMove,
         leading: const Icon(Symbols.drive_file_move_rounded, size: 20),

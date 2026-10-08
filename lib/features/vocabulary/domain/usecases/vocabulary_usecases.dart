@@ -200,6 +200,30 @@ final class SaveWord implements UseCase<int?, SaveWordParams> {
   }
 }
 
+class UpdateWordParams {
+  const UpdateWordParams(this.id, this.draft);
+
+  final int id;
+  final WordDraft draft;
+}
+
+/// 저장된 단어 수정 (AD-05, AD-06). 정답률 기록은 유지한다.
+/// 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치면 false.
+final class UpdateWord implements UseCase<bool, UpdateWordParams> {
+  const UpdateWord(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(UpdateWordParams params) {
+    final draft = params.draft;
+    if (draft.word.trim().isEmpty || draft.meaning.trim().isEmpty) {
+      return Future.value(false);
+    }
+    return _repository.updateWord(params.id, draft);
+  }
+}
+
 class CreateWordTestParams {
   const CreateWordTestParams(this.wordbookId, this.mode, {this.random});
 

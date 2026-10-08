@@ -536,3 +536,8 @@
 
 ## 정답·오답 표시 대비 수정 (AD-21)
 - 다크 모드에서 errorContainer(연한 분홍) 위에 밝은 글자가 얹혀 "오답이에요"가 안 보이던 문제: 정답/오답 배경을 primary/error 16% 투명으로 통일(`studyFill`), 테스트 · 조립 · 선 잇기 · 하강형 위험 블록에 적용. 암기 테스트는 결과 띠를 문제 카드 바로 아래(보기 위)에 표시. analyze 0, test 통과.
+
+## 단어 수정 (AD-05 · AD-06, #157, 묶음 브랜치 batch/wordbook-polish)
+- 단어장 상세의 단어 ⋮ 메뉴에 "단어 수정", 단어 상세에 "단어 수정" 버튼. 단어 추가 시트를 수정 모드로 재사용(단어장 선택 없이 기존 내용 채움). 단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문을 고칠 수 있고, 외운 표시 · 정답률 · 저장 시각 · 출처 앱 · 언어는 유지. 같은 단어장의 다른 단어와 겹치게 고치면 저장하지 않고 안내.
+- 코드 변경: Pigeon `VocabularyHostApi.updateWord` 추가(재생성), 네이티브 `VocabularyDatabase.kt`(`editWord`) · `VocabularyRepository.kt` · `HostApis.kt`, Flutter `UpdateWord` 유스케이스 · 시트 · 화면, ARB 문구 3개. 새 의존성 없음.
+- 확인: `flutter analyze` 0, `flutter test` 통과(수정 테스트 추가), `flutter build apk --debug` 성공. 기기 확인 전.

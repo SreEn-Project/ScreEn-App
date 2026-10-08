@@ -53,7 +53,7 @@ final class FallingViewModelProvider
   }
 }
 
-String _$fallingViewModelHash() => r'03959ea75d4f09d2b42d194fb94eb8b0392f9bcd';
+String _$fallingViewModelHash() => r'cebc9f1a5796a916cba7447ada9b338fcb50598e';
 
 /// 하강형 타이핑 (AD-12): 방식 고르기 → 게임 → 결과.
 

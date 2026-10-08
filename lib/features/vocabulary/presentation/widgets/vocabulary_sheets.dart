@@ -260,9 +260,9 @@ Future<bool> showDeleteConfirmSheet(
   );
 }
 
-enum WordAction { move, delete }
+enum WordAction { edit, move, delete }
 
-/// 단어 하나에 할 동작 고르기 (AD-05): 다른 단어장으로 이동 · 삭제.
+/// 단어 하나에 할 동작 고르기 (AD-05): 수정 · 다른 단어장으로 이동 · 삭제.
 Future<WordAction?> showWordActionsSheet(BuildContext context) {
   return showModalBottomSheet<WordAction>(
     context: context,
@@ -283,6 +283,12 @@ Future<WordAction?> showWordActionsSheet(BuildContext context) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                AppListTile(
+                  icon: Symbols.edit_rounded,
+                  title: l10n.vocabEditWord,
+                  onTap: () => Navigator.of(sheetContext).pop(WordAction.edit),
+                ),
+                const AppDivider(),
                 AppListTile(
                   icon: Symbols.drive_file_move_rounded,
                   title: l10n.vocabMove,

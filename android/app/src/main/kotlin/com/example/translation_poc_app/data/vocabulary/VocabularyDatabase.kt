@@ -127,6 +127,33 @@ interface VocabularyDao {
         sourceApp: String?,
     )
 
+    @Query(
+        "UPDATE vocabulary_words SET word = :word, meaning = :meaning, pronunciation = :pronunciation, " +
+            "partOfSpeech = :partOfSpeech, contextMeaning = :contextMeaning, sentence = :sentence WHERE id = :id",
+    )
+    suspend fun updateWordFields(
+        id: Long,
+        word: String,
+        meaning: String,
+        pronunciation: String?,
+        partOfSpeech: String?,
+        contextMeaning: String?,
+        sentence: String?,
+    )
+
+    /** 단어의 내용을 고친다. 외운 표시 · 정답률 · 저장 시각 · 출처는 그대로. 같은 단어장의 다른 단어와 겹치면 false. */
+    @Transaction
+    suspend fun editWord(id: Long, edited: WordEntity): Boolean {
+        val current = word(id) ?: return false
+        val clash = wordByText(current.wordbookId, edited.word)
+        if (clash != null && clash.id != id) return false
+        updateWordFields(
+            id, edited.word, edited.meaning, edited.pronunciation, edited.partOfSpeech,
+            edited.contextMeaning, edited.sentence,
+        )
+        return true
+    }
+
     @Query("UPDATE vocabulary_words SET wordbookId = :wordbookId WHERE id = :id")
     suspend fun moveWord(id: Long, wordbookId: Long)
 
