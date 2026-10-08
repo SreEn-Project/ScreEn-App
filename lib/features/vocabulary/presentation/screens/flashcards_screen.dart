@@ -112,18 +112,29 @@ class _DeckState extends ConsumerState<_Deck> {
           ),
           const SizedBox(height: AppTokens.space8),
           AppProgressBar(value: state.doneCount / state.deck.length),
-          const SizedBox(height: AppTokens.sectionGap),
-          _SwipeCard(
-            key: _cardKey,
-            word: word,
-            onSwiped: (known) => model.mark(memorized: known),
-          ),
-          const SizedBox(height: AppTokens.sectionGap),
-          Center(
-            child: Text(
-              l10n.cardsSwipeHint,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall,
+          // 남은 공간의 세로 가운데에 카드와 안내를 둔다.
+          SizedBox(
+            height: (MediaQuery.sizeOf(context).height - 320).clamp(
+              360.0,
+              760.0,
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _SwipeCard(
+                    key: _cardKey,
+                    word: word,
+                    onSwiped: (known) => model.mark(memorized: known),
+                  ),
+                  const SizedBox(height: AppTokens.sectionGap),
+                  Text(
+                    l10n.cardsSwipeHint,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -206,9 +217,9 @@ class _SwipeCardState extends State<_SwipeCard> with TickerProviderStateMixin {
     final l10n = AppLocalizations.of(context);
     final width = MediaQuery.sizeOf(context).width;
     // 화면 높이의 절반 이상을 카드가 차지한다.
-    final cardHeight = (MediaQuery.sizeOf(context).height * 0.52).clamp(
-      320.0,
-      640.0,
+    final cardHeight = (MediaQuery.sizeOf(context).height * 0.46).clamp(
+      300.0,
+      560.0,
     );
     final tilt = (_dx / width) * 0.35;
     final progress = (_dx.abs() / (width * _commitFraction)).clamp(0.0, 1.0);
