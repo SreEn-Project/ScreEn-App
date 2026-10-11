@@ -308,6 +308,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Confirm you are 18 or older in AI translation setup';
 
   @override
+  String get aiOrderTitle => 'First-choice engine';
+
+  @override
+  String get aiOrderDetail =>
+      'If it hits a limit or fails, the other AI engine is tried, then ML Kit';
+
+  @override
+  String get aiOrderNone => 'Not set';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

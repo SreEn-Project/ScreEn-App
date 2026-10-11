@@ -105,6 +105,9 @@
   "engineGroqDetail": "Fast AI translation (Llama) · API key needed",
   "engineNeedsKey": "Add an API key to use this",
   "engineNeedsAge": "Confirm you are 18 or older in AI translation setup",
+  "aiOrderTitle": "First-choice engine",
+  "aiOrderDetail": "If it hits a limit or fails, the other AI engine is tried, then ML Kit",
+  "aiOrderNone": "Not set",
 
   "settingsTitle": "Settings",
   "settingsSectionTranslation": "Translation",

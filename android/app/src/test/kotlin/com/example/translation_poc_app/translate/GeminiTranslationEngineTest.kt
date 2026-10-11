@@ -76,6 +76,35 @@ class GeminiTranslationEngineTest {
     }
 }
 
+class AiEngineOrderChainTest {
+    private val request = TranslationRequest("hello", "en", "ko")
+    private fun ok(id: EngineId) = EngineResult.Ok(TranslationResult("x", "en", "ko", id))
+    private val busy = EngineResult.Err(TranslationError.ServiceBusy)
+
+    @Test
+    fun `1순위가 한도 초과면 2순위 AI가 번역하고 ML Kit은 부르지 않는다`() = runBlocking {
+        val first = FakeEngine(EngineId.GEMINI, busy)
+        val second = FakeEngine(EngineId.GROQ, ok(EngineId.GROQ))
+        val ml = FakeEngine(EngineId.ML_KIT, ok(EngineId.ML_KIT))
+        val chain = FallbackTranslationEngine(FallbackTranslationEngine(first, second), ml)
+        val r = chain.translate(request)
+        assertEquals(EngineId.GROQ, (r as EngineResult.Ok).value.engine)
+        assertEquals(0, ml.calls)
+    }
+
+    @Test
+    fun `AI 둘 다 실패하면 ML Kit으로 대체하고 안내한다`() = runBlocking {
+        val first = FakeEngine(EngineId.GEMINI, busy)
+        val second = FakeEngine(EngineId.GROQ, EngineResult.Err(TranslationError.Network))
+        val ml = FakeEngine(EngineId.ML_KIT, ok(EngineId.ML_KIT))
+        var noticed: TranslationError? = null
+        val chain = FallbackTranslationEngine(FallbackTranslationEngine(first, second), ml) { noticed = it }
+        val r = chain.translate(request)
+        assertEquals(EngineId.ML_KIT, (r as EngineResult.Ok).value.engine)
+        assertEquals(TranslationError.Network, noticed)
+    }
+}
+
 class GeminiPromptTest {
     private fun prompt(style: AiStyle, text: String = "Open the Quest log") =
         GeminiTranslationEngine.systemPrompt(TranslationRequest(text, "en", "ko", style), "en")
