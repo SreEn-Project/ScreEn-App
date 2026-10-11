@@ -165,18 +165,26 @@ class TranslatorService : LifecycleService() {
     }
 
     /**
-     * 설정(FL-06)에서 고른 번역 엔진 (NA-11): ML Kit(NA-12) 또는 Gemini · Groq(NA-13, 실패 시 ML Kit으로 대체).
-     * 엔진이 추가되면 [Engine]별 분기만 늘리면 된다.
+     * 설정(FL-06)에서 고른 번역 엔진 (NA-11): ML Kit(NA-12) 또는 Gemini · Groq(NA-13).
+     * 고른 AI 엔진이 1순위이고, 실패하면 다른 AI 엔진(키가 있을 때) → ML Kit 순으로 넘어간다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
         val mlKit = mlKit()
-        return when (settings.engine) {
-            Engine.ML_KIT -> mlKit
-            // 설정이 연령 확인 전 AI 엔진을 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
-            Engine.GEMINI -> if (!settings.ageConfirmed) mlKit else FallbackTranslationEngine(GeminiTranslationEngine(keysFor(Engine.GEMINI)), mlKit, ::notifyAiFallback)
-            Engine.GROQ -> if (!settings.ageConfirmed) mlKit else FallbackTranslationEngine(GroqTranslationEngine(keysFor(Engine.GROQ)), mlKit, ::notifyAiFallback)
-        }
+        // 설정이 연령 확인 전 AI 엔진을 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
+        if (!settings.engine.isAi || !settings.ageConfirmed) return mlKit
+        val first = aiEngine(settings.engine)
+        val second = Engine.entries.firstOrNull { it.isAi && it != settings.engine && hasKey(it) }
+        val chain = if (second == null) first else FallbackTranslationEngine(first, aiEngine(second), ::notifyAiSwitch)
+        return FallbackTranslationEngine(chain, mlKit, ::notifyAiFallback)
     }
+
+    private fun aiEngine(engine: Engine): TranslationEngine = when (engine) {
+        Engine.GROQ -> GroqTranslationEngine(keysFor(Engine.GROQ))
+        else -> GeminiTranslationEngine(keysFor(Engine.GEMINI))
+    }
+
+    // 엔진을 만드는 시점의 조회라 짧게 블로킹한다 (암호화 저장소 읽기).
+    private fun hasKey(engine: Engine) = !AppGraph.apiKeyStore(this).get(engine).isNullOrBlank()
 
     private fun mlKit(): MlKitTranslationEngine = mlKitEngine ?: MlKitTranslationEngine(
         downloadPolicyProvider = {
@@ -217,6 +225,11 @@ class TranslatorService : LifecycleService() {
             else -> R.string.ai_fallback_failed
         }
         Handler(Looper.getMainLooper()).post { toast.show(getString(message), ToastKind.INFO) }
+    }
+
+    /** 1순위 AI가 실패해 다른 AI 엔진으로 넘어갔음을 알린다. 실제 안내는 ML Kit까지 갈 때만 띄운다 (로그만). */
+    private fun notifyAiSwitch(error: TranslationError) {
+        Log.w(TAG, "1순위 AI 번역 실패 → 2순위 AI: $error")
     }
 
     private fun keysFor(engine: Engine) = ApiKeyProvider { AppGraph.apiKeyStore(this).get(engine) }

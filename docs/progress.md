@@ -554,3 +554,8 @@
 - 설정 > AI 번역 설정에 Gemini · Groq 탭을 두고 엔진별로 키를 붙여 넣기 · 보기 · 수정 · 삭제 · 테스트. 설정 엔진 목록과 빠른 설정 버블의 엔진 선택에도 "내 Groq 키"가 나온다(연령 확인 + 키가 있어야 선택). 실패 시 ML Kit 대체와 안내는 기존 그대로. 단어 사전 카드(AD-02)도 Groq 선택 시 Groq로 풀이한다.
 - 코드 변경: Pigeon(`EngineType.groq`, 키 API에 엔진 인자, 재생성), 네이티브 `GroqTranslationEngine` · `GroqKeyTester` · `GroqDictionary`, `ApiKeyStore`(엔진별 항목), `Engine.GROQ`/`isAi`, 서비스 · 오버레이 · 결과 시트 · 문자열, Flutter 키 유스케이스 · `ApiKeyViewModel`(엔진 인자) · 설정 화면 · ARB. 새 의존성 · Manifest 변경 없음.
 - 확인: `flutter analyze` 0, `flutter test` 통과, 네이티브 단위 테스트(Groq 엔진 · 키 테스트 · 사전) 통과, `flutter build apk --debug` 성공. 실제 Groq 키로 호출은 사용자 키가 필요해 기기 확인 전.
+
+## AI 엔진 사용 순서 (NA-13, #169)
+- 설정 > AI 번역 설정에 "1순위 엔진" 팝업(Gemini / Groq, 키 둘 다 있을 때만). 1순위 실패 시 다른 AI 엔진 → ML Kit 순으로 넘어간다. 빠른 설정 버블에서 고른 엔진 = 1순위(D-067).
+- 코드 변경: 네이티브 `TranslatorService.translationEngine`(FallbackTranslationEngine 이중), Flutter `ai_engine_order_card.dart` · `AiSetupScreen`, ARB 3개. 새 의존성 · Pigeon · Manifest 변경 없음.
+- 확인: analyze 0, flutter test · 네이티브 단위 테스트(2단계 전환 테스트 추가) 통과. 기기 확인은 키 두 개가 필요해 안 함.

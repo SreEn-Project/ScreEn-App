@@ -299,6 +299,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get engineNeedsAge => 'AI 번역 설정에서 만 18세 확인이 필요해요';
 
   @override
+  String get aiOrderTitle => '1순위 엔진';
+
+  @override
+  String get aiOrderDetail =>
+      '1순위가 한도 초과나 오류로 안 되면 다른 AI 엔진으로, 그것도 안 되면 ML Kit으로 넘어가요';
+
+  @override
+  String get aiOrderNone => '선택 안 함';
+
+  @override
   String get settingsTitle => '설정';
 
   @override

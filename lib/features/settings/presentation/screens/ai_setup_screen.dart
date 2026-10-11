@@ -11,6 +11,7 @@ import '../../domain/entities/translator_settings.dart';
 import '../view_models/ai_options_view_model.dart';
 import '../view_models/api_key_pin_view_model.dart';
 import '../view_models/api_key_view_model.dart';
+import '../widgets/ai_engine_order_card.dart';
 import '../widgets/ai_options_section.dart';
 import '../widgets/pin_sheets.dart';
 
@@ -199,6 +200,7 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                   if (ageConfirmed && locked)
                     _LockedCard(onUnlock: _unlock, onForgot: _forgotPin)
                   else if (ageConfirmed) ...[
+                    const AiEngineOrderCard(),
                     AppSegmented<EngineType>(
                       values: const [EngineType.gemini, EngineType.groq],
                       selected: _engine,

@@ -403,3 +403,8 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 - **모델**: `llama-3.3-70b-versatile`을 먼저, 없으면(404 · model_decommissioned) `llama-3.1-8b-instant`. 이유: 한국어 · 일본어 번역은 70B가 8B보다 안정적이고, 8B는 한도가 넉넉한 예비.
 - 프롬프트(말투 · 용어집 포함)와 단어 사전(AD-02) 지시문은 Gemini와 같은 것을 쓰고, 캐시 키는 엔진 id가 달라 서로 섞이지 않는다.
 - Pigeon 키 API(`getApiKey` · `setApiKey` · `clearApiKey` · `testApiKey`)에 `EngineType` 인자를 추가했다.
+
+## D-067. AI 엔진 사용 순서: 1순위 → 다른 AI → ML Kit (NA-13, #169)
+- **1순위 = 기존 `engine` 설정 그대로**. 새 저장 값을 만들지 않아 설정 화면 엔진 목록 · 빠른 설정 버블 · 새 "1순위 엔진" 팝업이 모두 같은 값을 바꾼다 (충돌 없음). 빠른 설정에서 엔진을 직접 고르면 그 엔진이 곧 1순위가 된다.
+- **2순위는 자동**: 1순위가 아닌 다른 AI 엔진에 키가 있으면 1순위 실패(한도 429 · 오류 · 오프라인 등 어떤 실패든) 때 그 엔진으로 넘어가고, 둘 다 안 되면 ML Kit으로 대체 + 기존 안내. AI끼리 넘어갈 때는 안내 없이 로그만 남긴다(결과 배지가 실제 엔진을 보여 준다).
+- **UI**: AI 번역 설정에 `AppPopupMenu`로 "1순위 엔진"(Gemini / Groq). 연령 확인 + 두 키가 모두 있을 때만 보인다. ML Kit을 쓰는 중이면 "선택 안 함"으로 보이고, 고르면 그 엔진으로 AI 번역이 켜진다.

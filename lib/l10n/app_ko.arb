@@ -104,6 +104,9 @@
   "engineGroqDetail": "빠른 AI 번역(Llama) · API 키 필요",
   "engineNeedsKey": "API 키를 등록해야 쓸 수 있어요",
   "engineNeedsAge": "AI 번역 설정에서 만 18세 확인이 필요해요",
+  "aiOrderTitle": "1순위 엔진",
+  "aiOrderDetail": "1순위가 한도 초과나 오류로 안 되면 다른 AI 엔진으로, 그것도 안 되면 ML Kit으로 넘어가요",
+  "aiOrderNone": "선택 안 함",
 
   "settingsTitle": "설정",
   "settingsSectionTranslation": "번역",

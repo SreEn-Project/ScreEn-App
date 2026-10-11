@@ -662,6 +662,24 @@ abstract class AppLocalizations {
   /// **'Confirm you are 18 or older in AI translation setup'**
   String get engineNeedsAge;
 
+  /// No description provided for @aiOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First-choice engine'**
+  String get aiOrderTitle;
+
+  /// No description provided for @aiOrderDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'If it hits a limit or fails, the other AI engine is tried, then ML Kit'**
+  String get aiOrderDetail;
+
+  /// No description provided for @aiOrderNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get aiOrderNone;
+
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
