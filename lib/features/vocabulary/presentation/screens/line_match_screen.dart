@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -432,86 +431,26 @@ class _Result extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final model = ref.read(lineMatchViewModelProvider(selection).notifier);
-    final missed = game.missedWords;
 
-    return AppPage(
+    return StudyResultPage(
       title: l10n.matchResultTitle,
-      bottom: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AppButton(label: l10n.matchRetry, onPressed: model.restart),
-          const SizedBox(height: AppTokens.space8),
-          AppButton.secondary(
-            label: l10n.testDone,
-            onPressed: () => context.pop(),
-          ),
-        ],
-      ),
-      children: [
-        AppCard(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                const IconBadge(icon: Symbols.emoji_events_rounded, size: 56),
-                const SizedBox(height: AppTokens.space16),
-                Text(
-                  l10n.testScore(game.score, game.total),
-                  style: theme.textTheme.headlineMedium,
-                ),
-                const SizedBox(height: AppTokens.space4),
-                Text(
-                  missed.isEmpty
-                      ? l10n.testPerfect
-                      : l10n.testWrongCount(missed.length),
-                  style: theme.textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
+      actions: [
+        AppButton(label: l10n.matchRetry, onPressed: model.restart),
+        AppButton.secondary(
+          label: l10n.testDone,
+          onPressed: () => context.pop(),
         ),
-        if (missed.isNotEmpty) ...[
-          const SizedBox(height: AppTokens.sectionGap),
-          SectionTitle(l10n.testWrongWords),
-          const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < missed.length; i++) ...[
-                  if (i > 0) const AppDivider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTokens.rowPaddingH,
-                      vertical: AppTokens.space12,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            missed[i].word,
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: AppTokens.space4),
-                          Text(
-                            missed[i].meaning,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+      ],
+      hero: StudyResultHero(
+        score: l10n.testScore(game.score, game.total),
+        caption: game.missedWords.isEmpty
+            ? l10n.testPerfect
+            : l10n.testWrongCount(game.missedWords.length),
+      ),
+      words: [
+        for (final w in game.missedWords)
+          StudyWrongWord(word: w.word, meaning: w.meaning),
       ],
     );
   }

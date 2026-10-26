@@ -369,3 +369,108 @@ class _StudyResultHeroState extends State<StudyResultHero> {
     );
   }
 }
+
+/// 결과 화면의 틀린(놓친) 단어 한 줄.
+class StudyWrongWord {
+  const StudyWrongWord({
+    required this.word,
+    required this.meaning,
+    this.yourAnswer,
+  });
+
+  final String word;
+  final String meaning;
+
+  /// 사용자가 적은 답. 비어 있으면 보이지 않는다.
+  final String? yourAnswer;
+}
+
+/// 학습 · 테스트 결과 화면의 공통 틀: 맨 위 [hero], 틀린 단어 목록, 아래 [actions] 버튼.
+class StudyResultPage extends StatelessWidget {
+  const StudyResultPage({
+    super.key,
+    required this.title,
+    required this.hero,
+    required this.actions,
+    this.listTitle,
+    this.words = const [],
+  });
+
+  final String title;
+  final Widget hero;
+
+  /// 아래 버튼들. 사이에 간격이 들어간다.
+  final List<Widget> actions;
+  final String? listTitle;
+  final List<StudyWrongWord> words;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return AppPage(
+      title: title,
+      bottom: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < actions.length; i++) ...[
+            if (i > 0) const SizedBox(height: AppTokens.space8),
+            actions[i],
+          ],
+        ],
+      ),
+      children: [
+        hero,
+        if (words.isNotEmpty) ...[
+          const SizedBox(height: AppTokens.sectionGap),
+          SectionTitle(listTitle ?? l10n.testWrongWords),
+          const SizedBox(height: AppTokens.sectionTitleGap),
+          AppCard(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppTokens.cardListPaddingV,
+            ),
+            child: Column(
+              children: [
+                for (var i = 0; i < words.length; i++) ...[
+                  if (i > 0) const AppDivider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTokens.rowPaddingH,
+                      vertical: AppTokens.space12,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            words[i].word,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: AppTokens.space4),
+                          Text(
+                            words[i].meaning,
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          if (words[i].yourAnswer?.isNotEmpty ?? false) ...[
+                            const SizedBox(height: AppTokens.space4),
+                            Text(
+                              l10n.testYourAnswer(words[i].yourAnswer!),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.error,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}

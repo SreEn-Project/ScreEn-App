@@ -444,70 +444,27 @@ class _Result extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final model = ref.read(fallingViewModelProvider(selection).notifier);
     final game = state.game!;
-    final missed = game.missedWords;
 
-    return AppPage(
+    return StudyResultPage(
       title: l10n.fallResultTitle,
-      bottom: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AppButton(label: l10n.matchRetry, onPressed: model.start),
-          const SizedBox(height: AppTokens.space8),
-          AppButton.secondary(
-            label: l10n.testDone,
-            onPressed: () => context.pop(),
-          ),
-        ],
-      ),
-      children: [
-        StudyResultHero(
-          score: l10n.matchScore(game.score),
-          caption: l10n.fallDestroyed(game.destroyed),
-          celebrate: game.destroyed >= 5,
+      actions: [
+        AppButton(label: l10n.matchRetry, onPressed: model.start),
+        AppButton.secondary(
+          label: l10n.testDone,
+          onPressed: () => context.pop(),
         ),
-        if (missed.isNotEmpty) ...[
-          const SizedBox(height: AppTokens.sectionGap),
-          SectionTitle(l10n.fallMissedWords),
-          const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < missed.length; i++) ...[
-                  if (i > 0) const AppDivider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTokens.rowPaddingH,
-                      vertical: AppTokens.space12,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            missed[i].word,
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: AppTokens.space4),
-                          Text(
-                            missed[i].meaning,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+      ],
+      hero: StudyResultHero(
+        score: l10n.matchScore(game.score),
+        caption: l10n.fallDestroyed(game.destroyed),
+        celebrate: game.destroyed >= 5,
+      ),
+      listTitle: l10n.fallMissedWords,
+      words: [
+        for (final w in game.missedWords)
+          StudyWrongWord(word: w.word, meaning: w.meaning),
       ],
     );
   }

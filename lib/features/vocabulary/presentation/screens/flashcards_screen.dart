@@ -10,6 +10,7 @@ import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/vocabulary.dart';
 import '../view_models/flashcards_view_model.dart';
+import '../widgets/study_widgets.dart';
 
 /// 카드 학습 (L-02, AD-08): 카드를 탭해 뒤집고, 좌우로 밀어 외움 · 못 외움을 기록한다.
 class FlashcardsScreen extends ConsumerWidget {
@@ -349,94 +350,51 @@ class _Result extends ConsumerWidget {
     final model = ref.read(flashcardsViewModelProvider(selection).notifier);
     final unknown = state.unknown;
 
-    return AppPage(
+    return StudyResultPage(
       title: l10n.cardsResultTitle,
-      bottom: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (unknown.isNotEmpty) ...[
-            AppButton(
-              label: l10n.cardsReviewUnknown,
-              onPressed: model.reviewUnknown,
-            ),
-            const SizedBox(height: AppTokens.space8),
-            AppButton.secondary(
-              label: l10n.cardsRestart,
-              onPressed: model.restart,
-            ),
-          ] else ...[
-            AppButton(label: l10n.cardsRestart, onPressed: model.restart),
-          ],
-          const SizedBox(height: AppTokens.space8),
-          AppButton.text(
-            label: l10n.cardsDone,
-            expand: true,
-            onPressed: () => context.pop(),
+      actions: [
+        if (unknown.isNotEmpty) ...[
+          AppButton(
+            label: l10n.cardsReviewUnknown,
+            onPressed: model.reviewUnknown,
           ),
-        ],
-      ),
-      children: [
-        AppCard(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                const IconBadge(icon: Symbols.emoji_events_rounded, size: 56),
-                const SizedBox(height: AppTokens.space16),
-                Text(
-                  unknown.isEmpty
-                      ? l10n.cardsAllKnown
-                      : l10n.cardsResultSummary(
-                          state.known.length,
-                          unknown.length,
-                        ),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleLarge,
-                ),
-              ],
-            ),
+          AppButton.secondary(
+            label: l10n.cardsRestart,
+            onPressed: model.restart,
+          ),
+        ] else
+          AppButton(label: l10n.cardsRestart, onPressed: model.restart),
+        AppButton.text(
+          label: l10n.cardsDone,
+          expand: true,
+          onPressed: () => context.pop(),
+        ),
+      ],
+      hero: AppCard(
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            children: [
+              const IconBadge(icon: Symbols.emoji_events_rounded, size: 56),
+              const SizedBox(height: AppTokens.space16),
+              Text(
+                unknown.isEmpty
+                    ? l10n.cardsAllKnown
+                    : l10n.cardsResultSummary(
+                        state.known.length,
+                        unknown.length,
+                      ),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge,
+              ),
+            ],
           ),
         ),
-        if (unknown.isNotEmpty) ...[
-          const SizedBox(height: AppTokens.sectionGap),
-          SectionTitle(l10n.cardsUnknownWords),
-          const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < unknown.length; i++) ...[
-                  if (i > 0) const AppDivider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTokens.rowPaddingH,
-                      vertical: AppTokens.space12,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            unknown[i].word,
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: AppTokens.space4),
-                          Text(
-                            unknown[i].meaning,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
+      ),
+      listTitle: l10n.cardsUnknownWords,
+      words: [
+        for (final w in unknown)
+          StudyWrongWord(word: w.word, meaning: w.meaning),
       ],
     );
   }

@@ -287,80 +287,33 @@ class _Result extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final model = ref.read(wordTestViewModelProvider(selection).notifier);
     final wrong = state.wrongAnswers;
     final total = state.questions.length;
 
-    return AppPage(
+    return StudyResultPage(
       title: l10n.testResultTitle,
-      bottom: _BottomBar(
-        children: [
-          AppButton(label: l10n.testRetry, onPressed: model.retry),
-          const SizedBox(height: AppTokens.space8),
-          AppButton.secondary(
-            label: l10n.testDone,
-            onPressed: () => context.pop(),
-          ),
-        ],
-      ),
-      children: [
-        StudyResultHero(
-          score: l10n.testScore(state.correctCount, total),
-          caption: wrong.isEmpty
-              ? l10n.testPerfect
-              : l10n.testWrongCount(wrong.length),
-          celebrate: total > 0 && state.correctCount * 2 >= total,
+      actions: [
+        AppButton(label: l10n.testRetry, onPressed: model.retry),
+        AppButton.secondary(
+          label: l10n.testDone,
+          onPressed: () => context.pop(),
         ),
-        if (wrong.isNotEmpty) ...[
-          const SizedBox(height: AppTokens.sectionGap),
-          SectionTitle(l10n.testWrongWords),
-          const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
-            child: Column(
-              children: [
-                for (var i = 0; i < wrong.length; i++) ...[
-                  if (i > 0) const AppDivider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTokens.rowPaddingH,
-                      vertical: AppTokens.space12,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            wrong[i].question.word,
-                            style: theme.textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: AppTokens.space4),
-                          Text(
-                            wrong[i].question.meaning,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                          if (wrong[i].answer.trim().isNotEmpty) ...[
-                            const SizedBox(height: AppTokens.space4),
-                            Text(
-                              l10n.testYourAnswer(wrong[i].answer.trim()),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.error,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
+      ],
+      hero: StudyResultHero(
+        score: l10n.testScore(state.correctCount, total),
+        caption: wrong.isEmpty
+            ? l10n.testPerfect
+            : l10n.testWrongCount(wrong.length),
+        celebrate: total > 0 && state.correctCount * 2 >= total,
+      ),
+      words: [
+        for (final w in wrong)
+          StudyWrongWord(
+            word: w.question.word,
+            meaning: w.question.meaning,
+            yourAnswer: w.answer.trim(),
           ),
-        ],
       ],
     );
   }
