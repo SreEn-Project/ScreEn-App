@@ -559,3 +559,8 @@
 - 설정 > AI 번역 설정에 "1순위 엔진" 팝업(Gemini / Groq, 키 둘 다 있을 때만). 1순위 실패 시 다른 AI 엔진 → ML Kit 순으로 넘어간다. 빠른 설정 버블에서 고른 엔진 = 1순위(D-067).
 - 코드 변경: 네이티브 `TranslatorService.translationEngine`(FallbackTranslationEngine 이중), Flutter `ai_engine_order_card.dart` · `AiSetupScreen`, ARB 3개. 새 의존성 · Pigeon · Manifest 변경 없음.
 - 확인: analyze 0, flutter test · 네이티브 단위 테스트(2단계 전환 테스트 추가) 통과. 기기 확인은 키 두 개가 필요해 안 함.
+
+## 키 상태 갱신 정리 (NA-13, #171)
+- 버그: PIN 분실 초기화 뒤 AI 설정 화면의 입력창에 지운 키가 그대로 남던 문제. 원인은 `reset()`이 `ref.invalidate`만 하고 기다리지 않아, 다시 읽는 동안 이전 값이 남은 채 화면이 입력창을 다시 채운 것.
+- 정리: 모든 AI 엔진의 키를 다시 읽고 끝날 때까지 기다리는 `reloadApiKeys`를 한 곳(`api_key_view_model.dart`)에 두고 reset이 쓴다. 키를 쓰는 엔진 목록 `aiKeyEngines`를 한 곳으로 모아 화면 · 1순위 카드가 같이 쓴다. 화면은 다시 읽는 중의 값으로 입력창을 채우지 않는다. 엔진 · 빠른 설정 · 옵션은 이미 네이티브 설정 이벤트 하나로 갱신되어 따로 고칠 곳이 없었다.
+- 코드 변경: 뷰모델 2개 · AI 설정 화면 · 1순위 카드 · 테스트 1개 추가. 네이티브 · 의존성 변경 없음. 확인: analyze 0, test 통과, 디버그 빌드 성공.

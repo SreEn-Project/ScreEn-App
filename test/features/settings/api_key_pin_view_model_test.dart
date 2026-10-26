@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/features/settings/di.dart';
 import 'package:translation_poc_app/features/settings/domain/entities/translator_settings.dart';
 import 'package:translation_poc_app/features/settings/presentation/view_models/api_key_pin_view_model.dart';
+import 'package:translation_poc_app/features/settings/presentation/view_models/api_key_view_model.dart';
 
 import '../../fakes.dart';
 
@@ -80,5 +81,27 @@ void main() {
     expect(repository.settings.engine, EngineType.mlKit);
     expect(state()!.enabled, isFalse);
     expect(state()!.unlocked, isTrue);
+  });
+
+  test('분실 초기화가 끝나면 모든 엔진의 키 상태가 이미 비워져 있다 (옛 값이 남지 않는다)', () async {
+    await start(pin: '1234');
+    repository
+      ..apiKeys[EngineType.gemini] = 'g-key'
+      ..apiKeys[EngineType.groq] = 'q-key';
+    for (final e in aiKeyEngines) {
+      container.listen(apiKeyViewModelProvider(e), (_, _) {});
+      expect(
+        await container.read(apiKeyViewModelProvider(e).future),
+        isNotNull,
+      );
+    }
+
+    await vm().reset();
+
+    for (final e in aiKeyEngines) {
+      final async = container.read(apiKeyViewModelProvider(e));
+      expect(async.isLoading, isFalse);
+      expect(async.value, isNull);
+    }
   });
 }

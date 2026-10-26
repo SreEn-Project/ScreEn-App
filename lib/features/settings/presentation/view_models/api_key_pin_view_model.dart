@@ -62,7 +62,7 @@ class ApiKeyPinViewModel extends _$ApiKeyPinViewModel {
   Future<void> reset() async {
     await ref.read(resetApiKeyProtectionProvider)();
     await ref.read(changeEngineProvider)(EngineType.mlKit);
-    ref.invalidate(apiKeyViewModelProvider);
+    await reloadApiKeys(ref);
     state = const AsyncData(ApiKeyPinState(enabled: false, unlocked: true));
   }
 }
