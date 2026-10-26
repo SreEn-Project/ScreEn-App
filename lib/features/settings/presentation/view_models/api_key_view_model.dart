@@ -5,6 +5,18 @@ import '../../domain/entities/translator_settings.dart';
 
 part 'api_key_view_model.g.dart';
 
+/// 키를 쓰는 AI 엔진들.
+final aiKeyEngines = [
+  for (final e in EngineType.values)
+    if (e.needsApiKey) e,
+];
+
+/// 모든 AI 엔진의 키를 저장소에서 다시 읽고, 다 읽을 때까지 기다린다.
+/// 키가 밖에서(PIN 초기화 등) 바뀐 뒤, 화면이 갱신 중인 옛 값을 보지 않게 한다.
+Future<void> reloadApiKeys(Ref ref) => Future.wait([
+  for (final e in aiKeyEngines) ref.refresh(apiKeyViewModelProvider(e).future),
+]);
+
 /// 엔진([engine])별로 저장된 AI 번역 API 키 (NA-13). 없으면 null. 원본은 네이티브 Keystore 저장소다.
 /// 화면은 이 값을 가려서 보여 주고, 눌러서 볼 수 있게 한다.
 @riverpod

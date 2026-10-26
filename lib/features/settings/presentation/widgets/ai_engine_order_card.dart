@@ -16,11 +16,9 @@ import '../view_models/engine_view_model.dart';
 class AiEngineOrderCard extends ConsumerWidget {
   const AiEngineOrderCard({super.key});
 
-  static const _aiEngines = [EngineType.gemini, EngineType.groq];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hasBoth = _aiEngines.every(
+    final hasBoth = aiKeyEngines.every(
       (e) => ref.watch(apiKeyViewModelProvider(e)).value != null,
     );
     if (!hasBoth) return const SizedBox.shrink();
@@ -42,7 +40,7 @@ class AiEngineOrderCard extends ConsumerWidget {
           trailing: AppPopupMenu<EngineType>(
             icon: Symbols.looks_one_rounded,
             label: isAi ? l10n.engineBrand(current) : l10n.aiOrderNone,
-            values: _aiEngines,
+            values: aiKeyEngines,
             selected: current,
             itemLabel: l10n.engineBrand,
             active: isAi,

@@ -168,12 +168,14 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
     final theme = Theme.of(context);
     final options = ref.watch(aiOptionsViewModelProvider).value;
     final ageConfirmed = options?.ageConfirmed ?? false;
-    final saved = ref.watch(apiKeyViewModelProvider(_engine)).value;
+    final savedAsync = ref.watch(apiKeyViewModelProvider(_engine));
+    // 다시 읽는 중에는 이전 값이 남아 있으므로, 다 읽은 값만 쓴다.
+    final saved = savedAsync.isLoading ? null : savedAsync.value;
     final pinState = ref.watch(apiKeyPinViewModelProvider).value;
     final pinEnabled = pinState?.enabled ?? false;
     // PIN 상태를 읽기 전에도 잠긴 것처럼 둬서 키가 잠깐 비치지 않게 한다.
     final locked = pinState == null || (pinState.enabled && !pinState.unlocked);
-    if (!_filled && !locked && saved != null) {
+    if (!_filled && !locked && !savedAsync.isLoading && saved != null) {
       _controller.text = saved;
       _filled = true;
     }
@@ -202,7 +204,7 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                   else if (ageConfirmed) ...[
                     const AiEngineOrderCard(),
                     AppSegmented<EngineType>(
-                      values: const [EngineType.gemini, EngineType.groq],
+                      values: aiKeyEngines,
                       selected: _engine,
                       label: l10n.engineBrand,
                       onChanged: _selectEngine,
