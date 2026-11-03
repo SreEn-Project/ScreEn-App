@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
+import '../../../gemma/presentation/view_models/gemma_view_model.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
 import '../view_models/ai_options_view_model.dart';
@@ -71,6 +72,8 @@ class _EngineSection extends ConsumerWidget {
     };
     final ageConfirmed =
         ref.watch(aiOptionsViewModelProvider).value?.ageConfirmed ?? false;
+    final gemmaReady =
+        ref.watch(gemmaViewModelProvider).value?.isReady ?? false;
     return AppSection(
       title: l10n.settingsSectionEngine,
       child: AppCard(
@@ -84,7 +87,9 @@ class _EngineSection extends ConsumerWidget {
                 engine: engine,
                 selected: engine == selected,
                 // AI 엔진은 만 18세 확인(FL-09)과 그 엔진의 키가 있어야 고를 수 있다.
-                disabledReason: !engine.needsApiKey
+                disabledReason: engine == EngineType.gemma
+                    ? (gemmaReady ? null : l10n.engineNeedsModel)
+                    : !engine.needsApiKey
                     ? null
                     : !ageConfirmed
                     ? l10n.engineNeedsAge
@@ -93,6 +98,13 @@ class _EngineSection extends ConsumerWidget {
               ),
               const AppDivider(),
             ],
+            AppListTile(
+              icon: Symbols.memory_rounded,
+              title: l10n.settingsGemma,
+              subtitle: l10n.settingsGemmaDetail,
+              onTap: () => context.push(AppRoutes.gemma),
+            ),
+            const AppDivider(),
             AppListTile(
               icon: Symbols.tune_rounded,
               title: l10n.settingsAiSetup,

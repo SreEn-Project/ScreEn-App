@@ -10,12 +10,14 @@ extension EnumLabels on AppLocalizations {
     EngineType.mlKit => engineMlKit,
     EngineType.gemini => engineGemini,
     EngineType.groq => engineGroq,
+    EngineType.gemma => engineGemma,
   };
 
   String engineDetail(EngineType engine) => switch (engine) {
     EngineType.mlKit => engineMlKitDetail,
     EngineType.gemini => engineGeminiDetail,
     EngineType.groq => engineGroqDetail,
+    EngineType.gemma => engineGemmaDetail,
   };
 
   /// 탭 등에 쓰는 짧은 서비스 이름.
@@ -23,6 +25,7 @@ extension EnumLabels on AppLocalizations {
     EngineType.mlKit => engineMlKit,
     EngineType.gemini => 'Gemini',
     EngineType.groq => 'Groq',
+    EngineType.gemma => 'Gemma',
   };
 
   String apiKeyHintFor(EngineType engine) =>
@@ -57,6 +60,7 @@ IconData engineIcon(EngineType engine) => switch (engine) {
   EngineType.mlKit => Symbols.offline_bolt_rounded,
   EngineType.gemini => Symbols.key_rounded,
   EngineType.groq => Symbols.bolt_rounded,
+  EngineType.gemma => Symbols.memory_rounded,
 };
 
 IconData captureModeIcon(CaptureMode mode) => switch (mode) {

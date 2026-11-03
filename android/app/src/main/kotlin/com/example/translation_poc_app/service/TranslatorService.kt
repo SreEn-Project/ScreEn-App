@@ -36,6 +36,7 @@ import com.example.translation_poc_app.translate.GeminiDictionary
 import com.example.translation_poc_app.translate.WordLookup
 import com.example.translation_poc_app.translate.WordLookupOutcome
 import com.example.translation_poc_app.translate.GeminiTranslationEngine
+import com.example.translation_poc_app.translate.GemmaTranslationEngine
 import com.example.translation_poc_app.translate.GroqDictionary
 import com.example.translation_poc_app.translate.GroqTranslationEngine
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
@@ -165,21 +166,37 @@ class TranslatorService : LifecycleService() {
     }
 
     /**
-     * 설정(FL-06)에서 고른 번역 엔진 (NA-11): ML Kit(NA-12) 또는 Gemini · Groq(NA-13).
-     * 고른 AI 엔진이 1순위이고, 실패하면 다른 AI 엔진(키가 있을 때) → ML Kit 순으로 넘어간다.
+     * 설정(FL-06)에서 고른 번역 엔진 (NA-11): ML Kit(NA-12), Gemini · Groq(NA-13), Gemma 온디바이스(#174).
+     * 고른 AI 엔진이 1순위이고, 실패하면 쓸 수 있는 다른 AI 엔진(키가 있거나 모델을 받아 둔 것) → ML Kit 순으로 넘어간다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
         val mlKit = mlKit()
-        // 설정이 연령 확인 전 AI 엔진을 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
-        if (!settings.engine.isAi || !settings.ageConfirmed) return mlKit
-        val first = aiEngine(settings.engine)
-        val second = Engine.entries.firstOrNull { it.isAi && it != settings.engine && hasKey(it) }
-        val chain = if (second == null) first else FallbackTranslationEngine(first, aiEngine(second), ::notifyAiSwitch)
+        val order = aiOrder(settings)
+        if (order.isEmpty()) return mlKit
+        val chain = order.map(::aiEngine).reduceRight { engine, rest ->
+            FallbackTranslationEngine(engine, rest, ::notifyAiSwitch)
+        }
         return FallbackTranslationEngine(chain, mlKit, ::notifyAiFallback)
+    }
+
+    /** 쓸 AI 엔진을 순서대로. 고른 엔진이 맨 앞이고, ML Kit을 골랐으면 비어 있다. */
+    private fun aiOrder(settings: Settings): List<Engine> {
+        val first = settings.engine
+        if (!first.isAi) return emptyList()
+        // 설정이 연령 확인 전 클라우드 AI를 ML Kit으로 돌려주지만(FL-09), 서비스에서도 한 번 더 막는다.
+        if (first.needsApiKey && !settings.ageConfirmed) return emptyList()
+        val others = Engine.entries.filter { e ->
+            e.isAi && e != first && when {
+                e.needsApiKey -> settings.ageConfirmed && hasKey(e)
+                else -> AppGraph.gemmaModelManager(this).isReady()
+            }
+        }
+        return listOf(first) + others
     }
 
     private fun aiEngine(engine: Engine): TranslationEngine = when (engine) {
         Engine.GROQ -> GroqTranslationEngine(keysFor(Engine.GROQ))
+        Engine.GEMMA -> GemmaTranslationEngine(AppGraph.gemmaRuntime(this))
         else -> GeminiTranslationEngine(keysFor(Engine.GEMINI))
     }
 
@@ -268,8 +285,12 @@ class TranslatorService : LifecycleService() {
             onStopRequested = { stopSelf() },
             onTranslated = ::recordHistory,
             hasAiKey = { engine ->
-                AppGraph.settingsRepository(this).current().ageConfirmed &&
-                    !AppGraph.apiKeyStore(this).get(engine).isNullOrBlank()
+                if (engine == Engine.GEMMA) {
+                    AppGraph.gemmaModelManager(this).isReady()
+                } else {
+                    AppGraph.settingsRepository(this).current().ageConfirmed &&
+                        !AppGraph.apiKeyStore(this).get(engine).isNullOrBlank()
+                }
             },
             vocabulary = AppGraph.vocabularyRepository(this),
             lookupWord = ::lookupWord,

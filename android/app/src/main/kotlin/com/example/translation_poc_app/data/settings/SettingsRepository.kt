@@ -33,9 +33,9 @@ class SettingsRepository(context: Context) {
 
     suspend fun setTargetLanguage(languageCode: String) = edit { it[Keys.TARGET_LANGUAGE] = languageCode }
 
-    // AI 엔진(Gemini · Groq)은 만 18세 확인(FL-09) 뒤에만 고른다: 확인 전 요청은 무시한다.
+    // 클라우드 AI 엔진(Gemini · Groq)은 만 18세 확인(FL-09) 뒤에만 고른다: 확인 전 요청은 무시한다.
     suspend fun setEngine(engine: Engine) = edit {
-        if (engine.isAi && it[Keys.AGE_CONFIRMED] != true) return@edit
+        if (engine.needsApiKey && it[Keys.AGE_CONFIRMED] != true) return@edit
         it[Keys.ENGINE] = engine.name
     }
 
@@ -99,7 +99,7 @@ class SettingsRepository(context: Context) {
         return Settings(
             targetLanguage = this[Keys.TARGET_LANGUAGE] ?: defaults.targetLanguage,
             // 연령 확인 전에 저장된 AI 엔진(이전 버전 등)은 ML Kit으로 본다.
-            engine = enumOrDefault(this[Keys.ENGINE], defaults.engine).takeIf { ageConfirmed || !it.isAi }
+            engine = enumOrDefault(this[Keys.ENGINE], defaults.engine).takeIf { ageConfirmed || !it.needsApiKey }
                 ?: Engine.ML_KIT,
             captureRange = range,
             resultDisplay = enumOrDefault(this[Keys.RESULT_DISPLAY], defaults.resultDisplay),

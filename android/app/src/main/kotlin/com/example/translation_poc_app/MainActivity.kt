@@ -1,6 +1,8 @@
 package com.example.translation_poc_app
 
 import com.example.translation_poc_app.bridge.EventsStreamHandler
+import com.example.translation_poc_app.bridge.GemmaHostApi
+import com.example.translation_poc_app.bridge.GemmaHostApiImpl
 import com.example.translation_poc_app.bridge.HistoryHostApi
 import com.example.translation_poc_app.bridge.HistoryHostApiImpl
 import com.example.translation_poc_app.bridge.VocabularyHostApi
@@ -27,6 +29,10 @@ class MainActivity : FlutterActivity() {
         SettingsHostApi.setUp(messenger, SettingsHostApiImpl(settingsRepository, AppGraph.apiKeyStore(this)))
         ServiceHostApi.setUp(messenger, ServiceHostApiImpl(applicationContext))
         ModelHostApi.setUp(messenger, ModelHostApiImpl())
+        GemmaHostApi.setUp(
+            messenger,
+            GemmaHostApiImpl(AppGraph.gemmaModelManager(this), AppGraph.gemmaRuntime(this), AppGraph.apiKeyStore(this)),
+        )
         HistoryHostApi.setUp(messenger, HistoryHostApiImpl(AppGraph.historyRepository(this)))
         VocabularyHostApi.setUp(messenger, VocabularyHostApiImpl(AppGraph.vocabularyRepository(this)))
         eventHandler = TranslatorEventHandler(settingsRepository).also {
@@ -39,6 +45,7 @@ class MainActivity : FlutterActivity() {
         SettingsHostApi.setUp(messenger, null)
         ServiceHostApi.setUp(messenger, null)
         ModelHostApi.setUp(messenger, null)
+        GemmaHostApi.setUp(messenger, null)
         HistoryHostApi.setUp(messenger, null)
         VocabularyHostApi.setUp(messenger, null)
         eventHandler?.dispose()

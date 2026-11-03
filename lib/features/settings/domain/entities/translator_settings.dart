@@ -2,14 +2,16 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'translator_settings.freezed.dart';
 
-/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13).
+/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13),
+/// gemma = 기기 안에서 도는 AI 모델 (#174, 키 없이 쓰지만 모델을 먼저 받아야 한다).
 enum EngineType {
   mlKit,
   gemini,
-  groq;
+  groq,
+  gemma;
 
-  /// 사용자가 발급한 API 키가 있어야 쓰는 AI 엔진인가.
-  bool get needsApiKey => this != mlKit;
+  /// 사용자가 발급한 API 키가 있어야 쓰는 클라우드 AI 엔진인가 (만 18세 확인도 필요).
+  bool get needsApiKey => this == gemini || this == groq;
 }
 
 /// AI 번역 말투 (FL-11). standard = 지정하지 않음 (AI가 원문에 맞춘다).

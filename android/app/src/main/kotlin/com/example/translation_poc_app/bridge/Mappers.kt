@@ -54,12 +54,14 @@ fun Engine.toPigeon() = when (this) {
     Engine.ML_KIT -> EngineType.ML_KIT
     Engine.GEMINI -> EngineType.GEMINI
     Engine.GROQ -> EngineType.GROQ
+    Engine.GEMMA -> EngineType.GEMMA
 }
 
 fun EngineType.toNative() = when (this) {
     EngineType.ML_KIT -> Engine.ML_KIT
     EngineType.GEMINI -> Engine.GEMINI
     EngineType.GROQ -> Engine.GROQ
+    EngineType.GEMMA -> Engine.GEMMA
 }
 
 fun CaptureRange.toPigeon() = when (this) {

@@ -17,6 +17,9 @@ ServiceHostApi serviceHostApi(Ref ref) => ServiceHostApi();
 ModelHostApi modelHostApi(Ref ref) => ModelHostApi();
 
 @Riverpod(keepAlive: true)
+GemmaHostApi gemmaHostApi(Ref ref) => GemmaHostApi();
+
+@Riverpod(keepAlive: true)
 HistoryHostApi historyHostApi(Ref ref) => HistoryHostApi();
 
 @Riverpod(keepAlive: true)

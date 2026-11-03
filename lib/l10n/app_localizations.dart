@@ -2407,6 +2407,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check what you know with a word test'**
   String get vocabStudyHint;
+
+  /// No description provided for @engineGemma.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemma (on-device AI)'**
+  String get engineGemma;
+
+  /// No description provided for @engineGemmaDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'AI translation on your phone · no key or internet · model download required'**
+  String get engineGemmaDetail;
+
+  /// No description provided for @engineNeedsModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the Gemma model first'**
+  String get engineNeedsModel;
+
+  /// No description provided for @settingsGemma.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemma model'**
+  String get settingsGemma;
+
+  /// No description provided for @settingsGemmaDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Download or delete the on-device AI model'**
+  String get settingsGemmaDetail;
+
+  /// No description provided for @gemmaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemma (on-device AI)'**
+  String get gemmaTitle;
+
+  /// No description provided for @gemmaIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The Gemma AI model translates right on your phone, so the text is never sent over the internet and no API key is needed. You download the model once, and the phone may get slow or warm while translating.'**
+  String get gemmaIntro;
+
+  /// No description provided for @gemmaModelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemma 3 1B (int4)'**
+  String get gemmaModelName;
+
+  /// No description provided for @gemmaStateReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded · ready to use'**
+  String get gemmaStateReady;
+
+  /// No description provided for @gemmaStateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {percent}% · about {size}MB'**
+  String gemmaStateDownloading(int percent, int size);
+
+  /// No description provided for @gemmaStateNotDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not downloaded · about {size}MB'**
+  String gemmaStateNotDownloaded(int size);
+
+  /// No description provided for @gemmaCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop download'**
+  String get gemmaCancel;
+
+  /// No description provided for @gemmaResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume download'**
+  String get gemmaResume;
+
+  /// No description provided for @gemmaDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the Gemma model?'**
+  String get gemmaDeleteTitle;
+
+  /// No description provided for @gemmaDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The model file is removed from this phone. You will need to download it again to use it.'**
+  String get gemmaDeleteBody;
+
+  /// No description provided for @gemmaUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate with Gemma'**
+  String get gemmaUse;
+
+  /// No description provided for @gemmaUseDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'When on, Gemma is tried first. If it fails, the other AI engine and then ML Kit take over'**
+  String get gemmaUseDetail;
+
+  /// No description provided for @gemmaRamLow.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone\'s memory ({device}GB) is too low to run the model. At least {min}GB is needed.'**
+  String gemmaRamLow(String device, String min);
+
+  /// No description provided for @gemmaTokenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hugging Face token'**
+  String get gemmaTokenTitle;
+
+  /// No description provided for @gemmaTokenIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The Gemma model can only be downloaded after you accept its terms. 1) Sign in to Hugging Face and accept the Gemma terms on the model page, 2) create a Read token and paste it below. The token is encrypted and stays on this phone.'**
+  String get gemmaTokenIntro;
+
+  /// No description provided for @gemmaTokenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hugging Face token (hf_...)'**
+  String get gemmaTokenHint;
+
+  /// No description provided for @gemmaTokenSavedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A token is saved · paste a new one to replace it'**
+  String get gemmaTokenSavedHint;
+
+  /// No description provided for @gemmaTokenSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Token saved'**
+  String get gemmaTokenSaved;
+
+  /// No description provided for @gemmaTokenRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove saved token'**
+  String get gemmaTokenRemove;
+
+  /// No description provided for @gemmaLicenseLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept the terms on the model page'**
+  String get gemmaLicenseLink;
+
+  /// No description provided for @gemmaTokenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a token on Hugging Face'**
+  String get gemmaTokenLink;
+
+  /// No description provided for @gemmaErrorToken.
+  ///
+  /// In en, this message translates to:
+  /// **'A Hugging Face token is needed to download the model. Paste and save one, then try again.'**
+  String get gemmaErrorToken;
+
+  /// No description provided for @gemmaErrorLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Your token works, but you have not accepted the Gemma terms yet. Accept them on the model page, then try again.'**
+  String get gemmaErrorLicense;
+
+  /// No description provided for @gemmaErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed. Check your connection, or connect to Wi-Fi if downloads are Wi-Fi only.'**
+  String get gemmaErrorNetwork;
+
+  /// No description provided for @gemmaErrorSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage. Free some space and try again.'**
+  String get gemmaErrorSpace;
+
+  /// No description provided for @gemmaErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not download the model. Please try again later.'**
+  String get gemmaErrorUnknown;
+
+  /// No description provided for @gemmaFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemma is Google\'s open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.'**
+  String get gemmaFootnote;
 }
 
 class _AppLocalizationsDelegate

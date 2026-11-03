@@ -415,6 +415,7 @@ private fun engineName(engine: EngineId): String = stringResource(
         EngineId.ML_KIT -> R.string.engine_ml_kit
         EngineId.GEMINI -> R.string.engine_gemini
         EngineId.GROQ -> R.string.engine_groq
+        EngineId.GEMMA -> R.string.engine_gemma
     },
 )
 

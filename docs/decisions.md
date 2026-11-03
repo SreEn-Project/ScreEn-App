@@ -408,3 +408,14 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 - **1순위 = 기존 `engine` 설정 그대로**. 새 저장 값을 만들지 않아 설정 화면 엔진 목록 · 빠른 설정 버블 · 새 "1순위 엔진" 팝업이 모두 같은 값을 바꾼다 (충돌 없음). 빠른 설정에서 엔진을 직접 고르면 그 엔진이 곧 1순위가 된다.
 - **2순위는 자동**: 1순위가 아닌 다른 AI 엔진에 키가 있으면 1순위 실패(한도 429 · 오류 · 오프라인 등 어떤 실패든) 때 그 엔진으로 넘어가고, 둘 다 안 되면 ML Kit으로 대체 + 기존 안내. AI끼리 넘어갈 때는 안내 없이 로그만 남긴다(결과 배지가 실제 엔진을 보여 준다).
 - **UI**: AI 번역 설정에 `AppPopupMenu`로 "1순위 엔진"(Gemini / Groq). 연령 확인 + 두 키가 모두 있을 때만 보인다. ML Kit을 쓰는 중이면 "선택 안 함"으로 보이고, 고르면 그 엔진으로 AI 번역이 켜진다.
+
+## D-068. Gemma 온디바이스 번역 엔진 (NA-13, #174)
+- **목적**: 인터넷 · API 키 · 18세 확인 없이 기기 안에서 도는 AI 번역. 번역할 글이 기기 밖으로 나가지 않는다. Gemini Nano(AICore)는 대상 기기가 제한적이라 쓰지 않고, 오픈 모델 Gemma를 직접 돌린다.
+- **런타임**: MediaPipe LLM Inference(`com.google.mediapipe:tasks-genai:0.10.27`, 네이티브 Kotlin) + `gemma3-1b-it-int4.task`(Gemma 3 1B int4, 약 0.5GB). 구글이 이 API를 유지보수 전용으로 돌려 후속은 LiteRT-LM이다. 지금은 문서와 예제가 가장 확실한 MediaPipe로 가고, 실기기에서 확인한 뒤 옮길지 정한다. 런타임은 `LlmRunner` 인터페이스 뒤에 있어 교체 범위가 `MediaPipeLlmRunner` 하나다.
+- **모델 파일**: 앱에 넣지 않고 처음 쓸 때 `filesDir/models/`로 받는다(이어받기, `.part` → 완성 시 이름 변경). 진행률은 Flutter가 1초마다 `GemmaHostApi.getStatus`로 읽는다(이벤트 채널 변경 없음). 설정의 "Wi-Fi에서만 받기"를 따른다. 저장 공간이 모자라면 시작하지 않는다.
+- **라이선스 · 토큰**: 모델 저장소(`litert-community/Gemma3-1B-IT`)는 Hugging Face에서 Gemma 사용 조건에 동의한 사람만 받을 수 있어 사용자가 Hugging Face 토큰(Read)을 붙여 넣는다. 토큰은 API 키와 같은 Keystore AES-GCM 암호화로 기기에만 보관하고, Flutter로는 값을 내보내지 않는다(저장 여부만). 401 = 토큰 필요, 403 = 사용 조건 미동의로 구분해 안내한다. 토큰은 `huggingface.co`로만 보내고, CDN으로 리다이렉트될 때는 직접 따라가며 Authorization을 뺀다.
+- **기기 조건**: 전체 메모리 3.5GB 미만이면 받기를 막는다. 모델은 쓰지 않으면 5분 뒤 메모리에서 내린다(`GemmaRuntime`). 실행은 블록이 여러 개여도 한 번에 하나씩 순서대로 한다.
+- **엔진 순서(D-067 확장)**: 1순위 = 기존 `engine` 설정. 1순위 실패 → 쓸 수 있는 다른 AI(클라우드는 연령 확인 + 키, Gemma는 모델을 받아 둔 것) → ML Kit. Gemma는 기기 밖으로 보내지 않으므로 연령 확인 · 키가 필요 없다(`Engine.needsApiKey`로 구분, `isAi`는 말투 · 용어집 적용 여부).
+- **프롬프트**: Gemini · Groq와 같은 지시문(말투 · 용어집 포함)을 Gemma 대화 형식(`<start_of_turn>`)에 넣는다. 컨텍스트가 작아 500자 단위로 잘라 차례로 번역한다. 번역 품질은 클라우드 모델보다 낮을 수 있다.
+- **단어 사전(AD-02)** 은 Gemma로 하지 않고 기존처럼 ML Kit 번역만 쓴다.
+- 코드 변경: `translate/Gemma*.kt` 3개, `ApiKeyStore`(토큰), `AppGraph`, `TranslatorService`, `HostApis`, Pigeon(`EngineType.gemma`, `GemmaHostApi`), Gradle(`tasks-genai`), Manifest(`ACCESS_NETWORK_STATE`), Flutter `features/gemma`, ARB · strings.xml.

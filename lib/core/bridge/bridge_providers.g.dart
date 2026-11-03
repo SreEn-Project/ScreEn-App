@@ -133,6 +133,47 @@ final class ModelHostApiProvider
 
 String _$modelHostApiHash() => r'834639a0370a81aea455e8560e851aced4b40de2';
 
+@ProviderFor(gemmaHostApi)
+final gemmaHostApiProvider = GemmaHostApiProvider._();
+
+final class GemmaHostApiProvider
+    extends $FunctionalProvider<GemmaHostApi, GemmaHostApi, GemmaHostApi>
+    with $Provider<GemmaHostApi> {
+  GemmaHostApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'gemmaHostApiProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$gemmaHostApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<GemmaHostApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GemmaHostApi create(Ref ref) {
+    return gemmaHostApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GemmaHostApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GemmaHostApi>(value),
+    );
+  }
+}
+
+String _$gemmaHostApiHash() => r'1682e582e8b3eb52dcf61d4aad8c14df71e4bc8e';
+
 @ProviderFor(historyHostApi)
 final historyHostApiProvider = HistoryHostApiProvider._();
 

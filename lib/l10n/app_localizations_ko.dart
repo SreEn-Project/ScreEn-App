@@ -1245,4 +1245,113 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vocabStudyHint => '암기 테스트로 단어를 확인해요';
+
+  @override
+  String get engineGemma => 'Gemma (기기 안 AI)';
+
+  @override
+  String get engineGemmaDetail => '인터넷 · 키 없이 기기에서 AI 번역 · 모델 받기 필요';
+
+  @override
+  String get engineNeedsModel => 'Gemma 모델을 먼저 받아야 해요';
+
+  @override
+  String get settingsGemma => 'Gemma 모델 관리';
+
+  @override
+  String get settingsGemmaDetail => '기기 안 AI 번역 모델 받기 · 삭제';
+
+  @override
+  String get gemmaTitle => 'Gemma (기기 안 AI)';
+
+  @override
+  String get gemmaIntro =>
+      '번역할 글을 인터넷으로 보내지 않고, 기기 안에서 Gemma AI 모델이 직접 번역해요. API 키도 필요 없어요. 처음 한 번 모델을 받아야 하고, 기기가 느리거나 뜨거워질 수 있어요.';
+
+  @override
+  String get gemmaModelName => 'Gemma 3 1B (int4)';
+
+  @override
+  String get gemmaStateReady => '받음 · 쓸 수 있어요';
+
+  @override
+  String gemmaStateDownloading(int percent, int size) {
+    return '받는 중 $percent% · 약 ${size}MB';
+  }
+
+  @override
+  String gemmaStateNotDownloaded(int size) {
+    return '아직 받지 않았어요 · 약 ${size}MB';
+  }
+
+  @override
+  String get gemmaCancel => '받기 멈추기';
+
+  @override
+  String get gemmaResume => '이어서 받기';
+
+  @override
+  String get gemmaDeleteTitle => 'Gemma 모델을 지울까요?';
+
+  @override
+  String get gemmaDeleteBody => '기기에서 모델 파일이 지워져요. 다시 쓰려면 새로 받아야 해요.';
+
+  @override
+  String get gemmaUse => 'Gemma로 번역하기';
+
+  @override
+  String get gemmaUseDetail =>
+      '켜면 Gemma를 1순위로 써요. 실패하면 다른 AI → ML Kit 순으로 넘어가요';
+
+  @override
+  String gemmaRamLow(String device, String min) {
+    return '이 기기의 메모리(${device}GB)가 모델을 돌리기에 부족해요. 최소 ${min}GB가 필요해요.';
+  }
+
+  @override
+  String get gemmaTokenTitle => 'Hugging Face 토큰';
+
+  @override
+  String get gemmaTokenIntro =>
+      'Gemma 모델은 사용 조건에 동의한 사람만 받을 수 있어요. ① Hugging Face에 로그인해 모델 페이지에서 Gemma 사용 조건에 동의하고 ② 읽기(Read) 토큰을 만들어 아래에 붙여 넣으세요. 토큰은 암호화되어 이 기기에만 저장돼요.';
+
+  @override
+  String get gemmaTokenHint => 'Hugging Face 토큰 (hf_...)';
+
+  @override
+  String get gemmaTokenSavedHint => '저장된 토큰이 있어요 · 새로 붙여 넣으면 바뀌어요';
+
+  @override
+  String get gemmaTokenSaved => '토큰을 저장했어요';
+
+  @override
+  String get gemmaTokenRemove => '저장된 토큰 지우기';
+
+  @override
+  String get gemmaLicenseLink => '모델 페이지에서 사용 조건 동의하기';
+
+  @override
+  String get gemmaTokenLink => 'Hugging Face에서 토큰 만들기';
+
+  @override
+  String get gemmaErrorToken =>
+      '모델을 받으려면 Hugging Face 토큰이 필요해요. 토큰을 붙여 넣고 저장한 뒤 다시 받아 주세요.';
+
+  @override
+  String get gemmaErrorLicense =>
+      '토큰은 확인됐지만 Gemma 사용 조건에 아직 동의하지 않았어요. 모델 페이지에서 동의한 뒤 다시 받아 주세요.';
+
+  @override
+  String get gemmaErrorNetwork =>
+      '받지 못했어요. 인터넷 연결을 확인하거나, Wi-Fi 전용 설정이면 Wi-Fi에 연결해 주세요.';
+
+  @override
+  String get gemmaErrorSpace => '저장 공간이 부족해요. 공간을 확보한 뒤 다시 받아 주세요.';
+
+  @override
+  String get gemmaErrorUnknown => '모델을 받지 못했어요. 잠시 뒤 다시 시도해 주세요.';
+
+  @override
+  String get gemmaFootnote =>
+      'Gemma는 Google의 오픈 모델이에요. 작은 모델이라 번역 품질은 Gemini · Groq보다 낮을 수 있고, 처음 번역할 때 모델을 불러오느라 몇 초 걸려요.';
 }

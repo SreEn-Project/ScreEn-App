@@ -38,7 +38,18 @@ class ApiKeyStore(context: Context) {
     private fun entry(engine: Engine): String? = when (engine) {
         Engine.GEMINI -> GEMINI_ENTRY
         Engine.GROQ -> GROQ_ENTRY
-        Engine.ML_KIT -> null
+        Engine.ML_KIT, Engine.GEMMA -> null
+    }
+
+    /** Gemma 모델을 받을 때 쓰는 Hugging Face 토큰 (#174). 키와 같은 Keystore 키로 암호화한다. */
+    fun huggingFaceToken(): String? = decrypt(HF_ENTRY)?.let { String(it) }?.takeIf { it.isNotBlank() }
+
+    fun setHuggingFaceToken(token: String) {
+        encrypt(HF_ENTRY, token.filterNot { it.isWhitespace() }.toByteArray())
+    }
+
+    fun clearHuggingFaceToken() {
+        prefs.edit().remove(HF_ENTRY).apply()
     }
 
     /** 키 접근 PIN이 켜져 있는지. PIN 자료가 있으나 읽을 수 없으면(Keystore 키 분실) 켜진 것으로 본다. */
@@ -71,7 +82,7 @@ class ApiKeyStore(context: Context) {
 
     /** PIN 분실: 키와 PIN을 함께 지운다. */
     fun reset() {
-        prefs.edit().remove(GEMINI_ENTRY).remove(GROQ_ENTRY).remove(PIN_ENTRY).apply()
+        prefs.edit().remove(GEMINI_ENTRY).remove(GROQ_ENTRY).remove(HF_ENTRY).remove(PIN_ENTRY).apply()
     }
 
     private fun isValidPin(pin: String) = pin.length == PIN_LENGTH && pin.all { it in '0'..'9' }
@@ -118,6 +129,7 @@ class ApiKeyStore(context: Context) {
         const val FILE = "api_key_store"
         const val GEMINI_ENTRY = "gemini"
         const val GROQ_ENTRY = "groq"
+        const val HF_ENTRY = "huggingface"
         const val PIN_ENTRY = "pin"
         const val PIN_LENGTH = 4
         const val SALT_BYTES = 16
