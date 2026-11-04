@@ -13,8 +13,9 @@ import 'package:pigeon/pigeon.dart';
     dartPackageName: 'translation_poc_app',
   ),
 )
-/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13).
-enum EngineType { mlKit, gemini, groq }
+/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13),
+/// gemma = 기기 안에서 도는 AI 모델 (Gemma, #174). 키 · 인터넷 없이 쓰지만 모델을 먼저 받아야 한다.
+enum EngineType { mlKit, gemini, groq, gemma }
 
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
@@ -206,6 +207,80 @@ abstract class ModelHostApi {
 
   @async
   void deleteLanguage(String languageCode);
+}
+
+/// Gemma 온디바이스 모델 상태 (#174).
+enum GemmaState { notDownloaded, downloading, ready }
+
+/// Gemma 모델 받기 실패 이유. none = 실패 없음.
+enum GemmaError {
+  none,
+
+  /// 모델이 잠겨 있어 Hugging Face 토큰이 필요하다 (토큰 없음 · 잘못된 토큰).
+  tokenRequired,
+
+  /// 토큰은 맞지만 Gemma 사용 조건(라이선스)에 동의하지 않았다.
+  licenseNotAccepted,
+
+  /// Wi-Fi 전용인데 Wi-Fi가 아니거나, 네트워크가 끊겼다.
+  network,
+  notEnoughSpace,
+  unknown,
+}
+
+/// Gemma 온디바이스 모델 상태 한 장 (#174). 받는 중에는 화면이 주기적으로 불러 진행률을 갱신한다.
+class GemmaStatus {
+  GemmaStatus({
+    required this.state,
+    required this.downloadedBytes,
+    required this.totalBytes,
+    required this.error,
+    required this.hasToken,
+    required this.deviceRamMb,
+    required this.minRamMb,
+  });
+
+  GemmaState state;
+
+  /// 받은 크기와 전체 크기 (바이트). 전체를 모르면 대략의 크기.
+  int downloadedBytes;
+  int totalBytes;
+
+  /// 마지막 받기가 실패했을 때의 이유. 받기를 다시 시작하면 none으로 돌아간다.
+  GemmaError error;
+
+  /// Hugging Face 토큰이 저장돼 있다. 토큰 값은 Flutter로 내보내지 않는다.
+  bool hasToken;
+
+  /// 기기 전체 메모리와 모델을 돌리는 데 필요한 최소 메모리 (MB). 모자라면 받기를 막는다.
+  int deviceRamMb;
+  int minRamMb;
+}
+
+/// Gemma 온디바이스 번역 모델 관리 (#174): 받기 · 취소 · 삭제 · Hugging Face 토큰.
+@HostApi()
+abstract class GemmaHostApi {
+  @async
+  GemmaStatus getStatus();
+
+  /// 모델 받기를 시작하고 바로 돌아온다 (진행률은 [getStatus]). 이미 받는 중이면 무시. 이어받기를 지원한다.
+  @async
+  void startDownload(bool wifiOnly);
+
+  /// 받기를 멈춘다. 받던 파일은 이어받을 수 있게 남긴다.
+  @async
+  void cancelDownload();
+
+  /// 받은 모델과 받던 파일을 지운다.
+  @async
+  void deleteModel();
+
+  /// Hugging Face 토큰을 Keystore로 암호화해 기기에만 저장한다.
+  @async
+  void setHuggingFaceToken(String token);
+
+  @async
+  void clearHuggingFaceToken();
 }
 
 @HostApi()

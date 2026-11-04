@@ -198,11 +198,15 @@ class FlutterError (
   val details: Any? = null
 ) : RuntimeException()
 
-/** 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13). */
+/**
+ * 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13),
+ * gemma = 기기 안에서 도는 AI 모델 (Gemma, #174). 키 · 인터넷 없이 쓰지만 모델을 먼저 받아야 한다.
+ */
 enum class EngineType(val raw: Int) {
   ML_KIT(0),
   GEMINI(1),
-  GROQ(2);
+  GROQ(2),
+  GEMMA(3);
 
   companion object {
     fun ofRaw(raw: Int): EngineType? {
@@ -262,6 +266,38 @@ enum class ServiceState(val raw: Int) {
 
   companion object {
     fun ofRaw(raw: Int): ServiceState? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** Gemma 온디바이스 모델 상태 (#174). */
+enum class GemmaState(val raw: Int) {
+  NOT_DOWNLOADED(0),
+  DOWNLOADING(1),
+  READY(2);
+
+  companion object {
+    fun ofRaw(raw: Int): GemmaState? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** Gemma 모델 받기 실패 이유. none = 실패 없음. */
+enum class GemmaError(val raw: Int) {
+  NONE(0),
+  /** 모델이 잠겨 있어 Hugging Face 토큰이 필요하다 (토큰 없음 · 잘못된 토큰). */
+  TOKEN_REQUIRED(1),
+  /** 토큰은 맞지만 Gemma 사용 조건(라이선스)에 동의하지 않았다. */
+  LICENSE_NOT_ACCEPTED(2),
+  /** Wi-Fi 전용인데 Wi-Fi가 아니거나, 네트워크가 끊겼다. */
+  NETWORK(3),
+  NOT_ENOUGH_SPACE(4),
+  UNKNOWN(5);
+
+  companion object {
+    fun ofRaw(raw: Int): GemmaError? {
       return values().firstOrNull { it.raw == raw }
     }
   }
@@ -437,6 +473,75 @@ data class AppSettings (
   }
   override fun toString(): String {
     return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload, buttonSizeDp=$buttonSizeDp, buttonOpacityPercent=$buttonOpacityPercent, hasFixedRegion=$hasFixedRegion, ageConfirmed=$ageConfirmed, aiTone=$aiTone, glossary=$glossary)"
+  }
+}
+
+/**
+ * Gemma 온디바이스 모델 상태 한 장 (#174). 받는 중에는 화면이 주기적으로 불러 진행률을 갱신한다.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class GemmaStatus (
+  val state: GemmaState,
+  /** 받은 크기와 전체 크기 (바이트). 전체를 모르면 대략의 크기. */
+  val downloadedBytes: Long,
+  val totalBytes: Long,
+  /** 마지막 받기가 실패했을 때의 이유. 받기를 다시 시작하면 none으로 돌아간다. */
+  val error: GemmaError,
+  /** Hugging Face 토큰이 저장돼 있다. 토큰 값은 Flutter로 내보내지 않는다. */
+  val hasToken: Boolean,
+  /** 기기 전체 메모리와 모델을 돌리는 데 필요한 최소 메모리 (MB). 모자라면 받기를 막는다. */
+  val deviceRamMb: Long,
+  val minRamMb: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GemmaStatus {
+      val state = pigeonVar_list[0] as GemmaState
+      val downloadedBytes = pigeonVar_list[1] as Long
+      val totalBytes = pigeonVar_list[2] as Long
+      val error = pigeonVar_list[3] as GemmaError
+      val hasToken = pigeonVar_list[4] as Boolean
+      val deviceRamMb = pigeonVar_list[5] as Long
+      val minRamMb = pigeonVar_list[6] as Long
+      return GemmaStatus(state, downloadedBytes, totalBytes, error, hasToken, deviceRamMb, minRamMb)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      state,
+      downloadedBytes,
+      totalBytes,
+      error,
+      hasToken,
+      deviceRamMb,
+      minRamMb,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as GemmaStatus
+    return TranslatorApiPigeonUtils.deepEquals(this.state, other.state) && TranslatorApiPigeonUtils.deepEquals(this.downloadedBytes, other.downloadedBytes) && TranslatorApiPigeonUtils.deepEquals(this.totalBytes, other.totalBytes) && TranslatorApiPigeonUtils.deepEquals(this.error, other.error) && TranslatorApiPigeonUtils.deepEquals(this.hasToken, other.hasToken) && TranslatorApiPigeonUtils.deepEquals(this.deviceRamMb, other.deviceRamMb) && TranslatorApiPigeonUtils.deepEquals(this.minRamMb, other.minRamMb)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.state)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.downloadedBytes)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.totalBytes)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.error)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.hasToken)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.deviceRamMb)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.minRamMb)
+    return result
+  }
+  override fun toString(): String {
+    return "GemmaStatus(state=$state, downloadedBytes=$downloadedBytes, totalBytes=$totalBytes, error=$error, hasToken=$hasToken, deviceRamMb=$deviceRamMb, minRamMb=$minRamMb)"
   }
 }
 
@@ -897,50 +1002,65 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
       }
       134.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          VocabSort.ofRaw(it.toInt())
+          GemmaState.ofRaw(it.toInt())
         }
       }
       135.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          GlossaryEntry.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          GemmaError.ofRaw(it.toInt())
         }
       }
       136.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          AppSettings.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          VocabSort.ofRaw(it.toInt())
         }
       }
       137.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationRecord.fromList(it)
+          GlossaryEntry.fromList(it)
         }
       }
       138.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          Wordbook.fromList(it)
+          AppSettings.fromList(it)
         }
       }
       139.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VocabWord.fromList(it)
+          GemmaStatus.fromList(it)
         }
       }
       140.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          WordAnswer.fromList(it)
+          TranslationRecord.fromList(it)
         }
       }
       141.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VocabWordInput.fromList(it)
+          Wordbook.fromList(it)
         }
       }
       142.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ServiceStateChanged.fromList(it)
+          VocabWord.fromList(it)
         }
       }
       143.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          WordAnswer.fromList(it)
+        }
+      }
+      144.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VocabWordInput.fromList(it)
+        }
+      }
+      145.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ServiceStateChanged.fromList(it)
+        }
+      }
+      146.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SettingsChanged.fromList(it)
         }
@@ -970,44 +1090,56 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
         stream.write(133)
         writeValue(stream, value.raw.toLong())
       }
-      is VocabSort -> {
+      is GemmaState -> {
         stream.write(134)
         writeValue(stream, value.raw.toLong())
       }
-      is GlossaryEntry -> {
+      is GemmaError -> {
         stream.write(135)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is AppSettings -> {
+      is VocabSort -> {
         stream.write(136)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationRecord -> {
+      is GlossaryEntry -> {
         stream.write(137)
         writeValue(stream, value.toList())
       }
-      is Wordbook -> {
+      is AppSettings -> {
         stream.write(138)
         writeValue(stream, value.toList())
       }
-      is VocabWord -> {
+      is GemmaStatus -> {
         stream.write(139)
         writeValue(stream, value.toList())
       }
-      is WordAnswer -> {
+      is TranslationRecord -> {
         stream.write(140)
         writeValue(stream, value.toList())
       }
-      is VocabWordInput -> {
+      is Wordbook -> {
         stream.write(141)
         writeValue(stream, value.toList())
       }
-      is ServiceStateChanged -> {
+      is VocabWord -> {
         stream.write(142)
         writeValue(stream, value.toList())
       }
-      is SettingsChanged -> {
+      is WordAnswer -> {
         stream.write(143)
+        writeValue(stream, value.toList())
+      }
+      is VocabWordInput -> {
+        stream.write(144)
+        writeValue(stream, value.toList())
+      }
+      is ServiceStateChanged -> {
+        stream.write(145)
+        writeValue(stream, value.toList())
+      }
+      is SettingsChanged -> {
+        stream.write(146)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -1649,6 +1781,146 @@ interface ModelHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.deleteLanguage(languageCodeArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * Gemma 온디바이스 번역 모델 관리 (#174): 받기 · 취소 · 삭제 · Hugging Face 토큰.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GemmaHostApi {
+  suspend fun getStatus(): GemmaStatus
+  /** 모델 받기를 시작하고 바로 돌아온다 (진행률은 [getStatus]). 이미 받는 중이면 무시. 이어받기를 지원한다. */
+  suspend fun startDownload(wifiOnly: Boolean)
+  /** 받기를 멈춘다. 받던 파일은 이어받을 수 있게 남긴다. */
+  suspend fun cancelDownload()
+  /** 받은 모델과 받던 파일을 지운다. */
+  suspend fun deleteModel()
+  /** Hugging Face 토큰을 Keystore로 암호화해 기기에만 저장한다. */
+  suspend fun setHuggingFaceToken(token: String)
+  suspend fun clearHuggingFaceToken()
+
+  companion object {
+    /** The codec used by GemmaHostApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      TranslatorApiPigeonCodec()
+    }
+    /** Sets up an instance of `GemmaHostApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GemmaHostApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.GemmaHostApi.getStatus$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getStatus())
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.GemmaHostApi.startDownload$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val wifiOnlyArg = args[0] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.startDownload(wifiOnlyArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.GemmaHostApi.cancelDownload$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.cancelDownload()
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.GemmaHostApi.deleteModel$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deleteModel()
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.GemmaHostApi.setHuggingFaceToken$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tokenArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setHuggingFaceToken(tokenArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.GemmaHostApi.clearHuggingFaceToken$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.clearHuggingFaceToken()
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

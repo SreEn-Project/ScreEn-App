@@ -8,6 +8,7 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/language/presentation/screens/language_picker_screen.dart';
 import '../features/models/presentation/screens/language_models_screen.dart';
 import '../features/settings/di.dart';
+import '../features/gemma/presentation/screens/gemma_screen.dart';
 import '../features/settings/presentation/screens/ai_setup_screen.dart';
 import '../features/settings/presentation/screens/quick_languages_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -40,6 +41,7 @@ abstract final class AppRoutes {
   static const targetLanguage = '/target-language';
   static const quickLanguages = '/quick-languages';
   static const aiSetup = '/ai-setup';
+  static const gemma = '/gemma';
   static const about = '/about';
   static const history = '/history';
   static const vocabulary = '/vocabulary';
@@ -114,6 +116,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
       GoRoute(
         path: AppRoutes.aiSetup,
         builder: (context, state) => const AiSetupScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.gemma,
+        builder: (context, state) => const GemmaScreen(),
       ),
       GoRoute(
         path: AppRoutes.history,

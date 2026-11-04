@@ -6,6 +6,9 @@ import com.example.translation_poc_app.data.history.AppDatabase
 import com.example.translation_poc_app.data.history.HistoryRepository
 import com.example.translation_poc_app.data.settings.SettingsRepository
 import com.example.translation_poc_app.data.vocabulary.VocabularyRepository
+import com.example.translation_poc_app.translate.GemmaModelManager
+import com.example.translation_poc_app.translate.GemmaRuntime
+import com.example.translation_poc_app.translate.MediaPipeLlmRunner
 
 /**
  * 프로세스 단위 공유 객체. Activity(Flutter 브리지)와 서비스가 같은 인스턴스를 쓴다.
@@ -51,6 +54,33 @@ object AppGraph {
             vocabularyRepository ?: VocabularyRepository(database(context).vocabulary()).also {
                 vocabularyRepository = it
             }
+        }
+
+    @Volatile
+    private var gemmaModelManager: GemmaModelManager? = null
+
+    /** Gemma 온디바이스 모델 파일 관리 (#174). */
+    fun gemmaModelManager(context: Context): GemmaModelManager =
+        gemmaModelManager ?: synchronized(this) {
+            gemmaModelManager ?: GemmaModelManager(
+                context.applicationContext,
+                tokenProvider = { apiKeyStore(context).huggingFaceToken() },
+            ).also { gemmaModelManager = it }
+        }
+
+    @Volatile
+    private var gemmaRuntime: GemmaRuntime? = null
+
+    /** Gemma 실행기. 프로세스에서 하나만 두고, 안 쓰면 알아서 메모리에서 내린다 (#174). */
+    fun gemmaRuntime(context: Context): GemmaRuntime =
+        gemmaRuntime ?: synchronized(this) {
+            gemmaRuntime ?: gemmaModelManager(context).let { models ->
+                GemmaRuntime(
+                    modelFile = { models.modelFile },
+                    isReady = { models.isReady() },
+                    createRunner = { MediaPipeLlmRunner(context.applicationContext, it) },
+                )
+            }.also { gemmaRuntime = it }
         }
 
     @Volatile

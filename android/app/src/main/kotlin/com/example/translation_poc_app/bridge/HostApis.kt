@@ -15,6 +15,10 @@ import com.example.translation_poc_app.service.CaptureConsentActivity
 import com.example.translation_poc_app.service.RunState
 import com.example.translation_poc_app.service.TranslatorService
 import com.example.translation_poc_app.service.TranslatorServiceState
+import com.example.translation_poc_app.translate.GemmaFailure
+import com.example.translation_poc_app.translate.GemmaModelManager
+import com.example.translation_poc_app.translate.GemmaModelState
+import com.example.translation_poc_app.translate.GemmaRuntime
 import com.example.translation_poc_app.translate.LanguageModelManager
 
 /** Flutter → 네이티브 설정 호출 (NA-01, NA-16). */
@@ -93,6 +97,50 @@ class ModelHostApiImpl(private val models: LanguageModelManager = LanguageModelM
         models.download(languageCode, wifiOnly)
 
     override suspend fun deleteLanguage(languageCode: String) = models.delete(languageCode)
+}
+
+/** Gemma 온디바이스 모델 상태 · 받기 · 삭제와 Hugging Face 토큰 (#174). */
+class GemmaHostApiImpl(
+    private val models: GemmaModelManager,
+    private val runtime: GemmaRuntime,
+    private val apiKeys: ApiKeyStore,
+) : GemmaHostApi {
+    override suspend fun getStatus(): GemmaStatus {
+        val s = models.snapshot()
+        return GemmaStatus(
+            state = when (s.state) {
+                GemmaModelState.NOT_DOWNLOADED -> GemmaState.NOT_DOWNLOADED
+                GemmaModelState.DOWNLOADING -> GemmaState.DOWNLOADING
+                GemmaModelState.READY -> GemmaState.READY
+            },
+            downloadedBytes = s.downloadedBytes,
+            totalBytes = s.totalBytes,
+            error = when (s.failure) {
+                GemmaFailure.NONE -> GemmaError.NONE
+                GemmaFailure.TOKEN_REQUIRED -> GemmaError.TOKEN_REQUIRED
+                GemmaFailure.LICENSE_NOT_ACCEPTED -> GemmaError.LICENSE_NOT_ACCEPTED
+                GemmaFailure.NETWORK -> GemmaError.NETWORK
+                GemmaFailure.NOT_ENOUGH_SPACE -> GemmaError.NOT_ENOUGH_SPACE
+                GemmaFailure.UNKNOWN -> GemmaError.UNKNOWN
+            },
+            hasToken = apiKeys.huggingFaceToken() != null,
+            deviceRamMb = models.deviceRamMb().toLong(),
+            minRamMb = models.minRamMb.toLong(),
+        )
+    }
+
+    override suspend fun startDownload(wifiOnly: Boolean) = models.startDownload(wifiOnly)
+
+    override suspend fun cancelDownload() = models.cancelDownload()
+
+    override suspend fun deleteModel() {
+        runtime.unload() // 파일을 지우기 전에 메모리에서 내린다.
+        models.delete()
+    }
+
+    override suspend fun setHuggingFaceToken(token: String) = apiKeys.setHuggingFaceToken(token)
+
+    override suspend fun clearHuggingFaceToken() = apiKeys.clearHuggingFaceToken()
 }
 
 /** 번역 기록 조회 · 삭제 (FL-13). */

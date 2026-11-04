@@ -728,7 +728,7 @@ class OverlayController(
                 showChoices(QuickSettingChoices.showDelay(), storedShowDelayMs, settingsRepository::setAutoShowDelayMs)
             }
         }
-        // AI 번역 엔진: 누르면 ML Kit · Gemini AI · Groq AI 목록이 열린다. 저장은 앱 설정과 같은 엔진 설정이라 서로 맞는다.
+        // AI 번역 엔진: 누르면 ML Kit · Gemini AI · Groq AI · Gemma(기기 안) 목록이 열린다. 저장은 앱 설정과 같은 엔진 설정이라 서로 맞는다.
         options += MenuOption(
             Symbol.AUTO_AWESOME,
             context.getString(R.string.overlay_setting_engine, engineLabel(engine)),
@@ -743,6 +743,7 @@ class OverlayController(
             when (engine) {
                 Engine.GEMINI -> R.string.overlay_engine_gemini
                 Engine.GROQ -> R.string.overlay_engine_groq
+                Engine.GEMMA -> R.string.overlay_engine_gemma
                 Engine.ML_KIT -> R.string.overlay_engine_ml_kit
             },
         )
@@ -762,7 +763,11 @@ class OverlayController(
                 val usable = ready[choice] == true
                 MenuOption(
                     Symbol.CHECK,
-                    if (usable) engineLabel(choice) else context.getString(R.string.overlay_engine_needs_key, engineLabel(choice)),
+                    when {
+                        usable -> engineLabel(choice)
+                        choice == Engine.GEMMA -> context.getString(R.string.overlay_engine_needs_model, engineLabel(choice))
+                        else -> context.getString(R.string.overlay_engine_needs_key, engineLabel(choice))
+                    },
                     selected = usable && choice == engine,
                     enabled = usable,
                 ) {

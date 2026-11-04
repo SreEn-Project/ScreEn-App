@@ -97,8 +97,9 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
-/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13).
-enum EngineType { mlKit, gemini, groq }
+/// 번역 엔진 (NA-11). mlKit = 기기 내 번역, gemini · groq = 내 API 키 (NA-13),
+/// gemma = 기기 안에서 도는 AI 모델 (Gemma, #174). 키 · 인터넷 없이 쓰지만 모델을 먼저 받아야 한다.
+enum EngineType { mlKit, gemini, groq, gemma }
 
 /// 캡처 범위 (NA-06). 1단계는 fullScreen만 동작.
 enum CaptureMode { fullScreen, dragRegion, fixedRegion }
@@ -112,6 +113,25 @@ enum AiTone { standard, formal, informal }
 /// 포그라운드 서비스 상태 (NA-02). starting = 화면 캡처 동의 대기 중.
 /// error = 시작 실패 (동의 후 서비스 시작 실패 등). 다시 시작하면 벗어난다.
 enum ServiceState { stopped, starting, running, error }
+
+/// Gemma 온디바이스 모델 상태 (#174).
+enum GemmaState { notDownloaded, downloading, ready }
+
+/// Gemma 모델 받기 실패 이유. none = 실패 없음.
+enum GemmaError {
+  none,
+
+  /// 모델이 잠겨 있어 Hugging Face 토큰이 필요하다 (토큰 없음 · 잘못된 토큰).
+  tokenRequired,
+
+  /// 토큰은 맞지만 Gemma 사용 조건(라이선스)에 동의하지 않았다.
+  licenseNotAccepted,
+
+  /// Wi-Fi 전용인데 Wi-Fi가 아니거나, 네트워크가 끊겼다.
+  network,
+  notEnoughSpace,
+  unknown,
+}
 
 enum VocabSort { newest, oldest, alphabetical }
 
@@ -309,6 +329,93 @@ class AppSettings {
   @override
   String toString() {
     return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion, ageConfirmed: $ageConfirmed, aiTone: $aiTone, glossary: $glossary)';
+  }
+}
+
+/// Gemma 온디바이스 모델 상태 한 장 (#174). 받는 중에는 화면이 주기적으로 불러 진행률을 갱신한다.
+class GemmaStatus {
+  GemmaStatus({
+    required this.state,
+    required this.downloadedBytes,
+    required this.totalBytes,
+    required this.error,
+    required this.hasToken,
+    required this.deviceRamMb,
+    required this.minRamMb,
+  });
+
+  GemmaState state;
+
+  /// 받은 크기와 전체 크기 (바이트). 전체를 모르면 대략의 크기.
+  int downloadedBytes;
+
+  int totalBytes;
+
+  /// 마지막 받기가 실패했을 때의 이유. 받기를 다시 시작하면 none으로 돌아간다.
+  GemmaError error;
+
+  /// Hugging Face 토큰이 저장돼 있다. 토큰 값은 Flutter로 내보내지 않는다.
+  bool hasToken;
+
+  /// 기기 전체 메모리와 모델을 돌리는 데 필요한 최소 메모리 (MB). 모자라면 받기를 막는다.
+  int deviceRamMb;
+
+  int minRamMb;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      state,
+      downloadedBytes,
+      totalBytes,
+      error,
+      hasToken,
+      deviceRamMb,
+      minRamMb,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static GemmaStatus decode(Object result) {
+    result as List<Object?>;
+    return GemmaStatus(
+      state: result[0]! as GemmaState,
+      downloadedBytes: result[1]! as int,
+      totalBytes: result[2]! as int,
+      error: result[3]! as GemmaError,
+      hasToken: result[4]! as bool,
+      deviceRamMb: result[5]! as int,
+      minRamMb: result[6]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! GemmaStatus || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(state, other.state) &&
+        _deepEquals(downloadedBytes, other.downloadedBytes) &&
+        _deepEquals(totalBytes, other.totalBytes) &&
+        _deepEquals(error, other.error) &&
+        _deepEquals(hasToken, other.hasToken) &&
+        _deepEquals(deviceRamMb, other.deviceRamMb) &&
+        _deepEquals(minRamMb, other.minRamMb);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'GemmaStatus(state: $state, downloadedBytes: $downloadedBytes, totalBytes: $totalBytes, error: $error, hasToken: $hasToken, deviceRamMb: $deviceRamMb, minRamMb: $minRamMb)';
   }
 }
 
@@ -853,35 +960,44 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is ServiceState) {
       buffer.putUint8(133);
       writeValue(buffer, value.index);
-    } else if (value is VocabSort) {
+    } else if (value is GemmaState) {
       buffer.putUint8(134);
       writeValue(buffer, value.index);
-    } else if (value is GlossaryEntry) {
+    } else if (value is GemmaError) {
       buffer.putUint8(135);
-      writeValue(buffer, value.encode());
-    } else if (value is AppSettings) {
+      writeValue(buffer, value.index);
+    } else if (value is VocabSort) {
       buffer.putUint8(136);
-      writeValue(buffer, value.encode());
-    } else if (value is TranslationRecord) {
+      writeValue(buffer, value.index);
+    } else if (value is GlossaryEntry) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    } else if (value is Wordbook) {
+    } else if (value is AppSettings) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    } else if (value is VocabWord) {
+    } else if (value is GemmaStatus) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    } else if (value is WordAnswer) {
+    } else if (value is TranslationRecord) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    } else if (value is VocabWordInput) {
+    } else if (value is Wordbook) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    } else if (value is ServiceStateChanged) {
+    } else if (value is VocabWord) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    } else if (value is SettingsChanged) {
+    } else if (value is WordAnswer) {
       buffer.putUint8(143);
+      writeValue(buffer, value.encode());
+    } else if (value is VocabWordInput) {
+      buffer.putUint8(144);
+      writeValue(buffer, value.encode());
+    } else if (value is ServiceStateChanged) {
+      buffer.putUint8(145);
+      writeValue(buffer, value.encode());
+    } else if (value is SettingsChanged) {
+      buffer.putUint8(146);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -908,24 +1024,32 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : ServiceState.values[value];
       case 134:
         final value = readValue(buffer) as int?;
-        return value == null ? null : VocabSort.values[value];
+        return value == null ? null : GemmaState.values[value];
       case 135:
-        return GlossaryEntry.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : GemmaError.values[value];
       case 136:
-        return AppSettings.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : VocabSort.values[value];
       case 137:
-        return TranslationRecord.decode(readValue(buffer)!);
+        return GlossaryEntry.decode(readValue(buffer)!);
       case 138:
-        return Wordbook.decode(readValue(buffer)!);
+        return AppSettings.decode(readValue(buffer)!);
       case 139:
-        return VocabWord.decode(readValue(buffer)!);
+        return GemmaStatus.decode(readValue(buffer)!);
       case 140:
-        return WordAnswer.decode(readValue(buffer)!);
+        return TranslationRecord.decode(readValue(buffer)!);
       case 141:
-        return VocabWordInput.decode(readValue(buffer)!);
+        return Wordbook.decode(readValue(buffer)!);
       case 142:
-        return ServiceStateChanged.decode(readValue(buffer)!);
+        return VocabWord.decode(readValue(buffer)!);
       case 143:
+        return WordAnswer.decode(readValue(buffer)!);
+      case 144:
+        return VocabWordInput.decode(readValue(buffer)!);
+      case 145:
+        return ServiceStateChanged.decode(readValue(buffer)!);
+      case 146:
         return SettingsChanged.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -1556,6 +1680,142 @@ class ModelHostApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[languageCode],
     );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+}
+
+/// Gemma 온디바이스 번역 모델 관리 (#174): 받기 · 취소 · 삭제 · Hugging Face 토큰.
+class GemmaHostApi {
+  /// Constructor for [GemmaHostApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GemmaHostApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  Future<GemmaStatus> getStatus() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.GemmaHostApi.getStatus$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as GemmaStatus;
+  }
+
+  /// 모델 받기를 시작하고 바로 돌아온다 (진행률은 [getStatus]). 이미 받는 중이면 무시. 이어받기를 지원한다.
+  Future<void> startDownload(bool wifiOnly) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.GemmaHostApi.startDownload$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[wifiOnly],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 받기를 멈춘다. 받던 파일은 이어받을 수 있게 남긴다.
+  Future<void> cancelDownload() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.GemmaHostApi.cancelDownload$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 받은 모델과 받던 파일을 지운다.
+  Future<void> deleteModel() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.GemmaHostApi.deleteModel$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// Hugging Face 토큰을 Keystore로 암호화해 기기에만 저장한다.
+  Future<void> setHuggingFaceToken(String token) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.GemmaHostApi.setHuggingFaceToken$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[token],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> clearHuggingFaceToken() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.GemmaHostApi.clearHuggingFaceToken$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

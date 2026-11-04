@@ -1275,4 +1275,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vocabStudyHint => 'Check what you know with a word test';
+
+  @override
+  String get engineGemma => 'Gemma (on-device AI)';
+
+  @override
+  String get engineGemmaDetail =>
+      'AI translation on your phone · no key or internet · model download required';
+
+  @override
+  String get engineNeedsModel => 'Download the Gemma model first';
+
+  @override
+  String get settingsGemma => 'Gemma model';
+
+  @override
+  String get settingsGemmaDetail => 'Download or delete the on-device AI model';
+
+  @override
+  String get gemmaTitle => 'Gemma (on-device AI)';
+
+  @override
+  String get gemmaIntro =>
+      'The Gemma AI model translates right on your phone, so the text is never sent over the internet and no API key is needed. You download the model once, and the phone may get slow or warm while translating.';
+
+  @override
+  String get gemmaModelName => 'Gemma 3 1B (int4)';
+
+  @override
+  String get gemmaStateReady => 'Downloaded · ready to use';
+
+  @override
+  String gemmaStateDownloading(int percent, int size) {
+    return 'Downloading $percent% · about ${size}MB';
+  }
+
+  @override
+  String gemmaStateNotDownloaded(int size) {
+    return 'Not downloaded · about ${size}MB';
+  }
+
+  @override
+  String get gemmaCancel => 'Stop download';
+
+  @override
+  String get gemmaResume => 'Resume download';
+
+  @override
+  String get gemmaDeleteTitle => 'Delete the Gemma model?';
+
+  @override
+  String get gemmaDeleteBody =>
+      'The model file is removed from this phone. You will need to download it again to use it.';
+
+  @override
+  String get gemmaUse => 'Translate with Gemma';
+
+  @override
+  String get gemmaUseDetail =>
+      'When on, Gemma is tried first. If it fails, the other AI engine and then ML Kit take over';
+
+  @override
+  String gemmaRamLow(String device, String min) {
+    return 'This phone\'s memory (${device}GB) is too low to run the model. At least ${min}GB is needed.';
+  }
+
+  @override
+  String get gemmaTokenTitle => 'Hugging Face token';
+
+  @override
+  String get gemmaTokenIntro =>
+      'The Gemma model can only be downloaded after you accept its terms. 1) Sign in to Hugging Face and accept the Gemma terms on the model page, 2) create a Read token and paste it below. The token is encrypted and stays on this phone.';
+
+  @override
+  String get gemmaTokenHint => 'Hugging Face token (hf_...)';
+
+  @override
+  String get gemmaTokenSavedHint =>
+      'A token is saved · paste a new one to replace it';
+
+  @override
+  String get gemmaTokenSaved => 'Token saved';
+
+  @override
+  String get gemmaTokenRemove => 'Remove saved token';
+
+  @override
+  String get gemmaLicenseLink => 'Accept the terms on the model page';
+
+  @override
+  String get gemmaTokenLink => 'Create a token on Hugging Face';
+
+  @override
+  String get gemmaErrorToken =>
+      'A Hugging Face token is needed to download the model. Paste and save one, then try again.';
+
+  @override
+  String get gemmaErrorLicense =>
+      'Your token works, but you have not accepted the Gemma terms yet. Accept them on the model page, then try again.';
+
+  @override
+  String get gemmaErrorNetwork =>
+      'Download failed. Check your connection, or connect to Wi-Fi if downloads are Wi-Fi only.';
+
+  @override
+  String get gemmaErrorSpace =>
+      'Not enough storage. Free some space and try again.';
+
+  @override
+  String get gemmaErrorUnknown =>
+      'Could not download the model. Please try again later.';
+
+  @override
+  String get gemmaFootnote =>
+      'Gemma is Google\'s open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.';
 }

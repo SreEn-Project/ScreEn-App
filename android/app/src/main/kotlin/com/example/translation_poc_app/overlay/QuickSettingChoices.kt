@@ -14,5 +14,5 @@ internal object QuickSettingChoices {
     fun showDelay(): List<Long> = SHOW_DELAY_MS
 
     /** 엔진 선택지 (앱 설정 화면과 같다). */
-    fun engines(): List<Engine> = listOf(Engine.ML_KIT, Engine.GEMINI, Engine.GROQ)
+    fun engines(): List<Engine> = listOf(Engine.ML_KIT, Engine.GEMINI, Engine.GROQ, Engine.GEMMA)
 }

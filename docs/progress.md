@@ -564,3 +564,8 @@
 - 버그: PIN 분실 초기화 뒤 AI 설정 화면의 입력창에 지운 키가 그대로 남던 문제. 원인은 `reset()`이 `ref.invalidate`만 하고 기다리지 않아, 다시 읽는 동안 이전 값이 남은 채 화면이 입력창을 다시 채운 것.
 - 정리: 모든 AI 엔진의 키를 다시 읽고 끝날 때까지 기다리는 `reloadApiKeys`를 한 곳(`api_key_view_model.dart`)에 두고 reset이 쓴다. 키를 쓰는 엔진 목록 `aiKeyEngines`를 한 곳으로 모아 화면 · 1순위 카드가 같이 쓴다. 화면은 다시 읽는 중의 값으로 입력창을 채우지 않는다. 엔진 · 빠른 설정 · 옵션은 이미 네이티브 설정 이벤트 하나로 갱신되어 따로 고칠 곳이 없었다.
 - 코드 변경: 뷰모델 2개 · AI 설정 화면 · 1순위 카드 · 테스트 1개 추가. 네이티브 · 의존성 변경 없음. 확인: analyze 0, test 통과, 디버그 빌드 성공.
+
+## Gemma 온디바이스 번역 엔진 (NA-13, #174)
+- 한 일: 기기 안에서 도는 Gemma 3 1B 번역 엔진(MediaPipe LLM Inference)을 AI 엔진 순서에 추가. 모델 받기(이어받기 · 진행률 · 취소 · 삭제) · Hugging Face 토큰 · 기기 메모리 확인 · 설정 화면 `Gemma 모델 관리`. D-068 참고.
+- 확인: `flutter analyze` 0, `flutter test` 전체 통과(Gemma 뷰모델 · 엔진 선택 테스트 추가). Kotlin 단위 테스트(`GemmaTranslationEngineTest` · `GemmaModelManagerTest`)는 작성했지만 이 환경에 Android SDK가 없어 실행하지 못했다. 네이티브 컴파일 · 실기기 번역은 확인 전.
+- 남은 일: 실기기(RAM 8GB)에서 모델 받기 → 번역 속도 · 품질 · 발열 확인, 모델 파일 주소(`GemmaModelSpec.DEFAULT`) 검증, 필요하면 LiteRT-LM으로 이전.

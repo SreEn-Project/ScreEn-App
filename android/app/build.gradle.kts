@@ -75,6 +75,8 @@ dependencies {
     implementation("androidx.room:room-ktx:2.8.5")
     ksp("androidx.room:room-compiler:2.8.5")
     // 문자 인식 · 언어 감지 · 온디바이스 번역 (NA-09, NA-10, NA-12)
+    // Gemma 온디바이스 번역 (#174): MediaPipe LLM Inference. 모델 파일은 앱 안에 넣지 않고 처음 쓸 때 받는다.
+    implementation("com.google.mediapipe:tasks-genai:0.10.27")
     implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("com.google.mlkit:text-recognition-korean:16.0.1")
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")

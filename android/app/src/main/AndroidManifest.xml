@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- ML Kit 언어 모델 다운로드 (NA-12) -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Gemma 모델을 Wi-Fi 등 데이터 요금이 없는 망에서만 받게 한다 (#174) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:fullBackupContent="@xml/backup_rules"
