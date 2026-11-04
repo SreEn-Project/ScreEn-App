@@ -574,3 +574,4 @@
 - ML Kit 번역 앞뒤에 Gemma 보정을 붙였다(D-069). 설정 2개(기본 꺼짐), Gemma 화면에 토글. 모델이 없거나 실패하면 보정 없이 진행.
 - 확인: `flutter analyze` 경고 0, `flutter test` 통과(설정 전달 · 뷰모델). Kotlin 단위 테스트(`GemmaAssistTest`)는 작성했으나 클라우드에 Android SDK가 없어 실행하지 못했다.
 - 남은 일: 기기에서 모델 실행 · 속도 · 품질 확인.
+- Gemma 도우미 진단 로그(#176): debug 빌드에서만 logcat 태그 `GemmaAssist`로 단계별 모델 응답 시간(ms), 입력 · 모델 답, 채택 여부, 건너뜀 · 시간 초과 · 실패를 남긴다. 화면 글자가 들어 있어 release에서는 끈다.

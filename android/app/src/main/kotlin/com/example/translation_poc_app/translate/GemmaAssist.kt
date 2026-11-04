@@ -31,39 +31,65 @@ data class AssistOptions(
 class GemmaAssist(
     private val runtime: GemmaRuntime,
     private val timeoutMs: Long = TIMEOUT_MS,
+    /** 진단 로그 (debug 빌드에서만 켜서 넘긴다). 호출 시간 · 입력 · 모델 답 · 채택 여부. 기본은 아무것도 안 한다. */
+    private val log: (String) -> Unit = {},
+    private val clock: () -> Long = System::currentTimeMillis,
 ) {
     /** OCR 보정: 잘못 읽은 글자와 잘못 합쳐진(또는 쪼개진) 줄바꿈을 고친다. 번역하지 않는다. */
     suspend fun fixOcr(text: String, language: String): String {
-        if (!canRun(text)) return text
-        val raw = run(fixOcrPrompt(text, language)) ?: return text
-        return acceptFix(text, raw)
+        if (!canRun(text)) return skip("OCR 보정", text)
+        val raw = run("OCR 보정", fixOcrPrompt(text, language)) ?: return text
+        val fixed = acceptFix(text, raw)
+        log("OCR 보정 ${if (fixed == text) "원문 유지" else "채택"}: ${show(text)} → ${show(raw)}" + if (fixed == text && raw.isNotBlank() && GemmaTranslationEngine.clean(raw) != text) " (거절: 길이 벗어남)" else "")
+        return fixed
     }
 
     /** 번역 다듬기: 초벌 번역 [draft]를 원문과 단어 단위로 견주어 어색하거나 틀린 단어를 고치고, 말투 · 용어집에 맞춘다. */
     suspend fun polish(source: String, draft: String, targetLanguage: String, tone: AiTone, glossary: List<GlossaryEntry>): String {
-        if (!canRun(draft) || !canRun(source)) return draft
+        if (!canRun(draft) || !canRun(source)) return skip("번역 검토", draft)
         val terms = glossaryHits(source, glossary)
-        val raw = run(polishPrompt(source, draft, GemmaTranslationEngine.languageName(targetLanguage), tone, terms)) ?: return draft
-        return acceptPolish(draft, raw, terms)
+        val raw = run("번역 검토", polishPrompt(source, draft, GemmaTranslationEngine.languageName(targetLanguage), tone, terms)) ?: return draft
+        val polished = acceptPolish(draft, raw, terms)
+        log("번역 검토 ${if (polished == draft) "초벌 유지" else "채택"}: ${show(draft)} → ${show(raw)} (말투=$tone, 용어 ${terms.size}개)")
+        return polished
     }
+
+    private fun skip(step: String, text: String): String {
+        log("$step 건너뜀 (모델 없음 · 빈 글 · ${MAX_CHARS}자 초과): ${show(text)}")
+        return text
+    }
+
+    private fun show(s: String) = "\"" + s.replace("\n", "⏎").take(LOG_CHARS) + (if (s.length > LOG_CHARS) "…" else "") + "\""
 
     private fun canRun(text: String) =
         text.isNotBlank() && text.length <= MAX_CHARS && runtime.isModelReady()
 
     /** 시간 안에 못 끝나거나 실패하면 null. 취소는 그대로 던진다. */
-    private suspend fun run(prompt: String): String? = try {
-        withTimeoutOrNull(timeoutMs) { runtime.generate(prompt) }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        null
-    } catch (e: OutOfMemoryError) {
-        null
+    private suspend fun run(step: String, prompt: String): String? {
+        val start = clock()
+        val result = try {
+            withTimeoutOrNull(timeoutMs) { runtime.generate(prompt) }.also {
+                if (it == null) log("$step 시간 초과 (${timeoutMs}ms)")
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            log("$step 실패: ${e.message ?: e::class.java.simpleName}")
+            null
+        } catch (e: OutOfMemoryError) {
+            log("$step 실패: 메모리 부족")
+            null
+        }
+        if (result != null) log("$step 모델 응답 ${clock() - start}ms (프롬프트 ${prompt.length}자, 답 ${result.length}자)")
+        return result
     }
 
     companion object {
         /** 도우미 한 번의 제한 시간. 넘으면 보정 없이 원래 결과를 쓴다. */
         const val TIMEOUT_MS = 20_000L
+
+        /** 로그에 찍는 글 길이 상한. */
+        private const val LOG_CHARS = 120
 
         /** 이보다 긴 글은 보정하지 않는다 (모델 토큰 한도 안에서 입력 + 출력을 담기 위해). */
         const val MAX_CHARS = 400

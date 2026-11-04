@@ -175,8 +175,16 @@ class TranslatorService : LifecycleService() {
         val base = baseEngine(settings)
         // Gemma 도우미(#176): 켜 둔 것이 있을 때만 감싼다.
         if (!settings.gemmaFixOcr && !settings.gemmaPolish) return base
-        return GemmaAssistedEngine(base, GemmaAssist(AppGraph.gemmaRuntime(this)))
+        return GemmaAssistedEngine(base, GemmaAssist(AppGraph.gemmaRuntime(this), log = assistLog()))
     }
+
+    /** Gemma 도우미 진단 로그: debug 빌드에서만 남긴다 (화면 글자가 들어 있어 release에서는 끈다). logcat 태그 `GemmaAssist`. */
+    private fun assistLog(): (String) -> Unit =
+        if ((applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            { Log.d("GemmaAssist", it) }
+        } else {
+            {}
+        }
 
     private fun baseEngine(settings: Settings): TranslationEngine {
         val mlKit = mlKit()

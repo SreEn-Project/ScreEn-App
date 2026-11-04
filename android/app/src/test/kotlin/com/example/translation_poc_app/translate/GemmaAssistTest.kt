@@ -37,6 +37,31 @@ class GemmaAssistTest {
     )
 
     @Test
+    fun `로그 - 호출 시간 · 입력 · 답 · 채택 여부를 남긴다`() {
+        val lines = mutableListOf<String>()
+        val runner = AssistRunner { "Hello World" }
+        val a = GemmaAssist(
+            GemmaRuntime(modelFile = { File("model.task") }, isReady = { true }, createRunner = { runner }),
+            log = { lines += it },
+        )
+        runBlocking { a.fixOcr("He1lo W0rld", "en") }
+        assertTrue(lines.any { it.contains("모델 응답") && it.contains("ms") })
+        assertTrue(lines.any { it.contains("채택") && it.contains("He1lo W0rld") && it.contains("Hello World") })
+    }
+
+    @Test
+    fun `로그 - 모델이 없으면 건너뜀을 남긴다`() {
+        val lines = mutableListOf<String>()
+        val runner = AssistRunner { "x" }
+        val a = GemmaAssist(
+            GemmaRuntime(modelFile = { File("model.task") }, isReady = { false }, createRunner = { runner }),
+            log = { lines += it },
+        )
+        runBlocking { a.fixOcr("abc", "en") }
+        assertTrue(lines.single().contains("건너뜀"))
+    }
+
+    @Test
     fun `OCR 보정 - 고친 글을 돌려준다`() {
         val runner = AssistRunner { "Hello World" }
         val r = runBlocking { assist(true, runner).fixOcr("He1lo W0rld", "en") }
