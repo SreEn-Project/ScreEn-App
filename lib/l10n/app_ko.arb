@@ -472,7 +472,7 @@
   "gemmaAssistIntro": "번역은 ML Kit이 하고, Gemma는 앞뒤에서 돕기만 해요. 시간이 조금 더 걸리고, 모델이 없거나 실패하면 도움 없이 그대로 번역해요.",
   "gemmaAssistFixOcr": "번역 전 글자 보정",
   "gemmaAssistFixOcrDetail": "잘못 읽은 글자와 잘못 이어진 줄바꿈을 고친 뒤 번역해요",
-  "gemmaAssistPolish": "번역 후 말투 다듬기",
-  "gemmaAssistPolishDetail": "ML Kit 번역을 정한 말투 · 용어집에 맞게 다듬어요. 말투나 용어집이 없으면 건너뛰어요",
+  "gemmaAssistPolish": "번역 후 단어 · 말투 검토",
+  "gemmaAssistPolishDetail": "ML Kit 번역을 원문과 단어 단위로 견주어 틀리거나 어색한 단어를 고치고, 정한 말투 · 용어집에 맞춰요",
   "gemmaFootnote": "Gemma는 Google의 오픈 모델이에요. 작은 모델이라 번역 품질은 Gemini · Groq보다 낮을 수 있고, 처음 번역할 때 모델을 불러오느라 몇 초 걸려요."
 }

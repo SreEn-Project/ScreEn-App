@@ -1401,11 +1401,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Corrects misread characters and wrongly joined line breaks, then translates';
 
   @override
-  String get gemmaAssistPolish => 'Polish translation style';
+  String get gemmaAssistPolish => 'Review words and style after translating';
 
   @override
   String get gemmaAssistPolishDetail =>
-      'Adjusts the ML Kit translation to your tone and glossary. Skipped when neither is set';
+      'Checks the ML Kit translation word by word against the source, fixes wrong or unnatural words, and applies your tone and glossary';
 
   @override
   String get gemmaFootnote =>

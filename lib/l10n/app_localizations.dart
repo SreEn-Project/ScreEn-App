@@ -2621,13 +2621,13 @@ abstract class AppLocalizations {
   /// No description provided for @gemmaAssistPolish.
   ///
   /// In en, this message translates to:
-  /// **'Polish translation style'**
+  /// **'Review words and style after translating'**
   String get gemmaAssistPolish;
 
   /// No description provided for @gemmaAssistPolishDetail.
   ///
   /// In en, this message translates to:
-  /// **'Adjusts the ML Kit translation to your tone and glossary. Skipped when neither is set'**
+  /// **'Checks the ML Kit translation word by word against the source, fixes wrong or unnatural words, and applies your tone and glossary'**
   String get gemmaAssistPolishDetail;
 
   /// No description provided for @gemmaFootnote.

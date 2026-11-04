@@ -480,7 +480,7 @@
   "gemmaAssistIntro": "ML Kit does the translating; Gemma only helps before and after. It adds a little time, and if the model is missing or fails, the text is translated as usual without help.",
   "gemmaAssistFixOcr": "Fix text before translating",
   "gemmaAssistFixOcrDetail": "Corrects misread characters and wrongly joined line breaks, then translates",
-  "gemmaAssistPolish": "Polish translation style",
-  "gemmaAssistPolishDetail": "Adjusts the ML Kit translation to your tone and glossary. Skipped when neither is set",
+  "gemmaAssistPolish": "Review words and style after translating",
+  "gemmaAssistPolishDetail": "Checks the ML Kit translation word by word against the source, fixes wrong or unnatural words, and applies your tone and glossary",
   "gemmaFootnote": "Gemma is Google's open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads."
 }

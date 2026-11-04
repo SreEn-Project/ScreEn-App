@@ -39,11 +39,10 @@ class GemmaAssist(
         return acceptFix(text, raw)
     }
 
-    /** 번역 다듬기: 초벌 번역 [draft]를 말투 · 용어집에 맞게 고친다. 고칠 것이 없으면 모델을 부르지 않는다. */
+    /** 번역 다듬기: 초벌 번역 [draft]를 원문과 단어 단위로 견주어 어색하거나 틀린 단어를 고치고, 말투 · 용어집에 맞춘다. */
     suspend fun polish(source: String, draft: String, targetLanguage: String, tone: AiTone, glossary: List<GlossaryEntry>): String {
         if (!canRun(draft) || !canRun(source)) return draft
         val terms = glossaryHits(source, glossary)
-        if (tone == AiTone.STANDARD && terms.isEmpty()) return draft
         val raw = run(polishPrompt(source, draft, GemmaTranslationEngine.languageName(targetLanguage), tone, terms)) ?: return draft
         return acceptPolish(draft, raw, terms)
     }
@@ -92,8 +91,10 @@ class GemmaAssist(
         ): String {
             val sb = StringBuilder(
                 "Below is a source text and its draft translation into $targetName. " +
-                    "Rewrite the draft so it follows the rules, keeping the meaning, numbers, names and line breaks. " +
-                    "Do not add explanations.",
+                    "Review the draft word by word against the source. Fix words that are mistranslated, " +
+                    "missing or unnatural, and make it follow the rules below. " +
+                    "Change only what is clearly wrong; if the draft is already good, repeat it unchanged. " +
+                    "Keep the meaning, numbers, names and line breaks. Do not add explanations.",
             )
             when (tone) {
                 AiTone.STANDARD -> Unit

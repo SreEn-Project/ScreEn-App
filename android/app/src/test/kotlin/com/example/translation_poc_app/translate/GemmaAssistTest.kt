@@ -80,10 +80,18 @@ class GemmaAssistTest {
     }
 
     @Test
-    fun `다듬기 - 말투도 용어집도 없으면 모델을 부르지 않는다`() {
-        val runner = AssistRunner { "x" }
-        val r = runBlocking { assist(true, runner).polish("hello", "안녕하세요", "ko", AiTone.STANDARD, emptyList()) }
+    fun `다듬기 - 말투도 용어집도 없어도 단어를 검토한다`() {
+        val runner = AssistRunner { "안녕하세요" }
+        val r = runBlocking { assist(true, runner).polish("hello", "안녕하세", "ko", AiTone.STANDARD, emptyList()) }
         assertEquals("안녕하세요", r)
+        assertTrue(runner.prompts.single().contains("word by word"))
+    }
+
+    @Test
+    fun `다듬기 - 모델이 없으면 초벌 그대로`() {
+        val runner = AssistRunner { "x" }
+        val r = runBlocking { assist(false, runner).polish("hello", "안녕", "ko", AiTone.STANDARD, emptyList()) }
+        assertEquals("안녕", r)
         assertTrue(runner.prompts.isEmpty())
     }
 

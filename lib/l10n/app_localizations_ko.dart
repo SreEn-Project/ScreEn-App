@@ -1365,11 +1365,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gemmaAssistFixOcrDetail => '잘못 읽은 글자와 잘못 이어진 줄바꿈을 고친 뒤 번역해요';
 
   @override
-  String get gemmaAssistPolish => '번역 후 말투 다듬기';
+  String get gemmaAssistPolish => '번역 후 단어 · 말투 검토';
 
   @override
   String get gemmaAssistPolishDetail =>
-      'ML Kit 번역을 정한 말투 · 용어집에 맞게 다듬어요. 말투나 용어집이 없으면 건너뛰어요';
+      'ML Kit 번역을 원문과 단어 단위로 견주어 틀리거나 어색한 단어를 고치고, 정한 말투 · 용어집에 맞춰요';
 
   @override
   String get gemmaFootnote =>
