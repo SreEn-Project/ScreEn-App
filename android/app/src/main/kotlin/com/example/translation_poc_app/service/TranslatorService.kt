@@ -287,6 +287,13 @@ class TranslatorService : LifecycleService() {
             } catch (e: Exception) {
                 Log.w(TAG, "인식기 예열 실패", e)
             }
+            // Gemma 도우미를 켜 뒀으면 모델도 미리 올려 첫 번역이 로딩을 기다리지 않게 한다 (#176).
+            try {
+                val s = AppGraph.settingsRepository(this@TranslatorService).current()
+                if (s.gemmaFixOcr || s.gemmaPolish) AppGraph.gemmaRuntime(this@TranslatorService).warmUp()
+            } catch (e: Exception) {
+                Log.w(TAG, "Gemma 예열 실패", e)
+            }
         }
     }
 

@@ -91,6 +91,13 @@ class GemmaAssist(
         /** 로그에 찍는 글 길이 상한. */
         private const val LOG_CHARS = 120
 
+        /** 고칠 것이 없을 때 모델이 이 한 단어만 답하게 한다 (전체를 되풀이해 쓰는 시간을 아낀다). */
+        internal const val OK_REPLY = "OK"
+
+        /** 모델이 "고칠 것 없음"으로 답했는가 (OK, ok., "OK" 등). */
+        internal fun isOkReply(cleaned: String) =
+            cleaned.trim().trim('"', '\'', '.', '!', ' ').equals(OK_REPLY, ignoreCase = true)
+
         /** 이보다 긴 글은 보정하지 않는다 (모델 토큰 한도 안에서 입력 + 출력을 담기 위해). */
         const val MAX_CHARS = 400
 
@@ -104,7 +111,7 @@ class GemmaAssist(
                 "Fix only clear OCR mistakes: wrongly recognized characters (for example 0/O, 1/l/I, rn/m), " +
                 "stray symbols, and line breaks that were wrongly joined or split. " +
                 "Keep the same language. Do not translate, summarize, add or remove content. " +
-                "If the text already looks correct, repeat it unchanged. Reply with the corrected text only.\n\n" +
+                "If the text already looks correct, reply with exactly: $OK_REPLY. Otherwise reply with the corrected text only.\n\n" +
                 "Text:\n$text<end_of_turn>\n<start_of_turn>model\n"
         }
 
@@ -119,7 +126,7 @@ class GemmaAssist(
                 "Below is a source text and its draft translation into $targetName. " +
                     "Review the draft word by word against the source. Fix words that are mistranslated, " +
                     "missing or unnatural, and make it follow the rules below. " +
-                    "Change only what is clearly wrong; if the draft is already good, repeat it unchanged. " +
+                    "Change only what is clearly wrong; if the draft is already good, reply with exactly: $OK_REPLY. " +
                     "Keep the meaning, numbers, names and line breaks. Do not add explanations.",
             )
             when (tone) {
@@ -132,7 +139,7 @@ class GemmaAssist(
                 terms.forEach { sb.append("\n- ").append(it.source).append(" => ").append(it.target) }
             }
             sb.append("\n\nSource:\n").append(source).append("\n\nDraft:\n").append(draft)
-            sb.append("\n\nNow write only the improved $targetName text.<end_of_turn>\n<start_of_turn>model\n")
+            sb.append("\n\nNow write only the improved $targetName text, or $OK_REPLY if nothing needs to change.<end_of_turn>\n<start_of_turn>model\n")
             return "<start_of_turn>user\n$sb"
         }
 
@@ -147,7 +154,7 @@ class GemmaAssist(
         /** OCR 보정 결과 검사: 비었거나 길이가 크게 달라졌으면(번역 · 요약 · 군더더기) 원문을 쓴다. */
         internal fun acceptFix(original: String, raw: String): String {
             val fixed = GemmaTranslationEngine.clean(raw)
-            if (fixed.isBlank()) return original
+            if (fixed.isBlank() || isOkReply(fixed)) return original
             val before = visibleLength(original).coerceAtLeast(1)
             val ratio = visibleLength(fixed).toDouble() / before
             return if (ratio in 0.8..1.25) fixed else original
@@ -156,7 +163,7 @@ class GemmaAssist(
         /** 다듬기 결과 검사: 길이가 크게 달라졌거나, 초벌에 있던 용어집 번역어가 사라졌으면 초벌을 쓴다. */
         internal fun acceptPolish(draft: String, raw: String, terms: List<GlossaryEntry>): String {
             val polished = GemmaTranslationEngine.clean(raw)
-            if (polished.isBlank()) return draft
+            if (polished.isBlank() || isOkReply(polished)) return draft
             val before = visibleLength(draft).coerceAtLeast(1)
             val ratio = visibleLength(polished).toDouble() / before
             if (ratio !in 0.5..2.0) return draft

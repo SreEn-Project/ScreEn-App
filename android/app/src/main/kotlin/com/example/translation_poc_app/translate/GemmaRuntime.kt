@@ -6,6 +6,7 @@ import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
 import java.io.Closeable
 import java.io.File
 import java.util.concurrent.Executors
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -86,6 +87,28 @@ class GemmaRuntime(
             idleJob = scope.launch {
                 delay(idleMs)
                 unload()
+            }
+        }
+    }
+
+    /** 모델을 미리 올려 둔다 — 첫 호출이 로딩을 기다리지 않게. 모델이 없거나 실패하면 조용히 넘어간다. */
+    suspend fun warmUp() {
+        if (!isReady()) return
+        mutex.withLock {
+            idleJob?.cancel()
+            try {
+                withContext(dispatcher) {
+                    if (runner == null) runner = createRunner(modelFile())
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // 번역할 때 다시 시도한다.
+            } finally {
+                idleJob = scope.launch {
+                    delay(idleMs)
+                    unload()
+                }
             }
         }
     }

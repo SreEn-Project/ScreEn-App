@@ -70,6 +70,29 @@ class GemmaAssistTest {
     }
 
     @Test
+    fun `OK 답은 고칠 것 없음 - 원문 · 초벌 그대로`() {
+        assertEquals("abc", GemmaAssist.acceptFix("abc", "OK"))
+        assertEquals("abc", GemmaAssist.acceptFix("abc", "ok."))
+        assertEquals("안녕", GemmaAssist.acceptPolish("안녕", "\"OK\"", emptyList()))
+    }
+
+    @Test
+    fun `예열 - 모델이 있으면 실행기를 미리 만든다`() {
+        var created = 0
+        val rt = GemmaRuntime(modelFile = { File("m.task") }, isReady = { true }, createRunner = { created++; AssistRunner { "x" } })
+        runBlocking { rt.warmUp(); rt.warmUp() }
+        assertEquals(1, created)
+    }
+
+    @Test
+    fun `예열 - 모델이 없으면 아무것도 안 한다`() {
+        var created = 0
+        val rt = GemmaRuntime(modelFile = { File("m.task") }, isReady = { false }, createRunner = { created++; AssistRunner { "x" } })
+        runBlocking { rt.warmUp() }
+        assertEquals(0, created)
+    }
+
+    @Test
     fun `OCR 보정 - 모델이 없으면 모델을 부르지 않고 원문`() {
         val runner = AssistRunner { "x" }
         assertEquals("abc", runBlocking { assist(false, runner).fixOcr("abc", "en") })
