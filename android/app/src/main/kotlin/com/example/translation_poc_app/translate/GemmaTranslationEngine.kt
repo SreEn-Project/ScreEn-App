@@ -22,10 +22,12 @@ class GemmaTranslationEngine(
         }
         if (!runtime.isModelReady()) return EngineResult.Err(TranslationError.ModelNotDownloaded(listOf(MODEL_LABEL)))
         return try {
-            val from = if (request.source == AUTO_LANGUAGE) "the source language (detect it)" else request.source
-            val system = GeminiTranslationEngine.systemPrompt(request, from)
+            // 작은 모델은 "en → ko" 같은 코드를 놓치고 영어로 답하기 쉬워서 언어 이름을 풀어 쓴다.
+            val from = if (request.source == AUTO_LANGUAGE) "the source language (detect it)" else languageName(request.source)
+            val targetName = languageName(request.target)
+            val system = GeminiTranslationEngine.systemPrompt(request.copy(target = targetName), from)
             val parts = chunk(request.text).map { piece ->
-                clean(runtime.generate(buildPrompt(system, piece)))
+                clean(runtime.generate(buildPrompt(system, piece, targetName)))
             }
             val translated = parts.joinToString("\n").trim()
             if (translated.isEmpty()) {
@@ -60,9 +62,20 @@ class GemmaTranslationEngine(
         /** 한 번에 보내는 글자 수 상한. 입력 + 출력이 모델 토큰 한도(1024) 안에 들어오게 넉넉히 잡았다. */
         const val MAX_CHUNK_CHARS = 500
 
-        /** Gemma 대화 형식. 시스템 지시는 따로 없어 사용자 턴 맨 앞에 넣는다. */
-        internal fun buildPrompt(system: String, text: String): String =
-            "<start_of_turn>user\n$system\n\nText:\n$text<end_of_turn>\n<start_of_turn>model\n"
+        /** 언어 코드 → 영어 이름 (ko → Korean). 모르는 코드는 그대로. */
+        internal fun languageName(code: String): String {
+            val name = java.util.Locale.forLanguageTag(code).getDisplayLanguage(java.util.Locale.ENGLISH)
+            return name.takeIf { it.isNotBlank() } ?: code
+        }
+
+        /**
+         * Gemma 대화 형식. 시스템 지시는 따로 없어 사용자 턴 맨 앞에 넣고,
+         * 작은 모델이 원문을 따라 쓰지 않도록 끝에 도착 언어를 한 번 더 못 박는다.
+         */
+        internal fun buildPrompt(system: String, text: String, targetName: String): String =
+            "<start_of_turn>user\n$system\n\nText:\n$text\n\n" +
+                "Now write only the $targetName translation of the text above. Do not repeat the original text." +
+                "<end_of_turn>\n<start_of_turn>model\n"
 
         /** 줄 단위로 모아 [maxChars] 안으로 자른다. 한 줄이 더 길면 문장 끝에서, 그래도 길면 글자 수로 자른다. */
         internal fun chunk(text: String, maxChars: Int = MAX_CHUNK_CHARS): List<String> {

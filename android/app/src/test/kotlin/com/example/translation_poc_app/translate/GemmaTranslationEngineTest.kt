@@ -49,6 +49,9 @@ class GemmaTranslationEngineTest {
         assertTrue(prompt.startsWith("<start_of_turn>user\n"))
         assertTrue(prompt.endsWith("<end_of_turn>\n<start_of_turn>model\n"))
         assertTrue(prompt.contains("hello"))
+        // 코드(ko)가 아니라 언어 이름으로 도착 언어를 지시한다.
+        assertTrue(prompt.contains("to Korean"))
+        assertTrue(prompt.contains("only the Korean translation"))
     }
 
     @Test
@@ -75,6 +78,13 @@ class GemmaTranslationEngineTest {
         val r = runBlocking { GemmaTranslationEngine(runtime(true, runner)).translate(TranslationRequest(text, "en", "ko")) }
         assertEquals(3, runner.prompts.size)
         assertEquals("T\nT\nT", (r as EngineResult.Ok).value.text)
+    }
+
+    @Test
+    fun `languageName은 코드를 영어 이름으로 바꾼다`() {
+        assertEquals("Korean", GemmaTranslationEngine.languageName("ko"))
+        assertEquals("English", GemmaTranslationEngine.languageName("en"))
+        assertEquals("Japanese", GemmaTranslationEngine.languageName("ja"))
     }
 
     @Test
