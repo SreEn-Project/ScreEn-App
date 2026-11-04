@@ -122,5 +122,11 @@ abstract class TranslatorSettings with _$TranslatorSettings {
 
     /// AI 번역 용어집 (FL-11).
     @Default(<GlossaryEntry>[]) List<GlossaryEntry> glossary,
+
+    /// Gemma 도우미: 번역 전 OCR 보정 (#176). 모델을 받아 둔 경우에만 동작.
+    @Default(false) bool gemmaFixOcr,
+
+    /// Gemma 도우미: 번역 후 말투 · 용어집 다듬기 (#176). 모델을 받아 둔 경우에만 동작.
+    @Default(false) bool gemmaPolish,
   }) = _TranslatorSettings;
 }

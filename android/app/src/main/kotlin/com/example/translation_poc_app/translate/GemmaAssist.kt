@@ -1,0 +1,160 @@
+package com.example.translation_poc_app.translate
+
+import com.example.translation_poc_app.data.settings.AiTone
+import com.example.translation_poc_app.data.settings.GlossaryEntry
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeoutOrNull
+
+/**
+ * Gemma 도우미 옵션 (#176). 번역은 ML Kit이 하고, Gemma는 앞뒤에서 보조만 한다.
+ * 번역 요청에 실려 캐시 키에도 들어가서, 설정을 바꾸면 이전 결과가 섞이지 않는다.
+ */
+data class AssistOptions(
+    /** 번역 전에 OCR 글자 · 줄바꿈을 고친다. */
+    val fixOcr: Boolean = false,
+    /** 번역 뒤에 말투 · 용어집에 맞게 다듬는다. */
+    val polish: Boolean = false,
+    val tone: AiTone = AiTone.STANDARD,
+    val glossary: List<GlossaryEntry> = emptyList(),
+) {
+    val enabled: Boolean get() = fixOcr || polish
+
+    companion object {
+        val NONE = AssistOptions()
+    }
+}
+
+/**
+ * Gemma로 글을 고치는 도우미 (#176). 모든 메서드는 실패해도 원래 글을 그대로 돌려준다:
+ * 모델이 없거나, 실행이 실패하거나, 시간이 걸리거나, 답이 원문에서 너무 벗어나면 보정 없이 넘어간다.
+ */
+class GemmaAssist(
+    private val runtime: GemmaRuntime,
+    private val timeoutMs: Long = TIMEOUT_MS,
+) {
+    /** OCR 보정: 잘못 읽은 글자와 잘못 합쳐진(또는 쪼개진) 줄바꿈을 고친다. 번역하지 않는다. */
+    suspend fun fixOcr(text: String, language: String): String {
+        if (!canRun(text)) return text
+        val raw = run(fixOcrPrompt(text, language)) ?: return text
+        return acceptFix(text, raw)
+    }
+
+    /** 번역 다듬기: 초벌 번역 [draft]를 말투 · 용어집에 맞게 고친다. 고칠 것이 없으면 모델을 부르지 않는다. */
+    suspend fun polish(source: String, draft: String, targetLanguage: String, tone: AiTone, glossary: List<GlossaryEntry>): String {
+        if (!canRun(draft) || !canRun(source)) return draft
+        val terms = glossaryHits(source, glossary)
+        if (tone == AiTone.STANDARD && terms.isEmpty()) return draft
+        val raw = run(polishPrompt(source, draft, GemmaTranslationEngine.languageName(targetLanguage), tone, terms)) ?: return draft
+        return acceptPolish(draft, raw, terms)
+    }
+
+    private fun canRun(text: String) =
+        text.isNotBlank() && text.length <= MAX_CHARS && runtime.isModelReady()
+
+    /** 시간 안에 못 끝나거나 실패하면 null. 취소는 그대로 던진다. */
+    private suspend fun run(prompt: String): String? = try {
+        withTimeoutOrNull(timeoutMs) { runtime.generate(prompt) }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        null
+    } catch (e: OutOfMemoryError) {
+        null
+    }
+
+    companion object {
+        /** 도우미 한 번의 제한 시간. 넘으면 보정 없이 원래 결과를 쓴다. */
+        const val TIMEOUT_MS = 20_000L
+
+        /** 이보다 긴 글은 보정하지 않는다 (모델 토큰 한도 안에서 입력 + 출력을 담기 위해). */
+        const val MAX_CHARS = 400
+
+        /** 프롬프트를 바꾸면 올린다. */
+        const val PROMPT_VERSION = 1
+
+        internal fun fixOcrPrompt(text: String, language: String): String {
+            val lang = if (language == AUTO_LANGUAGE || language == "und") "the original language" else GemmaTranslationEngine.languageName(language)
+            return "<start_of_turn>user\n" +
+                "The text below was read from a phone screenshot by OCR. It is written in $lang. " +
+                "Fix only clear OCR mistakes: wrongly recognized characters (for example 0/O, 1/l/I, rn/m), " +
+                "stray symbols, and line breaks that were wrongly joined or split. " +
+                "Keep the same language. Do not translate, summarize, add or remove content. " +
+                "If the text already looks correct, repeat it unchanged. Reply with the corrected text only.\n\n" +
+                "Text:\n$text<end_of_turn>\n<start_of_turn>model\n"
+        }
+
+        internal fun polishPrompt(
+            source: String,
+            draft: String,
+            targetName: String,
+            tone: AiTone,
+            terms: List<GlossaryEntry>,
+        ): String {
+            val sb = StringBuilder(
+                "Below is a source text and its draft translation into $targetName. " +
+                    "Rewrite the draft so it follows the rules, keeping the meaning, numbers, names and line breaks. " +
+                    "Do not add explanations.",
+            )
+            when (tone) {
+                AiTone.STANDARD -> Unit
+                AiTone.FORMAL -> sb.append(" Use a polite, formal speech level (for example 존댓말 in Korean, 敬語 in Japanese).")
+                AiTone.INFORMAL -> sb.append(" Use a casual, informal speech level (for example 반말 in Korean, タメ口 in Japanese).")
+            }
+            if (terms.isNotEmpty()) {
+                sb.append(" Always use these translations for these terms:")
+                terms.forEach { sb.append("\n- ").append(it.source).append(" => ").append(it.target) }
+            }
+            sb.append("\n\nSource:\n").append(source).append("\n\nDraft:\n").append(draft)
+            sb.append("\n\nNow write only the improved $targetName text.<end_of_turn>\n<start_of_turn>model\n")
+            return "<start_of_turn>user\n$sb"
+        }
+
+        /** 이 글에 나오는 용어집 항목만. */
+        internal fun glossaryHits(source: String, glossary: List<GlossaryEntry>): List<GlossaryEntry> {
+            val lowered = source.lowercase()
+            return glossary.filter { lowered.contains(it.source.lowercase()) }
+        }
+
+        private fun visibleLength(s: String) = s.count { !it.isWhitespace() }
+
+        /** OCR 보정 결과 검사: 비었거나 길이가 크게 달라졌으면(번역 · 요약 · 군더더기) 원문을 쓴다. */
+        internal fun acceptFix(original: String, raw: String): String {
+            val fixed = GemmaTranslationEngine.clean(raw)
+            if (fixed.isBlank()) return original
+            val before = visibleLength(original).coerceAtLeast(1)
+            val ratio = visibleLength(fixed).toDouble() / before
+            return if (ratio in 0.8..1.25) fixed else original
+        }
+
+        /** 다듬기 결과 검사: 길이가 크게 달라졌거나, 초벌에 있던 용어집 번역어가 사라졌으면 초벌을 쓴다. */
+        internal fun acceptPolish(draft: String, raw: String, terms: List<GlossaryEntry>): String {
+            val polished = GemmaTranslationEngine.clean(raw)
+            if (polished.isBlank()) return draft
+            val before = visibleLength(draft).coerceAtLeast(1)
+            val ratio = visibleLength(polished).toDouble() / before
+            if (ratio !in 0.5..2.0) return draft
+            val lostTerm = terms.any { draft.contains(it.target) && !polished.contains(it.target) }
+            return if (lostTerm) draft else polished
+        }
+    }
+}
+
+/**
+ * 번역 엔진을 감싸서 Gemma 도우미를 앞뒤에 붙인다 (#176). 요청의 [TranslationRequest.assist]가 꺼져 있으면 그대로 넘긴다.
+ * 다듬기는 ML Kit이 번역한 결과에만 한다: AI 엔진은 말투 · 용어집을 이미 따르기 때문이다.
+ */
+class GemmaAssistedEngine(
+    private val inner: TranslationEngine,
+    private val assist: GemmaAssist,
+) : TranslationEngine by inner {
+
+    override suspend fun translate(request: TranslationRequest): EngineResult<TranslationResult> {
+        val options = request.assist
+        if (!options.enabled) return inner.translate(request)
+        val text = if (options.fixOcr) assist.fixOcr(request.text, request.source) else request.text
+        val result = inner.translate(request.copy(text = text))
+        if (!options.polish || result !is EngineResult.Ok || result.value.engine != EngineId.ML_KIT) return result
+        val polished = assist.polish(text, result.value.text, request.target, options.tone, options.glossary)
+        return EngineResult.Ok(result.value.copy(text = polished))
+    }
+}

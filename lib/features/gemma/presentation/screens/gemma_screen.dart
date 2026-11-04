@@ -9,6 +9,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../settings/domain/entities/translator_settings.dart';
 import '../../../settings/presentation/view_models/engine_view_model.dart';
 import '../../domain/entities/gemma_status.dart';
+import '../view_models/gemma_assist_view_model.dart';
 import '../view_models/gemma_view_model.dart';
 
 final _licenseUrl = Uri.parse(
@@ -62,6 +63,10 @@ class _GemmaScreenState extends ConsumerState<GemmaScreen> {
         ref.watch(gemmaViewModelProvider).value ?? const GemmaStatus();
     final viewModel = ref.read(gemmaViewModelProvider.notifier);
     final engine = ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
+    final assist =
+        ref.watch(gemmaAssistViewModelProvider).value ??
+        const GemmaAssistOptions();
+    final assistViewModel = ref.read(gemmaAssistViewModelProvider.notifier);
     final sizeMb = (status.totalBytes / (1024 * 1024)).round();
 
     final String stateText;
@@ -181,6 +186,44 @@ class _GemmaScreenState extends ConsumerState<GemmaScreen> {
                               .read(engineViewModelProvider.notifier)
                               .select(on ? EngineType.gemma : EngineType.mlKit),
                         ),
+                      ),
+                    ),
+                  ],
+                  if (status.isReady) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.gemmaAssistTitle,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n.gemmaAssistIntro,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 12),
+                    AppCard(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Column(
+                        children: [
+                          AppListTile(
+                            icon: Symbols.spellcheck_rounded,
+                            title: l10n.gemmaAssistFixOcr,
+                            subtitle: l10n.gemmaAssistFixOcrDetail,
+                            trailing: AppSwitch(
+                              value: assist.fixOcr,
+                              onChanged: assistViewModel.setFixOcr,
+                            ),
+                          ),
+                          AppListTile(
+                            icon: Symbols.edit_note_rounded,
+                            title: l10n.gemmaAssistPolish,
+                            subtitle: l10n.gemmaAssistPolishDetail,
+                            trailing: AppSwitch(
+                              value: assist.polish,
+                              onChanged: assistViewModel.setPolish,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

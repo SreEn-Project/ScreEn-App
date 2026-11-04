@@ -476,5 +476,11 @@
   "gemmaErrorNetwork": "Download failed. Check your connection, or connect to Wi-Fi if downloads are Wi-Fi only.",
   "gemmaErrorSpace": "Not enough storage. Free some space and try again.",
   "gemmaErrorUnknown": "Could not download the model. Please try again later.",
+  "gemmaAssistTitle": "Translation helper",
+  "gemmaAssistIntro": "ML Kit does the translating; Gemma only helps before and after. It adds a little time, and if the model is missing or fails, the text is translated as usual without help.",
+  "gemmaAssistFixOcr": "Fix text before translating",
+  "gemmaAssistFixOcrDetail": "Corrects misread characters and wrongly joined line breaks, then translates",
+  "gemmaAssistPolish": "Polish translation style",
+  "gemmaAssistPolishDetail": "Adjusts the ML Kit translation to your tone and glossary. Skipped when neither is set",
   "gemmaFootnote": "Gemma is Google's open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads."
 }

@@ -24,6 +24,8 @@ extension AppSettingsMapper on pigeon.AppSettings {
       for (final e in glossary)
         GlossaryEntry(source: e.source, target: e.target),
     ],
+    gemmaFixOcr: gemmaFixOcr,
+    gemmaPolish: gemmaPolish,
   );
 }
 

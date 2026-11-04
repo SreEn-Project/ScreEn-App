@@ -419,3 +419,12 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 - **프롬프트**: Gemini · Groq와 같은 지시문(말투 · 용어집 포함)을 Gemma 대화 형식(`<start_of_turn>`)에 넣는다. 컨텍스트가 작아 500자 단위로 잘라 차례로 번역한다. 번역 품질은 클라우드 모델보다 낮을 수 있다.
 - **단어 사전(AD-02)** 은 Gemma로 하지 않고 기존처럼 ML Kit 번역만 쓴다.
 - 코드 변경: `translate/Gemma*.kt` 3개, `ApiKeyStore`(토큰), `AppGraph`, `TranslatorService`, `HostApis`, Pigeon(`EngineType.gemma`, `GemmaHostApi`), Gradle(`tasks-genai`), Manifest(`ACCESS_NETWORK_STATE`), Flutter `features/gemma`, ARB · strings.xml.
+
+## D-069. Gemma를 번역기가 아니라 도우미로 (NA-13, #176)
+- **역할**: 번역은 ML Kit이 그대로 하고, Gemma는 앞뒤에서 보조만 한다. 단어 뜻 카드 · 번역 대상 필터링은 이번 범위가 아니다. D-068의 `GemmaRuntime`을 재사용한다.
+- **번역 전 OCR 보정**(`gemmaFixOcr`): 잘못 읽은 글자와 잘못 합쳐진(쪼개진) 줄바꿈을 고쳐서 번역에 넘긴다. 번역 · 요약 · 덧붙임은 금지하고, 답의 글자 수(공백 제외)가 원문의 0.8~1.25배를 벗어나면 원문을 쓴다.
+- **번역 후 다듬기**(`gemmaPolish`): ML Kit 번역을 설정의 말투 · 용어집에 맞게 다듬는다. 말투가 기본이고 이 글에 나오는 용어도 없으면 모델을 부르지 않는다. 답이 초벌의 0.5~2배를 벗어나거나 초벌에 있던 용어집 번역어가 사라지면 초벌을 쓴다. AI 엔진(Gemini · Groq · Gemma)이 번역한 결과는 이미 말투 · 용어집을 따르므로 다듬지 않는다.
+- **설정**: 둘 다 기본 꺼짐, Gemma 화면(모델을 받은 뒤)에서 따로 켜고 끈다. Pigeon `AppSettings.gemmaFixOcr / gemmaPolish`, `setGemmaFixOcr / setGemmaPolish`.
+- **안전장치**: 모델이 없거나, 실행이 실패하거나, 20초를 넘기거나, 400자를 넘는 글이면 보정 없이 원래 결과를 쓴다. 도우미는 어떤 경우에도 번역을 실패시키지 않는다.
+- **구조**: `GemmaAssist`(보정 로직) + `GemmaAssistedEngine`(엔진 데코레이터, 켜 둔 경우에만 서비스가 감쌈). 요청에 `AssistOptions`를 실어 번역 캐시 키에 포함한다(설정을 바꾸면 이전 결과가 섞이지 않음).
+- **미검증**: 모델 실행(속도 · 품질 · 프롬프트 효과)은 클라우드에서 확인하지 못했다. 기기에서 확인한 뒤 프롬프트 · 길이 기준을 조정한다.

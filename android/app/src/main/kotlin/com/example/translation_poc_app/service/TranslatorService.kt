@@ -36,6 +36,8 @@ import com.example.translation_poc_app.translate.GeminiDictionary
 import com.example.translation_poc_app.translate.WordLookup
 import com.example.translation_poc_app.translate.WordLookupOutcome
 import com.example.translation_poc_app.translate.GeminiTranslationEngine
+import com.example.translation_poc_app.translate.GemmaAssist
+import com.example.translation_poc_app.translate.GemmaAssistedEngine
 import com.example.translation_poc_app.translate.GemmaTranslationEngine
 import com.example.translation_poc_app.translate.GroqDictionary
 import com.example.translation_poc_app.translate.GroqTranslationEngine
@@ -170,6 +172,13 @@ class TranslatorService : LifecycleService() {
      * 고른 AI 엔진이 1순위이고, 실패하면 쓸 수 있는 다른 AI 엔진(키가 있거나 모델을 받아 둔 것) → ML Kit 순으로 넘어간다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
+        val base = baseEngine(settings)
+        // Gemma 도우미(#176): 켜 둔 것이 있을 때만 감싼다.
+        if (!settings.gemmaFixOcr && !settings.gemmaPolish) return base
+        return GemmaAssistedEngine(base, GemmaAssist(AppGraph.gemmaRuntime(this)))
+    }
+
+    private fun baseEngine(settings: Settings): TranslationEngine {
         val mlKit = mlKit()
         val order = aiOrder(settings)
         if (order.isEmpty()) return mlKit

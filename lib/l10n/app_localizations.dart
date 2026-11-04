@@ -2594,6 +2594,42 @@ abstract class AppLocalizations {
   /// **'Could not download the model. Please try again later.'**
   String get gemmaErrorUnknown;
 
+  /// No description provided for @gemmaAssistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation helper'**
+  String get gemmaAssistTitle;
+
+  /// No description provided for @gemmaAssistIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'ML Kit does the translating; Gemma only helps before and after. It adds a little time, and if the model is missing or fails, the text is translated as usual without help.'**
+  String get gemmaAssistIntro;
+
+  /// No description provided for @gemmaAssistFixOcr.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix text before translating'**
+  String get gemmaAssistFixOcr;
+
+  /// No description provided for @gemmaAssistFixOcrDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Corrects misread characters and wrongly joined line breaks, then translates'**
+  String get gemmaAssistFixOcrDetail;
+
+  /// No description provided for @gemmaAssistPolish.
+  ///
+  /// In en, this message translates to:
+  /// **'Polish translation style'**
+  String get gemmaAssistPolish;
+
+  /// No description provided for @gemmaAssistPolishDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusts the ML Kit translation to your tone and glossary. Skipped when neither is set'**
+  String get gemmaAssistPolishDetail;
+
   /// No description provided for @gemmaFootnote.
   ///
   /// In en, this message translates to:

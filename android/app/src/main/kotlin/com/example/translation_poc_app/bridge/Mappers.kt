@@ -26,6 +26,8 @@ fun Settings.toPigeon() = AppSettings(
     ageConfirmed = ageConfirmed,
     aiTone = aiTone.toPigeon(),
     glossary = glossary.map { GlossaryEntry(it.source, it.target) },
+    gemmaFixOcr = gemmaFixOcr,
+    gemmaPolish = gemmaPolish,
 )
 
 fun AiTone.toPigeon() = when (this) {

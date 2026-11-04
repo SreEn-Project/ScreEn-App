@@ -63,6 +63,10 @@ class SettingsHostApiImpl(
     override suspend fun setAiTone(tone: com.example.translation_poc_app.bridge.AiTone) =
         repository.setAiTone(tone.toNative())
 
+    override suspend fun setGemmaFixOcr(enabled: Boolean) = repository.setGemmaFixOcr(enabled)
+
+    override suspend fun setGemmaPolish(enabled: Boolean) = repository.setGemmaPolish(enabled)
+
     override suspend fun setGlossary(entries: List<GlossaryEntry>) =
         repository.setGlossary(entries.map { NativeGlossaryEntry(it.source, it.target) })
 

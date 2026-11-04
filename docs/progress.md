@@ -569,3 +569,8 @@
 - 한 일: 기기 안에서 도는 Gemma 3 1B 번역 엔진(MediaPipe LLM Inference)을 AI 엔진 순서에 추가. 모델 받기(이어받기 · 진행률 · 취소 · 삭제) · Hugging Face 토큰 · 기기 메모리 확인 · 설정 화면 `Gemma 모델 관리`. D-068 참고.
 - 확인: `flutter analyze` 0, `flutter test` 전체 통과(Gemma 뷰모델 · 엔진 선택 테스트 추가). Kotlin 단위 테스트(`GemmaTranslationEngineTest` · `GemmaModelManagerTest`)는 작성했지만 이 환경에 Android SDK가 없어 실행하지 못했다. 네이티브 컴파일 · 실기기 번역은 확인 전.
 - 남은 일: 실기기(RAM 8GB)에서 모델 받기 → 번역 속도 · 품질 · 발열 확인, 모델 파일 주소(`GemmaModelSpec.DEFAULT`) 검증, 필요하면 LiteRT-LM으로 이전.
+
+## Gemma 도우미: OCR 보정 · 번역 다듬기 (NA-13, #176)
+- ML Kit 번역 앞뒤에 Gemma 보정을 붙였다(D-069). 설정 2개(기본 꺼짐), Gemma 화면에 토글. 모델이 없거나 실패하면 보정 없이 진행.
+- 확인: `flutter analyze` 경고 0, `flutter test` 통과(설정 전달 · 뷰모델). Kotlin 단위 테스트(`GemmaAssistTest`)는 작성했으나 클라우드에 Android SDK가 없어 실행하지 못했다.
+- 남은 일: 기기에서 모델 실행 · 속도 · 품질 확인.
