@@ -49,7 +49,7 @@ class GemmaAssist(
         if (!canRun(draft) || !canRun(source)) return skip("번역 검토", draft)
         val terms = glossaryHits(source, glossary)
         val raw = run("번역 검토", polishPrompt(source, draft, GemmaTranslationEngine.languageName(targetLanguage), tone, terms)) ?: return draft
-        val polished = acceptPolish(draft, raw, terms)
+        val polished = applyCorrections(draft, raw, terms)
         log("번역 검토 ${if (polished == draft) "초벌 유지" else "채택"}: ${show(draft)} → ${show(raw)} (말투=$tone, 용어 ${terms.size}개)")
         return polished
     }
@@ -124,22 +124,23 @@ class GemmaAssist(
         ): String {
             val sb = StringBuilder(
                 "Below is a source text and its draft translation into $targetName. " +
-                    "Review the draft word by word against the source. Fix words that are mistranslated, " +
-                    "missing or unnatural, and make it follow the rules below. " +
-                    "Change only what is clearly wrong; if the draft is already good, reply with exactly: $OK_REPLY. " +
-                    "Keep the meaning, numbers, names and line breaks. Do not add explanations.",
+                    "Check the draft word by word against the source. " +
+                    "List only the words or phrases of the draft that are mistranslated, missing or unnatural, " +
+                    "one per line, in the form: wrong => right. " +
+                    "Copy each wrong word exactly as it appears in the draft. At most $MAX_CORRECTIONS lines. " +
+                    "If nothing needs to change, reply with exactly: $OK_REPLY. No other text.",
             )
             when (tone) {
                 AiTone.STANDARD -> Unit
-                AiTone.FORMAL -> sb.append(" Use a polite, formal speech level (for example 존댓말 in Korean, 敬語 in Japanese).")
-                AiTone.INFORMAL -> sb.append(" Use a casual, informal speech level (for example 반말 in Korean, タメ口 in Japanese).")
+                AiTone.FORMAL -> sb.append(" Also fix words so the speech level is polite and formal (for example 존댓말 in Korean, 敬語 in Japanese).")
+                AiTone.INFORMAL -> sb.append(" Also fix words so the speech level is casual and informal (for example 반말 in Korean, タメ口 in Japanese).")
             }
             if (terms.isNotEmpty()) {
-                sb.append(" Always use these translations for these terms:")
+                sb.append(" These terms must be translated exactly like this:")
                 terms.forEach { sb.append("\n- ").append(it.source).append(" => ").append(it.target) }
             }
             sb.append("\n\nSource:\n").append(source).append("\n\nDraft:\n").append(draft)
-            sb.append("\n\nNow write only the improved $targetName text, or $OK_REPLY if nothing needs to change.<end_of_turn>\n<start_of_turn>model\n")
+            sb.append("<end_of_turn>\n<start_of_turn>model\n")
             return "<start_of_turn>user\n$sb"
         }
 
@@ -160,16 +161,39 @@ class GemmaAssist(
             return if (ratio in 0.8..1.25) fixed else original
         }
 
-        /** 다듬기 결과 검사: 길이가 크게 달라졌거나, 초벌에 있던 용어집 번역어가 사라졌으면 초벌을 쓴다. */
-        internal fun acceptPolish(draft: String, raw: String, terms: List<GlossaryEntry>): String {
-            val polished = GemmaTranslationEngine.clean(raw)
-            if (polished.isBlank() || isOkReply(polished)) return draft
-            val before = visibleLength(draft).coerceAtLeast(1)
-            val ratio = visibleLength(polished).toDouble() / before
-            if (ratio !in 0.5..2.0) return draft
-            val lostTerm = terms.any { draft.contains(it.target) && !polished.contains(it.target) }
-            return if (lostTerm) draft else polished
+        /** 한 번에 고칠 수 있는 단어 쌍의 수. */
+        const val MAX_CORRECTIONS = 8
+
+        private val ARROWS = listOf("=>", "->", "→", "⇒")
+
+        /**
+         * 모델이 답한 `틀린 단어 => 고친 단어` 줄을 초벌 번역에 직접 적용한다. 번역문을 통째로 받지 않으니 짧게 끝나고,
+         * 앱이 초벌에 실제로 있는 단어만 바꾸므로 모델이 문장을 멋대로 바꿀 수 없다. 적용할 것이 없으면 초벌 그대로.
+         * 건너뛰는 쌍: 초벌에 없는 단어, 같은 값, 지나치게 긴 바꿈, 용어집 번역어를 없애는 바꿈.
+         */
+        internal fun applyCorrections(draft: String, raw: String, terms: List<GlossaryEntry>): String {
+            val cleaned = GemmaTranslationEngine.clean(raw)
+            if (cleaned.isBlank() || isOkReply(cleaned)) return draft
+            var result = draft
+            var applied = 0
+            for (line in cleaned.lines()) {
+                if (applied >= MAX_CORRECTIONS) break
+                val arrow = ARROWS.firstOrNull { line.contains(it) } ?: continue
+                val old = unwrap(line.substringBefore(arrow))
+                val new = unwrap(line.substringAfter(arrow))
+                if (old.isEmpty() || new.isEmpty() || old == new) continue
+                if (!result.contains(old)) continue
+                if (new.length > old.length * 3 + 10) continue
+                if (terms.any { result.contains(it.target) && old.contains(it.target) && !new.contains(it.target) }) continue
+                result = result.replace(old, new)
+                applied++
+            }
+            return result
         }
+
+        /** 줄머리 기호(-, *, 번호)와 감싼 따옴표를 걷는다. */
+        private fun unwrap(s: String): String =
+            s.trim().trimStart('-', '*', '•', ' ').replace(Regex("^\\d+[.)]\\s*"), "").trim().trim('"', '\'', '`', '“', '”', '「', '」').trim()
     }
 }
 

@@ -73,7 +73,7 @@ class GemmaAssistTest {
     fun `OK 답은 고칠 것 없음 - 원문 · 초벌 그대로`() {
         assertEquals("abc", GemmaAssist.acceptFix("abc", "OK"))
         assertEquals("abc", GemmaAssist.acceptFix("abc", "ok."))
-        assertEquals("안녕", GemmaAssist.acceptPolish("안녕", "\"OK\"", emptyList()))
+        assertEquals("안녕", GemmaAssist.applyCorrections("안녕", "\"OK\"", emptyList()))
     }
 
     @Test
@@ -129,7 +129,7 @@ class GemmaAssistTest {
 
     @Test
     fun `다듬기 - 말투도 용어집도 없어도 단어를 검토한다`() {
-        val runner = AssistRunner { "안녕하세요" }
+        val runner = AssistRunner { "안녕하세 => 안녕하세요" }
         val r = runBlocking { assist(true, runner).polish("hello", "안녕하세", "ko", AiTone.STANDARD, emptyList()) }
         assertEquals("안녕하세요", r)
         assertTrue(runner.prompts.single().contains("word by word"))
@@ -156,15 +156,34 @@ class GemmaAssistTest {
     }
 
     @Test
-    fun `다듬기 - 용어집 번역어가 사라지면 초벌을 쓴다`() {
-        val terms = listOf(GlossaryEntry("cat", "고양이"))
-        assertEquals("고양이가 있다", GemmaAssist.acceptPolish("고양이가 있다", "야옹이가 있다", terms))
-        assertEquals("고양이가 있어", GemmaAssist.acceptPolish("고양이가 있다", "고양이가 있어", terms))
+    fun `다듬기 - 틀린 단어 쌍을 초벌에 직접 적용한다`() {
+        val raw = "- 고양이를 => 고양이가\n\"야옹\" => \"미야옹\""
+        assertEquals("고양이가 미야옹 운다", GemmaAssist.applyCorrections("고양이를 야옹 운다", raw, emptyList()))
     }
 
     @Test
-    fun `다듬기 - 길이가 크게 달라지면 초벌을 쓴다`() {
-        assertEquals("안녕하세요 반갑습니다", GemmaAssist.acceptPolish("안녕하세요 반갑습니다", "네", emptyList()))
+    fun `다듬기 - 초벌에 없는 단어 · 같은 값 · 지나치게 긴 바꿈은 무시한다`() {
+        val draft = "고양이가 있다"
+        assertEquals(draft, GemmaAssist.applyCorrections(draft, "강아지 => 개", emptyList()))
+        assertEquals(draft, GemmaAssist.applyCorrections(draft, "고양이 => 고양이", emptyList()))
+        assertEquals(draft, GemmaAssist.applyCorrections(draft, "있다 => " + "아".repeat(40), emptyList()))
+        assertEquals(draft, GemmaAssist.applyCorrections(draft, "고양이가 있다.", emptyList()))
+    }
+
+    @Test
+    fun `다듬기 - 용어집 번역어를 없애는 바꿈은 무시한다`() {
+        val terms = listOf(GlossaryEntry("cat", "고양이"))
+        assertEquals("고양이가 있다", GemmaAssist.applyCorrections("고양이가 있다", "고양이 => 야옹이", terms))
+        assertEquals("고양이가 있어", GemmaAssist.applyCorrections("고양이가 있다", "있다 => 있어", terms))
+    }
+
+    @Test
+    fun `다듬기 - 한 번에 적용하는 쌍은 최대 개수까지`() {
+        val raw = (1..20).joinToString("\n") { "w$it => x$it" }
+        val draft = (1..20).joinToString(" ") { "w$it" }
+        val out = GemmaAssist.applyCorrections(draft, raw, emptyList())
+        assertTrue(out.contains("x${GemmaAssist.MAX_CORRECTIONS}"))
+        assertTrue(!out.contains("x${GemmaAssist.MAX_CORRECTIONS + 1}"))
     }
 
     @Test
@@ -179,7 +198,7 @@ class GemmaAssistTest {
     @Test
     fun `엔진 - OCR 보정한 글을 번역하고 번역을 다듬는다`() {
         val inner = StubEngine("안녕하세요")
-        val runner = AssistRunner { prompt -> if (prompt.contains("OCR")) "Hello" else "안녕" }
+        val runner = AssistRunner { prompt -> if (prompt.contains("OCR")) "Hello" else "안녕하세요 => 안녕" }
         val request = TranslationRequest("He1lo", "en", "ko", assist = AssistOptions(fixOcr = true, polish = true, tone = AiTone.INFORMAL))
         val r = runBlocking { GemmaAssistedEngine(inner, assist(true, runner)).translate(request) }
         assertEquals("Hello", inner.requests.single().text)
