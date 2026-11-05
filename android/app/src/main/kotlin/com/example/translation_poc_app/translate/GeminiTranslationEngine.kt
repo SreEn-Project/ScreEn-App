@@ -89,6 +89,50 @@ class GeminiTranslationEngine(
         }
     }
 
+    override val prefersBatch get() = true
+
+    /** 같은 언어 · 말투 요청을 한 번의 호출로 보낸다. 묶음 응답이 잘못되면 그 묶음만 블록별로 다시 부른다. */
+    override suspend fun translateBatch(requests: List<TranslationRequest>): List<EngineResult<TranslationResult>> {
+        val out = arrayOfNulls<EngineResult<TranslationResult>>(requests.size)
+        for (group in BatchTranslation.groups(requests)) {
+            val items = group.map { requests[it] }
+            val texts = batchOrNull(items)
+            group.forEachIndexed { n, i ->
+                out[i] = texts?.get(n)?.let { EngineResult.Ok(TranslationResult(it, items[n].source, items[n].target, id)) }
+                    ?: translate(requests[i])
+            }
+        }
+        return out.map { it!! }
+    }
+
+    private suspend fun batchOrNull(items: List<TranslationRequest>): List<String>? {
+        if (items.size < 2 || items.any { it.text.isBlank() || it.source == it.target }) return null
+        return try {
+            val key = keys.key()?.takeIf { it.isNotBlank() } ?: return null
+            val from = if (items[0].source == AUTO_LANGUAGE) "the source language (detect it)" else items[0].source
+            val system = BatchTranslation.systemPrompt(items[0], items.joinToString("\n") { it.text }, from)
+            val body = JSONObject()
+                .put("systemInstruction", JSONObject().put("parts", JSONArray().put(JSONObject().put("text", system))))
+                .put(
+                    "contents",
+                    JSONArray().put(
+                        JSONObject().put(
+                            "parts",
+                            JSONArray().put(JSONObject().put("text", BatchTranslation.userText(items.map { it.text }))),
+                        ),
+                    ),
+                )
+                .put("generationConfig", JSONObject().put("temperature", 0).put("responseMimeType", "application/json"))
+                .toString()
+            val raw = parse(generateWithFallback(transport, key, models, body)) ?: return null
+            BatchTranslation.parse(raw, items.size)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null // 묶음이 실패하면 블록별 호출이 오류 종류를 정확히 돌려준다.
+        }
+    }
+
     override suspend fun isLanguageAvailable(language: String): EngineResult<Boolean> = EngineResult.Ok(true)
 
     override suspend fun downloadLanguage(language: String, policy: ModelDownloadPolicy): EngineResult<Unit> =
@@ -112,7 +156,7 @@ class GeminiTranslationEngine(
         val MODELS = listOf("gemini-3.5-flash-lite", "gemini-3.1-flash-lite")
 
         /** 프롬프트를 바꾸면 올린다 (캐시 키에 넣을 값). */
-        const val PROMPT_VERSION = 2
+        const val PROMPT_VERSION = 3
 
         internal fun buildBody(request: TranslationRequest): String {
             val from = if (request.source == AUTO_LANGUAGE) "the source language (detect it)" else request.source
@@ -129,7 +173,9 @@ class GeminiTranslationEngine(
             val sb = StringBuilder(
                 "You translate text captured from a phone screen. Translate from $from to " +
                     "${request.target}. Keep line breaks, numbers, names and symbols. " +
-                    "Reply with the translation only, no notes or quotes.",
+                    "Reply with the translation only, no notes or quotes. " +
+                    "Never repeat or quote the original text, never show the original and the translation together, " +
+                    "and never add greetings or explanations.",
             )
             when (request.style.tone) {
                 AiTone.STANDARD -> Unit

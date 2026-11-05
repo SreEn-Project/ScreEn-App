@@ -22,6 +22,20 @@ class FallbackTranslationEngine(
         return fallback.translate(request)
     }
 
+    override val prefersBatch get() = primary.prefersBatch
+
+    /** primary가 묶음으로 보내고, 실패한 항목만 fallback이 따로 번역한다. */
+    override suspend fun translateBatch(requests: List<TranslationRequest>): List<EngineResult<TranslationResult>> {
+        val firsts = primary.translateBatch(requests)
+        val failed = firsts.withIndex().filter { it.value is EngineResult.Err }
+        if (failed.isEmpty()) return firsts
+        onFallback((failed.first().value as EngineResult.Err).error)
+        val retried = fallback.translateBatch(failed.map { requests[it.index] })
+        val out = firsts.toMutableList()
+        failed.forEachIndexed { n, f -> out[f.index] = retried[n] }
+        return out
+    }
+
     override suspend fun isLanguageAvailable(language: String) = fallback.isLanguageAvailable(language)
 
     override suspend fun downloadLanguage(language: String, policy: ModelDownloadPolicy) =

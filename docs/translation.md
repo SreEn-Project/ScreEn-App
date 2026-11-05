@@ -39,3 +39,9 @@ Gemini와 같은 BYOK 방식의 두 번째 AI 엔진. 공식 문서 확인일 20
 - **데이터**: 번역할 글자가 Groq로 전송된다(DPA 적용). 설정의 데이터 전송 고지에 Groq를 포함했다.
 - **모델**: `llama-3.3-70b-versatile` 우선, 없으면 `llama-3.1-8b-instant`. 한국어 번역 품질은 70B가 안정적이어서.
 - **호출**: `POST https://api.groq.com/openai/v1/chat/completions`, 헤더 `Authorization: Bearer <키>`, system(번역 지시) + user(원문), `temperature 0`. 단어 사전은 `response_format: json_object`.
+
+## AI 응답 검증 · 묶음 호출 · ML Kit 먼저 표시
+- **ML Kit 먼저**: AI 엔진(Gemini · Groq · Gemma)을 쓰면 `TranslationPipeline.translateWithPreview`가 AI와 ML Kit을 동시에 시작하고, ML Kit이 먼저 끝나면 그 결과를 먼저 보여 준 뒤 AI 결과로 바꾼다. AI가 먼저 오면 미리 보기는 건너뛴다. 미리 보기는 AI 캐시에 들어가지 않는다.
+- **묶음 호출**: Gemini · Groq는 화면의 블록을 (원문 언어, 대상 언어, 말투)별로 요청 한 번에 보낸다. 입력은 JSON 문자열 배열, 출력은 `{"translations":[...]}`로 고정(`BatchTranslation`). 개수가 안 맞거나 형식이 틀리면 그 묶음만 블록별 호출로 되돌린다. Gemma는 기기 안에서 도는 작은 모델이라 블록별로 둔다.
+- **응답 검증**: `GuardedTranslationEngine`(`AiResponseGuard`)이 모든 AI 엔진 결과를 검사한다. 대답 문장("번역해 드릴게요"), 프롬프트 지시문, 대상 언어 글자 없음, 길이가 크게 어긋남, 원문 그대로이면 버리고 다음 엔진 → ML Kit 결과를 쓴다. 원문을 다시 보여 준 줄은 지운다.
+- 프롬프트에 "원문을 다시 보여 주지 말고 번역만"을 명시했다 (`PROMPT_VERSION` 3, 캐시 키가 바뀐다).

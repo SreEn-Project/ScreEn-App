@@ -38,6 +38,7 @@ import com.example.translation_poc_app.translate.WordLookupOutcome
 import com.example.translation_poc_app.translate.GeminiTranslationEngine
 import com.example.translation_poc_app.translate.GemmaTranslationEngine
 import com.example.translation_poc_app.translate.GroqDictionary
+import com.example.translation_poc_app.translate.GuardedTranslationEngine
 import com.example.translation_poc_app.translate.GroqTranslationEngine
 import com.example.translation_poc_app.translate.MlKitTranslationEngine
 import com.example.translation_poc_app.translate.ModelDownloadPolicy
@@ -82,6 +83,8 @@ class TranslatorService : LifecycleService() {
             },
             detect = { ocr, target -> languageDetector.detect(ocr.blocks, target) },
             engineFor = { translationEngine(it) },
+            // AI 번역은 ML Kit 결과를 먼저 보여 주고 AI 결과가 오면 바꾼다.
+            previewEngineFor = { if (aiOrder(it).isNotEmpty()) mlKit() else null },
             settings = { AppGraph.settingsRepository(this).current() },
             onTimings = { Log.i(TAG, "번역 시간 $it total=${it.total}ms") },
             log = { Log.i(TAG, it) },
@@ -194,11 +197,14 @@ class TranslatorService : LifecycleService() {
         return listOf(first) + others
     }
 
-    private fun aiEngine(engine: Engine): TranslationEngine = when (engine) {
-        Engine.GROQ -> GroqTranslationEngine(keysFor(Engine.GROQ))
-        Engine.GEMMA -> GemmaTranslationEngine(AppGraph.gemmaRuntime(this))
-        else -> GeminiTranslationEngine(keysFor(Engine.GEMINI))
-    }
+    // 대답 문장 · 지시문 · 원문 되풀이가 섞인 응답은 걸러 다음 엔진(ML Kit)이 맡게 한다.
+    private fun aiEngine(engine: Engine): TranslationEngine = GuardedTranslationEngine(
+        when (engine) {
+            Engine.GROQ -> GroqTranslationEngine(keysFor(Engine.GROQ))
+            Engine.GEMMA -> GemmaTranslationEngine(AppGraph.gemmaRuntime(this))
+            else -> GeminiTranslationEngine(keysFor(Engine.GEMINI))
+        },
+    )
 
     // 엔진을 만드는 시점의 조회라 짧게 블로킹한다 (암호화 저장소 읽기).
     private fun hasKey(engine: Engine) = !AppGraph.apiKeyStore(this).get(engine).isNullOrBlank()
