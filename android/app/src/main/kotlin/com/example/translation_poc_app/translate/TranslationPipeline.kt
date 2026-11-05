@@ -47,6 +47,8 @@ sealed interface TranslationOutcome {
         val targetLanguage: String,
         /** 이미 대상 언어라 건너뛴 블록 수. */
         val skipped: Int,
+        /** true면 ML Kit 미리 보기라 AI 결과가 곧 이 결과를 바꾼다. 화면에서 다르게 보여 준다. */
+        val refining: Boolean = false,
     ) : TranslationOutcome
 
     /** 캡처가 전부 검다 → 보안 화면. */
@@ -197,7 +199,7 @@ class TranslationPipeline(
             } else {
                 translateWithPreview(engine, preview, requests, onPreview = { quick ->
                     TranslationAssembler.assemblePartial(detected, quick, preview.id, current.targetLanguage, lineHeight, bounds)
-                        ?.let(onPartial)
+                        ?.let { onPartial(it.copy(refining = true)) }
                 }) { cached++ }
             }
             onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size, cached))

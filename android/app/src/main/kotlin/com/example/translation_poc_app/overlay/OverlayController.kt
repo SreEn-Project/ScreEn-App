@@ -219,6 +219,9 @@ class OverlayController(
     private var layerTouchless = false
     private var layerItems by mutableStateOf<List<TranslatedItem>>(emptyList())
     private var layerPending by mutableStateOf<List<NormalizedRegion>>(emptyList())
+
+    /** 보이는 막이 ML Kit 미리 보기이고 AI 결과를 기다리는 중인가. */
+    private var layerRefining by mutableStateOf(false)
     private var overlayQuietUntil = 0L
     private var settingsJob: Job? = null
     private var snapAnimator: ValueAnimator? = null
@@ -950,6 +953,7 @@ class OverlayController(
             emptyList()
         }
         val layerPendingNow = if (shownDisplay == ResultDisplay.OVERLAY) pending else emptyList()
+        val refiningNow = (outcome as? TranslationOutcome.Translated)?.refining == true
         val isLayer = overItems.isNotEmpty() || layerPendingNow.isNotEmpty()
         // 자동 번역 중이거나 닫힘 시간이 정해져 있으면 막이 터치를 통과시켜 아래 앱을 그대로 스크롤할 수 있게 한다
         // (#23, #35). '직접 닫기'(자동 번역 꺼짐)는 화면 전체를 막고 사용자가 닫을 때까지 둔다. 목록 · 문장 시트는 항상 막는다.
@@ -964,6 +968,7 @@ class OverlayController(
             if (isLayer) {
                 layerItems = overItems
                 layerPending = layerPendingNow
+                layerRefining = refiningNow
             } else {
                 sheetOutcome = outcome
             }
@@ -980,6 +985,7 @@ class OverlayController(
         layerTouchless = touchless
         layerItems = overItems
         layerPending = layerPendingNow
+        layerRefining = refiningNow
         sheetOutcome = outcome
         val params = OverlayWindow.params(
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -997,6 +1003,7 @@ class OverlayController(
                 OverlayResult(
                     layerItems,
                     layerPending,
+                    refining = layerRefining,
                     onDismiss = { post(::closeByUser) },
                     onPickWord = if (vocabulary != null) ({ item -> post { openBlockWindow(item) } }) else null,
                 )
