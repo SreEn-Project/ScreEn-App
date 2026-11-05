@@ -575,3 +575,8 @@
 - 확인: `flutter analyze` 경고 0, `flutter test` 통과(설정 전달 · 뷰모델). Kotlin 단위 테스트(`GemmaAssistTest`)는 작성했으나 클라우드에 Android SDK가 없어 실행하지 못했다.
 - 남은 일: 기기에서 모델 실행 · 속도 · 품질 확인.
 - Gemma 도우미 진단 로그(#176): debug 빌드에서만 logcat 태그 `GemmaAssist`로 단계별 모델 응답 시간(ms), 입력 · 모델 답, 채택 여부, 건너뜀 · 시간 초과 · 실패를 남긴다. 화면 글자가 들어 있어 release에서는 끈다.
+
+## 글자 인식 누락 · 작은 글자 잡음 (NA-09, #178)
+- 한 일: 인식 입력 상한 2000px, `OcrTinyTextFilter`(아주 작은 줄 · 짧은 라틴 조각 거르기) 추가. D-070 참고.
+- 확인: Kotlin 단위 테스트(`OcrTinyTextFilterTest`)를 작성했지만 이 환경에 Android SDK · Gradle 래퍼가 없어 컴파일 · 실행하지 못했다. 실기기 확인 전.
+- 남은 일: 실기기에서 작은 글자 누락 · 그림 속 잡음 비교, 기준값 조정, PaddleOCR 비교.
