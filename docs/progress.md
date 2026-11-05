@@ -571,6 +571,6 @@
 - 남은 일: 실기기(RAM 8GB)에서 모델 받기 → 번역 속도 · 품질 · 발열 확인, 모델 파일 주소(`GemmaModelSpec.DEFAULT`) 검증, 필요하면 LiteRT-LM으로 이전.
 
 ## 글자 인식 누락 · 작은 글자 잡음 (NA-09, #178)
-- 한 일: 인식 입력 상한 2000px, `OcrTinyTextFilter`(아주 작은 줄 · 짧은 라틴 조각 거르기) 추가. D-069 참고.
+- 한 일: 인식 입력 상한 2000px, `OcrTinyTextFilter`(아주 작은 줄 · 짧은 라틴 조각 거르기) 추가. D-070 참고.
 - 확인: Kotlin 단위 테스트(`OcrTinyTextFilterTest`)를 작성했지만 이 환경에 Android SDK · Gradle 래퍼가 없어 컴파일 · 실행하지 못했다. 실기기 확인 전.
 - 남은 일: 실기기에서 작은 글자 누락 · 그림 속 잡음 비교, 기준값 조정, PaddleOCR 비교.

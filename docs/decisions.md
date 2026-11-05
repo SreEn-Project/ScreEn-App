@@ -420,7 +420,7 @@ Material Symbols Rounded 선 아이콘을 위해 `material_symbols_icons` 추가
 - **단어 사전(AD-02)** 은 Gemma로 하지 않고 기존처럼 ML Kit 번역만 쓴다.
 - 코드 변경: `translate/Gemma*.kt` 3개, `ApiKeyStore`(토큰), `AppGraph`, `TranslatorService`, `HostApis`, Pigeon(`EngineType.gemma`, `GemmaHostApi`), Gradle(`tasks-genai`), Manifest(`ACCESS_NETWORK_STATE`), Flutter `features/gemma`, ARB · strings.xml.
 
-## D-069. 글자 인식 누락 · 작은 글자 잡음 완화 (NA-09, #178)
+## D-070. 글자 인식 누락 · 작은 글자 잡음 완화 (NA-09, #178)
 - **원인**: 긴 변 1600px로 줄여 읽어 작은 글자가 뭉개졌고, 거르기는 신뢰도뿐이라 그림 속 작은 글자가 잡음으로 남았다.
 - **변경**: 인식 입력 긴 변 상한 1600 → 2000px. `OcrTinyTextFilter`: 줄 높이가 화면 높이의 0.5% 미만이면 버리고, 0.8% 미만이면 신뢰도 0.85 이상일 때만 남긴다. 라틴 글자 2자 이하의 짧은 줄은 신뢰도 0.8 미만이면 버린다(한 · 중 · 일은 제외). 인식기별 결과를 고르기 전에 적용한다.
 - **한계 · 다음**: 상한을 올리면 인식이 조금 느려진다. 기준값은 실기기 로그(`ScreenTextRecognizer`)로 조정한다. 다른 글자는 많이 읽었는데 일부만 놓친 화면은 아직 재시도하지 않는다. PaddleOCR(ONNX Runtime)은 같은 화면으로 ML Kit과 나란히 비교한 뒤 "못 읽은 경우만 재인식" 보조로 붙일지 정한다(모델 파일 · 래퍼 필요, 속도 · 발열 · 메모리 불리).
