@@ -130,6 +130,10 @@ class FakeSettingsRepository implements SettingsRepository {
       settings = settings.copyWith(aiTone: tone);
 
   @override
+  Future<void> setGemmaPolish(bool enabled) async =>
+      settings = settings.copyWith(gemmaPolish: enabled);
+
+  @override
   Future<void> setGlossary(List<GlossaryEntry> entries) async =>
       settings = settings.copyWith(glossary: entries);
 

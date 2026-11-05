@@ -37,4 +37,5 @@ data class TranslationKey(
     val source: String,
     val target: String,
     val style: AiStyle = AiStyle.NONE,
+    val assist: AssistOptions = AssistOptions.NONE,
 )

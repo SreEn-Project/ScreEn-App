@@ -73,6 +73,10 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<void> setAiTone(AiTone tone) => _dataSource.setAiTone(tone.toPigeon());
 
   @override
+  Future<void> setGemmaPolish(bool enabled) =>
+      _dataSource.setGemmaPolish(enabled);
+
+  @override
   Future<void> setGlossary(List<GlossaryEntry> entries) =>
       _dataSource.setGlossary([for (final e in entries) e.toPigeon()]);
 

@@ -172,7 +172,9 @@ class TranslationPipeline(
             val engine = engineFor(current)
             // 말투 · 용어집은 AI 엔진에만 쓴다 (FL-11). ML Kit에는 넣지 않아 캐시도 나뉘지 않는다.
             val style = if (current.engine.isAi) AiStyle(current.aiTone, current.glossary) else AiStyle.NONE
-            val requests = TranslationAssembler.requests(detected, current.targetLanguage, style)
+            // Gemma 도우미(#176): 켜 둔 보정만 요청에 싣는다. 모델이 없으면 도우미가 알아서 건너뛴다.
+            val assist = AssistOptions(current.gemmaPolish, current.aiTone, current.glossary)
+            val requests = TranslationAssembler.requests(detected, current.targetLanguage, style, assist)
             val lineHeight = { block: OcrBlock -> medianLineHeight(block)?.let { it.toFloat() / screenHeight } }
             val bounds = { block: OcrBlock ->
                 block.bounds?.let {
@@ -240,7 +242,7 @@ class TranslationPipeline(
         onHit: () -> Unit,
     ): List<EngineResult<TranslationResult>> = coroutineScope {
         val done = arrayOfNulls<EngineResult<TranslationResult>>(requests.size)
-        val keys = requests.map { TranslationKey(engine.id, it.text, it.source, it.target, it.style) }
+        val keys = requests.map { TranslationKey(engine.id, it.text, it.source, it.target, it.style, it.assist) }
         keys.forEachIndexed { i, key ->
             translations[key]?.let {
                 onHit()
@@ -305,10 +307,11 @@ object TranslationAssembler {
         detected: List<DetectedBlock>,
         targetLanguage: String,
         style: AiStyle = AiStyle.NONE,
+        assist: AssistOptions = AssistOptions.NONE,
     ): List<TranslationRequest> =
         detected.filter { it.decision.action == BlockAction.TRANSLATE }
             .map {
-                TranslationRequest(sourceText(it.block, it.decision.language), it.decision.language, targetLanguage, style)
+                TranslationRequest(sourceText(it.block, it.decision.language), it.decision.language, targetLanguage, style, assist)
             }
 
     /**

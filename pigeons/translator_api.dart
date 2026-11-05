@@ -57,6 +57,7 @@ class AppSettings {
     required this.ageConfirmed,
     required this.aiTone,
     required this.glossary,
+    required this.gemmaPolish,
   });
 
   /// BCP-47 언어 코드. 예: "ko", "en", "ja".
@@ -99,6 +100,9 @@ class AppSettings {
 
   /// AI 번역 용어집 (FL-11). 입력 순서 유지.
   List<GlossaryEntry> glossary;
+
+  /// Gemma 도우미 (#176): 번역 후 단어 · 말투 · 용어집 검토.
+  bool gemmaPolish;
 }
 
 @HostApi()
@@ -152,6 +156,10 @@ abstract class SettingsHostApi {
 
   @async
   void setAiTone(AiTone tone);
+
+  /// Gemma 도우미: 번역 후 다듬기를 켜고 끈다 (#176).
+  @async
+  void setGemmaPolish(bool enabled);
 
   /// 용어집 전체를 바꾼다 (FL-11). 네이티브가 빈 칸 · 중복 · 개수를 정리해 저장한다.
   @async

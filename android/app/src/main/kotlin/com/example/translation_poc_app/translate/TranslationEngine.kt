@@ -34,6 +34,8 @@ data class TranslationRequest(
     val source: String,
     val target: String,
     val style: AiStyle = AiStyle.NONE,
+    /** Gemma 도우미(#176) 옵션. 엔진 자체는 무시하고 [GemmaAssistedEngine]이 읽는다. */
+    val assist: AssistOptions = AssistOptions.NONE,
 )
 
 data class TranslationResult(

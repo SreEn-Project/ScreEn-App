@@ -199,6 +199,16 @@ final class ChangeAiTone implements UseCase<void, AiTone> {
   Future<void> call(AiTone tone) => _repository.setAiTone(tone);
 }
 
+/// Gemma 도우미: 번역 후 다듬기 켜기 · 끄기 (#176).
+final class ChangeGemmaPolish implements UseCase<void, bool> {
+  const ChangeGemmaPolish(this._repository);
+
+  final SettingsRepository _repository;
+
+  @override
+  Future<void> call(bool enabled) => _repository.setGemmaPolish(enabled);
+}
+
 /// AI 번역 용어집 변경 (FL-11). 앞뒤 공백을 걷고, 빈 칸 · 같은 원문(대소문자 무시) 중복을 빼고,
 /// 길이 · 개수를 제한한 뒤 저장한다. 앞의 항목이 이긴다.
 final class ChangeGlossary implements UseCase<void, List<GlossaryEntry>> {

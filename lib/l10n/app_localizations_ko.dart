@@ -1352,6 +1352,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gemmaErrorUnknown => '모델을 받지 못했어요. 잠시 뒤 다시 시도해 주세요.';
 
   @override
+  String get gemmaAssistTitle => '번역 도우미';
+
+  @override
+  String get gemmaAssistIntro =>
+      '번역은 ML Kit이 하고, Gemma는 번역 뒤에 검토만 해요. 시간이 조금 더 걸리고, 모델이 없거나 실패하면 검토 없이 번역 결과를 그대로 보여 줘요.';
+
+  @override
+  String get gemmaAssistPolish => '번역 후 단어 · 말투 검토';
+
+  @override
+  String get gemmaAssistPolishDetail =>
+      'ML Kit 번역을 원문과 단어 단위로 견주어 틀리거나 어색한 단어를 고치고, 정한 말투 · 용어집에 맞춰요';
+
+  @override
   String get gemmaFootnote =>
       'Gemma는 Google의 오픈 모델이에요. 작은 모델이라 번역 품질은 Gemini · Groq보다 낮을 수 있고, 처음 번역할 때 모델을 불러오느라 몇 초 걸려요.';
 }

@@ -1,11 +1,13 @@
 package com.example.translation_poc_app.translate
 
 import android.content.Context
+import android.util.Log
 import com.google.mediapipe.tasks.genai.llminference.LlmInference
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
 import java.io.Closeable
 import java.io.File
 import java.util.concurrent.Executors
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,15 +26,47 @@ interface LlmRunner : Closeable {
 }
 
 /** MediaPipe LLM Inference(`tasks-genai`)로 Gemma `.task` 모델을 돌린다 (#174). */
-class MediaPipeLlmRunner(context: Context, modelFile: File) : LlmRunner {
-    private val llm: LlmInference = LlmInference.createFromOptions(
-        context.applicationContext,
-        LlmInference.LlmInferenceOptions.builder()
+class MediaPipeLlmRunner(context: Context, modelFile: File, preferGpu: Boolean = true) : LlmRunner {
+    private val llm: LlmInference
+
+    /** 실제로 올라간 백엔드 ("GPU" 또는 "CPU"). GPU를 먼저 시도하고 안 되면 CPU로 다시 올린다 (#176). */
+    val backend: String
+
+    init {
+        val app = context.applicationContext
+        var created: LlmInference? = null
+        var used = "CPU"
+        if (preferGpu) {
+            try {
+                created = create(app, modelFile, gpu = true)
+                used = "GPU"
+            } catch (e: Throwable) {
+                Log.w(TAG, "GPU로 올리지 못해 CPU로 다시 시도: ${e.message}")
+            }
+        }
+        llm = created ?: create(app, modelFile, gpu = false)
+        backend = used
+        Log.i(TAG, "Gemma 모델을 $backend 로 올림")
+    }
+
+    private fun create(app: Context, modelFile: File, gpu: Boolean): LlmInference {
+        val builder = LlmInference.LlmInferenceOptions.builder()
             .setModelPath(modelFile.absolutePath)
             .setMaxTokens(MAX_TOKENS)
             .setMaxTopK(TOP_K)
-            .build(),
-    )
+        if (gpu) setGpuBackend(builder)
+        return LlmInference.createFromOptions(app, builder.build())
+    }
+
+    /**
+     * GPU를 우선 백엔드로 지정한다. 라이브러리 버전에 이 설정이 없으면 예외가 나고, 호출한 쪽이 CPU로 넘어간다
+     * (그래서 컴파일 시점에 이름에 묶이지 않도록 리플렉션을 쓴다).
+     */
+    private fun setGpuBackend(builder: LlmInference.LlmInferenceOptions.Builder) {
+        val backendClass = Class.forName("com.google.mediapipe.tasks.genai.llminference.LlmInference\$Backend")
+        val gpu = backendClass.enumConstants!!.first { (it as Enum<*>).name == "GPU" }
+        builder.javaClass.getMethod("setPreferredBackend", backendClass).invoke(builder, gpu)
+    }
 
     /** 요청마다 새 세션을 만들어 앞선 번역의 문맥이 섞이지 않게 한다. 번역이라 무작위성은 낮춘다. */
     override fun generate(prompt: String): String {
@@ -50,6 +84,7 @@ class MediaPipeLlmRunner(context: Context, modelFile: File) : LlmRunner {
 
     companion object {
         /** 입력 + 출력 토큰 합계 한도. 긴 글은 [GemmaTranslationEngine]이 잘라서 보낸다. */
+        private const val TAG = "GemmaRuntime"
         const val MAX_TOKENS = 1024
         const val TOP_K = 1
         const val TEMPERATURE = 0.1f
@@ -86,6 +121,28 @@ class GemmaRuntime(
             idleJob = scope.launch {
                 delay(idleMs)
                 unload()
+            }
+        }
+    }
+
+    /** 모델을 미리 올려 둔다 — 첫 호출이 로딩을 기다리지 않게. 모델이 없거나 실패하면 조용히 넘어간다. */
+    suspend fun warmUp() {
+        if (!isReady()) return
+        mutex.withLock {
+            idleJob?.cancel()
+            try {
+                withContext(dispatcher) {
+                    if (runner == null) runner = createRunner(modelFile())
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // 번역할 때 다시 시도한다.
+            } finally {
+                idleJob = scope.launch {
+                    delay(idleMs)
+                    unload()
+                }
             }
         }
     }

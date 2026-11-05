@@ -793,6 +793,53 @@ final class ChangeAiToneProvider
 
 String _$changeAiToneHash() => r'234e610631216cba0623731038734bb1976699bc';
 
+@ProviderFor(changeGemmaPolish)
+final changeGemmaPolishProvider = ChangeGemmaPolishProvider._();
+
+final class ChangeGemmaPolishProvider
+    extends
+        $FunctionalProvider<
+          ChangeGemmaPolish,
+          ChangeGemmaPolish,
+          ChangeGemmaPolish
+        >
+    with $Provider<ChangeGemmaPolish> {
+  ChangeGemmaPolishProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'changeGemmaPolishProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$changeGemmaPolishHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChangeGemmaPolish> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ChangeGemmaPolish create(Ref ref) {
+    return changeGemmaPolish(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChangeGemmaPolish value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChangeGemmaPolish>(value),
+    );
+  }
+}
+
+String _$changeGemmaPolishHash() => r'd2a3cd2ec7b7e8acaf1fb1df99654a625ed32643';
+
 @ProviderFor(changeGlossary)
 final changeGlossaryProvider = ChangeGlossaryProvider._();
 

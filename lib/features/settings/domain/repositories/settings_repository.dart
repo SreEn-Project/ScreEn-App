@@ -23,6 +23,9 @@ abstract interface class SettingsRepository {
   /// 만 18세 이상 확인 (FL-09). 거두면 네이티브가 엔진을 ML Kit으로 되돌린다.
   Future<void> setAgeConfirmed(bool confirmed);
   Future<void> setAiTone(AiTone tone);
+
+  /// Gemma 도우미 (#176): 번역 후 단어 · 말투 검토.
+  Future<void> setGemmaPolish(bool enabled);
   Future<void> setGlossary(List<GlossaryEntry> entries);
 
   /// AI 번역 API 키 (NA-13). 엔진마다 따로 보관한다. 없으면 null.

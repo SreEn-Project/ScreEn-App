@@ -1387,6 +1387,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not download the model. Please try again later.';
 
   @override
+  String get gemmaAssistTitle => 'Translation helper';
+
+  @override
+  String get gemmaAssistIntro =>
+      'ML Kit does the translating; Gemma only reviews the result afterwards. It adds a little time, and if the model is missing or fails, the translation is shown as is.';
+
+  @override
+  String get gemmaAssistPolish => 'Review words and style after translating';
+
+  @override
+  String get gemmaAssistPolishDetail =>
+      'Checks the ML Kit translation word by word against the source, fixes wrong or unnatural words, and applies your tone and glossary';
+
+  @override
   String get gemmaFootnote =>
       'Gemma is Google\'s open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.';
 }

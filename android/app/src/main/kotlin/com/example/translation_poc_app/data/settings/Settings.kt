@@ -67,6 +67,8 @@ data class Settings(
     val aiTone: AiTone = AiTone.STANDARD,
     /** AI 번역 용어집 (FL-11). */
     val glossary: List<GlossaryEntry> = emptyList(),
+    /** Gemma 도우미 (#176): ML Kit 번역을 말투 · 용어집에 맞게 다듬는다. 모델을 받아 둔 경우에만 동작. */
+    val gemmaPolish: Boolean = false,
 ) {
     companion object {
         const val DEFAULT_TARGET_LANGUAGE = "ko"

@@ -36,6 +36,8 @@ import com.example.translation_poc_app.translate.GeminiDictionary
 import com.example.translation_poc_app.translate.WordLookup
 import com.example.translation_poc_app.translate.WordLookupOutcome
 import com.example.translation_poc_app.translate.GeminiTranslationEngine
+import com.example.translation_poc_app.translate.GemmaAssist
+import com.example.translation_poc_app.translate.GemmaAssistedEngine
 import com.example.translation_poc_app.translate.GemmaTranslationEngine
 import com.example.translation_poc_app.translate.GroqDictionary
 import com.example.translation_poc_app.translate.GroqTranslationEngine
@@ -170,6 +172,21 @@ class TranslatorService : LifecycleService() {
      * 고른 AI 엔진이 1순위이고, 실패하면 쓸 수 있는 다른 AI 엔진(키가 있거나 모델을 받아 둔 것) → ML Kit 순으로 넘어간다.
      */
     private fun translationEngine(settings: Settings): TranslationEngine {
+        val base = baseEngine(settings)
+        // Gemma 도우미(#176): 켜 둔 것이 있을 때만 감싼다.
+        if (!settings.gemmaPolish) return base
+        return GemmaAssistedEngine(base, GemmaAssist(AppGraph.gemmaRuntime(this), log = assistLog()))
+    }
+
+    /** Gemma 도우미 진단 로그: debug 빌드에서만 남긴다 (화면 글자가 들어 있어 release에서는 끈다). logcat 태그 `GemmaAssist`. */
+    private fun assistLog(): (String) -> Unit =
+        if ((applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            { Log.d("GemmaAssist", it) }
+        } else {
+            {}
+        }
+
+    private fun baseEngine(settings: Settings): TranslationEngine {
         val mlKit = mlKit()
         val order = aiOrder(settings)
         if (order.isEmpty()) return mlKit
@@ -269,6 +286,13 @@ class TranslatorService : LifecycleService() {
                 textRecognizer.warmUp()
             } catch (e: Exception) {
                 Log.w(TAG, "인식기 예열 실패", e)
+            }
+            // Gemma 도우미를 켜 뒀으면 모델도 미리 올려 첫 번역이 로딩을 기다리지 않게 한다 (#176).
+            try {
+                val s = AppGraph.settingsRepository(this@TranslatorService).current()
+                if (s.gemmaPolish) AppGraph.gemmaRuntime(this@TranslatorService).warmUp()
+            } catch (e: Exception) {
+                Log.w(TAG, "Gemma 예열 실패", e)
             }
         }
     }

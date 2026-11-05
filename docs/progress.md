@@ -570,6 +570,12 @@
 - 확인: `flutter analyze` 0, `flutter test` 전체 통과(Gemma 뷰모델 · 엔진 선택 테스트 추가). Kotlin 단위 테스트(`GemmaTranslationEngineTest` · `GemmaModelManagerTest`)는 작성했지만 이 환경에 Android SDK가 없어 실행하지 못했다. 네이티브 컴파일 · 실기기 번역은 확인 전.
 - 남은 일: 실기기(RAM 8GB)에서 모델 받기 → 번역 속도 · 품질 · 발열 확인, 모델 파일 주소(`GemmaModelSpec.DEFAULT`) 검증, 필요하면 LiteRT-LM으로 이전.
 
+## Gemma 도우미: 번역 후 단어 · 말투 검토 (NA-13, #176)
+- ML Kit 번역 뒤에 Gemma 검토를 붙였다(D-069). 설정 1개(기본 꺼짐), Gemma 화면에 토글. 번역 전 OCR 보정은 사용자 결정으로 뺐다(11-05). 모델이 없거나 실패하면 보정 없이 진행.
+- 확인: `flutter analyze` 경고 0, `flutter test` 통과(설정 전달 · 뷰모델). Kotlin 단위 테스트(`GemmaAssistTest`)는 작성했으나 클라우드에 Android SDK가 없어 실행하지 못했다.
+- 남은 일: 기기에서 모델 실행 · 속도 · 품질 확인.
+- Gemma 도우미 진단 로그(#176): debug 빌드에서만 logcat 태그 `GemmaAssist`로 단계별 모델 응답 시간(ms), 입력 · 모델 답, 채택 여부, 건너뜀 · 시간 초과 · 실패를 남긴다. 화면 글자가 들어 있어 release에서는 끈다.
+
 ## 글자 인식 누락 · 작은 글자 잡음 (NA-09, #178)
 - 한 일: 인식 입력 상한 2000px, `OcrTinyTextFilter`(아주 작은 줄 · 짧은 라틴 조각 거르기) 추가. D-070 참고.
 - 확인: Kotlin 단위 테스트(`OcrTinyTextFilterTest`)를 작성했지만 이 환경에 Android SDK · Gradle 래퍼가 없어 컴파일 · 실행하지 못했다. 실기기 확인 전.
