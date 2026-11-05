@@ -64,7 +64,7 @@ class ScreenTextRecognizer : Closeable {
      * 비교할 수 없거나 너무 많이 바뀌었으면 통째로 읽는다.
      */
     suspend fun recognize(bitmap: Bitmap, sourceLanguage: String? = null, incremental: Boolean = false): OcrResult {
-        // 글자 인식 시간은 픽셀 수에 거의 비례한다. 긴 변을 줄여 읽고, 좌표는 원래 크기로 되돌린다 (#11).
+        // 글자 인식 시간은 픽셀 수에 거의 비례한다. 긴 변을 줄여 읽고, 좌표는 원래 크기로 되돌린다 (#11). 너무 줄이면 작은 글자가 뭉개져 누락되므로 상한을 2000px로 둔다 (#178).
         val scale = minOf(1f, MAX_SIDE.toFloat() / maxOf(bitmap.width, bitmap.height))
         val input = if (scale < 1f) {
             Bitmap.createScaledBitmap(bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
@@ -87,13 +87,13 @@ class ScreenTextRecognizer : Closeable {
                     return it
                 }
             }
-            var result = read(InputImage.fromBitmap(input, 0), sourceLanguage, 1f / scale)
+            var result = read(InputImage.fromBitmap(input, 0), sourceLanguage, 1f / scale, input.height / scale)
             var wasInverted = false
             // 거의 못 읽은 화면은 어두운 배경의 밝은 글자일 수 있다. 이 경우에만 색을 뒤집어 한 번 더 읽는다 (#21).
             if (OcrSelection.charCount(result.blocks) < OcrSelection.MIN_TRUSTED_CHARS) {
                 val inverted = inverted(input)
                 try {
-                    val second = read(InputImage.fromBitmap(inverted, 0), sourceLanguage, 1f / scale)
+                    val second = read(InputImage.fromBitmap(inverted, 0), sourceLanguage, 1f / scale, input.height / scale)
                     if (OcrSelection.score(second) > OcrSelection.score(result)) {
                         Log.i(TAG, "색을 뒤집어 읽은 결과가 더 낫다")
                         result = second
@@ -135,7 +135,7 @@ class ScreenTextRecognizer : Closeable {
                 val fresh = plan.regions.flatMap { box ->
                     val crop = Bitmap.createBitmap(input, box.left, box.top, box.width, box.height)
                     try {
-                        read(InputImage.fromBitmap(crop, 0), sourceLanguage, 1f).blocks
+                        read(InputImage.fromBitmap(crop, 0), sourceLanguage, 1f, input.height.toFloat()).blocks
                             .map { it.shifted(box.left, box.top).scaledBy(1f / scale) }
                     } finally {
                         crop.recycle()
@@ -178,13 +178,14 @@ class ScreenTextRecognizer : Closeable {
         return out
     }
 
-    private suspend fun read(image: InputImage, sourceLanguage: String?, factor: Float): OcrResult {
+    /** [referenceHeight]는 결과 좌표계에서의 화면 전체 높이 — 작은 글자 거르기의 기준 (#178). */
+    private suspend fun read(image: InputImage, sourceLanguage: String?, factor: Float, referenceHeight: Float): OcrResult {
         val auto = OcrSelection.scriptsFor(sourceLanguage).size > 1
         val first = if (auto) setOf(lastWinner) else OcrSelection.scriptsFor(sourceLanguage)
-        var results = readWith(image, first, factor)
+        var results = readWith(image, first, factor, referenceHeight)
         if (auto && !OcrSelection.isTrusted(results.flatMap { it.raw })) {
             Log.i(TAG, "첫 인식기(${lastWinner}) 결과가 미덥지 않아 나머지도 읽는다")
-            results = results + readWith(image, OcrSelection.remainingAuto(lastWinner), factor)
+            results = results + readWith(image, OcrSelection.remainingAuto(lastWinner), factor, referenceHeight)
         }
         val best = OcrSelection.pickBest(results.map { it.filtered }) ?: OcrResult(Script.LATIN, emptyList())
         // 진단 (#25): 인식기별 글자 수 · 평균 신뢰도, 거르고 남은 글자 수.
@@ -197,11 +198,11 @@ class ScreenTextRecognizer : Closeable {
 
     private class Read(val raw: List<OcrBlock>, val filtered: OcrResult)
 
-    private suspend fun readWith(image: InputImage, scripts: Set<Script>, factor: Float): List<Read> = coroutineScope {
+    private suspend fun readWith(image: InputImage, scripts: Set<Script>, factor: Float, referenceHeight: Float): List<Read> = coroutineScope {
         scripts.map { script ->
             async {
                 val raw = recognizerFor(script).process(image).await().toBlocks(factor)
-                Read(raw, OcrResult(script, OcrSelection.filterLowConfidence(raw)))
+                Read(raw, OcrResult(script, OcrTinyTextFilter.filter(OcrSelection.filterLowConfidence(raw), referenceHeight)))
             }
         }.awaitAll()
     }
@@ -245,7 +246,7 @@ class ScreenTextRecognizer : Closeable {
 
     private companion object {
         /** 인식에 넣는 이미지의 긴 변 상한(px). 휴대폰 글자 크기는 이 정도로 줄여도 읽힌다. */
-        const val MAX_SIDE = 1600
+        const val MAX_SIDE = 2000
         const val TAG = "ScreenTextRecognizer"
     }
 
