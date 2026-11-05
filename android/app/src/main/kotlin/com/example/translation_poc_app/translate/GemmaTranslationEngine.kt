@@ -57,7 +57,7 @@ class GemmaTranslationEngine(
         const val MODEL_LABEL = "gemma"
 
         /** 프롬프트를 바꾸면 올린다 (캐시 키에 넣을 값). */
-        const val PROMPT_VERSION = 1
+        const val PROMPT_VERSION = 2
 
         /** 한 번에 보내는 글자 수 상한. 입력 + 출력이 모델 토큰 한도(1024) 안에 들어오게 넉넉히 잡았다. */
         const val MAX_CHUNK_CHARS = 500
@@ -69,12 +69,11 @@ class GemmaTranslationEngine(
         }
 
         /**
-         * Gemma 대화 형식. 시스템 지시는 따로 없어 사용자 턴 맨 앞에 넣고,
-         * 작은 모델이 원문을 따라 쓰지 않도록 끝에 도착 언어를 한 번 더 못 박는다.
+         * Gemma 대화 형식. 시스템 지시는 따로 없어 사용자 턴 맨 앞에 넣는다.
+         * 작은 모델은 텍스트 뒤에 붙은 지시문을 번역 결과로 따라 쓰므로, 지시는 텍스트 앞에만 두고 텍스트로 끝낸다.
          */
         internal fun buildPrompt(system: String, text: String, targetName: String): String =
-            "<start_of_turn>user\n$system\n\nText:\n$text\n\n" +
-                "Now write only the $targetName translation of the text above. Do not repeat the original text." +
+            "<start_of_turn>user\n$system Output only the $targetName translation.\n\nText:\n$text" +
                 "<end_of_turn>\n<start_of_turn>model\n"
 
         /** 줄 단위로 모아 [maxChars] 안으로 자른다. 한 줄이 더 길면 문장 끝에서, 그래도 길면 글자 수로 자른다. */
@@ -119,7 +118,16 @@ class GemmaTranslationEngine(
             if (s.length >= 2 && ((s.first() == '"' && s.last() == '"') || (s.first() == '“' && s.last() == '”'))) {
                 s = s.substring(1, s.length - 1)
             }
-            return s.trim()
+            return stripEchoedInstruction(s).trim()
         }
+
+        /** 예전 프롬프트의 끝 지시문이나 그 비슷한 문장이 번역에 섞여 나오면 그 줄을 지운다. */
+        private val ECHOED_INSTRUCTION = Regex(
+            "(now write only|do not repeat the original|output only the .* translation|translation of the text above)",
+            RegexOption.IGNORE_CASE,
+        )
+
+        internal fun stripEchoedInstruction(s: String): String =
+            s.lines().filterNot { ECHOED_INSTRUCTION.containsMatchIn(it) }.joinToString("\n")
     }
 }

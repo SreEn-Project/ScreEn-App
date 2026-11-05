@@ -105,4 +105,17 @@ class GemmaTranslationEngineTest {
         }
         assertTrue(runner.closed)
     }
+
+    @Test
+    fun `프롬프트는 텍스트로 끝나고 끝 지시문이 없다`() {
+        val p = GemmaTranslationEngine.buildPrompt("sys", "hello", "Korean")
+        assertTrue(p.contains("Text:\nhello<end_of_turn>"))
+        assertTrue(!p.contains("Do not repeat"))
+    }
+
+    @Test
+    fun `번역에 섞인 지시문 줄은 걷어낸다`() {
+        val raw = "안녕하세요\nNow write only the Korean translation of the text above. Do not repeat the original text."
+        assertEquals("안녕하세요", GemmaTranslationEngine.clean(raw))
+    }
 }
