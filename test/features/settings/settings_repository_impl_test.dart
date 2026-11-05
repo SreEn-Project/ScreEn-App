@@ -28,7 +28,6 @@ pigeon.AppSettings _pigeonSettings({String targetLanguage = 'ko'}) =>
       ageConfirmed: true,
       aiTone: pigeon.AiTone.formal,
       glossary: [pigeon.GlossaryEntry(source: 'Mana', target: '마나')],
-      gemmaFixOcr: true,
       gemmaPolish: true,
     );
 
@@ -74,7 +73,6 @@ void main() {
         ageConfirmed: true,
         aiTone: AiTone.formal,
         glossary: [GlossaryEntry(source: 'Mana', target: '마나')],
-        gemmaFixOcr: true,
         gemmaPolish: true,
       ),
     );
@@ -101,13 +99,10 @@ void main() {
   });
 
   test('Gemma 도우미 설정을 Pigeon으로 전달한다', () async {
-    when(() => api.setGemmaFixOcr(any())).thenAnswer((_) async {});
     when(() => api.setGemmaPolish(any())).thenAnswer((_) async {});
 
-    await repository.setGemmaFixOcr(true);
     await repository.setGemmaPolish(false);
 
-    verify(() => api.setGemmaFixOcr(true)).called(1);
     verify(() => api.setGemmaPolish(false)).called(1);
   });
 

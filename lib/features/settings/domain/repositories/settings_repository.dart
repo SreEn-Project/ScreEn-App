@@ -24,8 +24,7 @@ abstract interface class SettingsRepository {
   Future<void> setAgeConfirmed(bool confirmed);
   Future<void> setAiTone(AiTone tone);
 
-  /// Gemma 도우미 (#176): 번역 전 OCR 보정 · 번역 후 다듬기.
-  Future<void> setGemmaFixOcr(bool enabled);
+  /// Gemma 도우미 (#176): 번역 후 단어 · 말투 검토.
   Future<void> setGemmaPolish(bool enabled);
   Future<void> setGlossary(List<GlossaryEntry> entries);
 

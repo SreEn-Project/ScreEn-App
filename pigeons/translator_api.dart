@@ -57,7 +57,6 @@ class AppSettings {
     required this.ageConfirmed,
     required this.aiTone,
     required this.glossary,
-    required this.gemmaFixOcr,
     required this.gemmaPolish,
   });
 
@@ -102,10 +101,7 @@ class AppSettings {
   /// AI 번역 용어집 (FL-11). 입력 순서 유지.
   List<GlossaryEntry> glossary;
 
-  /// Gemma 도우미 (#176): 번역 전 OCR 보정.
-  bool gemmaFixOcr;
-
-  /// Gemma 도우미 (#176): 번역 후 말투 · 용어집 다듬기.
+  /// Gemma 도우미 (#176): 번역 후 단어 · 말투 · 용어집 검토.
   bool gemmaPolish;
 }
 
@@ -160,10 +156,6 @@ abstract class SettingsHostApi {
 
   @async
   void setAiTone(AiTone tone);
-
-  /// Gemma 도우미: 번역 전 OCR 보정을 켜고 끈다 (#176).
-  @async
-  void setGemmaFixOcr(bool enabled);
 
   /// Gemma 도우미: 번역 후 다듬기를 켜고 끈다 (#176).
   @async

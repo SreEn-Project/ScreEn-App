@@ -6,18 +6,16 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Gemma 도우미 옵션 (#176). 번역은 ML Kit이 하고, Gemma는 앞뒤에서 보조만 한다.
+ * Gemma 도우미 옵션 (#176). 번역은 ML Kit이 하고, Gemma는 번역 뒤에 검토만 한다.
  * 번역 요청에 실려 캐시 키에도 들어가서, 설정을 바꾸면 이전 결과가 섞이지 않는다.
  */
 data class AssistOptions(
-    /** 번역 전에 OCR 글자 · 줄바꿈을 고친다. */
-    val fixOcr: Boolean = false,
     /** 번역 뒤에 말투 · 용어집에 맞게 다듬는다. */
     val polish: Boolean = false,
     val tone: AiTone = AiTone.STANDARD,
     val glossary: List<GlossaryEntry> = emptyList(),
 ) {
-    val enabled: Boolean get() = fixOcr || polish
+    val enabled: Boolean get() = polish
 
     companion object {
         val NONE = AssistOptions()
@@ -35,15 +33,6 @@ class GemmaAssist(
     private val log: (String) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
-    /** OCR 보정: 잘못 읽은 글자와 잘못 합쳐진(또는 쪼개진) 줄바꿈을 고친다. 번역하지 않는다. */
-    suspend fun fixOcr(text: String, language: String): String {
-        if (!canRun(text)) return skip("OCR 보정", text)
-        val raw = run("OCR 보정", fixOcrPrompt(text, language)) ?: return text
-        val fixed = acceptFix(text, raw)
-        log("OCR 보정 ${if (fixed == text) "원문 유지" else "채택"}: ${show(text)} → ${show(raw)}" + if (fixed == text && raw.isNotBlank() && GemmaTranslationEngine.clean(raw) != text) " (거절: 길이 벗어남)" else "")
-        return fixed
-    }
-
     /** 번역 다듬기: 초벌 번역 [draft]를 원문과 단어 단위로 견주어 어색하거나 틀린 단어를 고치고, 말투 · 용어집에 맞춘다. */
     suspend fun polish(source: String, draft: String, targetLanguage: String, tone: AiTone, glossary: List<GlossaryEntry>): String {
         if (!canRun(draft) || !canRun(source)) return skip("번역 검토", draft)
@@ -104,17 +93,6 @@ class GemmaAssist(
         /** 프롬프트를 바꾸면 올린다. */
         const val PROMPT_VERSION = 1
 
-        internal fun fixOcrPrompt(text: String, language: String): String {
-            val lang = if (language == AUTO_LANGUAGE || language == "und") "the original language" else GemmaTranslationEngine.languageName(language)
-            return "<start_of_turn>user\n" +
-                "The text below was read from a phone screenshot by OCR. It is written in $lang. " +
-                "Fix only clear OCR mistakes: wrongly recognized characters (for example 0/O, 1/l/I, rn/m), " +
-                "stray symbols, and line breaks that were wrongly joined or split. " +
-                "Keep the same language. Do not translate, summarize, add or remove content. " +
-                "If the text already looks correct, reply with exactly: $OK_REPLY. Otherwise reply with the corrected text only.\n\n" +
-                "Text:\n$text<end_of_turn>\n<start_of_turn>model\n"
-        }
-
         internal fun polishPrompt(
             source: String,
             draft: String,
@@ -148,17 +126,6 @@ class GemmaAssist(
         internal fun glossaryHits(source: String, glossary: List<GlossaryEntry>): List<GlossaryEntry> {
             val lowered = source.lowercase()
             return glossary.filter { lowered.contains(it.source.lowercase()) }
-        }
-
-        private fun visibleLength(s: String) = s.count { !it.isWhitespace() }
-
-        /** OCR 보정 결과 검사: 비었거나 길이가 크게 달라졌으면(번역 · 요약 · 군더더기) 원문을 쓴다. */
-        internal fun acceptFix(original: String, raw: String): String {
-            val fixed = GemmaTranslationEngine.clean(raw)
-            if (fixed.isBlank() || isOkReply(fixed)) return original
-            val before = visibleLength(original).coerceAtLeast(1)
-            val ratio = visibleLength(fixed).toDouble() / before
-            return if (ratio in 0.8..1.25) fixed else original
         }
 
         /** 한 번에 고칠 수 있는 단어 쌍의 수. */
@@ -198,8 +165,8 @@ class GemmaAssist(
 }
 
 /**
- * 번역 엔진을 감싸서 Gemma 도우미를 앞뒤에 붙인다 (#176). 요청의 [TranslationRequest.assist]가 꺼져 있으면 그대로 넘긴다.
- * 다듬기는 ML Kit이 번역한 결과에만 한다: AI 엔진은 말투 · 용어집을 이미 따르기 때문이다.
+ * 번역 엔진을 감싸서 Gemma 번역 검토를 뒤에 붙인다 (#176). 요청의 [TranslationRequest.assist]가 꺼져 있으면 그대로 넘긴다.
+ * 검토는 ML Kit이 번역한 결과에만 한다: AI 엔진은 말투 · 용어집을 이미 따르기 때문이다.
  */
 class GemmaAssistedEngine(
     private val inner: TranslationEngine,
@@ -209,10 +176,9 @@ class GemmaAssistedEngine(
     override suspend fun translate(request: TranslationRequest): EngineResult<TranslationResult> {
         val options = request.assist
         if (!options.enabled) return inner.translate(request)
-        val text = if (options.fixOcr) assist.fixOcr(request.text, request.source) else request.text
-        val result = inner.translate(request.copy(text = text))
-        if (!options.polish || result !is EngineResult.Ok || result.value.engine != EngineId.ML_KIT) return result
-        val polished = assist.polish(text, result.value.text, request.target, options.tone, options.glossary)
+        val result = inner.translate(request)
+        if (result !is EngineResult.Ok || result.value.engine != EngineId.ML_KIT) return result
+        val polished = assist.polish(request.text, result.value.text, request.target, options.tone, options.glossary)
         return EngineResult.Ok(result.value.copy(text = polished))
     }
 }

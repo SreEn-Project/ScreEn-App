@@ -83,10 +83,6 @@ ChangeAiTone changeAiTone(Ref ref) =>
     ChangeAiTone(ref.watch(settingsRepositoryProvider));
 
 @riverpod
-ChangeGemmaFixOcr changeGemmaFixOcr(Ref ref) =>
-    ChangeGemmaFixOcr(ref.watch(settingsRepositoryProvider));
-
-@riverpod
 ChangeGemmaPolish changeGemmaPolish(Ref ref) =>
     ChangeGemmaPolish(ref.watch(settingsRepositoryProvider));
 

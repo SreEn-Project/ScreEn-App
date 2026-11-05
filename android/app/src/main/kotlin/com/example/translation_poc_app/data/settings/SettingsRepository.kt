@@ -47,8 +47,6 @@ class SettingsRepository(context: Context) {
 
     suspend fun setAiTone(tone: AiTone) = edit { it[Keys.AI_TONE] = tone.name }
 
-    suspend fun setGemmaFixOcr(enabled: Boolean) = edit { it[Keys.GEMMA_FIX_OCR] = enabled }
-
     suspend fun setGemmaPolish(enabled: Boolean) = edit { it[Keys.GEMMA_POLISH] = enabled }
 
     suspend fun setGlossary(entries: List<GlossaryEntry>) =
@@ -128,7 +126,6 @@ class SettingsRepository(context: Context) {
             ageConfirmed = ageConfirmed,
             aiTone = enumOrDefault(this[Keys.AI_TONE], defaults.aiTone),
             glossary = decodeGlossary(this[Keys.GLOSSARY]),
-            gemmaFixOcr = this[Keys.GEMMA_FIX_OCR] ?: defaults.gemmaFixOcr,
             gemmaPolish = this[Keys.GEMMA_POLISH] ?: defaults.gemmaPolish,
         )
     }
@@ -155,7 +152,6 @@ class SettingsRepository(context: Context) {
         val BUTTON_SIZE_DP = intPreferencesKey("button_size_dp")
         val BUTTON_OPACITY_PERCENT = intPreferencesKey("button_opacity_percent")
         val AGE_CONFIRMED = booleanPreferencesKey("age_confirmed")
-        val GEMMA_FIX_OCR = booleanPreferencesKey("gemma_fix_ocr")
         val GEMMA_POLISH = booleanPreferencesKey("gemma_polish")
         val AI_TONE = stringPreferencesKey("ai_tone")
         val GLOSSARY = stringPreferencesKey("glossary")

@@ -2603,20 +2603,8 @@ abstract class AppLocalizations {
   /// No description provided for @gemmaAssistIntro.
   ///
   /// In en, this message translates to:
-  /// **'ML Kit does the translating; Gemma only helps before and after. It adds a little time, and if the model is missing or fails, the text is translated as usual without help.'**
+  /// **'ML Kit does the translating; Gemma only reviews the result afterwards. It adds a little time, and if the model is missing or fails, the translation is shown as is.'**
   String get gemmaAssistIntro;
-
-  /// No description provided for @gemmaAssistFixOcr.
-  ///
-  /// In en, this message translates to:
-  /// **'Fix text before translating'**
-  String get gemmaAssistFixOcr;
-
-  /// No description provided for @gemmaAssistFixOcrDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'Corrects misread characters and wrongly joined line breaks, then translates'**
-  String get gemmaAssistFixOcrDetail;
 
   /// No description provided for @gemmaAssistPolish.
   ///

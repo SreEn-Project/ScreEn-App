@@ -52,8 +52,6 @@ class SettingsNativeDataSource {
 
   Future<void> setAiTone(pigeon.AiTone tone) => _api.setAiTone(tone);
 
-  Future<void> setGemmaFixOcr(bool enabled) => _api.setGemmaFixOcr(enabled);
-
   Future<void> setGemmaPolish(bool enabled) => _api.setGemmaPolish(enabled);
 
   Future<void> setGlossary(List<pigeon.GlossaryEntry> entries) =>

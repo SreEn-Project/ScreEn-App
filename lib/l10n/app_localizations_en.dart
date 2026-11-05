@@ -1391,14 +1391,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gemmaAssistIntro =>
-      'ML Kit does the translating; Gemma only helps before and after. It adds a little time, and if the model is missing or fails, the text is translated as usual without help.';
-
-  @override
-  String get gemmaAssistFixOcr => 'Fix text before translating';
-
-  @override
-  String get gemmaAssistFixOcrDetail =>
-      'Corrects misread characters and wrongly joined line breaks, then translates';
+      'ML Kit does the translating; Gemma only reviews the result afterwards. It adds a little time, and if the model is missing or fails, the translation is shown as is.';
 
   @override
   String get gemmaAssistPolish => 'Review words and style after translating';

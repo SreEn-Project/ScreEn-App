@@ -199,16 +199,6 @@ final class ChangeAiTone implements UseCase<void, AiTone> {
   Future<void> call(AiTone tone) => _repository.setAiTone(tone);
 }
 
-/// Gemma 도우미: 번역 전 OCR 보정 켜기 · 끄기 (#176).
-final class ChangeGemmaFixOcr implements UseCase<void, bool> {
-  const ChangeGemmaFixOcr(this._repository);
-
-  final SettingsRepository _repository;
-
-  @override
-  Future<void> call(bool enabled) => _repository.setGemmaFixOcr(enabled);
-}
-
 /// Gemma 도우미: 번역 후 다듬기 켜기 · 끄기 (#176).
 final class ChangeGemmaPolish implements UseCase<void, bool> {
   const ChangeGemmaPolish(this._repository);

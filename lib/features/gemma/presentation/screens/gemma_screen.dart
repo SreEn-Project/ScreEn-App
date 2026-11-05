@@ -203,27 +203,14 @@ class _GemmaScreenState extends ConsumerState<GemmaScreen> {
                     const SizedBox(height: 12),
                     AppCard(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Column(
-                        children: [
-                          AppListTile(
-                            icon: Symbols.spellcheck_rounded,
-                            title: l10n.gemmaAssistFixOcr,
-                            subtitle: l10n.gemmaAssistFixOcrDetail,
-                            trailing: AppSwitch(
-                              value: assist.fixOcr,
-                              onChanged: assistViewModel.setFixOcr,
-                            ),
-                          ),
-                          AppListTile(
-                            icon: Symbols.edit_note_rounded,
-                            title: l10n.gemmaAssistPolish,
-                            subtitle: l10n.gemmaAssistPolishDetail,
-                            trailing: AppSwitch(
-                              value: assist.polish,
-                              onChanged: assistViewModel.setPolish,
-                            ),
-                          ),
-                        ],
+                      child: AppListTile(
+                        icon: Symbols.edit_note_rounded,
+                        title: l10n.gemmaAssistPolish,
+                        subtitle: l10n.gemmaAssistPolishDetail,
+                        trailing: AppSwitch(
+                          value: assist.polish,
+                          onChanged: assistViewModel.setPolish,
+                        ),
                       ),
                     ),
                   ],

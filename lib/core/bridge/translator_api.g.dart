@@ -201,7 +201,6 @@ class AppSettings {
     required this.ageConfirmed,
     required this.aiTone,
     required this.glossary,
-    required this.gemmaFixOcr,
     required this.gemmaPolish,
   });
 
@@ -250,10 +249,7 @@ class AppSettings {
   /// AI 번역 용어집 (FL-11). 입력 순서 유지.
   List<GlossaryEntry> glossary;
 
-  /// Gemma 도우미 (#176): 번역 전 OCR 보정.
-  bool gemmaFixOcr;
-
-  /// Gemma 도우미 (#176): 번역 후 말투 · 용어집 다듬기.
+  /// Gemma 도우미 (#176): 번역 후 단어 · 말투 · 용어집 검토.
   bool gemmaPolish;
 
   List<Object?> _toList() {
@@ -274,7 +270,6 @@ class AppSettings {
       ageConfirmed,
       aiTone,
       glossary,
-      gemmaFixOcr,
       gemmaPolish,
     ];
   }
@@ -302,8 +297,7 @@ class AppSettings {
       ageConfirmed: result[13]! as bool,
       aiTone: result[14]! as AiTone,
       glossary: (result[15]! as List<Object?>).cast<GlossaryEntry>(),
-      gemmaFixOcr: result[16]! as bool,
-      gemmaPolish: result[17]! as bool,
+      gemmaPolish: result[16]! as bool,
     );
   }
 
@@ -332,7 +326,6 @@ class AppSettings {
         _deepEquals(ageConfirmed, other.ageConfirmed) &&
         _deepEquals(aiTone, other.aiTone) &&
         _deepEquals(glossary, other.glossary) &&
-        _deepEquals(gemmaFixOcr, other.gemmaFixOcr) &&
         _deepEquals(gemmaPolish, other.gemmaPolish);
   }
 
@@ -342,7 +335,7 @@ class AppSettings {
 
   @override
   String toString() {
-    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion, ageConfirmed: $ageConfirmed, aiTone: $aiTone, glossary: $glossary, gemmaFixOcr: $gemmaFixOcr, gemmaPolish: $gemmaPolish)';
+    return 'AppSettings(targetLanguage: $targetLanguage, engine: $engine, captureMode: $captureMode, displayMode: $displayMode, onboardingCompleted: $onboardingCompleted, quickLanguages: $quickLanguages, autoTranslate: $autoTranslate, autoShowDelayMs: $autoShowDelayMs, hideAfterInteractionMs: $hideAfterInteractionMs, wifiOnlyModelDownload: $wifiOnlyModelDownload, buttonSizeDp: $buttonSizeDp, buttonOpacityPercent: $buttonOpacityPercent, hasFixedRegion: $hasFixedRegion, ageConfirmed: $ageConfirmed, aiTone: $aiTone, glossary: $glossary, gemmaPolish: $gemmaPolish)';
   }
 }
 
@@ -1401,27 +1394,6 @@ class SettingsHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[tone],
-    );
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
-  }
-
-  /// Gemma 도우미: 번역 전 OCR 보정을 켜고 끈다 (#176).
-  Future<void> setGemmaFixOcr(bool enabled) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setGemmaFixOcr$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[enabled],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

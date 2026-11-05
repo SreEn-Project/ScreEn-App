@@ -39,14 +39,14 @@ class GemmaAssistTest {
     @Test
     fun `로그 - 호출 시간 · 입력 · 답 · 채택 여부를 남긴다`() {
         val lines = mutableListOf<String>()
-        val runner = AssistRunner { "Hello World" }
+        val runner = AssistRunner { "안녕하세 => 안녕하세요" }
         val a = GemmaAssist(
             GemmaRuntime(modelFile = { File("model.task") }, isReady = { true }, createRunner = { runner }),
             log = { lines += it },
         )
-        runBlocking { a.fixOcr("He1lo W0rld", "en") }
+        runBlocking { a.polish("hello", "안녕하세", "ko", AiTone.STANDARD, emptyList()) }
         assertTrue(lines.any { it.contains("모델 응답") && it.contains("ms") })
-        assertTrue(lines.any { it.contains("채택") && it.contains("He1lo W0rld") && it.contains("Hello World") })
+        assertTrue(lines.any { it.contains("채택") && it.contains("안녕하세") && it.contains("안녕하세요") })
     }
 
     @Test
@@ -57,22 +57,12 @@ class GemmaAssistTest {
             GemmaRuntime(modelFile = { File("model.task") }, isReady = { false }, createRunner = { runner }),
             log = { lines += it },
         )
-        runBlocking { a.fixOcr("abc", "en") }
+        runBlocking { a.polish("hello", "안녕", "ko", AiTone.STANDARD, emptyList()) }
         assertTrue(lines.single().contains("건너뜀"))
     }
 
     @Test
-    fun `OCR 보정 - 고친 글을 돌려준다`() {
-        val runner = AssistRunner { "Hello World" }
-        val r = runBlocking { assist(true, runner).fixOcr("He1lo W0rld", "en") }
-        assertEquals("Hello World", r)
-        assertTrue(runner.prompts.single().contains("He1lo W0rld"))
-    }
-
-    @Test
     fun `OK 답은 고칠 것 없음 - 원문 · 초벌 그대로`() {
-        assertEquals("abc", GemmaAssist.acceptFix("abc", "OK"))
-        assertEquals("abc", GemmaAssist.acceptFix("abc", "ok."))
         assertEquals("안녕", GemmaAssist.applyCorrections("안녕", "\"OK\"", emptyList()))
     }
 
@@ -90,41 +80,6 @@ class GemmaAssistTest {
         val rt = GemmaRuntime(modelFile = { File("m.task") }, isReady = { false }, createRunner = { created++; AssistRunner { "x" } })
         runBlocking { rt.warmUp() }
         assertEquals(0, created)
-    }
-
-    @Test
-    fun `OCR 보정 - 모델이 없으면 모델을 부르지 않고 원문`() {
-        val runner = AssistRunner { "x" }
-        assertEquals("abc", runBlocking { assist(false, runner).fixOcr("abc", "en") })
-        assertTrue(runner.prompts.isEmpty())
-    }
-
-    @Test
-    fun `OCR 보정 - 번역하거나 요약해 길이가 달라지면 원문`() {
-        val original = "Press the button to continue"
-        assertEquals(original, GemmaAssist.acceptFix(original, "계속하려면 버튼을 누르세요"))
-        assertEquals(original, GemmaAssist.acceptFix(original, "Press"))
-        assertEquals(original, GemmaAssist.acceptFix(original, "  "))
-    }
-
-    @Test
-    fun `OCR 보정 - 실행기가 실패하면 원문`() {
-        val runner = AssistRunner { error("boom") }
-        assertEquals("abc", runBlocking { assist(true, runner).fixOcr("abc", "en") })
-    }
-
-    @Test
-    fun `OCR 보정 - 제한 시간을 넘기면 원문`() {
-        val runner = AssistRunner { Thread.sleep(300); "fixed" }
-        assertEquals("abc", runBlocking { assist(true, runner, timeoutMs = 50).fixOcr("abc", "en") })
-    }
-
-    @Test
-    fun `OCR 보정 - 너무 긴 글은 건너뛴다`() {
-        val runner = AssistRunner { "x" }
-        val long = "a".repeat(GemmaAssist.MAX_CHARS + 1)
-        assertEquals(long, runBlocking { assist(true, runner).fixOcr(long, "en") })
-        assertTrue(runner.prompts.isEmpty())
     }
 
     @Test
@@ -153,6 +108,22 @@ class GemmaAssistTest {
         assertTrue(prompt.contains("Hello => 안녕"))
         assertTrue(!prompt.contains("Other"))
         assertTrue(prompt.contains("Draft:\n안녕하세요."))
+    }
+
+    @Test
+    fun `다듬기 - 실행기가 실패하거나 시간을 넘기면 초벌 그대로`() {
+        val failing = AssistRunner { error("boom") }
+        assertEquals("안녕", runBlocking { assist(true, failing).polish("hi", "안녕", "ko", AiTone.STANDARD, emptyList()) })
+        val slow = AssistRunner { Thread.sleep(300); "안녕 => 안녕하세요" }
+        assertEquals("안녕", runBlocking { assist(true, slow, timeoutMs = 50).polish("hi", "안녕", "ko", AiTone.STANDARD, emptyList()) })
+    }
+
+    @Test
+    fun `다듬기 - 너무 긴 글은 건너뛴다`() {
+        val runner = AssistRunner { "x => y" }
+        val long = "a".repeat(GemmaAssist.MAX_CHARS + 1)
+        assertEquals(long, runBlocking { assist(true, runner).polish("hi", long, "ko", AiTone.STANDARD, emptyList()) })
+        assertTrue(runner.prompts.isEmpty())
     }
 
     @Test
@@ -196,10 +167,10 @@ class GemmaAssistTest {
     }
 
     @Test
-    fun `엔진 - OCR 보정한 글을 번역하고 번역을 다듬는다`() {
+    fun `엔진 - 번역 뒤에 틀린 단어를 고친다`() {
         val inner = StubEngine("안녕하세요")
-        val runner = AssistRunner { prompt -> if (prompt.contains("OCR")) "Hello" else "안녕하세요 => 안녕" }
-        val request = TranslationRequest("He1lo", "en", "ko", assist = AssistOptions(fixOcr = true, polish = true, tone = AiTone.INFORMAL))
+        val runner = AssistRunner { "안녕하세요 => 안녕" }
+        val request = TranslationRequest("Hello", "en", "ko", assist = AssistOptions(polish = true, tone = AiTone.INFORMAL))
         val r = runBlocking { GemmaAssistedEngine(inner, assist(true, runner)).translate(request) }
         assertEquals("Hello", inner.requests.single().text)
         assertEquals("안녕", (r as EngineResult.Ok).value.text)

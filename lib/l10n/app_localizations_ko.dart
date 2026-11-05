@@ -1356,13 +1356,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gemmaAssistIntro =>
-      '번역은 ML Kit이 하고, Gemma는 앞뒤에서 돕기만 해요. 시간이 조금 더 걸리고, 모델이 없거나 실패하면 도움 없이 그대로 번역해요.';
-
-  @override
-  String get gemmaAssistFixOcr => '번역 전 글자 보정';
-
-  @override
-  String get gemmaAssistFixOcrDetail => '잘못 읽은 글자와 잘못 이어진 줄바꿈을 고친 뒤 번역해요';
+      '번역은 ML Kit이 하고, Gemma는 번역 뒤에 검토만 해요. 시간이 조금 더 걸리고, 모델이 없거나 실패하면 검토 없이 번역 결과를 그대로 보여 줘요.';
 
   @override
   String get gemmaAssistPolish => '번역 후 단어 · 말투 검토';

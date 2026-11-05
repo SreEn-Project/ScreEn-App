@@ -15,7 +15,6 @@ void main() {
   setUp(() {
     repository = _MockSettingsRepository();
     when(() => repository.watch()).thenAnswer((_) => const Stream.empty());
-    when(() => repository.setGemmaFixOcr(any())).thenAnswer((_) async {});
     when(() => repository.setGemmaPolish(any())).thenAnswer((_) async {});
     container = ProviderContainer(
       overrides: [settingsRepositoryProvider.overrideWithValue(repository)],
@@ -32,19 +31,15 @@ void main() {
     return container.read(gemmaAssistViewModelProvider.future);
   }
 
-  test('기본값은 둘 다 꺼짐', () async {
+  test('기본값은 꺼짐', () async {
     final options = await ready();
 
-    expect(options.fixOcr, isFalse);
     expect(options.polish, isFalse);
   });
 
   test('저장된 설정을 읽어 온다', () async {
-    final options = await ready(
-      const TranslatorSettings(gemmaFixOcr: true, gemmaPolish: true),
-    );
+    final options = await ready(const TranslatorSettings(gemmaPolish: true));
 
-    expect(options.fixOcr, isTrue);
     expect(options.polish, isTrue);
   });
 
@@ -52,10 +47,8 @@ void main() {
     await ready();
     final viewModel = container.read(gemmaAssistViewModelProvider.notifier);
 
-    await viewModel.setFixOcr(true);
     await viewModel.setPolish(true);
 
-    verify(() => repository.setGemmaFixOcr(true)).called(1);
     verify(() => repository.setGemmaPolish(true)).called(1);
   });
 }

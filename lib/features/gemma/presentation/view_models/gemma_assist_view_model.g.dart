@@ -8,17 +8,17 @@ part of 'gemma_assist_view_model.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Gemma 도우미 설정 (#176): 번역 전 OCR 보정 · 번역 후 다듬기. 원본은 네이티브 설정이라
+/// Gemma 도우미 설정 (#176): 번역 후 단어 · 말투 검토. 원본은 네이티브 설정이라
 /// 바꾸면 이벤트로 돌아와 화면이 갱신된다.
 
 @ProviderFor(GemmaAssistViewModel)
 final gemmaAssistViewModelProvider = GemmaAssistViewModelProvider._();
 
-/// Gemma 도우미 설정 (#176): 번역 전 OCR 보정 · 번역 후 다듬기. 원본은 네이티브 설정이라
+/// Gemma 도우미 설정 (#176): 번역 후 단어 · 말투 검토. 원본은 네이티브 설정이라
 /// 바꾸면 이벤트로 돌아와 화면이 갱신된다.
 final class GemmaAssistViewModelProvider
     extends $StreamNotifierProvider<GemmaAssistViewModel, GemmaAssistOptions> {
-  /// Gemma 도우미 설정 (#176): 번역 전 OCR 보정 · 번역 후 다듬기. 원본은 네이티브 설정이라
+  /// Gemma 도우미 설정 (#176): 번역 후 단어 · 말투 검토. 원본은 네이티브 설정이라
   /// 바꾸면 이벤트로 돌아와 화면이 갱신된다.
   GemmaAssistViewModelProvider._()
     : super(
@@ -40,9 +40,9 @@ final class GemmaAssistViewModelProvider
 }
 
 String _$gemmaAssistViewModelHash() =>
-    r'0de7b78aaef42ae3eec8d51fdd4f551054dad625';
+    r'0231b4d33d006715dceba88b1a2a06aaf5cf897b';
 
-/// Gemma 도우미 설정 (#176): 번역 전 OCR 보정 · 번역 후 다듬기. 원본은 네이티브 설정이라
+/// Gemma 도우미 설정 (#176): 번역 후 단어 · 말투 검토. 원본은 네이티브 설정이라
 /// 바꾸면 이벤트로 돌아와 화면이 갱신된다.
 
 abstract class _$GemmaAssistViewModel

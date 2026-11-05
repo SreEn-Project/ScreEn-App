@@ -397,9 +397,7 @@ data class AppSettings (
   val aiTone: AiTone,
   /** AI 번역 용어집 (FL-11). 입력 순서 유지. */
   val glossary: List<GlossaryEntry>,
-  /** Gemma 도우미 (#176): 번역 전 OCR 보정. */
-  val gemmaFixOcr: Boolean,
-  /** Gemma 도우미 (#176): 번역 후 말투 · 용어집 다듬기. */
+  /** Gemma 도우미 (#176): 번역 후 단어 · 말투 · 용어집 검토. */
   val gemmaPolish: Boolean
 )
  {
@@ -421,9 +419,8 @@ data class AppSettings (
       val ageConfirmed = pigeonVar_list[13] as Boolean
       val aiTone = pigeonVar_list[14] as AiTone
       val glossary = pigeonVar_list[15] as List<GlossaryEntry>
-      val gemmaFixOcr = pigeonVar_list[16] as Boolean
-      val gemmaPolish = pigeonVar_list[17] as Boolean
-      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs, wifiOnlyModelDownload, buttonSizeDp, buttonOpacityPercent, hasFixedRegion, ageConfirmed, aiTone, glossary, gemmaFixOcr, gemmaPolish)
+      val gemmaPolish = pigeonVar_list[16] as Boolean
+      return AppSettings(targetLanguage, engine, captureMode, displayMode, onboardingCompleted, quickLanguages, autoTranslate, autoShowDelayMs, hideAfterInteractionMs, wifiOnlyModelDownload, buttonSizeDp, buttonOpacityPercent, hasFixedRegion, ageConfirmed, aiTone, glossary, gemmaPolish)
     }
   }
   fun toList(): List<Any?> {
@@ -444,7 +441,6 @@ data class AppSettings (
       ageConfirmed,
       aiTone,
       glossary,
-      gemmaFixOcr,
       gemmaPolish,
     )
   }
@@ -456,7 +452,7 @@ data class AppSettings (
       return true
     }
     val other = other as AppSettings
-    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs) && TranslatorApiPigeonUtils.deepEquals(this.wifiOnlyModelDownload, other.wifiOnlyModelDownload) && TranslatorApiPigeonUtils.deepEquals(this.buttonSizeDp, other.buttonSizeDp) && TranslatorApiPigeonUtils.deepEquals(this.buttonOpacityPercent, other.buttonOpacityPercent) && TranslatorApiPigeonUtils.deepEquals(this.hasFixedRegion, other.hasFixedRegion) && TranslatorApiPigeonUtils.deepEquals(this.ageConfirmed, other.ageConfirmed) && TranslatorApiPigeonUtils.deepEquals(this.aiTone, other.aiTone) && TranslatorApiPigeonUtils.deepEquals(this.glossary, other.glossary) && TranslatorApiPigeonUtils.deepEquals(this.gemmaFixOcr, other.gemmaFixOcr) && TranslatorApiPigeonUtils.deepEquals(this.gemmaPolish, other.gemmaPolish)
+    return TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.engine, other.engine) && TranslatorApiPigeonUtils.deepEquals(this.captureMode, other.captureMode) && TranslatorApiPigeonUtils.deepEquals(this.displayMode, other.displayMode) && TranslatorApiPigeonUtils.deepEquals(this.onboardingCompleted, other.onboardingCompleted) && TranslatorApiPigeonUtils.deepEquals(this.quickLanguages, other.quickLanguages) && TranslatorApiPigeonUtils.deepEquals(this.autoTranslate, other.autoTranslate) && TranslatorApiPigeonUtils.deepEquals(this.autoShowDelayMs, other.autoShowDelayMs) && TranslatorApiPigeonUtils.deepEquals(this.hideAfterInteractionMs, other.hideAfterInteractionMs) && TranslatorApiPigeonUtils.deepEquals(this.wifiOnlyModelDownload, other.wifiOnlyModelDownload) && TranslatorApiPigeonUtils.deepEquals(this.buttonSizeDp, other.buttonSizeDp) && TranslatorApiPigeonUtils.deepEquals(this.buttonOpacityPercent, other.buttonOpacityPercent) && TranslatorApiPigeonUtils.deepEquals(this.hasFixedRegion, other.hasFixedRegion) && TranslatorApiPigeonUtils.deepEquals(this.ageConfirmed, other.ageConfirmed) && TranslatorApiPigeonUtils.deepEquals(this.aiTone, other.aiTone) && TranslatorApiPigeonUtils.deepEquals(this.glossary, other.glossary) && TranslatorApiPigeonUtils.deepEquals(this.gemmaPolish, other.gemmaPolish)
   }
 
   override fun hashCode(): Int {
@@ -477,12 +473,11 @@ data class AppSettings (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.ageConfirmed)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.aiTone)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.glossary)
-    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.gemmaFixOcr)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.gemmaPolish)
     return result
   }
   override fun toString(): String {
-    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload, buttonSizeDp=$buttonSizeDp, buttonOpacityPercent=$buttonOpacityPercent, hasFixedRegion=$hasFixedRegion, ageConfirmed=$ageConfirmed, aiTone=$aiTone, glossary=$glossary, gemmaFixOcr=$gemmaFixOcr, gemmaPolish=$gemmaPolish)"
+    return "AppSettings(targetLanguage=$targetLanguage, engine=$engine, captureMode=$captureMode, displayMode=$displayMode, onboardingCompleted=$onboardingCompleted, quickLanguages=$quickLanguages, autoTranslate=$autoTranslate, autoShowDelayMs=$autoShowDelayMs, hideAfterInteractionMs=$hideAfterInteractionMs, wifiOnlyModelDownload=$wifiOnlyModelDownload, buttonSizeDp=$buttonSizeDp, buttonOpacityPercent=$buttonOpacityPercent, hasFixedRegion=$hasFixedRegion, ageConfirmed=$ageConfirmed, aiTone=$aiTone, glossary=$glossary, gemmaPolish=$gemmaPolish)"
   }
 }
 
@@ -1180,8 +1175,6 @@ interface SettingsHostApi {
   /** 만 18세 이상 확인을 기록한다 (FL-09). */
   suspend fun setAgeConfirmed(confirmed: Boolean)
   suspend fun setAiTone(tone: AiTone)
-  /** Gemma 도우미: 번역 전 OCR 보정을 켜고 끈다 (#176). */
-  suspend fun setGemmaFixOcr(enabled: Boolean)
   /** Gemma 도우미: 번역 후 다듬기를 켜고 끈다 (#176). */
   suspend fun setGemmaPolish(enabled: Boolean)
   /** 용어집 전체를 바꾼다 (FL-11). 네이티브가 빈 칸 · 중복 · 개수를 정리해 저장한다. */
@@ -1517,26 +1510,6 @@ interface SettingsHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.setAiTone(toneArg)
-                listOf(null)
-              } catch (exception: Throwable) {
-                TranslatorApiPigeonUtils.wrapError(exception)
-              }
-              reply.reply(wrapped)
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.SettingsHostApi.setGemmaFixOcr$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val enabledArg = args[0] as Boolean
-            CoroutineScope(Dispatchers.Main).launch {
-              val wrapped: List<Any?> = try {
-                api.setGemmaFixOcr(enabledArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

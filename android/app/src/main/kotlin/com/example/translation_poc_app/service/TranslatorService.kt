@@ -174,7 +174,7 @@ class TranslatorService : LifecycleService() {
     private fun translationEngine(settings: Settings): TranslationEngine {
         val base = baseEngine(settings)
         // Gemma 도우미(#176): 켜 둔 것이 있을 때만 감싼다.
-        if (!settings.gemmaFixOcr && !settings.gemmaPolish) return base
+        if (!settings.gemmaPolish) return base
         return GemmaAssistedEngine(base, GemmaAssist(AppGraph.gemmaRuntime(this), log = assistLog()))
     }
 
@@ -290,7 +290,7 @@ class TranslatorService : LifecycleService() {
             // Gemma 도우미를 켜 뒀으면 모델도 미리 올려 첫 번역이 로딩을 기다리지 않게 한다 (#176).
             try {
                 val s = AppGraph.settingsRepository(this@TranslatorService).current()
-                if (s.gemmaFixOcr || s.gemmaPolish) AppGraph.gemmaRuntime(this@TranslatorService).warmUp()
+                if (s.gemmaPolish) AppGraph.gemmaRuntime(this@TranslatorService).warmUp()
             } catch (e: Exception) {
                 Log.w(TAG, "Gemma 예열 실패", e)
             }
