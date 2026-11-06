@@ -155,6 +155,16 @@ void main() {
       expect(repository.savedWords.any((w) => w.id == 3), isFalse);
     });
 
+    test('다른 단어장에도 든 단어를 빼면 그 단어장에는 남는다', () async {
+      await ready();
+      expect(await model().addTo(3, 2), isTrue);
+      await model().delete(3);
+      expect(now().words.map((w) => w.id), [2, 1]);
+      expect(repository.savedWords.any((w) => w.id == 3), isTrue);
+      expect(await repository.words(2), isNotEmpty);
+      expect((await repository.words(2)).map((w) => w.id), contains(3));
+    });
+
     test('이동하면 이 단어장에서 사라진다', () async {
       await ready();
       await model().move(3, 2);
@@ -186,20 +196,24 @@ void main() {
       );
     });
 
-    test('다른 단어장으로 옮긴다', () async {
+    test('다른 단어장에도 넣으면 두 곳에 든다', () async {
       final provider = wordDetailViewModelProvider(3);
       container.listen(provider, (_, _) {});
       await container.read(provider.future);
-      await container.read(provider.notifier).move(2);
-      expect(container.read(provider).value?.wordbookId, 2);
+      final model = container.read(provider.notifier);
+      expect(await model.addTo(2), isTrue);
+      expect(await model.wordbookIds(), [1, 2]);
+      // 같은 단어 하나라서 두 단어장에서 같은 id로 보인다.
+      expect(repository.savedWords.where((w) => w.id == 3), hasLength(1));
     });
 
-    test('옮길 곳에 같은 단어가 있으면 단어가 사라진다', () async {
+    test('그 단어장에 같은 글자가 있거나 이미 들어 있으면 넣지 않는다', () async {
       final provider = wordDetailViewModelProvider(1);
       container.listen(provider, (_, _) {});
       await container.read(provider.future);
-      await container.read(provider.notifier).move(2);
-      expect(container.read(provider).value, isNull);
+      final model = container.read(provider.notifier);
+      expect(await model.addTo(2), isFalse);
+      expect(await model.addTo(1), isFalse);
     });
 
     test('삭제하면 저장소에서 지운다', () async {

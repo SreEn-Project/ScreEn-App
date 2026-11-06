@@ -829,6 +829,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabSavedAt => 'Saved on';
 
   @override
+  String get vocabAddTo => 'Also add to another list';
+
+  @override
+  String get vocabAddToTitle => 'Add to';
+
+  @override
+  String get vocabAddedToast => 'Added to the list';
+
+  @override
+  String get vocabAddDuplicate => 'That list already has this word';
+
+  @override
+  String get vocabRemoveFromBook => 'Remove from this list';
+
+  @override
+  String get vocabRemoveFromBookTitle => 'Remove from this list?';
+
+  @override
   String get vocabDeleteWord => 'Delete word';
 
   @override

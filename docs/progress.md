@@ -574,3 +574,10 @@
 - 한 일: 인식 입력 상한 2000px, `OcrTinyTextFilter`(아주 작은 줄 · 짧은 라틴 조각 거르기) 추가. D-070 참고.
 - 확인: Kotlin 단위 테스트(`OcrTinyTextFilterTest`)를 작성했지만 이 환경에 Android SDK · Gradle 래퍼가 없어 컴파일 · 실행하지 못했다. 실기기 확인 전.
 - 남은 일: 실기기에서 작은 글자 누락 · 그림 속 잡음 비교, 기준값 조정, PaddleOCR 비교.
+
+## 한 단어를 여러 단어장에 넣기 (AD-05, #186)
+- 한 일: 단어-단어장을 다대다로 바꿨다. Room에 연결 표 `wordbook_words`를 두고 `vocabulary_words`에서 `wordbookId`를 뺐다(DB 3 → 4, 직접 쓴 `MIGRATION_3_4`; 단어 id를 유지해 기존 단어장 · 외움 · 정답률이 그대로). 외움 · 정답률 · 내용은 단어 하나에 하나라서 단어장이 달라도 같다. 어느 단어장에도 안 남은 단어는 지운다.
+- 동작: 단어 메뉴 · 상세에 "다른 단어장에도 넣기", 목록 삭제는 "이 단어장에서 빼기"(마지막 단어장이면 단어도 삭제), 상세 삭제는 모든 단어장에서 삭제, 옮기기는 `moveWord(id, from, to)`. 다른 단어장에 같은 글자가 있으면 넣기는 거절. 앱 · 오버레이에서 저장할 때 다른 단어장에 같은 단어(글자 · 언어쌍)가 있으면 새로 만들지 않고 연결한다. 여러 단어장 학습 · 테스트 보기 · 오늘의 단어는 같은 단어를 한 번만 쓴다.
+- Pigeon: `getWordWordbookIds` · `addWordToWordbook` · `removeWordFromWordbook` 추가, `moveWord`에 출발 단어장 추가.
+- 확인: `flutter analyze` 0, `flutter test` 전체 통과(넣기 · 빼기 · 중복 제거 테스트 추가). 이 환경에 Android SDK가 없어 Kotlin 컴파일 · 마이그레이션 실행 · `schemas/.../4.json` 생성은 못 했다.
+- 남은 일: 실기기에서 기존 데이터가 있는 앱을 업데이트해 마이그레이션 확인, 빌드 한 번 해서 `4.json` 스키마 파일 커밋.

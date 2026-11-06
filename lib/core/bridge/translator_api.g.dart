@@ -587,7 +587,7 @@ class Wordbook {
   }
 }
 
-/// 저장한 단어 (AD-03, AD-05, AD-06).
+/// 저장한 단어 (AD-03, AD-05, AD-06). [wordbookId]는 목록에서 가져온 단어장(상세에서는 들어 있는 첫 단어장).
 class VocabWord {
   VocabWord({
     required this.id,
@@ -2135,10 +2135,75 @@ class VocabularyHostApi {
     return pigeonVar_replyValue as VocabWord?;
   }
 
-  /// 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽을 지운다).
-  Future<void> moveWord(int id, int wordbookId) async {
+  /// 단어가 들어 있는 단어장 id (id 순). 한 단어가 여러 단어장에 들 수 있다.
+  Future<List<int>> getWordWordbookIds(int id) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWordWordbookIds$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<int>();
+  }
+
+  /// [fromWordbookId]에서 [toWordbookId]로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽에서만 뺀다).
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.moveWord$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id, fromWordbookId, toWordbookId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 단어를 다른 단어장에도 넣는다. 이미 들어 있거나 그 단어장에 같은 글자의 단어가 있으면 false.
+  Future<bool> addWordToWordbook(int id, int wordbookId) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.addWordToWordbook$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id, wordbookId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// 한 단어장에서만 뺀다. 마지막 단어장이었으면 단어도 지운다.
+  Future<void> removeWordFromWordbook(int id, int wordbookId) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.removeWordFromWordbook$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -2156,6 +2221,7 @@ class VocabularyHostApi {
     );
   }
 
+  /// 모든 단어장에서 지운다.
   Future<void> deleteWord(int id) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.deleteWord$pigeonVar_messageChannelSuffix';

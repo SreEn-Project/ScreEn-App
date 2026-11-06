@@ -23,9 +23,19 @@ abstract interface class VocabularyRepository {
 
   Future<VocabularyWord?> word(int id);
 
-  /// 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다.
-  Future<void> moveWord(int id, int wordbookId);
+  /// 단어가 들어 있는 단어장 id. 한 단어가 여러 단어장에 들 수 있다.
+  Future<List<int>> wordbookIdsOf(int id);
 
+  /// [fromWordbookId]에서 [toWordbookId]로 옮긴다. 거기에 같은 단어가 있으면 합친다.
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId);
+
+  /// 다른 단어장에도 넣는다. 이미 들어 있거나 그 단어장에 같은 글자의 단어가 있으면 false.
+  Future<bool> addToWordbook(int id, int wordbookId);
+
+  /// 한 단어장에서만 뺀다. 마지막 단어장이었으면 단어도 지워진다.
+  Future<void> removeFromWordbook(int id, int wordbookId);
+
+  /// 모든 단어장에서 지운다.
   Future<void> deleteWord(int id);
 
   Future<void> setMemorized(int id, bool memorized);

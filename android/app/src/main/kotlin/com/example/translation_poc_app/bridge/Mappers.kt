@@ -105,7 +105,8 @@ fun com.example.translation_poc_app.data.vocabulary.WordbookRow.toPigeon() = Wor
     createdAtMs = createdAt,
 )
 
-fun com.example.translation_poc_app.data.vocabulary.WordEntity.toPigeon() = VocabWord(
+/** [wordbookId]는 이 단어를 가져온 단어장 (여러 단어장에 든 단어라서 따로 받는다). */
+fun com.example.translation_poc_app.data.vocabulary.WordEntity.toPigeon(wordbookId: Long) = VocabWord(
     id = id,
     wordbookId = wordbookId,
     word = word,

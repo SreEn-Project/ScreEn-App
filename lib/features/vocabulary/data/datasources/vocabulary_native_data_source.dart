@@ -24,8 +24,16 @@ class VocabularyNativeDataSource {
 
   Future<pigeon.VocabWord?> getWord(int id) => _api.getWord(id);
 
-  Future<void> moveWord(int id, int wordbookId) =>
-      _api.moveWord(id, wordbookId);
+  Future<List<int>> getWordWordbookIds(int id) => _api.getWordWordbookIds(id);
+
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId) =>
+      _api.moveWord(id, fromWordbookId, toWordbookId);
+
+  Future<bool> addWordToWordbook(int id, int wordbookId) =>
+      _api.addWordToWordbook(id, wordbookId);
+
+  Future<void> removeWordFromWordbook(int id, int wordbookId) =>
+      _api.removeWordFromWordbook(id, wordbookId);
 
   Future<void> deleteWord(int id) => _api.deleteWord(id);
 

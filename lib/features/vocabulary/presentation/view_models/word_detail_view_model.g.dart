@@ -54,7 +54,7 @@ final class WordDetailViewModelProvider
 }
 
 String _$wordDetailViewModelHash() =>
-    r'70743f2729df7e40dc20307c2e058592b462b303';
+    r'9068679012fef5ff68980b163574fef230822c03';
 
 /// 단어 상세 (AD-06). 단어가 없으면(이미 지워짐) null.
 

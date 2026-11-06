@@ -678,7 +678,7 @@ data class Wordbook (
 }
 
 /**
- * 저장한 단어 (AD-03, AD-05, AD-06).
+ * 저장한 단어 (AD-03, AD-05, AD-06). [wordbookId]는 목록에서 가져온 단어장(상세에서는 들어 있는 첫 단어장).
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
@@ -2104,8 +2104,15 @@ interface VocabularyHostApi {
   /** [query]는 단어 · 뜻에서 찾을 글자(빈 문자열 = 전부). */
   suspend fun getWords(wordbookId: Long, query: String, sort: VocabSort): List<VocabWord>
   suspend fun getWord(id: Long): VocabWord?
-  /** 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽을 지운다). */
-  suspend fun moveWord(id: Long, wordbookId: Long)
+  /** 단어가 들어 있는 단어장 id (id 순). 한 단어가 여러 단어장에 들 수 있다. */
+  suspend fun getWordWordbookIds(id: Long): List<Long>
+  /** [fromWordbookId]에서 [toWordbookId]로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽에서만 뺀다). */
+  suspend fun moveWord(id: Long, fromWordbookId: Long, toWordbookId: Long)
+  /** 단어를 다른 단어장에도 넣는다. 이미 들어 있거나 그 단어장에 같은 글자의 단어가 있으면 false. */
+  suspend fun addWordToWordbook(id: Long, wordbookId: Long): Boolean
+  /** 한 단어장에서만 뺀다. 마지막 단어장이었으면 단어도 지운다. */
+  suspend fun removeWordFromWordbook(id: Long, wordbookId: Long)
+  /** 모든 단어장에서 지운다. */
   suspend fun deleteWord(id: Long)
   suspend fun setMemorized(id: Long, memorized: Boolean)
   /** 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18). */
@@ -2247,7 +2254,48 @@ interface VocabularyHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWordWordbookIds$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getWordWordbookIds(idArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.moveWord$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val fromWordbookIdArg = args[1] as Long
+            val toWordbookIdArg = args[2] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.moveWord(idArg, fromWordbookIdArg, toWordbookIdArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.addWordToWordbook$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
@@ -2255,7 +2303,27 @@ interface VocabularyHostApi {
             val wordbookIdArg = args[1] as Long
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.moveWord(idArg, wordbookIdArg)
+                listOf(api.addWordToWordbook(idArg, wordbookIdArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.removeWordFromWordbook$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val wordbookIdArg = args[1] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.removeWordFromWordbook(idArg, wordbookIdArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)

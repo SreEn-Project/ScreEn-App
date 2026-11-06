@@ -812,6 +812,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vocabSavedAt => '저장한 날';
 
   @override
+  String get vocabAddTo => '다른 단어장에도 넣기';
+
+  @override
+  String get vocabAddToTitle => '넣을 단어장';
+
+  @override
+  String get vocabAddedToast => '단어장에 넣었어요';
+
+  @override
+  String get vocabAddDuplicate => '그 단어장에 같은 단어가 이미 있어요';
+
+  @override
+  String get vocabRemoveFromBook => '이 단어장에서 빼기';
+
+  @override
+  String get vocabRemoveFromBookTitle => '이 단어장에서 뺄까요?';
+
+  @override
   String get vocabDeleteWord => '단어 삭제';
 
   @override

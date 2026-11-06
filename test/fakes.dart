@@ -262,8 +262,14 @@ class FakeVocabularyRepository implements VocabularyRepository {
 
   int _nextId = 100;
 
+  /// 단어 id → 대표 단어장([VocabularyWord.wordbookId]) 말고 더 들어 있는 단어장 id.
+  final Map<int, Set<int>> extraBooks = {};
+
+  bool _in(VocabularyWord w, int bookId) =>
+      w.wordbookId == bookId || (extraBooks[w.id]?.contains(bookId) ?? false);
+
   Wordbook _counted(Wordbook book) {
-    final inBook = savedWords.where((w) => w.wordbookId == book.id);
+    final inBook = savedWords.where((w) => _in(w, book.id));
     return Wordbook(
       id: book.id,
       name: book.name,
@@ -318,7 +324,12 @@ class FakeVocabularyRepository implements VocabularyRepository {
   @override
   Future<void> deleteWordbook(int id) async {
     books.removeWhere((b) => b.id == id);
-    savedWords.removeWhere((w) => w.wordbookId == id);
+    savedWords.removeWhere(
+      (w) => w.wordbookId == id && !extraBooks.containsKey(w.id),
+    );
+    for (final extra in extraBooks.values) {
+      extra.remove(id);
+    }
   }
 
   @override
@@ -331,7 +342,7 @@ class FakeVocabularyRepository implements VocabularyRepository {
     final found = savedWords
         .where(
           (w) =>
-              w.wordbookId == wordbookId &&
+              _in(w, wordbookId) &&
               (q.isEmpty ||
                   w.word.toLowerCase().contains(q) ||
                   w.meaning.toLowerCase().contains(q)),
@@ -380,17 +391,46 @@ class FakeVocabularyRepository implements VocabularyRepository {
   );
 
   @override
-  Future<void> moveWord(int id, int wordbookId) async {
+  Future<List<int>> wordbookIdsOf(int id) async {
+    final w = savedWords.where((w) => w.id == id).firstOrNull;
+    if (w == null) return [];
+    return ({w.wordbookId, ...?extraBooks[id]}.toList()..sort());
+  }
+
+  @override
+  Future<bool> addToWordbook(int id, int wordbookId) async {
+    final w = savedWords.where((w) => w.id == id).firstOrNull;
+    if (w == null || _in(w, wordbookId)) return false;
+    if (savedWords.any((o) => _in(o, wordbookId) && o.word == w.word)) {
+      return false;
+    }
+    (extraBooks[id] ??= {}).add(wordbookId);
+    return true;
+  }
+
+  @override
+  Future<void> removeFromWordbook(int id, int wordbookId) async {
+    final index = savedWords.indexWhere((w) => w.id == id);
+    if (index < 0) return;
+    final ids = (await wordbookIdsOf(id))..remove(wordbookId);
+    if (ids.isEmpty) {
+      savedWords.removeAt(index);
+      extraBooks.remove(id);
+      return;
+    }
+    extraBooks[id] = {...ids.skip(1)};
+    savedWords[index] = _copy(savedWords[index], wordbookId: ids.first);
+  }
+
+  @override
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId) async {
     final index = savedWords.indexWhere((w) => w.id == id);
     final moving = savedWords[index];
     final duplicate = savedWords.any(
-      (w) => w.wordbookId == wordbookId && w.word == moving.word,
+      (w) => _in(w, toWordbookId) && w.word == moving.word,
     );
-    if (duplicate) {
-      savedWords.removeAt(index);
-    } else {
-      savedWords[index] = _copy(moving, wordbookId: wordbookId);
-    }
+    if (!duplicate) await addToWordbook(id, toWordbookId);
+    await removeFromWordbook(id, fromWordbookId);
   }
 
   @override

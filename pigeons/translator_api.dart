@@ -355,7 +355,7 @@ class Wordbook {
   int createdAtMs;
 }
 
-/// 저장한 단어 (AD-03, AD-05, AD-06).
+/// 저장한 단어 (AD-03, AD-05, AD-06). [wordbookId]는 목록에서 가져온 단어장(상세에서는 들어 있는 첫 단어장).
 class VocabWord {
   VocabWord({
     required this.id,
@@ -459,10 +459,23 @@ abstract class VocabularyHostApi {
   @async
   VocabWord? getWord(int id);
 
-  /// 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽을 지운다).
+  /// 단어가 들어 있는 단어장 id (id 순). 한 단어가 여러 단어장에 들 수 있다.
   @async
-  void moveWord(int id, int wordbookId);
+  List<int> getWordWordbookIds(int id);
 
+  /// [fromWordbookId]에서 [toWordbookId]로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽에서만 뺀다).
+  @async
+  void moveWord(int id, int fromWordbookId, int toWordbookId);
+
+  /// 단어를 다른 단어장에도 넣는다. 이미 들어 있거나 그 단어장에 같은 글자의 단어가 있으면 false.
+  @async
+  bool addWordToWordbook(int id, int wordbookId);
+
+  /// 한 단어장에서만 뺀다. 마지막 단어장이었으면 단어도 지운다.
+  @async
+  void removeWordFromWordbook(int id, int wordbookId);
+
+  /// 모든 단어장에서 지운다.
   @async
   void deleteWord(int id);
 

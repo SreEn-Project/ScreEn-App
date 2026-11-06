@@ -43,8 +43,19 @@ class VocabularyRepositoryImpl implements VocabularyRepository {
       (await _dataSource.getWord(id))?.toEntity();
 
   @override
-  Future<void> moveWord(int id, int wordbookId) =>
-      _dataSource.moveWord(id, wordbookId);
+  Future<List<int>> wordbookIdsOf(int id) => _dataSource.getWordWordbookIds(id);
+
+  @override
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId) =>
+      _dataSource.moveWord(id, fromWordbookId, toWordbookId);
+
+  @override
+  Future<bool> addToWordbook(int id, int wordbookId) =>
+      _dataSource.addWordToWordbook(id, wordbookId);
+
+  @override
+  Future<void> removeFromWordbook(int id, int wordbookId) =>
+      _dataSource.removeWordFromWordbook(id, wordbookId);
 
   @override
   Future<void> deleteWord(int id) => _dataSource.deleteWord(id);

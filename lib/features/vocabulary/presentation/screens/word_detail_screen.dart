@@ -113,9 +113,9 @@ class WordDetailScreen extends ConsumerWidget {
       ),
       const SizedBox(height: AppTokens.space8),
       AppButton.secondary(
-        label: l10n.vocabMove,
-        leading: const Icon(Symbols.drive_file_move_rounded, size: 20),
-        onPressed: () => _move(context, ref, w),
+        label: l10n.vocabAddTo,
+        leading: const Icon(Symbols.library_add_rounded, size: 20),
+        onPressed: () => _addTo(context, ref, w),
       ),
       const SizedBox(height: AppTokens.space8),
       Center(
@@ -136,25 +136,30 @@ class WordDetailScreen extends ConsumerWidget {
     ];
   }
 
-  Future<void> _move(
+  Future<void> _addTo(
     BuildContext context,
     WidgetRef ref,
     VocabularyWord word,
   ) async {
+    final l10n = AppLocalizations.of(context);
+    final model = ref.read(wordDetailViewModelProvider(wordId).notifier);
+    final members = await model.wordbookIds();
     final books = await ref.read(wordbooksViewModelProvider.future);
     if (!context.mounted) return;
     final target = await showWordbookPickerSheet(
       context,
-      books: books,
-      exceptId: word.wordbookId,
+      books: [
+        for (final book in books)
+          if (!members.contains(book.id)) book,
+      ],
+      title: l10n.vocabAddToTitle,
     );
-    if (target == null) return;
-    final model = ref.read(wordDetailViewModelProvider(wordId).notifier);
-    await model.move(target);
-    // 옮길 단어장에 같은 단어가 있어 합쳐졌으면 이 단어는 사라진다.
-    if (context.mounted &&
-        ref.read(wordDetailViewModelProvider(wordId)).value == null) {
-      context.pop();
-    }
+    if (target == null || !context.mounted) return;
+    final added = await model.addTo(target);
+    if (!context.mounted) return;
+    AppToast.show(
+      context,
+      added ? l10n.vocabAddedToast : l10n.vocabAddDuplicate,
+    );
   }
 }

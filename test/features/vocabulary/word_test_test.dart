@@ -47,6 +47,19 @@ void main() {
   });
 
   group('CreateWordTest', () {
+    test('두 단어장에 든 단어는 여러 단어장을 같이 골라도 한 번만 낸다', () async {
+      await repository.addToWordbook(3, 1);
+      final questions = await CreateWordTest(repository)(
+        CreateWordTestParams(
+          WordbookSelection([1, 2]),
+          WordTestMode.typing,
+          random: Random(1),
+        ),
+      );
+      expect(questions, hasLength(5));
+      expect(questions.where((q) => q.word == 'cherry'), hasLength(1));
+    });
+
     test('입력형은 단어장의 단어 수만큼 문제를 낸다 (10개까지)', () async {
       final questions = await CreateWordTest(repository)(
         CreateWordTestParams(

@@ -132,10 +132,11 @@ final class GetWord implements UseCase<VocabularyWord?, int> {
 }
 
 class MoveWordParams {
-  const MoveWordParams(this.id, this.wordbookId);
+  const MoveWordParams(this.id, this.fromWordbookId, this.toWordbookId);
 
   final int id;
-  final int wordbookId;
+  final int fromWordbookId;
+  final int toWordbookId;
 }
 
 /// 단어를 다른 단어장으로 옮기기 (AD-05, AD-06).
@@ -145,11 +146,54 @@ final class MoveWord implements UseCase<void, MoveWordParams> {
   final VocabularyRepository _repository;
 
   @override
-  Future<void> call(MoveWordParams params) =>
-      _repository.moveWord(params.id, params.wordbookId);
+  Future<void> call(MoveWordParams params) => _repository.moveWord(
+    params.id,
+    params.fromWordbookId,
+    params.toWordbookId,
+  );
 }
 
-/// 단어 삭제 (AD-05, AD-06).
+class WordbookLinkParams {
+  const WordbookLinkParams(this.id, this.wordbookId);
+
+  final int id;
+  final int wordbookId;
+}
+
+/// 단어를 다른 단어장에도 넣기. 넣었으면 true, 이미 있거나 같은 글자가 있으면 false.
+final class AddWordToWordbook implements UseCase<bool, WordbookLinkParams> {
+  const AddWordToWordbook(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(WordbookLinkParams params) =>
+      _repository.addToWordbook(params.id, params.wordbookId);
+}
+
+/// 단어를 한 단어장에서만 빼기. 마지막 단어장이었으면 단어도 지워진다.
+final class RemoveWordFromWordbook
+    implements UseCase<void, WordbookLinkParams> {
+  const RemoveWordFromWordbook(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<void> call(WordbookLinkParams params) =>
+      _repository.removeFromWordbook(params.id, params.wordbookId);
+}
+
+/// 단어가 들어 있는 단어장 id.
+final class GetWordWordbookIds implements UseCase<List<int>, int> {
+  const GetWordWordbookIds(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<int>> call(int id) => _repository.wordbookIdsOf(id);
+}
+
+/// 단어 삭제 (모든 단어장에서, AD-05, AD-06).
 final class DeleteWord implements UseCase<void, int> {
   const DeleteWord(this._repository);
 
@@ -224,16 +268,19 @@ final class UpdateWord implements UseCase<bool, UpdateWordParams> {
   }
 }
 
-/// 고른 단어장들의 단어를 하나로 합친다 (AD-07). 단어 id는 단어장과 상관없이 유일하다.
+/// 고른 단어장들의 단어를 하나로 합친다 (AD-07). 단어 id는 단어장과 상관없이 유일하고,
+/// 한 단어가 여러 단어장에 들어 있으면 한 번만 담는다.
 Future<List<VocabularyWord>> _wordsOf(
   VocabularyRepository repository,
   WordbookSelection selection,
 ) async {
-  final all = <VocabularyWord>[];
+  final all = <int, VocabularyWord>{};
   for (final id in selection.ids) {
-    all.addAll(await repository.words(id));
+    for (final word in await repository.words(id)) {
+      all.putIfAbsent(word.id, () => word);
+    }
   }
-  return all;
+  return all.values.toList();
 }
 
 class CreateWordTestParams {
@@ -283,9 +330,12 @@ final class CreateWordTest
 
     // 같은 단어장 → 다른 단어장 순으로 오답 후보를 모은다.
     final others = <VocabularyWord>[];
+    final seen = {for (final word in targets) word.id};
     for (final book in await _repository.wordbooks()) {
       if (params.selection.contains(book.id)) continue;
-      others.addAll(await _repository.words(book.id));
+      for (final word in await _repository.words(book.id)) {
+        if (seen.add(word.id)) others.add(word);
+      }
     }
     final questions = <WordTestQuestion>[];
     for (final word in targets) {
@@ -462,10 +512,13 @@ final class GetWordOfTheDay
 
   @override
   Future<DailyWord?> call(GetWordOfTheDayParams params) async {
-    final all = <VocabularyWord>[];
+    final unique = <int, VocabularyWord>{};
     for (final book in await _repository.wordbooks()) {
-      all.addAll(await _repository.words(book.id));
+      for (final word in await _repository.words(book.id)) {
+        unique.putIfAbsent(word.id, () => word);
+      }
     }
+    final all = unique.values.toList();
     if (all.isEmpty) return null;
     all.sort((a, b) => a.id.compareTo(b.id));
 
