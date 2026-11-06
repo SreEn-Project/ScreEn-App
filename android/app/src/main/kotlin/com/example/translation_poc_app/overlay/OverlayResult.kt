@@ -53,7 +53,7 @@ internal fun overlayItems(items: List<TranslatedItem>): List<TranslatedItem> =
     items.filter { !it.translated.isNullOrBlank() && it.bounds != null }
 
 /** 막 색: 반투명 검정 (NA-22). */
-private val BoxColor = Color.Black.copy(alpha = 0.78f)
+private val BoxColor = Color.Black.copy(alpha = 0.9f)
 private const val MAX_SP = 40
 private const val MIN_SP = 10
 
@@ -66,6 +66,8 @@ private const val MIN_SP = 10
 internal fun OverlayResult(
     items: List<TranslatedItem>,
     pending: List<NormalizedRegion>,
+    /** ML Kit 미리 보기: AI가 다시 번역 중이라 테두리와 흐린 글자로 구분한다. */
+    refining: Boolean = false,
     onDismiss: () -> Unit,
     /** 막을 길게 누르면 그 글의 원문에서 단어를 고르게 한다 (AD-01). 터치를 통과시키는 막에서는 어차피 닿지 않는다. */
     onPickWord: ((TranslatedItem) -> Unit)? = null,
@@ -94,7 +96,7 @@ internal fun OverlayResult(
         for ((index, item) in items.withIndex()) {
             val region = item.bounds ?: continue
             val text = item.translated.orEmpty()
-            val style = OverlayTheme.translated.copy(color = Color.White)
+            val style = OverlayTheme.translated.copy(color = if (refining) Color.White.copy(alpha = 0.75f) else Color.White)
             val fit = fitText(measurer, text, style, paddedBox(region, widthPx, heightPx, pad), targets[index], density, heightPx)
             val box = fit.box
             val fontSp = fit.sp
@@ -107,6 +109,7 @@ internal fun OverlayResult(
                     )
                     .clip(RoundedCornerShape(6.dp))
                     .background(BoxColor)
+                    .then(if (refining) Modifier.border(1.5.dp, colors.primary, RoundedCornerShape(6.dp)) else Modifier)
                     .then(
                         if (onPickWord != null) {
                             Modifier.combinedClickable(

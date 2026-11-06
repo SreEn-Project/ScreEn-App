@@ -4,6 +4,9 @@ import com.example.translation_poc_app.data.settings.AiTone
 import com.example.translation_poc_app.data.settings.Engine
 import com.example.translation_poc_app.data.settings.GlossaryEntry
 import java.io.Closeable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 /** 번역 엔진 종류. 엔진이 늘면 여기에 추가한다 (NA-11). */
 enum class EngineId { ML_KIT, GEMINI, GROQ, GEMMA }
@@ -98,6 +101,13 @@ interface TranslationEngine : Closeable {
     fun supports(language: String): Boolean
 
     suspend fun translate(request: TranslationRequest): EngineResult<TranslationResult>
+
+    /** true면 여러 블록을 [translateBatch]로 한 번에 보내는 편이 낫다 (클라우드 AI: 요청 수 · 지연을 줄인다). */
+    val prefersBatch: Boolean get() = false
+
+    /** 여러 요청을 번역한다. 결과 순서는 [requests] 그대로. 기본은 블록마다 따로 동시에 부른다. */
+    suspend fun translateBatch(requests: List<TranslationRequest>): List<EngineResult<TranslationResult>> =
+        coroutineScope { requests.map { async { translate(it) } }.awaitAll() }
 
     /** 번역에 필요한 모델이 모두 기기에 있는가. 모델이 없는 엔진(클라우드)은 항상 true. */
     suspend fun isLanguageAvailable(language: String): EngineResult<Boolean>

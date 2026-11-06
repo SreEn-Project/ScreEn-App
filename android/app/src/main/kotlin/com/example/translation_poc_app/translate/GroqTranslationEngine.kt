@@ -80,6 +80,38 @@ class GroqTranslationEngine(
         }
     }
 
+    override val prefersBatch get() = true
+
+    /** 같은 언어 · 말투 요청을 한 번의 호출로 보낸다. 묶음 응답이 잘못되면 그 묶음만 블록별로 다시 부른다. */
+    override suspend fun translateBatch(requests: List<TranslationRequest>): List<EngineResult<TranslationResult>> {
+        val out = arrayOfNulls<EngineResult<TranslationResult>>(requests.size)
+        for (group in BatchTranslation.groups(requests)) {
+            val items = group.map { requests[it] }
+            val texts = batchOrNull(items)
+            group.forEachIndexed { n, i ->
+                out[i] = texts?.get(n)?.let { EngineResult.Ok(TranslationResult(it, items[n].source, items[n].target, id)) }
+                    ?: translate(requests[i])
+            }
+        }
+        return out.map { it!! }
+    }
+
+    private suspend fun batchOrNull(items: List<TranslationRequest>): List<String>? {
+        if (items.size < 2 || items.any { it.text.isBlank() || it.source == it.target }) return null
+        return try {
+            val key = keys.key()?.takeIf { it.isNotBlank() } ?: return null
+            val from = if (items[0].source == AUTO_LANGUAGE) "the source language (detect it)" else items[0].source
+            val system = BatchTranslation.systemPrompt(items[0], items.joinToString("\n") { it.text }, from)
+            val user = BatchTranslation.userText(items.map { it.text })
+            val raw = parse(chatWithFallback(transport, key, models) { chatBody(it, system, user, json = true) }) ?: return null
+            BatchTranslation.parse(raw, items.size)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null // 묶음이 실패하면 블록별 호출이 오류 종류를 정확히 돌려준다.
+        }
+    }
+
     override suspend fun isLanguageAvailable(language: String): EngineResult<Boolean> = EngineResult.Ok(true)
 
     override suspend fun downloadLanguage(language: String, policy: ModelDownloadPolicy): EngineResult<Unit> =

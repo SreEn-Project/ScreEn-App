@@ -47,6 +47,8 @@ sealed interface TranslationOutcome {
         val targetLanguage: String,
         /** 이미 대상 언어라 건너뛴 블록 수. */
         val skipped: Int,
+        /** true면 ML Kit 미리 보기라 AI 결과가 곧 이 결과를 바꾼다. 화면에서 다르게 보여 준다. */
+        val refining: Boolean = false,
     ) : TranslationOutcome
 
     /** 캡처가 전부 검다 → 보안 화면. */
@@ -94,6 +96,8 @@ class TranslationPipeline(
     private val recognize: suspend (CaptureResult.Frame, incremental: Boolean) -> OcrResult,
     private val detect: suspend (OcrResult, targetLanguage: String) -> List<DetectedBlock>,
     private val engineFor: (Settings) -> TranslationEngine,
+    /** AI 엔진을 쓸 때 먼저 보여 줄 빠른 엔진(ML Kit). null이면 먼저 보여 주지 않는다. */
+    private val previewEngineFor: (Settings) -> TranslationEngine? = { null },
     private val settings: suspend () -> Settings,
     private val onTimings: (PipelineTimings) -> Unit = {},
     /** 진단 로그 (#25). 캡처 크기 · 밝기, 영역, 단계별 결과 수. */
@@ -186,10 +190,18 @@ class TranslationPipeline(
                 }
             }
             onPending(detected.filter { it.decision.action == BlockAction.TRANSLATE }.mapNotNull { bounds(it.block) })
-            val results = translateAll(engine, requests, onProgress = { partial ->
-                TranslationAssembler.assemblePartial(detected, partial, engine.id, current.targetLanguage, lineHeight, bounds)
-                    ?.let(onPartial)
-            }) { cached++ }
+            val preview = previewEngineFor(current)?.takeIf { it.id != engine.id }
+            val results = if (preview == null) {
+                translateAll(engine, requests, onProgress = { partial ->
+                    TranslationAssembler.assemblePartial(detected, partial, engine.id, current.targetLanguage, lineHeight, bounds)
+                        ?.let(onPartial)
+                }) { cached++ }
+            } else {
+                translateWithPreview(engine, preview, requests, onPreview = { quick ->
+                    TranslationAssembler.assemblePartial(detected, quick, preview.id, current.targetLanguage, lineHeight, bounds)
+                        ?.let { onPartial(it.copy(refining = true)) }
+                }) { cached++ }
+            }
             onTimings(PipelineTimings(captureMs, ocrMs, detectMs, lap(), blocks.size, requests.size, cached))
             val assembled = TranslationAssembler.assemble(
                 detected, results, engine.id, current.targetLanguage,
@@ -229,6 +241,26 @@ class TranslationPipeline(
     }
 
     /**
+     * AI 엔진 번역과 ML Kit 번역을 동시에 시작해, ML Kit이 먼저 끝나면 그 결과를 [onPreview]로 먼저 보여 준다.
+     * AI 결과가 먼저 도착했거나 ML Kit이 하나도 못 했으면 미리 보기는 건너뛴다. 최종 결과는 항상 AI 엔진의 것이다.
+     */
+    internal suspend fun translateWithPreview(
+        engine: TranslationEngine,
+        preview: TranslationEngine,
+        requests: List<TranslationRequest>,
+        onPreview: (List<EngineResult<TranslationResult>?>) -> Unit,
+        onHit: () -> Unit,
+    ): List<EngineResult<TranslationResult>> = coroutineScope {
+        val main = async { translateAll(engine, requests, onHit = onHit) }
+        val quickRequests = requests.map { it.copy(style = AiStyle.NONE) }
+        val quick = translateAll(preview, quickRequests) { }
+        if (!main.isCompleted && quick.any { it is EngineResult.Ok }) {
+            onPreview(quick.map { r -> r.takeIf { it is EngineResult.Ok } })
+        }
+        main.await()
+    }
+
+    /**
      * 블록마다 따로 요청하고 동시에 기다린다. 캐시에 있는 번역은 엔진을 부르지 않고(맞으면 [onHit]), 새로 성공한 번역은
      * 캐시에 넣는다 (실패는 넣지 않아 다음에 다시 시도). ML Kit은 블록 하나씩, AI 엔진(3단계)은 묶음 호출로 바꿀 수 있다.
      */
@@ -249,6 +281,19 @@ class TranslationPipeline(
         }
         // 캐시로 일부만 채워졌으면 그것부터 보여 준다.
         if (done.any { it == null } && done.any { it != null }) onProgress(done.toList())
+        if (engine.prefersBatch) {
+            // AI 엔진: 캐시에 없는 블록을 요청 한 번으로 묶어 보낸다.
+            val missing = done.indices.filter { done[it] == null }
+            if (missing.isNotEmpty()) {
+                val batch = engine.translateBatch(missing.map { requests[it] })
+                missing.forEachIndexed { n, i ->
+                    val result = batch[n]
+                    if (result is EngineResult.Ok) translations[keys[i]] = result.value
+                    done[i] = result
+                }
+            }
+            return@coroutineScope done.map { it!! }
+        }
         requests.mapIndexed { i, request ->
             async<EngineResult<TranslationResult>> {
                 done[i] ?: engine.translate(request).also {

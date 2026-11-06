@@ -57,7 +57,7 @@ class GemmaTranslationEngine(
         const val MODEL_LABEL = "gemma"
 
         /** 프롬프트를 바꾸면 올린다 (캐시 키에 넣을 값). */
-        const val PROMPT_VERSION = 2
+        const val PROMPT_VERSION = 3
 
         /** 한 번에 보내는 글자 수 상한. 입력 + 출력이 모델 토큰 한도(1024) 안에 들어오게 넉넉히 잡았다. */
         const val MAX_CHUNK_CHARS = 500
