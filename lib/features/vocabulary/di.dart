@@ -41,6 +41,18 @@ GetWord getWord(Ref ref) => GetWord(ref.watch(vocabularyRepositoryProvider));
 MoveWord moveWord(Ref ref) => MoveWord(ref.watch(vocabularyRepositoryProvider));
 
 @riverpod
+AddWordToWordbook addWordToWordbook(Ref ref) =>
+    AddWordToWordbook(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+RemoveWordFromWordbook removeWordFromWordbook(Ref ref) =>
+    RemoveWordFromWordbook(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+GetWordWordbookIds getWordWordbookIds(Ref ref) =>
+    GetWordWordbookIds(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
 DeleteWord deleteWord(Ref ref) =>
     DeleteWord(ref.watch(vocabularyRepositoryProvider));
 

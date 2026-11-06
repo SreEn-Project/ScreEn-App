@@ -53,7 +53,7 @@ final class WordbookDetailViewModelProvider
 }
 
 String _$wordbookDetailViewModelHash() =>
-    r'88eb67ebf72ce22698534abaeea62cdafd139e5a';
+    r'9641367c03bd95b51a4f34ba2e635fe36fd3ff66';
 
 final class WordbookDetailViewModelFamily extends $Family
     with

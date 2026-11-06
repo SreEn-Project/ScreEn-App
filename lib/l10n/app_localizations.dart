@@ -1622,6 +1622,42 @@ abstract class AppLocalizations {
   /// **'Saved on'**
   String get vocabSavedAt;
 
+  /// No description provided for @vocabAddTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Also add to another list'**
+  String get vocabAddTo;
+
+  /// No description provided for @vocabAddToTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to'**
+  String get vocabAddToTitle;
+
+  /// No description provided for @vocabAddedToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to the list'**
+  String get vocabAddedToast;
+
+  /// No description provided for @vocabAddDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'That list already has this word'**
+  String get vocabAddDuplicate;
+
+  /// No description provided for @vocabRemoveFromBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from this list'**
+  String get vocabRemoveFromBook;
+
+  /// No description provided for @vocabRemoveFromBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from this list?'**
+  String get vocabRemoveFromBookTitle;
+
   /// No description provided for @vocabDeleteWord.
   ///
   /// In en, this message translates to:

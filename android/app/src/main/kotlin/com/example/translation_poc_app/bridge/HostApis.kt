@@ -167,11 +167,21 @@ class VocabularyHostApiImpl(private val repository: VocabularyRepository) : Voca
     override suspend fun deleteWordbook(id: Long) = repository.deleteWordbook(id)
 
     override suspend fun getWords(wordbookId: Long, query: String, sort: VocabSort): List<VocabWord> =
-        repository.words(wordbookId, query, sort.toNative()).map { it.toPigeon() }
+        repository.words(wordbookId, query, sort.toNative()).map { it.toPigeon(wordbookId) }
 
-    override suspend fun getWord(id: Long): VocabWord? = repository.word(id)?.toPigeon()
+    override suspend fun getWord(id: Long): VocabWord? =
+        repository.word(id)?.toPigeon(repository.wordbookIdsOf(id).firstOrNull() ?: 0L)
 
-    override suspend fun moveWord(id: Long, wordbookId: Long) = repository.moveWord(id, wordbookId)
+    override suspend fun getWordWordbookIds(id: Long): List<Long> = repository.wordbookIdsOf(id)
+
+    override suspend fun moveWord(id: Long, fromWordbookId: Long, toWordbookId: Long) =
+        repository.moveWord(id, fromWordbookId, toWordbookId)
+
+    override suspend fun addWordToWordbook(id: Long, wordbookId: Long): Boolean =
+        repository.addToWordbook(id, wordbookId)
+
+    override suspend fun removeWordFromWordbook(id: Long, wordbookId: Long) =
+        repository.removeFromWordbook(id, wordbookId)
 
     override suspend fun deleteWord(id: Long) = repository.deleteWord(id)
 

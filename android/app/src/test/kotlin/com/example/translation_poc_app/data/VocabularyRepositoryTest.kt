@@ -25,14 +25,13 @@ class VocabularyRepositoryTest {
 
     @Test
     fun `단어 · 뜻이 비면 저장하지 않는다`() {
-        assertNull(VocabularyRepository.entityOf(1, draft(word = " "), 0))
-        assertNull(VocabularyRepository.entityOf(1, draft(meaning = ""), 0))
+        assertNull(VocabularyRepository.entityOf(draft(word = " "), 0))
+        assertNull(VocabularyRepository.entityOf(draft(meaning = ""), 0))
     }
 
     @Test
     fun `저장할 단어는 다듬고 빈 부가 정보는 null로 둔다`() {
         val entity = VocabularyRepository.entityOf(
-            wordbookId = 3,
             draft = draft(word = " apple ", meaning = " 사과 ").copy(pronunciation = "  ", sentence = " An apple. "),
             now = 42,
         )!!
@@ -40,7 +39,6 @@ class VocabularyRepositoryTest {
         assertEquals("사과", entity.meaning)
         assertNull(entity.pronunciation)
         assertEquals("An apple.", entity.sentence)
-        assertEquals(3L, entity.wordbookId)
         assertEquals(42L, entity.createdAt)
         assertFalse(entity.memorized)
     }

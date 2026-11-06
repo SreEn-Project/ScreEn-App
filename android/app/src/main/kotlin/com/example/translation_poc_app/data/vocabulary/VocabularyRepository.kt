@@ -51,20 +51,30 @@ class VocabularyRepository(
 
     /** 단어장에 단어를 저장한다. 비어 있는 단어 · 뜻이면 저장하지 않고 null. 같은 단어면 내용만 새로 고친다. */
     suspend fun saveWord(wordbookId: Long, draft: WordDraft): Long? {
-        val entity = entityOf(wordbookId, draft, clock()) ?: return null
-        val id = dao.upsertWord(entity)
+        val entity = entityOf(draft, clock()) ?: return null
+        val id = dao.upsertWord(wordbookId, entity)
         return id.takeIf { it != -1L }
     }
 
-    /** 저장된 단어의 내용을 고친다. 비어 있는 단어 · 뜻이거나 같은 단어장의 다른 단어와 겹치면 false. */
+    /** 저장된 단어의 내용을 고친다. 비어 있는 단어 · 뜻이거나 들어 있는 단어장의 다른 단어와 겹치면 false. */
     suspend fun updateWord(id: Long, draft: WordDraft): Boolean {
         val current = dao.word(id) ?: return false
-        val entity = entityOf(current.wordbookId, draft, current.createdAt) ?: return false
+        val entity = entityOf(draft, current.createdAt) ?: return false
         return dao.editWord(id, entity)
     }
 
-    suspend fun moveWord(id: Long, wordbookId: Long) = dao.moveOrMerge(id, wordbookId)
+    suspend fun moveWord(id: Long, fromWordbookId: Long, toWordbookId: Long) =
+        dao.moveWord(id, fromWordbookId, toWordbookId)
 
+    /** 단어를 다른 단어장에도 넣는다. 이미 있거나 그 단어장에 같은 글자가 있으면 false. */
+    suspend fun addToWordbook(id: Long, wordbookId: Long): Boolean = dao.addToWordbook(id, wordbookId)
+
+    /** 한 단어장에서만 뺀다. 마지막 단어장이었으면 단어도 지운다. */
+    suspend fun removeFromWordbook(id: Long, wordbookId: Long) = dao.removeFromWordbook(id, wordbookId)
+
+    suspend fun wordbookIdsOf(id: Long): List<Long> = dao.wordbookIdsOf(id)
+
+    /** 모든 단어장에서 지운다. */
     suspend fun deleteWord(id: Long) = dao.deleteWord(id)
 
     suspend fun setMemorized(id: Long, memorized: Boolean) = dao.setMemorized(id, memorized)
@@ -80,12 +90,11 @@ class VocabularyRepository(
         /** 앞뒤 공백을 걷고 [MAX_NAME_LENGTH]자로 자른다. 비면 null. */
         fun cleanName(name: String): String? = name.trim().take(MAX_NAME_LENGTH).trim().ifEmpty { null }
 
-        fun entityOf(wordbookId: Long, draft: WordDraft, now: Long): WordEntity? {
+        fun entityOf(draft: WordDraft, now: Long): WordEntity? {
             val word = draft.word.trim()
             val meaning = draft.meaning.trim()
             if (word.isEmpty() || meaning.isEmpty()) return null
             return WordEntity(
-                wordbookId = wordbookId,
                 word = word,
                 meaning = meaning,
                 pronunciation = draft.pronunciation.blankToNull(),

@@ -108,13 +108,21 @@ class WordbookDetailViewModel extends _$WordbookDetailViewModel {
         ],
       ),
     );
-    await ref.read(deleteWordProvider)(id);
+    await ref.read(removeWordFromWordbookProvider)(
+      WordbookLinkParams(id, wordbookId),
+    );
   }
 
   Future<void> move(int id, int toWordbookId) async {
-    await ref.read(moveWordProvider)(MoveWordParams(id, toWordbookId));
+    await ref.read(moveWordProvider)(
+      MoveWordParams(id, wordbookId, toWordbookId),
+    );
     await refresh();
   }
+
+  /// 다른 단어장에도 넣는다. 이미 있거나 그 단어장에 같은 글자의 단어가 있으면 false.
+  Future<bool> addTo(int id, int toWordbookId) =>
+      ref.read(addWordToWordbookProvider)(WordbookLinkParams(id, toWordbookId));
 
   VocabularyWord _withMemorized(VocabularyWord word, bool memorized) =>
       VocabularyWord(
