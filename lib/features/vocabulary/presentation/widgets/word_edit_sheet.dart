@@ -305,137 +305,151 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
     );
 
     final saved = _savedBookName;
+    final media = MediaQuery.of(context);
+    // 내용 길이에 따라 시트 높이가 들쭉날쭉하지 않게 화면 높이의 0.85로 고정한다 (키보드가 올라오면 그만큼 줄인다).
+    final sheetHeight = (media.size.height * 0.85 - media.viewInsets.bottom)
+        .clamp(280.0, media.size.height);
     return SafeArea(
       top: false,
       child: Padding(
         // 키보드가 올라오면 그만큼 시트를 밀어 올린다.
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: saved != null
-            ? Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppTokens.sectionGap,
-                  horizontal: AppTokens.pagePadding,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const IconBadge(icon: Symbols.check_rounded, size: 56),
-                    const SizedBox(height: AppTokens.space16),
-                    Text(
-                      _editing ? l10n.vocabEdited : l10n.vocabSavedTo(saved),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleLarge,
+        padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+        child: SizedBox(
+          height: sheetHeight,
+          child: saved != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppTokens.sectionGap,
+                      horizontal: AppTokens.pagePadding,
                     ),
-                    const SizedBox(height: AppTokens.space4),
-                    Text(_word.text.trim(), style: theme.textTheme.bodySmall),
-                  ],
-                ),
-              )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
-                  AppTokens.pagePadding,
-                  0,
-                  AppTokens.pagePadding,
-                  AppTokens.sectionGap,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.title, style: theme.textTheme.titleLarge),
-                    const SizedBox(height: AppTokens.space16),
-                    field(_word, l10n.vocabWordHint),
-                    field(_meaning, l10n.vocabMeaningHint, lines: 3),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOut,
-                      alignment: Alignment.topCenter,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (final o in _Option.values)
-                            if (_shown.contains(o))
-                              field(
-                                _controllerOf(o),
-                                o.hint(l10n),
-                                lines: o == _Option.sentence ? 3 : 1,
-                                option: o,
-                              ),
-                          if (_shown.length < _Option.values.length)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: AppTokens.space12,
-                              ),
-                              child: Wrap(
-                                spacing: AppTokens.space8,
-                                runSpacing: AppTokens.space8,
-                                children: [
-                                  for (final o in _Option.values)
-                                    if (!_shown.contains(o))
-                                      AppAddChip(
-                                        label: o.label(l10n),
-                                        onTap: () =>
-                                            setState(() => _shown.add(o)),
-                                      ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    if (!_editing) ...[
-                      const SizedBox(height: AppTokens.space4),
-                      Text(
-                        l10n.vocabSaveTo,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const IconBadge(icon: Symbols.check_rounded, size: 56),
+                        const SizedBox(height: AppTokens.space16),
+                        Text(
+                          _editing
+                              ? l10n.vocabEdited
+                              : l10n.vocabSavedTo(saved),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleLarge,
                         ),
-                      ),
-                      const SizedBox(height: AppTokens.space8),
-                      WordbookSelector(
-                        label: creating
-                            ? l10n.vocabNewBook
-                            : books
-                                      .where((b) => b.id == selectedId)
-                                      .firstOrNull
-                                      ?.name ??
-                                  '',
-                        count: creating
-                            ? null
-                            : books
-                                  .where((b) => b.id == selectedId)
-                                  .firstOrNull
-                                  ?.wordCount,
-                        onTap: () => _pickBook(books, creating, selectedId),
-                      ),
-                      if (creating) ...[
-                        const SizedBox(height: AppTokens.space12),
-                        AppTextField(
-                          controller: _newBookName,
-                          hint: l10n.vocabNameHint,
-                          maxLength: 30,
-                          onChanged: (_) => setState(() {}),
+                        const SizedBox(height: AppTokens.space4),
+                        Text(
+                          _word.text.trim(),
+                          style: theme.textTheme.bodySmall,
                         ),
                       ],
-                    ],
-                    if (_failed) ...[
-                      const SizedBox(height: AppTokens.space12),
-                      Text(
-                        _editing ? l10n.vocabEditFailed : l10n.vocabSaveFailed,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.error,
+                    ),
+                  ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppTokens.pagePadding,
+                    0,
+                    AppTokens.pagePadding,
+                    AppTokens.sectionGap,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.title, style: theme.textTheme.titleLarge),
+                      const SizedBox(height: AppTokens.space16),
+                      field(_word, l10n.vocabWordHint),
+                      field(_meaning, l10n.vocabMeaningHint, lines: 3),
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOut,
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (final o in _Option.values)
+                              if (_shown.contains(o))
+                                field(
+                                  _controllerOf(o),
+                                  o.hint(l10n),
+                                  lines: o == _Option.sentence ? 3 : 1,
+                                  option: o,
+                                ),
+                            if (_shown.length < _Option.values.length)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: AppTokens.space12,
+                                ),
+                                child: Wrap(
+                                  spacing: AppTokens.space8,
+                                  runSpacing: AppTokens.space8,
+                                  children: [
+                                    for (final o in _Option.values)
+                                      if (!_shown.contains(o))
+                                        AppAddChip(
+                                          label: o.label(l10n),
+                                          onTap: () =>
+                                              setState(() => _shown.add(o)),
+                                        ),
+                                  ],
+                                ),
+                              ),
+                          ],
                         ),
                       ),
+                      if (!_editing) ...[
+                        const SizedBox(height: AppTokens.space4),
+                        Text(
+                          l10n.vocabSaveTo,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: AppTokens.space8),
+                        WordbookSelector(
+                          label: creating
+                              ? l10n.vocabNewBook
+                              : books
+                                        .where((b) => b.id == selectedId)
+                                        .firstOrNull
+                                        ?.name ??
+                                    '',
+                          count: creating
+                              ? null
+                              : books
+                                    .where((b) => b.id == selectedId)
+                                    .firstOrNull
+                                    ?.wordCount,
+                          onTap: () => _pickBook(books, creating, selectedId),
+                        ),
+                        if (creating) ...[
+                          const SizedBox(height: AppTokens.space12),
+                          AppTextField(
+                            controller: _newBookName,
+                            hint: l10n.vocabNameHint,
+                            maxLength: 30,
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ],
+                      ],
+                      if (_failed) ...[
+                        const SizedBox(height: AppTokens.space12),
+                        Text(
+                          _editing
+                              ? l10n.vocabEditFailed
+                              : l10n.vocabSaveFailed,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppTokens.sectionGap),
+                      AppButton(
+                        label: l10n.vocabSave,
+                        onPressed: _canSave(books) ? () => _save(books) : null,
+                      ),
                     ],
-                    const SizedBox(height: AppTokens.sectionGap),
-                    AppButton(
-                      label: l10n.vocabSave,
-                      onPressed: _canSave(books) ? () => _save(books) : null,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
