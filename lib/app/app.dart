@@ -17,7 +17,7 @@ class App extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light, // 흰 바탕 디자인 (#188). 다크 모드는 별도 설정을 만들 때 다시 켠다
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       // 기기 언어가 한국어 · 영어가 아니면 한국어로 보인다 (기본은 알파벳순 첫 언어인 영어).
