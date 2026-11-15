@@ -5,8 +5,6 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -25,23 +23,25 @@ fun interface ApiKeyProvider {
 /** [HttpURLConnection]으로 Gemini REST를 부른다 (새 의존성 없음). 키는 헤더로만 보낸다. */
 class GeminiHttpTransport(private val timeoutMs: Int = 20_000) : GeminiTransport {
     override suspend fun generate(apiKey: String, model: String, body: String): String =
-        withContext(Dispatchers.IO) {
+        run {
             val conn = URL("$BASE/$model:generateContent").openConnection() as HttpURLConnection
-            try {
-                conn.requestMethod = "POST"
-                conn.connectTimeout = timeoutMs
-                conn.readTimeout = timeoutMs
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/json")
-                conn.setRequestProperty("x-goog-api-key", apiKey)
-                conn.outputStream.use { it.write(body.toByteArray()) }
-                val code = conn.responseCode
-                val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-                val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
-                if (code !in 200..299) throw GeminiHttpException(code, text.take(300))
-                text
-            } finally {
-                conn.disconnect()
+            runCancellableHttp(conn) {
+                try {
+                    conn.requestMethod = "POST"
+                    conn.connectTimeout = timeoutMs
+                    conn.readTimeout = timeoutMs
+                    conn.doOutput = true
+                    conn.setRequestProperty("Content-Type", "application/json")
+                    conn.setRequestProperty("x-goog-api-key", apiKey)
+                    conn.outputStream.use { it.write(body.toByteArray()) }
+                    val code = conn.responseCode
+                    val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+                    val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                    if (code !in 200..299) throw GeminiHttpException(code, text.take(300))
+                    text
+                } finally {
+                    conn.disconnect()
+                }
             }
         }
 
