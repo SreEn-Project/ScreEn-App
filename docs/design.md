@@ -8,7 +8,8 @@ Flutter 앱 화면과 네이티브 오버레이(Compose)가 같은 토큰을 쓴
 ## 원칙
 - 화면 대부분은 흰색 · 회색. 초록은 **포인트에만** (주요 버튼, 강조 글자, 선택 칩, 아이콘 배경, 상태 점).
 - 넓은 여백. 기본 간격 8의 배수, 화면 좌우 여백 20, 섹션 사이 24~32.
-- 카드는 모서리 큰 흰 카드 + 옅고 넓은 그림자. 테두리는 쓰지 않는다 (입력창 · 구분선만 outline 색).
+- 카드는 흰 카드 + 1dp 옅은 테두리(outlineVariant) + 약한 그림자 (리디자인 #188). 계층은 그림자보다 표면 명도 차 · 테두리로 나눈다.
+- 반복 목록(기록 · 단어 · 언어)은 행마다 카드로 감싸지 않는다. 평면 행 + `AppDivider`, 또는 카드 하나 안에 행 여러 개. 카드 안에 카드 금지.
 - 버튼 · 칩은 알약 모양 (완전 둥근 모서리).
 - 한 화면에 주요 동작 하나.
 - 파랑 계열 색은 쓰지 않는다.
@@ -51,12 +52,14 @@ Flutter 앱 화면과 네이티브 오버레이(Compose)가 같은 토큰을 쓴
 ## 모양 · 그림자
 | 항목 | 값 |
 |---|---|
+| 모서리 스케일 | XS 8 · S 12 · M 16 · L 20 · XL(카드) 24 (`AppTokens.radius*`). 알약은 칩 · 상태 배지 · 큰 버튼에만 |
 | 카드 모서리 | 24dp |
 | 하단 시트 상단 모서리 | 28dp |
 | 버튼 · 칩 | 알약 (StadiumBorder) |
-| 입력창 | 16dp |
-| 카드 그림자 | y 8, blur 24, primary 10% (다크: 검정 32%) — 초록으로 살짝 물든 그림자 |
-| primary 버튼 빛 | y 10, blur 24, spread −4, primary 32% (다크: #C8EFC1 20%) |
+| 입력창 | 16dp, 1dp outline 테두리(포커스 시 primary 1.5dp), 그림자 없음 |
+| 카드 그림자 | y 8, blur 24, primary 6% (다크: 검정 24%) — 약하게 |
+| 떠 있는 요소 그림자 (탭바 · 토스트) | `floatShadow`: primary 12% (다크: 검정 40%) |
+| primary 버튼 빛 | y 10, blur 24, spread −4, primary 20% (다크: #C8EFC1 12%) |
 | 큰 버튼 높이 | 56dp |
 
 ## 글자
@@ -76,15 +79,15 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 | `Pressable` | 누르면 97% 크기 + 살짝 흐려짐. 물결(ripple) 효과는 테마에서 끔 |
 | `AppPage` · `AppHeader` | 배경 + 가운데 제목 헤더(왼쪽 뒤로가기, 오른쪽 동작 하나) + 스크롤 본문 |
 | `AppBottomNav` | 떠 있는 흰 둥근 탭바 + 그림자, 고른 탭은 primary 아이콘 + 아래 짧은 막대 |
-| `AppButton` | primary: 초록 알약 + 아래로 번지는 빛 / secondary: 흰 알약 + 그림자 / text |
-| `AppIconButton` | 흰 원 + 그림자(기본), primary 원 + 빛(filled), 배경 없음(plain) |
+| `AppButton` | primary: 초록 알약 + 약한 빛 / secondary: 흰 알약 + 1dp 테두리 + primary 글자 / text |
+| `AppIconButton` | 흰 원 + 1dp 테두리(기본), primary 원 + 빛(filled), 배경 없음(plain) |
 | `AppCard` · `AppSection` | 24dp 흰 카드 + 초록 그림자 / 작은 회색 섹션 제목 + 카드 |
-| `AppListTile` · `AppDivider` | 아이콘 원 + 제목 + 회색 설명 + 오른쪽 값(primary) · › / 가는 구분선 |
+| `AppListTile` · `AppDivider` | (아이콘 원 36 — 선택, 반복 목록엔 생략 가능) + 제목 + 회색 설명 + 오른쪽 값(primary) · › (`selected: true`면 ✓) / 가는 구분선 |
 | `AppSwitch` | 알약 트랙(켜짐 primary) + 흰 손잡이 |
 | `AppSegmented` · `AppChip` | 회색 트랙 안에서 고른 칸만 흰 알약으로(`enabled: false`면 흐리게 · 누를 수 없음) / 선택 시 primary 알약 |
 | `AppSlider` · `AppProgressBar` | 가는 알약 트랙 + 흰 원 손잡이(primary 테두리) |
-| `AppSearchField` | 테두리 없는 흰 알약 + 그림자 |
-| `AppTextField` | 입력창 (흰 둥근 사각형 + 그림자). 기본 한 줄, `maxLines`로 여러 줄(예문). `obscure`로 API 키 등을 가린다. `onSubmitted`(완료 키) · `enabled`(false면 입력 불가) |
+| `AppSearchField` | 흰 둥근 창 + 1dp 테두리(포커스 시 primary) |
+| `AppTextField` | 입력창 (흰 둥근 사각형 + 1dp 테두리). 기본 한 줄, `maxLines`로 여러 줄(예문). `obscure`로 API 키 등을 가린다. `onSubmitted`(완료 키) · `enabled`(false면 입력 불가) |
 | `AppBadge` · `AppStatusPill` · `StatusDot` | 작은 연두 배지 / 점 + 글자 알약 / 켜짐 점(accent) |
 | `IconBadge` · `AccentTitle` | 연한 초록 원 + 선 아이콘 / 한 단어 강조 제목 |
 | `AppToast` | 잠깐 뜨는 한 줄 메시지: 흰 알약 + 그림자 + 성격 아이콘(성공 · 안내 primary, 오류 error). 탭바 위, 2.4초, 한 번에 하나. `AppToast.show(context, 문구, kind:)`. SnackBar 금지 |
@@ -135,7 +138,7 @@ Material 느낌을 줄이려고 앱 자체 컴포넌트를 `lib/core/ui/`에 두
 - 플로팅 버튼: 흰 원 52dp + 초록 그림자, 현재 모드 아이콘 primary. 번역 중에는 둘레에 도는 호(primary, 바탕 링 primaryContainer). 끄는 동안 108%.
 - 닫기 영역: 아래 가운데 흰 원 60dp + ×, 버튼이 들어오면 primary로 채워지고 120%.
 - 모드 메뉴: 버튼 옆 흰 카드(24dp) + 그림자, 줄마다 아이콘 원 + 이름. 고른 모드는 primaryContainer 줄, 준비 중인 모드는 흐리게 + "준비 중".
-- 결과 시트: 어두운 막(scrim) 위 흰 하단 시트(상단 28dp, 화면 75%까지) · 손잡이. 머리: "번역 결과" + 엔진 배지 + "자동 감지 → 대상 언어" + 닫기. 카드(20dp, background 색)마다 원문(회색 13) · 번역문(16) · 복사. 아래 primary "전체 복사" + secondary "AI로 다시 번역". 결과가 없으면 같은 시트에 아이콘 원 + 제목 + 설명 + "닫기".
+- 결과 시트: 어두운 막(scrim) 위 흰 하단 시트(상단 28dp, 화면 75%까지) · 손잡이. 머리: "번역 결과" + 엔진 배지 + "자동 감지 → 대상 언어" + 닫기. 항목마다(카드 없이 평면 행 + 구분선) 번역문(16) 먼저 · 원문(회색 13) 아래 · 복사. 아래 primary "전체 복사" + secondary "AI로 다시 번역". 결과가 없으면 같은 시트에 아이콘 원 + 제목 + 설명 + "닫기".
 
 | 오버레이 컴포넌트 (`overlay/OverlayComponents.kt`) | 모양 |
 |---|---|
