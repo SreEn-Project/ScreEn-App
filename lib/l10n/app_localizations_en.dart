@@ -1504,4 +1504,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeSystem => 'System';
+
+  @override
+  String get homeStudyRecord => 'Study record';
+
+  @override
+  String get homeStatWords => 'Words';
+
+  @override
+  String get homeStatMemorized => 'Memorized';
+
+  @override
+  String get homeStatAccuracy => 'Accuracy';
 }

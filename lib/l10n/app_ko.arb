@@ -517,5 +517,9 @@
   "settingsSectionTheme": "테마",
   "themeLight": "라이트",
   "themeDark": "다크",
-  "themeSystem": "시스템"
+  "themeSystem": "시스템",
+  "homeStudyRecord": "학습 기록",
+  "homeStatWords": "단어",
+  "homeStatMemorized": "외움",
+  "homeStatAccuracy": "정확도"
 }

@@ -525,5 +525,9 @@
   "settingsSectionTheme": "Theme",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "themeSystem": "System"
+  "themeSystem": "System",
+  "homeStudyRecord": "Study record",
+  "homeStatWords": "Words",
+  "homeStatMemorized": "Memorized",
+  "homeStatAccuracy": "Accuracy"
 }

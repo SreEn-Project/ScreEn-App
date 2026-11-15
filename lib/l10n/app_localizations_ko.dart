@@ -1468,4 +1468,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get themeSystem => '시스템';
+
+  @override
+  String get homeStudyRecord => '학습 기록';
+
+  @override
+  String get homeStatWords => '단어';
+
+  @override
+  String get homeStatMemorized => '외움';
+
+  @override
+  String get homeStatAccuracy => '정확도';
 }

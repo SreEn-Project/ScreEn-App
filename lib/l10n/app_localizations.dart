@@ -2803,6 +2803,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System'**
   String get themeSystem;
+
+  /// No description provided for @homeStudyRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Study record'**
+  String get homeStudyRecord;
+
+  /// No description provided for @homeStatWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get homeStatWords;
+
+  /// No description provided for @homeStatMemorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorized'**
+  String get homeStatMemorized;
+
+  /// No description provided for @homeStatAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Accuracy'**
+  String get homeStatAccuracy;
 }
 
 class _AppLocalizationsDelegate

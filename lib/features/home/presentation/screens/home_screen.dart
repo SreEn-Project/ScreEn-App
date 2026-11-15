@@ -71,12 +71,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final books = ref.watch(wordbooksViewModelProvider).value;
     final bookCount = books?.length ?? 0;
     final wordCount = books?.fold<int>(0, (sum, b) => sum + b.wordCount) ?? 0;
+    final memorizedCount =
+        books?.fold<int>(0, (sum, b) => sum + b.memorizedCount) ?? 0;
+    final correct = books?.fold<int>(0, (sum, b) => sum + b.correctCount) ?? 0;
+    final attempts = books?.fold<int>(0, (sum, b) => sum + b.attemptCount) ?? 0;
 
     return AppPage(
       withBottomNav: true,
       children: [
         const _Header(),
         const SizedBox(height: AppTokens.space24),
+        // 학습 앱: 학습 기록이 맨 위. 번역 시작은 그 아래 카드에서.
+        _StudyCard(
+          words: wordCount,
+          memorized: memorizedCount,
+          accuracyPercent: attempts == 0
+              ? null
+              : (correct * 100 / attempts).round(),
+          empty: bookCount == 0,
+          canStart: wordCount > 0,
+          onOpen: () => context.go(AppRoutes.vocabulary),
+          onStart: () => context.push(AppRoutes.learning),
+        ),
+        const SizedBox(height: AppTokens.space12),
+        const WordOfTheDayCard(),
+        const SizedBox(height: AppTokens.sectionGap),
         // 번역 상태와 시작/중지는 한 덩어리: 화면에서 가장 먼저 읽히는 곳.
         _StatusCard(
           state: service,
@@ -111,24 +130,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
         ),
         const SizedBox(height: AppTokens.sectionGap),
-        SectionTitle(
-          l10n.homeSectionStudy,
-          action: AppButton.text(
-            label: l10n.vocabTitle,
-            onPressed: () => context.go(AppRoutes.vocabulary),
-          ),
-        ),
-        const SizedBox(height: AppTokens.space12),
-        _StudyCard(
-          summary: bookCount == 0
-              ? l10n.homeStudyEmpty
-              : l10n.homeStudySummary(bookCount, wordCount),
-          canStart: wordCount > 0,
-          onStart: () => context.push(AppRoutes.learning),
-        ),
-        const SizedBox(height: AppTokens.space12),
-        const WordOfTheDayCard(),
-        const SizedBox(height: AppTokens.space12),
         SectionTitle(l10n.homeSectionSetup),
         const SizedBox(height: AppTokens.space12),
         AppCard(
@@ -304,33 +305,82 @@ class _StatusCard extends StatelessWidget {
   }
 }
 
-/// 학습 진입 카드: 단어장 요약 + 학습 시작.
+/// 학습 기록 카드(홈 맨 위): 단어 수 · 외운 수 · 정답률 + 학습 시작.
 class _StudyCard extends StatelessWidget {
   const _StudyCard({
-    required this.summary,
+    required this.words,
+    required this.memorized,
+    required this.accuracyPercent,
+    required this.empty,
     required this.canStart,
+    required this.onOpen,
     required this.onStart,
   });
 
-  final String summary;
+  final int words;
+  final int memorized;
+  final int? accuracyPercent;
+  final bool empty;
   final bool canStart;
+  final VoidCallback onOpen;
   final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    Widget stat(String label, String value) => Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            value,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: colors.primary,
+            ),
+          ),
+          const SizedBox(height: AppTokens.space4),
+          Text(label, style: theme.textTheme.bodySmall),
+        ],
+      ),
+    );
 
     return AppCard(
       padding: const EdgeInsets.all(AppTokens.pagePadding),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: Text(summary, style: theme.textTheme.titleMedium)),
-          const SizedBox(width: AppTokens.space12),
-          AppButton.secondary(
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.homeStudyRecord,
+                  style: theme.textTheme.titleLarge,
+                ),
+              ),
+              AppButton.text(label: l10n.vocabTitle, onPressed: onOpen),
+            ],
+          ),
+          const SizedBox(height: AppTokens.space12),
+          if (empty)
+            Text(l10n.homeStudyEmpty, style: theme.textTheme.bodySmall)
+          else
+            Row(
+              children: [
+                stat(l10n.homeStatWords, '$words'),
+                stat(l10n.homeStatMemorized, '$memorized'),
+                stat(
+                  l10n.homeStatAccuracy,
+                  accuracyPercent == null ? '-' : '$accuracyPercent%',
+                ),
+              ],
+            ),
+          const SizedBox(height: AppTokens.space16),
+          AppButton(
             label: l10n.homeStudyStart,
-            expand: false,
-            height: 44,
+            height: 48,
             onPressed: canStart ? onStart : null,
           ),
         ],
