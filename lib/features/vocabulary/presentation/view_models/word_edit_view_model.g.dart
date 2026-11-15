@@ -47,7 +47,7 @@ final class WordEditViewModelProvider
   }
 }
 
-String _$wordEditViewModelHash() => r'280be18ce5baaf6183462304bc5462025b04c8cc';
+String _$wordEditViewModelHash() => r'a742b5e7df24f462410616f37be499101440bccc';
 
 /// 단어 편집 시트(AD-03)의 저장 동작. 직접 추가 · 기록에서 추가가 같이 쓴다.
 /// 시트가 닫히는 동안에도 여러 번 await 하며 쓰므로 살려 둔다 (상태가 없는 동작 모음이라 비용이 없다).

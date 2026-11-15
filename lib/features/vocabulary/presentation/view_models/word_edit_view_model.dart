@@ -13,10 +13,9 @@ class WordEditViewModel extends _$WordEditViewModel {
   @override
   void build() {}
 
-  /// [wordbookId] 단어장에 저장한다. 단어 · 뜻이 비어 저장하지 못하면 false.
-  Future<bool> save(int wordbookId, WordDraft draft) async =>
-      await ref.read(saveWordProvider)(SaveWordParams(wordbookId, draft)) !=
-      null;
+  /// [wordbookId] 단어장에 저장하고 단어 id를 돌려준다. 단어 · 뜻이 비어 저장하지 못하면 null.
+  Future<int?> save(int wordbookId, WordDraft draft) =>
+      ref.read(saveWordProvider)(SaveWordParams(wordbookId, draft));
 
   /// 같은 단어(글자 · 언어쌍)가 이미 저장돼 있으면 그 단어. 저장 전에 뜻을 더할지 물을 때 쓴다.
   Future<VocabularyWord?> findSame(WordDraft draft) =>

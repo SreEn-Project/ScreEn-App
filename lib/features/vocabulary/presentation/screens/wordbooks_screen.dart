@@ -37,12 +37,24 @@ class WordbooksScreen extends ConsumerWidget {
           children: [
             AppHeader(
               title: l10n.vocabTitle,
-              trailing: AppIconButton(
-                icon: Symbols.add_rounded,
-                tooltip: l10n.vocabNewBook,
-                plain: true,
-                size: 44,
-                onPressed: create,
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppIconButton(
+                    icon: Symbols.format_list_bulleted_rounded,
+                    tooltip: l10n.vocabAllWords,
+                    plain: true,
+                    size: 44,
+                    onPressed: () => context.push(AppRoutes.allWords),
+                  ),
+                  AppIconButton(
+                    icon: Symbols.add_rounded,
+                    tooltip: l10n.vocabNewBook,
+                    plain: true,
+                    size: 44,
+                    onPressed: create,
+                  ),
+                ],
               ),
             ),
             Expanded(

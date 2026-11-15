@@ -14,6 +14,7 @@ import '../features/settings/presentation/screens/quick_languages_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/permission/presentation/screens/permission_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/vocabulary/presentation/screens/all_words_screen.dart';
 import '../features/vocabulary/presentation/screens/assembly_screen.dart';
 import '../features/vocabulary/presentation/screens/falling_screen.dart';
 import '../features/vocabulary/presentation/screens/flashcards_screen.dart';
@@ -46,6 +47,7 @@ abstract final class AppRoutes {
   static const history = '/history';
   static const vocabulary = '/vocabulary';
 
+  static const allWords = '/vocabulary/words';
   static String wordbookPath(int id) => '/vocabulary/book/$id';
   static String wordPath(int id) => '/vocabulary/word/$id';
   static const learning = '/learning';
@@ -134,6 +136,10 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
             builder: (context, state) => WordbookDetailScreen(
               wordbookId: int.parse(state.pathParameters['id']!),
             ),
+          ),
+          GoRoute(
+            path: 'words',
+            builder: (context, state) => const AllWordsScreen(),
           ),
           GoRoute(
             path: 'word/:id',

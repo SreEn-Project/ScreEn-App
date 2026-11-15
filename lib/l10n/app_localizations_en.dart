@@ -862,8 +862,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabSameWordAdd => 'Add meaning';
 
   @override
-  String get vocabAlreadyInBook =>
-      'This list already has this word with the same meaning';
+  String get vocabAlreadyInBook => 'This word is already in this list';
 
   @override
   String get vocabMeaningDuplicate => 'That meaning already exists';
@@ -891,6 +890,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String vocabSameWordMessage(String word, String meanings) {
     return 'Add a meaning to “$word”?\nExisting: $meanings';
+  }
+
+  @override
+  String get vocabAllWords => 'All words';
+
+  @override
+  String vocabAllWordsCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String vocabMoreMeanings(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String vocabOverallAccuracy(int percent, int correct, int attempt) {
+    return 'Overall accuracy $percent% ($correct/$attempt)';
   }
 
   @override

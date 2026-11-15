@@ -35,6 +35,10 @@ DeleteWordbook deleteWordbook(Ref ref) =>
 GetWords getWords(Ref ref) => GetWords(ref.watch(vocabularyRepositoryProvider));
 
 @riverpod
+GetAllWords getAllWords(Ref ref) =>
+    GetAllWords(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
 GetWord getWord(Ref ref) => GetWord(ref.watch(vocabularyRepositoryProvider));
 
 @riverpod

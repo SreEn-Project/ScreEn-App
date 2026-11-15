@@ -108,6 +108,9 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
   );
   final _newBookName = TextEditingController();
 
+  /// 처음 만들 때 더 넣는 뜻들 (첫 뜻은 위의 기본 칸).
+  final List<_ExtraMeaning> _extras = [];
+
   int? _bookId;
   bool _wantsNewBook = false;
   bool _busy = false;
@@ -148,6 +151,9 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
       _newBookName,
     ]) {
       c.dispose();
+    }
+    for (final extra in _extras) {
+      extra.dispose();
     }
     super.dispose();
   }
@@ -259,13 +265,14 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
       return;
     }
     if (!mounted) return;
-    final saved =
-        bookId != null &&
-        await ref
-            .read(wordEditViewModelProvider.notifier)
-            .save(bookId, _draft());
+    final savedId = bookId == null
+        ? null
+        : await ref
+              .read(wordEditViewModelProvider.notifier)
+              .save(bookId, _draft());
+    if (savedId != null) await _saveExtras(savedId);
     if (!mounted) return;
-    if (!saved) {
+    if (savedId == null) {
       setState(() {
         _busy = false;
         _failed = true;
@@ -277,6 +284,27 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
     setState(() => _savedBookName = bookName ?? '');
     await Future<void>.delayed(const Duration(milliseconds: 1100));
     if (mounted) Navigator.of(context).pop(bookName ?? '');
+  }
+
+  /// 처음 만들 때 더 넣은 뜻들을 단어에 더한다 (빈 뜻은 건너뛴다).
+  Future<void> _saveExtras(int wordId) async {
+    final model = ref.read(wordEditViewModelProvider.notifier);
+    final base = _draft();
+    for (final extra in _extras) {
+      final meaning = extra.meaning.text.trim();
+      if (meaning.isEmpty) continue;
+      await model.addMeaning(
+        wordId,
+        WordDraft(
+          word: base.word,
+          meaning: meaning,
+          contextMeaning: _blankToNull(extra.contextMeaning),
+          sentence: _blankToNull(extra.sentence),
+          sourceLanguage: base.sourceLanguage,
+          targetLanguage: base.targetLanguage,
+        ),
+      );
+    }
   }
 
   /// 같은 단어가 이미 저장돼 있으면 저장 전에 알린다. 새 뜻이면 뜻을 더할지 묻고, 이 단어장에 같은 뜻까지 있으면 막는다.
@@ -308,6 +336,64 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
       cancelLabel: l10n.vocabCancel,
     );
     return add;
+  }
+
+  /// 처음 만들 때 더 넣는 뜻 하나: 뜻 · 문맥 뜻 · 예문, 오른쪽 끝 ×로 뺀다.
+  Widget _extraBlock(BuildContext context, int index) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final extra = _extras[index];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppTokens.space12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(
+              left: AppTokens.sectionTitleIndent,
+              bottom: AppTokens.space4,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.vocabMeaningN(index + 2),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                AppIconButton(
+                  icon: Symbols.close_rounded,
+                  tooltip: l10n.vocabOptRemove,
+                  plain: true,
+                  size: 32,
+                  onPressed: () => setState(() {
+                    _extras.removeAt(index).dispose();
+                  }),
+                ),
+              ],
+            ),
+          ),
+          AppTextField(
+            controller: extra.meaning,
+            hint: l10n.vocabMeaningHint,
+            maxLines: 2,
+          ),
+          const SizedBox(height: AppTokens.space8),
+          AppTextField(
+            controller: extra.contextMeaning,
+            hint: l10n.vocabContextMeaningHint,
+          ),
+          const SizedBox(height: AppTokens.space8),
+          AppTextField(
+            controller: extra.sentence,
+            hint: l10n.vocabSentenceHint,
+            maxLines: 2,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -464,6 +550,19 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                         ),
                       ),
                       if (!_editing) ...[
+                        for (var i = 0; i < _extras.length; i++)
+                          _extraBlock(context, i),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: AppAddChip(
+                            label: l10n.vocabAddMeaning,
+                            onTap: () =>
+                                setState(() => _extras.add(_ExtraMeaning())),
+                          ),
+                        ),
+                        const SizedBox(height: AppTokens.space12),
+                      ],
+                      if (!_editing) ...[
                         const SizedBox(height: AppTokens.space4),
                         Text(
                           l10n.vocabSaveTo,
@@ -529,5 +628,18 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
         ),
       ),
     );
+  }
+}
+
+/// 처음 만들 때 더 넣는 뜻 하나의 입력칸.
+class _ExtraMeaning {
+  final meaning = TextEditingController();
+  final contextMeaning = TextEditingController();
+  final sentence = TextEditingController();
+
+  void dispose() {
+    meaning.dispose();
+    contextMeaning.dispose();
+    sentence.dispose();
   }
 }

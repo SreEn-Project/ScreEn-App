@@ -1691,7 +1691,7 @@ abstract class AppLocalizations {
   /// No description provided for @vocabAlreadyInBook.
   ///
   /// In en, this message translates to:
-  /// **'This list already has this word with the same meaning'**
+  /// **'This word is already in this list'**
   String get vocabAlreadyInBook;
 
   /// No description provided for @vocabMeaningDuplicate.
@@ -1741,6 +1741,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a meaning to “{word}”?\nExisting: {meanings}'**
   String vocabSameWordMessage(String word, String meanings);
+
+  /// No description provided for @vocabAllWords.
+  ///
+  /// In en, this message translates to:
+  /// **'All words'**
+  String get vocabAllWords;
+
+  /// No description provided for @vocabAllWordsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String vocabAllWordsCount(int count);
+
+  /// No description provided for @vocabMoreMeanings.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String vocabMoreMeanings(int count);
+
+  /// No description provided for @vocabOverallAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Overall accuracy {percent}% ({correct}/{attempt})'**
+  String vocabOverallAccuracy(int percent, int correct, int attempt);
 
   /// No description provided for @vocabDeleteWord.
   ///

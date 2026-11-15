@@ -583,4 +583,5 @@
 - 학습 · 테스트 · 오늘의 단어: 여러 단어장을 같이 골라도 같은 단어는 한 번만 쓰고, 푼 결과는 그 단어를 가져온 단어장의 진도에 쌓인다. 게임 · 테스트는 대표 뜻만 쓴다.
 - Pigeon: `getWordWordbookIds` · `addWordToWordbook` · `removeWordFromWordbook` · `getWordProgress` · `findSameWord` · `addWordMeaning` · `updateWordMeaning` · `deleteWordMeaning` 추가, `moveWord(id, from, to)` · `setMemorized(wordbookId, ...)` · `WordAnswer.wordbookId`로 변경, `VocabWord.meanings` 추가.
 - 확인: `flutter analyze` 0, `flutter test` 전체 통과(뜻 추가 확인 · 단어장별 진도 · 중복 제거 테스트 추가). 이 환경에 Android SDK가 없어 Kotlin 컴파일 · Room 쿼리 검증 · 마이그레이션 실행 · `schemas/.../4.json`, `5.json` 생성은 못 했다.
-- 남은 일: PC에서 빌드해 스키마 파일 커밋, 기존 데이터가 있는 기기에서 업데이트해 마이그레이션 확인, "전체 단어" 목록 화면(단어가 어느 단어장에 들었는지 한눈에), 목록에서 뜻이 여러 개임을 표시.
+- 추가(사용자 요청): 단어를 처음 만들 때 뜻을 여러 개 입력(뜻마다 문맥 뜻 · 예문), "이 단어장에 이미 있는 단어예요" 안내 문구, **전체 단어 화면**(단어장 목록 위 오른쪽 아이콘 → `/vocabulary/words`: 모든 단어장의 단어를 한 단어씩 검색 · 정렬 · 필터, 든 단어장 표시, 여러 뜻이면 "외 n개", 정답률은 든 모든 단어장의 진도를 합침), 단어 상세에 전체 정답률. 전체 단어는 기존 단어장별 조회를 Dart에서 합쳐 만들어 네이티브 변경은 없다.
+- 남은 일: PC에서 빌드해 스키마 파일 커밋, 기존 데이터가 있는 기기에서 업데이트해 마이그레이션 확인, 단어장 상세 목록에서 뜻이 여러 개임을 표시.

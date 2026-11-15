@@ -125,6 +125,7 @@ class VocabularyWord {
     this.correctCount = 0,
     this.attemptCount = 0,
     this.meanings = const [],
+    this.wordbookIds = const [],
   });
 
   final int id;
@@ -153,6 +154,9 @@ class VocabularyWord {
 
   /// 모든 뜻 (대표 뜻이 맨 앞). 비어 있으면 대표 뜻 하나만 있는 것이다.
   final List<WordMeaning> meanings;
+
+  /// 이 단어가 들어 있는 단어장들 (전체 단어 목록에서만 채운다).
+  final List<int> wordbookIds;
 
   /// 정답률 0~1. 아직 푼 적이 없으면 null.
   double? get accuracy =>

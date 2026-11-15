@@ -110,6 +110,113 @@ final class GetWords implements UseCase<List<VocabularyWord>, GetWordsParams> {
   }
 }
 
+class GetAllWordsParams {
+  const GetAllWordsParams({
+    this.query = '',
+    this.sort = WordSort.newest,
+    this.filter = WordFilter.all,
+  });
+
+  final String query;
+  final WordSort sort;
+  final WordFilter filter;
+}
+
+/// 전체 단어: 모든 단어장의 단어를 한 단어씩 모아 보여 준다 (AD-05).
+/// 정답률 · 외움은 단어가 들어 있는 모든 단어장의 진도를 합친 값이다
+/// (맞힌 횟수 · 푼 횟수는 합, 외움은 든 모든 단어장에서 외웠을 때만).
+final class GetAllWords
+    implements UseCase<List<VocabularyWord>, GetAllWordsParams> {
+  const GetAllWords(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<VocabularyWord>> call(GetAllWordsParams params) async {
+    final byId = <int, VocabularyWord>{};
+    final books = <int, List<int>>{};
+    final allMemorized = <int, bool>{};
+    for (final book in await _repository.wordbooks()) {
+      final words = await _repository.words(
+        book.id,
+        query: params.query.trim(),
+        sort: WordSort.newest,
+      );
+      for (final w in words) {
+        books.putIfAbsent(w.id, () => []).add(book.id);
+        allMemorized[w.id] = (allMemorized[w.id] ?? true) && w.memorized;
+        final first = byId[w.id];
+        byId[w.id] = first == null
+            ? w
+            : VocabularyWord(
+                id: first.id,
+                wordbookId: first.wordbookId,
+                word: first.word,
+                meaning: first.meaning,
+                pronunciation: first.pronunciation,
+                partOfSpeech: first.partOfSpeech,
+                contextMeaning: first.contextMeaning,
+                sentence: first.sentence,
+                sourceApp: first.sourceApp,
+                sourceLanguage: first.sourceLanguage,
+                targetLanguage: first.targetLanguage,
+                memorized: first.memorized,
+                savedAt: first.savedAt,
+                correctCount: first.correctCount + w.correctCount,
+                attemptCount: first.attemptCount + w.attemptCount,
+                meanings: first.meanings,
+              );
+      }
+    }
+    final merged = [
+      for (final w in byId.values)
+        VocabularyWord(
+          id: w.id,
+          wordbookId: w.wordbookId,
+          word: w.word,
+          meaning: w.meaning,
+          pronunciation: w.pronunciation,
+          partOfSpeech: w.partOfSpeech,
+          contextMeaning: w.contextMeaning,
+          sentence: w.sentence,
+          sourceApp: w.sourceApp,
+          sourceLanguage: w.sourceLanguage,
+          targetLanguage: w.targetLanguage,
+          memorized: allMemorized[w.id] ?? false,
+          savedAt: w.savedAt,
+          correctCount: w.correctCount,
+          attemptCount: w.attemptCount,
+          meanings: w.meanings,
+          wordbookIds: books[w.id] ?? const [],
+        ),
+    ].where(params.filter.matches).toList();
+    switch (params.sort) {
+      case WordSort.newest:
+        merged.sort((a, b) => b.savedAt.compareTo(a.savedAt));
+      case WordSort.oldest:
+        merged.sort((a, b) => a.savedAt.compareTo(b.savedAt));
+      case WordSort.alphabetical:
+        merged.sort(
+          (a, b) => a.word.toLowerCase().compareTo(b.word.toLowerCase()),
+        );
+      case WordSort.accuracyHigh || WordSort.accuracyLow:
+        final high = params.sort == WordSort.accuracyHigh;
+        merged.sort((a, b) {
+          final x = a.accuracy;
+          final y = b.accuracy;
+          if (x == null && y == null) return 0;
+          if (x == null) return 1;
+          if (y == null) return -1;
+          final byRate = high ? y.compareTo(x) : x.compareTo(y);
+          return byRate != 0
+              ? byRate
+              : b.attemptCount.compareTo(a.attemptCount);
+        });
+    }
+    return merged;
+  }
+}
+
 /// 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18).
 final class RecordWordAnswers implements UseCase<void, List<WordAnswer>> {
   const RecordWordAnswers(this._repository);

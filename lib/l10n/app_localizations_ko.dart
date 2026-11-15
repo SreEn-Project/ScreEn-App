@@ -845,7 +845,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vocabSameWordAdd => '뜻 추가';
 
   @override
-  String get vocabAlreadyInBook => '이 단어장에 같은 단어와 같은 뜻이 이미 있어요';
+  String get vocabAlreadyInBook => '이 단어장에 이미 있는 단어예요';
 
   @override
   String get vocabMeaningDuplicate => '같은 뜻이 이미 있어요';
@@ -873,6 +873,24 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String vocabSameWordMessage(String word, String meanings) {
     return '“$word”에 뜻을 추가할까요?\n기존 뜻: $meanings';
+  }
+
+  @override
+  String get vocabAllWords => '전체 단어';
+
+  @override
+  String vocabAllWordsCount(int count) {
+    return '$count개';
+  }
+
+  @override
+  String vocabMoreMeanings(int count) {
+    return '외 $count개';
+  }
+
+  @override
+  String vocabOverallAccuracy(int percent, int correct, int attempt) {
+    return '전체 정답률 $percent% ($correct/$attempt)';
   }
 
   @override

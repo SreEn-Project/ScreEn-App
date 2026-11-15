@@ -262,6 +262,47 @@ final class GetWordsProvider
 
 String _$getWordsHash() => r'ea7f3d59d335db89f319330cc6dbf3c2fe30a37a';
 
+@ProviderFor(getAllWords)
+final getAllWordsProvider = GetAllWordsProvider._();
+
+final class GetAllWordsProvider
+    extends $FunctionalProvider<GetAllWords, GetAllWords, GetAllWords>
+    with $Provider<GetAllWords> {
+  GetAllWordsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getAllWordsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getAllWordsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetAllWords> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GetAllWords create(Ref ref) {
+    return getAllWords(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetAllWords value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetAllWords>(value),
+    );
+  }
+}
+
+String _$getAllWordsHash() => r'2966a87c60045e339b3926782cbd0f7611ac82f7';
+
 @ProviderFor(getWord)
 final getWordProvider = GetWordProvider._();
 

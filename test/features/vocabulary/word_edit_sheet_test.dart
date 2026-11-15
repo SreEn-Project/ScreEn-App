@@ -411,8 +411,30 @@ void main() {
     await tester.tap(find.text('저장').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('이 단어장에 같은 단어와 같은 뜻이 이미 있어요'), findsOneWidget);
+    expect(find.text('이 단어장에 이미 있는 단어예요'), findsOneWidget);
     expect(repository.savedWords, hasLength(1));
     expect(repository.extraMeanings, isEmpty);
+  });
+
+  testWidgets('처음 만들 때 뜻을 여러 개 넣고 뜻마다 문맥 뜻 · 예문을 붙인다', (tester) async {
+    final (repository, fields) = await openAddSheet(tester, []);
+    await tester.enterText(fields.at(0), 'bank');
+    await tester.enterText(fields.at(1), '은행');
+    await tester.tap(find.widgetWithText(AppAddChip, '뜻 추가'));
+    await tester.pumpAndSettle();
+    // 새로 생긴 칸: 뜻 · 문맥 뜻 · 예문.
+    expect(fields, findsNWidgets(5));
+    await tester.enterText(fields.at(2), '둑');
+    await tester.enterText(fields.at(3), '강가');
+    await tester.enterText(fields.at(4), 'We sat on the bank.');
+    await tester.pump();
+    await tester.tap(find.text('저장').last);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    expect(repository.savedWords, hasLength(1));
+    final extra = repository.extraMeanings[repository.savedWords.single.id]!;
+    expect(extra.map((m) => m.meaning), ['둑']);
+    expect(extra.single.contextMeaning, '강가');
+    expect(extra.single.sentence, 'We sat on the bank.');
   });
 }

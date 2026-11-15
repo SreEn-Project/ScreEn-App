@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/features/vocabulary/di.dart';
 import 'package:translation_poc_app/features/vocabulary/domain/entities/vocabulary.dart';
+import 'package:translation_poc_app/features/vocabulary/presentation/view_models/all_words_view_model.dart';
 import 'package:translation_poc_app/features/vocabulary/presentation/view_models/word_detail_view_model.dart';
 import 'package:translation_poc_app/features/vocabulary/presentation/view_models/wordbook_detail_view_model.dart';
 import 'package:translation_poc_app/features/vocabulary/presentation/view_models/wordbooks_view_model.dart';
@@ -208,6 +209,32 @@ void main() {
       };
       expect(progress[2]!.attemptCount, 1);
       expect(progress[1]!.attemptCount, 0);
+    });
+  });
+
+  group('전체 단어', () {
+    test('여러 단어장에 든 단어는 한 번만 나오고 진도는 합쳐진다', () async {
+      await repository.addToWordbook(3, 2);
+      await repository.recordAnswers([
+        const WordAnswer(3, wordbookId: 1, correct: true),
+        const WordAnswer(3, wordbookId: 2, correct: false),
+      ]);
+      final state = await container.read(allWordsViewModelProvider.future);
+      final ids = state.words.map((w) => w.id).toList();
+      expect(ids.toSet(), hasLength(ids.length));
+      final word = state.words.firstWhere((w) => w.id == 3);
+      expect(word.wordbookIds, [1, 2]);
+      expect(word.attemptCount, 2);
+      expect(word.correctCount, 1);
+    });
+
+    test('검색은 모든 단어장에서 찾는다', () async {
+      await container.read(allWordsViewModelProvider.future);
+      await container
+          .read(allWordsViewModelProvider.notifier)
+          .setQuery('apple');
+      final state = container.read(allWordsViewModelProvider).value!;
+      expect(state.words.map((w) => w.word), everyElement(contains('Apple')));
     });
   });
 

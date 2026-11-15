@@ -271,6 +271,19 @@ class WordDetailScreen extends ConsumerWidget {
       const SizedBox(height: AppTokens.sectionGap),
       SectionTitle(l10n.vocabProgressByBook),
       const SizedBox(height: AppTokens.space8),
+      if (progress.length > 1 && progress.any((p) => p.attemptCount > 0))
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppTokens.space8),
+          child: Text(() {
+            final correct = progress.fold(0, (a, p) => a + p.correctCount);
+            final attempt = progress.fold(0, (a, p) => a + p.attemptCount);
+            return l10n.vocabOverallAccuracy(
+              (correct * 100 / attempt).round(),
+              correct,
+              attempt,
+            );
+          }(), style: theme.textTheme.bodySmall),
+        ),
       for (final p in progress)
         Padding(
           padding: const EdgeInsets.only(bottom: AppTokens.space8),
