@@ -37,8 +37,26 @@ class VocabularyNativeDataSource {
 
   Future<void> deleteWord(int id) => _api.deleteWord(id);
 
-  Future<void> setMemorized(int id, bool memorized) =>
-      _api.setMemorized(id, memorized);
+  Future<List<pigeon.WordbookProgress>> getWordProgress(int id) =>
+      _api.getWordProgress(id);
+
+  Future<pigeon.VocabWord?> findSameWord(
+    String word,
+    String sourceLanguage,
+    String targetLanguage,
+  ) => _api.findSameWord(word, sourceLanguage, targetLanguage);
+
+  Future<void> setMemorized(int wordbookId, int id, bool memorized) =>
+      _api.setMemorized(wordbookId, id, memorized);
+
+  Future<bool> addWordMeaning(int id, pigeon.VocabWordInput input) =>
+      _api.addWordMeaning(id, input);
+
+  Future<bool> updateWordMeaning(int meaningId, pigeon.VocabWordInput input) =>
+      _api.updateWordMeaning(meaningId, input);
+
+  Future<bool> deleteWordMeaning(int meaningId) =>
+      _api.deleteWordMeaning(meaningId);
 
   Future<void> recordAnswers(List<pigeon.WordAnswer> answers) =>
       _api.recordAnswers(answers);

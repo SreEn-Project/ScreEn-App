@@ -847,6 +847,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabRemoveFromBookTitle => 'Remove from this list?';
 
   @override
+  String get vocabAddMeaning => 'Add meaning';
+
+  @override
+  String get vocabAddMeaningTitle => 'Add meaning';
+
+  @override
+  String get vocabEditMeaningTitle => 'Edit meaning';
+
+  @override
+  String get vocabSameWordTitle => 'This word is already saved';
+
+  @override
+  String get vocabSameWordAdd => 'Add meaning';
+
+  @override
+  String get vocabAlreadyInBook =>
+      'This list already has this word with the same meaning';
+
+  @override
+  String get vocabMeaningDuplicate => 'That meaning already exists';
+
+  @override
+  String get vocabMeaningLast => 'You can\'t delete the last meaning';
+
+  @override
+  String get vocabMeaningDeleteTitle => 'Delete this meaning?';
+
+  @override
+  String get vocabProgressByBook => 'Progress by list';
+
+  @override
+  String get vocabMemorizedShort => 'Memorized';
+
+  @override
+  String get vocabNotMemorizedShort => 'Learning';
+
+  @override
+  String vocabMeaningN(int n) {
+    return 'Meaning $n';
+  }
+
+  @override
+  String vocabSameWordMessage(String word, String meanings) {
+    return 'Add a meaning to “$word”?\nExisting: $meanings';
+  }
+
+  @override
   String get vocabDeleteWord => 'Delete word';
 
   @override

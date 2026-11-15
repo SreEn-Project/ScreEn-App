@@ -204,13 +204,20 @@ final class DeleteWord implements UseCase<void, int> {
 }
 
 class SetMemorizedParams {
-  const SetMemorizedParams(this.id, {required this.memorized});
+  const SetMemorizedParams(
+    this.id, {
+    required this.wordbookId,
+    required this.memorized,
+  });
 
   final int id;
+
+  /// 외움 표시는 단어장마다 따로다.
+  final int wordbookId;
   final bool memorized;
 }
 
-/// 외운 단어 표시 (AD-05).
+/// 외운 단어 표시 (AD-05). 그 단어장에서만 바뀐다.
 final class SetWordMemorized implements UseCase<void, SetMemorizedParams> {
   const SetWordMemorized(this._repository);
 
@@ -218,7 +225,7 @@ final class SetWordMemorized implements UseCase<void, SetMemorizedParams> {
 
   @override
   Future<void> call(SetMemorizedParams params) =>
-      _repository.setMemorized(params.id, params.memorized);
+      _repository.setMemorized(params.wordbookId, params.id, params.memorized);
 }
 
 class SaveWordParams {
@@ -321,6 +328,7 @@ final class CreateWordTest
         for (final word in targets)
           WordTestQuestion(
             wordId: word.id,
+            wordbookId: word.wordbookId,
             mode: WordTestMode.typing,
             word: word.word,
             meaning: word.meaning,
@@ -358,6 +366,7 @@ final class CreateWordTest
       questions.add(
         WordTestQuestion(
           wordId: word.id,
+          wordbookId: word.wordbookId,
           mode: WordTestMode.choice,
           word: word.word,
           meaning: word.meaning,
@@ -545,4 +554,84 @@ final class GetWordOfTheDay
       choices: [word.meaning, ...wrong]..shuffle(random),
     );
   }
+}
+
+/// 단어가 들어 있는 단어장마다의 진도.
+final class GetWordProgress implements UseCase<List<WordbookProgress>, int> {
+  const GetWordProgress(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<WordbookProgress>> call(int id) => _repository.progressOf(id);
+}
+
+class FindSameWordParams {
+  const FindSameWordParams(this.draft);
+
+  final WordDraft draft;
+}
+
+/// 저장하기 전에 같은 단어(글자 · 언어쌍)가 이미 있는지 찾는다. 있으면 그 단어.
+final class FindSameWord
+    implements UseCase<VocabularyWord?, FindSameWordParams> {
+  const FindSameWord(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<VocabularyWord?> call(FindSameWordParams params) {
+    final draft = params.draft;
+    final word = draft.word.trim();
+    if (word.isEmpty) return Future.value();
+    return _repository.findSame(
+      word,
+      draft.sourceLanguage,
+      draft.targetLanguage,
+    );
+  }
+}
+
+class MeaningParams {
+  const MeaningParams(this.id, this.draft);
+
+  /// 단어 id (뜻 더하기) 또는 뜻 id (뜻 고치기).
+  final int id;
+  final WordDraft draft;
+}
+
+/// 단어에 뜻 더하기. 비었거나 같은 뜻이 이미 있으면 false.
+final class AddWordMeaning implements UseCase<bool, MeaningParams> {
+  const AddWordMeaning(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(MeaningParams params) {
+    if (params.draft.meaning.trim().isEmpty) return Future.value(false);
+    return _repository.addMeaning(params.id, params.draft);
+  }
+}
+
+/// 뜻 하나 고치기. 비었거나 같은 단어의 다른 뜻과 겹치면 false.
+final class UpdateWordMeaning implements UseCase<bool, MeaningParams> {
+  const UpdateWordMeaning(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(MeaningParams params) {
+    if (params.draft.meaning.trim().isEmpty) return Future.value(false);
+    return _repository.updateMeaning(params.id, params.draft);
+  }
+}
+
+/// 뜻 하나 지우기. 마지막 뜻이면 false.
+final class DeleteWordMeaning implements UseCase<bool, int> {
+  const DeleteWordMeaning(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(int meaningId) => _repository.deleteMeaning(meaningId);
 }

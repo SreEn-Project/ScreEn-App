@@ -9,21 +9,24 @@ part of 'word_edit_view_model.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// 단어 편집 시트(AD-03)의 저장 동작. 직접 추가 · 기록에서 추가가 같이 쓴다.
+/// 시트가 닫히는 동안에도 여러 번 await 하며 쓰므로 살려 둔다 (상태가 없는 동작 모음이라 비용이 없다).
 
 @ProviderFor(WordEditViewModel)
 final wordEditViewModelProvider = WordEditViewModelProvider._();
 
 /// 단어 편집 시트(AD-03)의 저장 동작. 직접 추가 · 기록에서 추가가 같이 쓴다.
+/// 시트가 닫히는 동안에도 여러 번 await 하며 쓰므로 살려 둔다 (상태가 없는 동작 모음이라 비용이 없다).
 final class WordEditViewModelProvider
     extends $NotifierProvider<WordEditViewModel, void> {
   /// 단어 편집 시트(AD-03)의 저장 동작. 직접 추가 · 기록에서 추가가 같이 쓴다.
+  /// 시트가 닫히는 동안에도 여러 번 await 하며 쓰므로 살려 둔다 (상태가 없는 동작 모음이라 비용이 없다).
   WordEditViewModelProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'wordEditViewModelProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -44,9 +47,10 @@ final class WordEditViewModelProvider
   }
 }
 
-String _$wordEditViewModelHash() => r'e2f76621d7e4edc602a2f832d38189d51716043d';
+String _$wordEditViewModelHash() => r'280be18ce5baaf6183462304bc5462025b04c8cc';
 
 /// 단어 편집 시트(AD-03)의 저장 동작. 직접 추가 · 기록에서 추가가 같이 쓴다.
+/// 시트가 닫히는 동안에도 여러 번 await 하며 쓰므로 살려 둔다 (상태가 없는 동작 모음이라 비용이 없다).
 
 abstract class _$WordEditViewModel extends $Notifier<void> {
   void build();

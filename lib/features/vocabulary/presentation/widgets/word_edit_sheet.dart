@@ -15,12 +15,16 @@ import 'wordbook_selector.dart';
 /// 직접 추가 · 번역 기록에서 추가가 같이 쓴다. 저장하면 단어장 이름을 돌려주고, 닫으면 null.
 /// [wordbookId]를 주면 그 단어장이 미리 골라진다.
 /// [editingId]를 주면 저장된 그 단어를 고치는 모드다: 단어장 선택 없이, 정답률 등 기록은 유지한 채 내용만 바꾼다.
+/// [meaningOfWordId]를 주면 그 단어에 뜻을 더하는 모드, [editingMeaningId]를 주면 그 뜻 하나를 고치는 모드다
+/// (단어 · 발음 · 품사 없이 뜻 · 문맥 뜻 · 예문만 다룬다).
 Future<String?> showWordEditSheet(
   BuildContext context, {
   required String title,
   required WordDraft initial,
   int? wordbookId,
   int? editingId,
+  int? meaningOfWordId,
+  int? editingMeaningId,
 }) {
   return showModalBottomSheet<String>(
     context: context,
@@ -31,6 +35,8 @@ Future<String?> showWordEditSheet(
       initial: initial,
       wordbookId: wordbookId,
       editingId: editingId,
+      meaningOfWordId: meaningOfWordId,
+      editingMeaningId: editingMeaningId,
     ),
   );
 }
@@ -64,6 +70,8 @@ class WordEditSheet extends ConsumerStatefulWidget {
     required this.initial,
     this.wordbookId,
     this.editingId,
+    this.meaningOfWordId,
+    this.editingMeaningId,
   });
 
   final String title;
@@ -72,6 +80,12 @@ class WordEditSheet extends ConsumerStatefulWidget {
 
   /// 저장된 단어를 고칠 때 그 단어 id.
   final int? editingId;
+
+  /// 단어에 뜻을 더할 때 그 단어 id.
+  final int? meaningOfWordId;
+
+  /// 뜻 하나를 고칠 때 그 뜻 id.
+  final int? editingMeaningId;
 
   @override
   ConsumerState<WordEditSheet> createState() => _WordEditSheetState();
@@ -98,6 +112,9 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
   bool _wantsNewBook = false;
   bool _busy = false;
   bool _failed = false;
+
+  /// 이 단어장에 같은 단어 · 같은 뜻이 이미 있어 저장하지 않았다.
+  bool _alreadySaved = false;
   String? _savedBookName;
 
   /// 펼쳐진 부가 항목. 값이 이미 있는 항목은 처음부터 보인다.
@@ -156,7 +173,16 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
     });
   }
 
-  bool get _editing => widget.editingId != null;
+  bool get _meaningOnly =>
+      widget.meaningOfWordId != null || widget.editingMeaningId != null;
+
+  /// 단어장 선택 없이 이미 있는 단어를 고치거나 뜻을 더하는 모드.
+  bool get _editing => widget.editingId != null || _meaningOnly;
+
+  /// 이 모드에서 보여 줄 부가 항목.
+  List<_Option> get _options => _meaningOnly
+      ? const [_Option.contextMeaning, _Option.sentence]
+      : _Option.values;
 
   bool _canSave(List<Wordbook> books) {
     if (_word.text.trim().isEmpty || _meaning.text.trim().isEmpty) return false;
@@ -198,9 +224,12 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
       _failed = false;
     });
     if (_editing) {
-      final ok = await ref
-          .read(wordEditViewModelProvider.notifier)
-          .update(widget.editingId!, _draft());
+      final model = ref.read(wordEditViewModelProvider.notifier);
+      final ok = widget.meaningOfWordId != null
+          ? await model.addMeaning(widget.meaningOfWordId!, _draft())
+          : widget.editingMeaningId != null
+          ? await model.updateMeaning(widget.editingMeaningId!, _draft())
+          : await model.update(widget.editingId!, _draft());
       if (!mounted) return;
       if (!ok) {
         setState(() {
@@ -225,6 +254,11 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
       bookId = _effectiveBookId(books);
       bookName = books.where((b) => b.id == bookId).firstOrNull?.name;
     }
+    if (bookId != null && !await _confirmSameWord(bookId)) {
+      if (mounted) setState(() => _busy = false);
+      return;
+    }
+    if (!mounted) return;
     final saved =
         bookId != null &&
         await ref
@@ -243,6 +277,37 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
     setState(() => _savedBookName = bookName ?? '');
     await Future<void>.delayed(const Duration(milliseconds: 1100));
     if (mounted) Navigator.of(context).pop(bookName ?? '');
+  }
+
+  /// 같은 단어가 이미 저장돼 있으면 저장 전에 알린다. 새 뜻이면 뜻을 더할지 묻고, 이 단어장에 같은 뜻까지 있으면 막는다.
+  /// 계속 저장해도 되면 true.
+  Future<bool> _confirmSameWord(int bookId) async {
+    final l10n = AppLocalizations.of(context);
+    final model = ref.read(wordEditViewModelProvider.notifier);
+    final draft = _draft();
+    final same = await model.findSame(draft);
+    if (same == null || !mounted) return true;
+    final meanings = same.meanings.isEmpty
+        ? [same.meaning]
+        : [for (final m in same.meanings) m.meaning];
+    final sameMeaning = meanings.any(
+      (m) => m.trim().toLowerCase() == draft.meaning.trim().toLowerCase(),
+    );
+    final inBook = (await model.wordbookIds(same.id)).contains(bookId);
+    if (!mounted) return false;
+    if (sameMeaning) {
+      if (!inBook) return true;
+      setState(() => _alreadySaved = true);
+      return false;
+    }
+    final add = await showAppConfirm(
+      context,
+      title: l10n.vocabSameWordTitle,
+      message: l10n.vocabSameWordMessage(draft.word, meanings.join(' · ')),
+      confirmLabel: l10n.vocabSameWordAdd,
+      cancelLabel: l10n.vocabCancel,
+    );
+    return add;
   }
 
   @override
@@ -298,7 +363,10 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
             controller: c,
             hint: hint,
             maxLines: lines,
-            onChanged: (_) => setState(() => _failed = false),
+            onChanged: (_) => setState(() {
+              _failed = false;
+              _alreadySaved = false;
+            }),
           ),
         ],
       ),
@@ -356,7 +424,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                     children: [
                       Text(widget.title, style: theme.textTheme.titleLarge),
                       const SizedBox(height: AppTokens.space16),
-                      field(_word, l10n.vocabWordHint),
+                      if (!_meaningOnly) field(_word, l10n.vocabWordHint),
                       field(_meaning, l10n.vocabMeaningHint, lines: 3),
                       AnimatedSize(
                         duration: const Duration(milliseconds: 220),
@@ -365,7 +433,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            for (final o in _Option.values)
+                            for (final o in _options)
                               if (_shown.contains(o))
                                 field(
                                   _controllerOf(o),
@@ -373,7 +441,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                                   lines: o == _Option.sentence ? 3 : 1,
                                   option: o,
                                 ),
-                            if (_shown.length < _Option.values.length)
+                            if (_options.any((o) => !_shown.contains(o)))
                               Padding(
                                 padding: const EdgeInsets.only(
                                   bottom: AppTokens.space12,
@@ -382,7 +450,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                                   spacing: AppTokens.space8,
                                   runSpacing: AppTokens.space8,
                                   children: [
-                                    for (final o in _Option.values)
+                                    for (final o in _options)
                                       if (!_shown.contains(o))
                                         AppAddChip(
                                           label: o.label(l10n),
@@ -429,6 +497,15 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                             onChanged: (_) => setState(() {}),
                           ),
                         ],
+                      ],
+                      if (_alreadySaved) ...[
+                        const SizedBox(height: AppTokens.space12),
+                        Text(
+                          l10n.vocabAlreadyInBook,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
                       ],
                       if (_failed) ...[
                         const SizedBox(height: AppTokens.space12),

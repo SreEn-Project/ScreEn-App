@@ -94,7 +94,7 @@ class WordbookDetailViewModel extends _$WordbookDetailViewModel {
       ),
     );
     await ref.read(setWordMemorizedProvider)(
-      SetMemorizedParams(id, memorized: memorized),
+      SetMemorizedParams(id, wordbookId: wordbookId, memorized: memorized),
     );
   }
 

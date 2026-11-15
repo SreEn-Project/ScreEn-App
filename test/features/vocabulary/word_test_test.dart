@@ -137,6 +137,7 @@ void main() {
     test('입력형은 대소문자와 앞뒤 공백을 무시한다', () {
       const q = WordTestQuestion(
         wordId: 1,
+        wordbookId: 1,
         mode: WordTestMode.typing,
         word: 'Apple',
         meaning: '사과',
@@ -149,6 +150,7 @@ void main() {
     test('4지선다는 고른 뜻이 정답 뜻이어야 한다', () {
       const q = WordTestQuestion(
         wordId: 1,
+        wordbookId: 1,
         mode: WordTestMode.choice,
         word: 'apple',
         meaning: '사과',

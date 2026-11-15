@@ -19,6 +19,13 @@ class WordDetailViewModel extends _$WordDetailViewModel {
 
   Future<void> delete() => ref.read(deleteWordProvider)(id);
 
+  /// 뜻 하나를 지우고 새로 읽는다. 마지막 뜻이면 false.
+  Future<bool> deleteMeaning(int meaningId) async {
+    final ok = await ref.read(deleteWordMeaningProvider)(meaningId);
+    if (ok) await reload();
+    return ok;
+  }
+
   /// 단어가 들어 있는 단어장 id.
   Future<List<int>> wordbookIds() => ref.read(getWordWordbookIdsProvider)(id);
 
@@ -26,3 +33,8 @@ class WordDetailViewModel extends _$WordDetailViewModel {
   Future<bool> addTo(int wordbookId) =>
       ref.read(addWordToWordbookProvider)(WordbookLinkParams(id, wordbookId));
 }
+
+/// 단어가 들어 있는 단어장마다의 진도 (외움 · 정답률).
+@riverpod
+Future<List<WordbookProgress>> wordProgress(Ref ref, int id) =>
+    ref.watch(getWordProgressProvider)(id);

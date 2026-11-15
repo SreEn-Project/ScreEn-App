@@ -1658,6 +1658,90 @@ abstract class AppLocalizations {
   /// **'Remove from this list?'**
   String get vocabRemoveFromBookTitle;
 
+  /// No description provided for @vocabAddMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Add meaning'**
+  String get vocabAddMeaning;
+
+  /// No description provided for @vocabAddMeaningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add meaning'**
+  String get vocabAddMeaningTitle;
+
+  /// No description provided for @vocabEditMeaningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit meaning'**
+  String get vocabEditMeaningTitle;
+
+  /// No description provided for @vocabSameWordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This word is already saved'**
+  String get vocabSameWordTitle;
+
+  /// No description provided for @vocabSameWordAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add meaning'**
+  String get vocabSameWordAdd;
+
+  /// No description provided for @vocabAlreadyInBook.
+  ///
+  /// In en, this message translates to:
+  /// **'This list already has this word with the same meaning'**
+  String get vocabAlreadyInBook;
+
+  /// No description provided for @vocabMeaningDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'That meaning already exists'**
+  String get vocabMeaningDuplicate;
+
+  /// No description provided for @vocabMeaningLast.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t delete the last meaning'**
+  String get vocabMeaningLast;
+
+  /// No description provided for @vocabMeaningDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this meaning?'**
+  String get vocabMeaningDeleteTitle;
+
+  /// No description provided for @vocabProgressByBook.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress by list'**
+  String get vocabProgressByBook;
+
+  /// No description provided for @vocabMemorizedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Memorized'**
+  String get vocabMemorizedShort;
+
+  /// No description provided for @vocabNotMemorizedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning'**
+  String get vocabNotMemorizedShort;
+
+  /// No description provided for @vocabMeaningN.
+  ///
+  /// In en, this message translates to:
+  /// **'Meaning {n}'**
+  String vocabMeaningN(int n);
+
+  /// No description provided for @vocabSameWordMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a meaning to “{word}”?\nExisting: {meanings}'**
+  String vocabSameWordMessage(String word, String meanings);
+
   /// No description provided for @vocabDeleteWord.
   ///
   /// In en, this message translates to:

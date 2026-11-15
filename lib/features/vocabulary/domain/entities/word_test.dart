@@ -11,6 +11,7 @@ enum WordTestMode {
 class WordTestQuestion {
   const WordTestQuestion({
     required this.wordId,
+    required this.wordbookId,
     required this.mode,
     required this.word,
     required this.meaning,
@@ -18,6 +19,9 @@ class WordTestQuestion {
   });
 
   final int wordId;
+
+  /// 이 단어를 가져온 단어장 (진도가 쌓일 곳).
+  final int wordbookId;
   final WordTestMode mode;
   final String word;
   final String meaning;

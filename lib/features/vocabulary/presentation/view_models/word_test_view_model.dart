@@ -133,7 +133,11 @@ class WordTestViewModel extends _$WordTestViewModel {
     // 단어별 정답률에 쌓는다 (AD-18).
     unawaited(
       ref.read(recordWordAnswersProvider)([
-        WordAnswer(question.wordId, correct: given.correct),
+        WordAnswer(
+          question.wordId,
+          wordbookId: question.wordbookId,
+          correct: given.correct,
+        ),
       ]),
     );
   }

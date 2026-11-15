@@ -67,7 +67,46 @@ class WordbookSelection {
   int get hashCode => Object.hashAll(ids);
 }
 
+/// 단어의 뜻 하나. 한 단어에 여러 개 둘 수 있다.
+class WordMeaning {
+  const WordMeaning({
+    required this.id,
+    required this.meaning,
+    this.contextMeaning,
+    this.sentence,
+    this.sourceApp,
+  });
+
+  final int id;
+  final String meaning;
+  final String? contextMeaning;
+  final String? sentence;
+  final String? sourceApp;
+}
+
+/// 단어가 들어 있는 단어장 하나에서의 학습 진도.
+class WordbookProgress {
+  const WordbookProgress({
+    required this.wordbookId,
+    required this.memorized,
+    this.correctCount = 0,
+    this.attemptCount = 0,
+  });
+
+  final int wordbookId;
+  final bool memorized;
+  final int correctCount;
+  final int attemptCount;
+
+  /// 정답률 0~1. 아직 푼 적이 없으면 null.
+  double? get accuracy =>
+      attemptCount == 0 ? null : correctCount / attemptCount;
+}
+
 /// 저장한 단어 (AD-03, AD-05, AD-06).
+///
+/// 단어 하나가 여러 단어장에 들 수 있다. [meaning] · [contextMeaning] · [sentence] · [sourceApp]은 대표 뜻(첫 뜻)이고
+/// [meanings]가 모든 뜻이다. [memorized] · [correctCount] · [attemptCount]는 [wordbookId] 단어장에서의 진도다.
 class VocabularyWord {
   const VocabularyWord({
     required this.id,
@@ -85,6 +124,7 @@ class VocabularyWord {
     required this.savedAt,
     this.correctCount = 0,
     this.attemptCount = 0,
+    this.meanings = const [],
   });
 
   final int id;
@@ -110,6 +150,9 @@ class VocabularyWord {
   /// 테스트 · 게임에서 맞힌 횟수와 푼 횟수 (AD-18).
   final int correctCount;
   final int attemptCount;
+
+  /// 모든 뜻 (대표 뜻이 맨 앞). 비어 있으면 대표 뜻 하나만 있는 것이다.
+  final List<WordMeaning> meanings;
 
   /// 정답률 0~1. 아직 푼 적이 없으면 null.
   double? get accuracy =>
@@ -167,9 +210,16 @@ enum WordFilter {
 
 /// 단어 하나를 푼 결과 (AD-18). 테스트 · 게임이 끝날 때 쌓는다.
 class WordAnswer {
-  const WordAnswer(this.wordId, {required this.correct});
+  const WordAnswer(
+    this.wordId, {
+    required this.wordbookId,
+    required this.correct,
+  });
 
   final int wordId;
+
+  /// 푼 단어를 가져온 단어장 (진도는 단어장별로 쌓인다).
+  final int wordbookId;
   final bool correct;
 }
 

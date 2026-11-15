@@ -183,6 +183,34 @@ void main() {
     });
   });
 
+  group('단어장별 진도', () {
+    test('외움 표시는 그 단어장에서만 바뀐다', () async {
+      await container.read(wordDetailViewModelProvider(3).future);
+      await repository.addToWordbook(3, 2);
+      await repository.setMemorized(2, 3, true);
+      expect(
+        (await repository.words(2)).firstWhere((w) => w.id == 3).memorized,
+        isTrue,
+      );
+      expect(
+        (await repository.words(1)).firstWhere((w) => w.id == 3).memorized,
+        isFalse,
+      );
+    });
+
+    test('푼 결과는 푼 단어장의 진도에만 쌓인다', () async {
+      await repository.addToWordbook(3, 2);
+      await repository.recordAnswers([
+        const WordAnswer(3, wordbookId: 2, correct: true),
+      ]);
+      final progress = {
+        for (final p in await repository.progressOf(3)) p.wordbookId: p,
+      };
+      expect(progress[2]!.attemptCount, 1);
+      expect(progress[1]!.attemptCount, 0);
+    });
+  });
+
   group('단어 상세', () {
     test('저장한 단어를 읽는다', () async {
       final word = await container.read(wordDetailViewModelProvider(2).future);

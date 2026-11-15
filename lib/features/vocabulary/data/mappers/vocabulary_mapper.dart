@@ -32,6 +32,26 @@ extension VocabWordMapper on pigeon.VocabWord {
     savedAt: DateTime.fromMillisecondsSinceEpoch(createdAtMs),
     correctCount: correctCount,
     attemptCount: attemptCount,
+    meanings: [for (final m in meanings) m.toEntity()],
+  );
+}
+
+extension WordMeaningMapper on pigeon.WordMeaning {
+  WordMeaning toEntity() => WordMeaning(
+    id: id,
+    meaning: meaning,
+    contextMeaning: contextMeaning,
+    sentence: sentence,
+    sourceApp: sourceApp,
+  );
+}
+
+extension WordbookProgressMapper on pigeon.WordbookProgress {
+  WordbookProgress toEntity() => WordbookProgress(
+    wordbookId: wordbookId,
+    memorized: memorized,
+    correctCount: correctCount,
+    attemptCount: attemptCount,
   );
 }
 
@@ -59,6 +79,9 @@ extension WordDraftMapper on WordDraft {
 }
 
 extension WordAnswerMapper on WordAnswer {
-  pigeon.WordAnswer toPigeon() =>
-      pigeon.WordAnswer(wordId: wordId, correct: correct);
+  pigeon.WordAnswer toPigeon() => pigeon.WordAnswer(
+    wordbookId: wordbookId,
+    wordId: wordId,
+    correct: correct,
+  );
 }

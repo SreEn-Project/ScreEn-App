@@ -355,7 +355,41 @@ class Wordbook {
   int createdAtMs;
 }
 
+/// 단어의 뜻 하나. 한 단어에 여러 개 둘 수 있다.
+class WordMeaning {
+  WordMeaning({
+    required this.id,
+    required this.meaning,
+    this.contextMeaning,
+    this.sentence,
+    this.sourceApp,
+  });
+
+  int id;
+  String meaning;
+  String? contextMeaning;
+  String? sentence;
+  String? sourceApp;
+}
+
+/// 단어가 들어 있는 단어장 하나에서의 학습 진도.
+class WordbookProgress {
+  WordbookProgress({
+    required this.wordbookId,
+    required this.memorized,
+    required this.correctCount,
+    required this.attemptCount,
+  });
+
+  int wordbookId;
+  bool memorized;
+  int correctCount;
+  int attemptCount;
+}
+
 /// 저장한 단어 (AD-03, AD-05, AD-06). [wordbookId]는 목록에서 가져온 단어장(상세에서는 들어 있는 첫 단어장).
+/// [meaning] · [contextMeaning] · [sentence] · [sourceApp]은 대표 뜻(첫 뜻)이고 [meanings]가 전체다.
+/// [memorized] · [correctCount] · [attemptCount]는 [wordbookId] 단어장에서의 진도다.
 class VocabWord {
   VocabWord({
     required this.id,
@@ -373,6 +407,7 @@ class VocabWord {
     required this.createdAtMs,
     required this.correctCount,
     required this.attemptCount,
+    required this.meanings,
   });
 
   int id;
@@ -398,12 +433,20 @@ class VocabWord {
   /// 테스트 · 게임에서 맞힌 횟수와 푼 횟수 (AD-18).
   int correctCount;
   int attemptCount;
+
+  /// 모든 뜻 (대표 뜻이 맨 앞).
+  List<WordMeaning> meanings;
 }
 
-/// 단어 하나를 푼 결과 (AD-18).
+/// 단어 하나를 푼 결과 (AD-18). 푼 단어장([wordbookId])의 진도에 쌓인다.
 class WordAnswer {
-  WordAnswer({required this.wordId, required this.correct});
+  WordAnswer({
+    required this.wordbookId,
+    required this.wordId,
+    required this.correct,
+  });
 
+  int wordbookId;
   int wordId;
   bool correct;
 }
@@ -456,8 +499,21 @@ abstract class VocabularyHostApi {
   @async
   List<VocabWord> getWords(int wordbookId, String query, VocabSort sort);
 
+  /// 단어장을 모르는 상세 화면용: 들어 있는 첫 단어장 기준으로 돌려준다.
   @async
   VocabWord? getWord(int id);
+
+  /// 단어가 들어 있는 단어장마다의 진도 (단어장 id 순).
+  @async
+  List<WordbookProgress> getWordProgress(int id);
+
+  /// 같은 단어(글자 · 언어쌍)가 이미 저장돼 있으면 돌려준다. 저장 전에 "뜻을 더할까요?"를 물을 때 쓴다.
+  @async
+  VocabWord? findSameWord(
+    String word,
+    String sourceLanguage,
+    String targetLanguage,
+  );
 
   /// 단어가 들어 있는 단어장 id (id 순). 한 단어가 여러 단어장에 들 수 있다.
   @async
@@ -479,22 +535,35 @@ abstract class VocabularyHostApi {
   @async
   void deleteWord(int id);
 
+  /// [wordbookId] 단어장에서의 외움 표시.
   @async
-  void setMemorized(int id, bool memorized);
+  void setMemorized(int wordbookId, int id, bool memorized);
 
   /// 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18).
   @async
   void recordAnswers(List<WordAnswer> answers);
 
-  /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
-  /// 저장한 단어의 id를 돌려준다.
+  /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어가 이미 있으면 그 단어를 이 단어장에도 넣고,
+  /// 새로운 뜻이면 뜻을 더한다. 저장한 단어의 id를 돌려준다.
   @async
   int? saveWord(int wordbookId, VocabWordInput input);
 
-  /// 저장된 단어의 내용(단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문)을 고친다. 외운 표시 · 정답률 · 저장 시각 · 언어는 유지한다.
-  /// 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
+  /// 저장된 단어의 공통 부분(단어 · 발음 · 품사)과 대표 뜻(뜻 · 문맥 뜻 · 예문)을 고친다. 진도 · 저장 시각 · 언어는 유지한다.
+  /// 단어 · 뜻이 비었거나 들어 있는 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
   @async
   bool updateWord(int id, VocabWordInput input);
+
+  /// 단어에 뜻을 더한다 (input의 뜻 · 문맥 뜻 · 예문만 쓴다). 비었거나 같은 뜻이 이미 있으면 false.
+  @async
+  bool addWordMeaning(int id, VocabWordInput input);
+
+  /// 뜻 하나를 고친다 (뜻 · 문맥 뜻 · 예문). 비었거나 같은 단어의 다른 뜻과 겹치면 false.
+  @async
+  bool updateWordMeaning(int meaningId, VocabWordInput input);
+
+  /// 뜻 하나를 지운다. 마지막 뜻이면 false.
+  @async
+  bool deleteWordMeaning(int meaningId);
 }
 
 /// 네이티브 → Flutter 이벤트. 구독 시 현재 상태를 먼저 한 번씩 보낸다.

@@ -53,6 +53,26 @@ GetWordWordbookIds getWordWordbookIds(Ref ref) =>
     GetWordWordbookIds(ref.watch(vocabularyRepositoryProvider));
 
 @riverpod
+GetWordProgress getWordProgress(Ref ref) =>
+    GetWordProgress(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+FindSameWord findSameWord(Ref ref) =>
+    FindSameWord(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+AddWordMeaning addWordMeaning(Ref ref) =>
+    AddWordMeaning(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+UpdateWordMeaning updateWordMeaning(Ref ref) =>
+    UpdateWordMeaning(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
+DeleteWordMeaning deleteWordMeaning(Ref ref) =>
+    DeleteWordMeaning(ref.watch(vocabularyRepositoryProvider));
+
+@riverpod
 DeleteWord deleteWord(Ref ref) =>
     DeleteWord(ref.watch(vocabularyRepositoryProvider));
 

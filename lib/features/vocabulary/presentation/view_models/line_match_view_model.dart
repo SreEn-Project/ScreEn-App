@@ -39,7 +39,11 @@ class LineMatchViewModel extends _$LineMatchViewModel {
     state = AsyncData(LineMatchState(bookName: current.bookName, game: next));
     unawaited(
       ref.read(recordWordAnswersProvider)([
-        WordAnswer(wordId, correct: outcome == MatchOutcome.correct),
+        WordAnswer(
+          wordId,
+          wordbookId: game.words.firstWhere((w) => w.id == wordId).wordbookId,
+          correct: outcome == MatchOutcome.correct,
+        ),
       ]),
     );
     return outcome;
