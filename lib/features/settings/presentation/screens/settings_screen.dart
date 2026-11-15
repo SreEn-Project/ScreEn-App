@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
+import '../../../../app/theme/theme_mode_provider.dart';
 import '../../../gemma/presentation/view_models/gemma_view_model.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
@@ -52,6 +53,7 @@ class SettingsScreen extends StatelessWidget {
         const _DisplaySection(),
         const _QuickLanguagesSection(),
         const _AutoTranslateSection(),
+        const _ThemeSection(),
         AppSection(
           title: l10n.settingsSectionEtc,
           child: AppCard(
@@ -483,6 +485,34 @@ class _AutoTranslateSection extends ConsumerWidget {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 테마: 시스템 · 라이트 · 다크. 값은 기기에만 저장되고 바로 반영된다.
+class _ThemeSection extends ConsumerWidget {
+  const _ThemeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final mode = ref.watch(themeModeProvider);
+
+    return AppSection(
+      title: l10n.settingsSectionTheme,
+      child: AppCard(
+        padding: const EdgeInsets.all(AppTokens.pagePadding),
+        child: AppSegmented<ThemeMode>(
+          values: const [ThemeMode.light, ThemeMode.dark, ThemeMode.system],
+          selected: mode,
+          label: (m) => switch (m) {
+            ThemeMode.light => l10n.themeLight,
+            ThemeMode.dark => l10n.themeDark,
+            ThemeMode.system => l10n.themeSystem,
+          },
+          onChanged: ref.read(themeModeProvider.notifier).set,
         ),
       ),
     );

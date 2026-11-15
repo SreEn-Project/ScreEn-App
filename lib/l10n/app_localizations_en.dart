@@ -1492,4 +1492,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeStudyStart => 'Start studying';
+
+  @override
+  String get settingsSectionTheme => 'Theme';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeSystem => 'System';
 }

@@ -521,5 +521,9 @@
     }
   },
   "homeStudyEmpty": "Save words from translations to study them here",
-  "homeStudyStart": "Start studying"
+  "homeStudyStart": "Start studying",
+  "settingsSectionTheme": "Theme",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System"
 }

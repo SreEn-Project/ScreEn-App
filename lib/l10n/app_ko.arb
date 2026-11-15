@@ -513,5 +513,9 @@
     }
   },
   "homeStudyEmpty": "번역에서 단어를 저장하면 여기서 학습할 수 있어요",
-  "homeStudyStart": "학습 시작"
+  "homeStudyStart": "학습 시작",
+  "settingsSectionTheme": "테마",
+  "themeLight": "라이트",
+  "themeDark": "다크",
+  "themeSystem": "시스템"
 }

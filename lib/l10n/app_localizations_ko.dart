@@ -1456,4 +1456,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get homeStudyStart => '학습 시작';
+
+  @override
+  String get settingsSectionTheme => '테마';
+
+  @override
+  String get themeLight => '라이트';
+
+  @override
+  String get themeDark => '다크';
+
+  @override
+  String get themeSystem => '시스템';
 }
