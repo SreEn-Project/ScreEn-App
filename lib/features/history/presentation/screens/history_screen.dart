@@ -110,8 +110,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         24,
                       ),
                       itemCount: entries.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      separatorBuilder: (_, _) => const AppDivider(indent: 4),
                       itemBuilder: (context, index) => HistoryCard(
+                        flat: true,
                         entry: entries[index],
                         deleteTooltip: l10n.historyDelete,
                         onDelete: () => model.delete(entries[index].id),

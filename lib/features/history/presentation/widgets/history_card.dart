@@ -19,11 +19,15 @@ class HistoryCard extends StatelessWidget {
     required this.entry,
     this.onDelete,
     this.deleteTooltip = '',
+    this.flat = false,
   });
 
   final HistoryEntry entry;
   final VoidCallback? onDelete;
   final String deleteTooltip;
+
+  /// true면 카드로 감싸지 않고 평면 행으로 그린다 (그룹 카드 안이나 평면 목록에서 쓴다).
+  final bool flat;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +41,13 @@ class HistoryCard extends StatelessWidget {
         '${historyLanguageName(entry.sourceLanguage, locale.languageCode)} → '
         '${historyLanguageName(entry.targetLanguage, locale.languageCode)} · $time';
 
-    return AppCard(
-      onTap: () => HistoryDetailSheet.show(context, entry),
-      padding: EdgeInsets.fromLTRB(20, 16, onDelete == null ? 20 : 8, 16),
-      child: Row(
+    final padding = EdgeInsets.fromLTRB(
+      flat ? 4 : 20,
+      flat ? 14 : 16,
+      onDelete == null ? (flat ? 4 : 20) : 8,
+      flat ? 14 : 16,
+    );
+    final row = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
@@ -76,7 +83,19 @@ class HistoryCard extends StatelessWidget {
               onPressed: onDelete,
             ),
         ],
-      ),
+    );
+    final body = Padding(padding: padding, child: row);
+    if (flat) {
+      return Pressable(
+        onTap: () => HistoryDetailSheet.show(context, entry),
+        scale: 0.99,
+        child: body,
+      );
+    }
+    return AppCard(
+      onTap: () => HistoryDetailSheet.show(context, entry),
+      padding: padding,
+      child: row,
     );
   }
 }

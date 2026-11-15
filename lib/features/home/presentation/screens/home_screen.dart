@@ -141,19 +141,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: AppListTile(
-            icon: engineIcon(engine),
-            title: l10n.homeEngine,
-            value: l10n.engineName(engine),
-            onTap: () => context.go(AppRoutes.settings),
+        // 엔진은 실행 환경을 확인하는 보조 정보라 아이콘 없는 평면 행으로 낮춘다.
+        AppListTile(
+          title: l10n.homeEngine,
+          value: l10n.engineName(engine),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTokens.sectionTitleIndent,
+            vertical: AppTokens.space12,
           ),
+          onTap: () => context.go(AppRoutes.settings),
         ),
         const SizedBox(height: 12),
         const WordOfTheDayCard(),
         AppCard(
           padding: EdgeInsets.zero,
+          shadow: false,
           child: AppListTile(
             icon: Symbols.menu_book_rounded,
             title: l10n.vocabTitle,
@@ -323,7 +325,7 @@ class _SetupTile extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppTokens.space16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -420,10 +422,19 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
             ),
           )
         else
-          for (final entry in entries) ...[
-            HistoryCard(entry: entry),
-            const SizedBox(height: 12),
-          ],
+          AppCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTokens.space16,
+            ),
+            child: Column(
+              children: [
+                for (final (i, entry) in entries.indexed) ...[
+                  if (i > 0) const AppDivider(indent: 0),
+                  HistoryCard(entry: entry, flat: true),
+                ],
+              ],
+            ),
+          ),
       ],
     );
   }
