@@ -4,8 +4,6 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -19,23 +17,25 @@ class GroqHttpException(val code: Int, val body: String) : IOException("HTTP $co
 /** [HttpURLConnection]으로 Groq REST(OpenAI 호환)를 부른다 (새 의존성 없음). 키는 헤더로만 보낸다. */
 class GroqHttpTransport(private val timeoutMs: Int = 20_000) : GroqTransport {
     override suspend fun chat(apiKey: String, body: String): String =
-        withContext(Dispatchers.IO) {
+        run {
             val conn = URL(URL_CHAT).openConnection() as HttpURLConnection
-            try {
-                conn.requestMethod = "POST"
-                conn.connectTimeout = timeoutMs
-                conn.readTimeout = timeoutMs
-                conn.doOutput = true
-                conn.setRequestProperty("Content-Type", "application/json")
-                conn.setRequestProperty("Authorization", "Bearer $apiKey")
-                conn.outputStream.use { it.write(body.toByteArray()) }
-                val code = conn.responseCode
-                val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-                val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
-                if (code !in 200..299) throw GroqHttpException(code, text.take(300))
-                text
-            } finally {
-                conn.disconnect()
+            runCancellableHttp(conn) {
+                try {
+                    conn.requestMethod = "POST"
+                    conn.connectTimeout = timeoutMs
+                    conn.readTimeout = timeoutMs
+                    conn.doOutput = true
+                    conn.setRequestProperty("Content-Type", "application/json")
+                    conn.setRequestProperty("Authorization", "Bearer $apiKey")
+                    conn.outputStream.use { it.write(body.toByteArray()) }
+                    val code = conn.responseCode
+                    val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+                    val text = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                    if (code !in 200..299) throw GroqHttpException(code, text.take(300))
+                    text
+                } finally {
+                    conn.disconnect()
+                }
             }
         }
 
