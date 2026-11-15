@@ -99,14 +99,12 @@ class _EngineSection extends ConsumerWidget {
               const AppDivider(),
             ],
             AppListTile(
-              icon: Symbols.memory_rounded,
               title: l10n.settingsGemma,
               subtitle: l10n.settingsGemmaDetail,
               onTap: () => context.push(AppRoutes.gemma),
             ),
             const AppDivider(),
             AppListTile(
-              icon: Symbols.tune_rounded,
               title: l10n.settingsAiSetup,
               subtitle: l10n.settingsAiSetupDetail,
               onTap: () => context.push(AppRoutes.aiSetup),
@@ -137,7 +135,6 @@ class _EngineTile extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return AppListTile(
-      icon: engineIcon(engine),
       title: l10n.engineName(engine),
       subtitle: disabledReason ?? l10n.engineDetail(engine),
       enabled: disabledReason == null,
@@ -244,7 +241,6 @@ class _CaptureSection extends ConsumerWidget {
             ),
             const AppDivider(),
             AppListTile(
-              icon: Symbols.restart_alt_rounded,
               title: l10n.settingsResetFixedRegion,
               subtitle: settings.hasFixedRegion
                   ? null
