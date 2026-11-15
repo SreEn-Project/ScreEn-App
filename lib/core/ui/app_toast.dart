@@ -90,7 +90,7 @@ class _ToastView extends StatelessWidget {
                   decoration: ShapeDecoration(
                     shape: const StadiumBorder(),
                     color: colors.surface,
-                    shadows: context.tokens.cardShadow,
+                    shadows: context.tokens.floatShadow,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

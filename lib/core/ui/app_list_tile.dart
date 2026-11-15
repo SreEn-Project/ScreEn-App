@@ -18,6 +18,7 @@ class AppListTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.enabled = true,
+    this.selected = false,
     this.padding = const EdgeInsets.symmetric(
       horizontal: AppTokens.rowPaddingH,
       vertical: AppTokens.rowPaddingV,
@@ -33,6 +34,9 @@ class AppListTile extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
   final bool enabled;
+
+  /// 고른 항목: 오른쪽에 체크 표시 ([trailing]이 없을 때).
+  final bool selected;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -42,7 +46,9 @@ class AppListTile extends StatelessWidget {
 
     final end =
         trailing ??
-        (onTap != null
+        (selected
+            ? Icon(Symbols.check_rounded, color: colors.primary, size: 22)
+            : onTap != null
             ? Icon(
                 Symbols.chevron_right_rounded,
                 color: colors.onSurfaceVariant,
@@ -55,7 +61,7 @@ class AppListTile extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[
-            IconBadge(icon: icon!, size: 40),
+            IconBadge(icon: icon!, size: 36),
             const SizedBox(width: AppTokens.space12),
           ],
           Expanded(

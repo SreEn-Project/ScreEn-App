@@ -7,7 +7,7 @@ enum AppButtonVariant {
   /// primary 알약 + 아래로 번지는 빛. 화면의 주요 동작 하나에만.
   primary,
 
-  /// 흰 알약 + 옅은 그림자, 글자 primary.
+  /// 흰 알약 + 1dp 테두리, 글자 primary.
   secondary,
 
   /// 배경 없는 글자 버튼.
@@ -77,7 +77,7 @@ class AppButton extends StatelessWidget {
       AppButtonVariant.secondary => (
         colors.surface,
         enabled ? colors.primary : colors.onSurfaceVariant,
-        tokens.cardShadow,
+        null,
       ),
       AppButtonVariant.text => (
         null,
@@ -119,7 +119,11 @@ class AppButton extends StatelessWidget {
           horizontal: variant == AppButtonVariant.text ? 12 : 28,
         ),
         decoration: ShapeDecoration(
-          shape: const StadiumBorder(),
+          shape: StadiumBorder(
+            side: variant == AppButtonVariant.secondary
+                ? BorderSide(color: colors.outline)
+                : BorderSide.none,
+          ),
           color: background,
           shadows: shadow,
         ),

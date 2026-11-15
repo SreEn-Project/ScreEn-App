@@ -20,12 +20,16 @@ abstract final class AppColors {
     Color(0xFF2A4A1F),
   ];
 
-  // 그림자는 primary로 물들인다 (D-015). 라이트: primary 10%, 다크: 검정 32%.
-  static const lightShadow = Color(0x1A044B39);
-  static const darkShadow = Color(0x52000000);
-  // primary 버튼 아래 번지는 빛. 라이트: primary 32%, 다크: primary(다크) 20%.
-  static const lightGlow = Color(0x52044B39);
-  static const darkGlow = Color(0x33C8EFC1);
+  // 그림자는 약하게, primary로 살짝 물들인다 (D-015, 리디자인 #188).
+  // 계층은 그림자보다 표면 명도 차 + 1dp 테두리로 나눈다. 라이트: primary 6%, 다크: 검정 24%.
+  static const lightShadow = Color(0x0F044B39);
+  static const darkShadow = Color(0x3D000000);
+  // 떠 있는 요소(팝업 · 시트 · 탭바)용 그림자. 라이트: primary 12%, 다크: 검정 40%.
+  static const lightFloatShadow = Color(0x1F044B39);
+  static const darkFloatShadow = Color(0x66000000);
+  // primary 버튼 아래 번지는 빛. 라이트: primary 20%, 다크: primary(다크) 12%.
+  static const lightGlow = Color(0x33044B39);
+  static const darkGlow = Color(0x1FC8EFC1);
 
   static const light = ColorScheme(
     brightness: Brightness.light,
