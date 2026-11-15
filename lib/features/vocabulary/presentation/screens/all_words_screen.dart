@@ -122,8 +122,7 @@ class AllWordsScreen extends ConsumerWidget {
                         AppTokens.sectionGap,
                       ),
                       itemCount: words.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(height: AppTokens.space12),
+                      separatorBuilder: (_, _) => const AppDivider(indent: 0),
                       itemBuilder: (context, index) {
                         final word = words[index];
                         return _AllWordCard(
@@ -168,50 +167,56 @@ class _AllWordCard extends StatelessWidget {
     final extra = word.meanings.length - 1;
     final accuracy = word.accuracy;
 
-    return AppCard(
+    return Pressable(
       onTap: onTap,
-      padding: const EdgeInsets.all(AppTokens.pagePadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  word.word,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium,
+      scale: 0.99,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTokens.space4,
+          vertical: AppTokens.space12,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    word.word,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium,
+                  ),
                 ),
+                if (accuracy != null)
+                  Text(
+                    l10n.vocabAccuracy((accuracy * 100).round()),
+                    style: theme.textTheme.bodySmall,
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppTokens.space4),
+            Text(
+              extra > 0
+                  ? '${word.meaning}  ${l10n.vocabMoreMeanings(extra)}'
+                  : word.meaning,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
               ),
-              if (accuracy != null)
-                Text(
-                  l10n.vocabAccuracy((accuracy * 100).round()),
-                  style: theme.textTheme.bodySmall,
-                ),
+            ),
+            if (bookNames.isNotEmpty) ...[
+              const SizedBox(height: AppTokens.space8),
+              Wrap(
+                spacing: AppTokens.space8,
+                runSpacing: AppTokens.space4,
+                children: [for (final name in bookNames) AppBadge(label: name)],
+              ),
             ],
-          ),
-          const SizedBox(height: AppTokens.space4),
-          Text(
-            extra > 0
-                ? '${word.meaning}  ${l10n.vocabMoreMeanings(extra)}'
-                : word.meaning,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          if (bookNames.isNotEmpty) ...[
-            const SizedBox(height: AppTokens.space8),
-            Wrap(
-              spacing: AppTokens.space8,
-              runSpacing: AppTokens.space4,
-              children: [for (final name in bookNames) AppBadge(label: name)],
-            ),
           ],
-        ],
+        ),
       ),
     );
   }

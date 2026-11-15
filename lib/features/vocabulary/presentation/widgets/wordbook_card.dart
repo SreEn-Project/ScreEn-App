@@ -37,14 +37,12 @@ class WordbookCard extends StatelessWidget {
       onTap: onTap,
       padding: const EdgeInsets.fromLTRB(
         AppTokens.pagePadding,
-        AppTokens.space12,
         AppTokens.space8,
-        AppTokens.space12,
+        AppTokens.space8,
+        AppTokens.space8,
       ),
       child: Row(
         children: [
-          const IconBadge(icon: Symbols.menu_book_rounded, size: 44),
-          const SizedBox(width: AppTokens.space12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

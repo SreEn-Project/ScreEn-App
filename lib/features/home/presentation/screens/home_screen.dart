@@ -423,9 +423,7 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
           )
         else
           AppCard(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTokens.space16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: AppTokens.space16),
             child: Column(
               children: [
                 for (final (i, entry) in entries.indexed) ...[

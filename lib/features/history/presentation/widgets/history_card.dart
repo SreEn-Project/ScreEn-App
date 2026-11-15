@@ -48,41 +48,41 @@ class HistoryCard extends StatelessWidget {
       flat ? 14 : 16,
     );
     final row = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.translated,
-                  maxLines: _translatedMaxLines,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                entry.translated,
+                maxLines: _translatedMaxLines,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                entry.original,
+                maxLines: _originalMaxLines,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  entry.original,
-                  maxLines: _originalMaxLines,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(meta, style: theme.textTheme.bodySmall),
-              ],
-            ),
+              ),
+              const SizedBox(height: 8),
+              Text(meta, style: theme.textTheme.bodySmall),
+            ],
           ),
-          if (onDelete != null)
-            AppIconButton(
-              icon: Symbols.delete_rounded,
-              tooltip: deleteTooltip,
-              plain: true,
-              size: 40,
-              onPressed: onDelete,
-            ),
-        ],
+        ),
+        if (onDelete != null)
+          AppIconButton(
+            icon: Symbols.delete_rounded,
+            tooltip: deleteTooltip,
+            plain: true,
+            size: 40,
+            onPressed: onDelete,
+          ),
+      ],
     );
     final body = Padding(padding: padding, child: row);
     if (flat) {

@@ -61,7 +61,8 @@ class _LanguageListState extends State<LanguageList> {
               : ListView.separated(
                   padding: widget.padding.copyWith(top: 4, bottom: 24),
                   itemCount: languages.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: AppTokens.space4),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppTokens.space4),
                   itemBuilder: (context, index) {
                     final language = languages[index];
                     return _LanguageTile(
@@ -104,38 +105,38 @@ class _LanguageTile extends StatelessWidget {
       onTap: onTap,
       scale: 0.99,
       child: Container(
-      decoration: BoxDecoration(
-        color: selected ? colors.primaryContainer : Colors.transparent,
-        borderRadius: BorderRadius.circular(AppTokens.radiusS),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.space16,
-        vertical: AppTokens.space12,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: theme.textTheme.titleMedium),
-                const SizedBox(height: 2),
-                Text(language.nativeName, style: theme.textTheme.bodySmall),
-              ],
+        decoration: BoxDecoration(
+          color: selected ? colors.primaryContainer : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppTokens.radiusS),
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTokens.space16,
+          vertical: AppTokens.space12,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 2),
+                  Text(language.nativeName, style: theme.textTheme.bodySmall),
+                ],
+              ),
             ),
-          ),
-          if (!language.ocrSupported) ...[
-            AppBadge(label: l10n.languageOcrUnsupported),
-            const SizedBox(width: 8),
+            if (!language.ocrSupported) ...[
+              AppBadge(label: l10n.languageOcrUnsupported),
+              const SizedBox(width: 8),
+            ],
+            AnimatedOpacity(
+              opacity: selected ? 1 : 0,
+              duration: const Duration(milliseconds: 150),
+              child: Icon(Symbols.check_rounded, color: colors.primary),
+            ),
           ],
-          AnimatedOpacity(
-            opacity: selected ? 1 : 0,
-            duration: const Duration(milliseconds: 150),
-            child: Icon(Symbols.check_rounded, color: colors.primary),
-          ),
-        ],
+        ),
       ),
-    ),
     );
   }
 }

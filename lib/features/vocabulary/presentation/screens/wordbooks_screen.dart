@@ -170,6 +170,7 @@ class _StudyCard extends StatelessWidget {
       onTap: onTap,
       color: colors.primaryContainer,
       shadow: false,
+      bordered: false,
       padding: const EdgeInsets.symmetric(
         horizontal: AppTokens.pagePadding,
         vertical: AppTokens.space16,
