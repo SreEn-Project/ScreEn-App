@@ -2743,6 +2743,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gemma is Google\'s open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.'**
   String get gemmaFootnote;
+
+  /// No description provided for @navVocabulary.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get navVocabulary;
+
+  /// No description provided for @navHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get navHistory;
+
+  /// No description provided for @homeSectionStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get homeSectionStudy;
+
+  /// No description provided for @homeStudySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{books} wordbooks · {words} words'**
+  String homeStudySummary(int books, int words);
+
+  /// No description provided for @homeStudyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Save words from translations to study them here'**
+  String get homeStudyEmpty;
+
+  /// No description provided for @homeStudyStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start studying'**
+  String get homeStudyStart;
 }
 
 class _AppLocalizationsDelegate

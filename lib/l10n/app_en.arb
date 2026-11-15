@@ -505,5 +505,21 @@
   "gemmaErrorNetwork": "Download failed. Check your connection, or connect to Wi-Fi if downloads are Wi-Fi only.",
   "gemmaErrorSpace": "Not enough storage. Free some space and try again.",
   "gemmaErrorUnknown": "Could not download the model. Please try again later.",
-  "gemmaFootnote": "Gemma is Google's open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads."
+  "gemmaFootnote": "Gemma is Google's open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.",
+  "navVocabulary": "Words",
+  "navHistory": "History",
+  "homeSectionStudy": "Study",
+  "homeStudySummary": "{books} wordbooks · {words} words",
+  "@homeStudySummary": {
+    "placeholders": {
+      "books": {
+        "type": "int"
+      },
+      "words": {
+        "type": "int"
+      }
+    }
+  },
+  "homeStudyEmpty": "Save words from translations to study them here",
+  "homeStudyStart": "Start studying"
 }

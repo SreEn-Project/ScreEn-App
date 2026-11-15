@@ -52,6 +52,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         }
                         setState(() => _confirmClear = false);
                         model.clear();
+                        ref.invalidate(recentHistoryProvider);
                       },
                     )
                   : null,
@@ -107,7 +108,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         AppTokens.pagePadding,
                         4,
                         AppTokens.pagePadding,
-                        24,
+                        AppTokens.bottomNavSpace + AppTokens.space16,
                       ),
                       itemCount: entries.length,
                       separatorBuilder: (_, _) => const AppDivider(indent: 4),
@@ -115,7 +116,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         flat: true,
                         entry: entries[index],
                         deleteTooltip: l10n.historyDelete,
-                        onDelete: () => model.delete(entries[index].id),
+                        onDelete: () {
+                          model.delete(entries[index].id);
+                          ref.invalidate(recentHistoryProvider);
+                        },
                       ),
                     ),
             ),

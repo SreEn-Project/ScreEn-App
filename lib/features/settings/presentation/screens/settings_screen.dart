@@ -34,6 +34,20 @@ class SettingsScreen extends StatelessWidget {
       withBottomNav: true,
       children: [
         const _EngineSection(),
+        AppSection(
+          title: l10n.languagesTitle,
+          child: AppCard(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppTokens.cardListPaddingV,
+            ),
+            child: AppListTile(
+              icon: Symbols.translate_rounded,
+              title: l10n.languagesTitle,
+              subtitle: l10n.modelsBody,
+              onTap: () => context.push(AppRoutes.languages),
+            ),
+          ),
+        ),
         const _CaptureSection(),
         const _DisplaySection(),
         const _QuickLanguagesSection(),

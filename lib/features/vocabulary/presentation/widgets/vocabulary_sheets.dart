@@ -17,6 +17,7 @@ Future<void> showWordbookNameSheet(
 }) {
   return showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     builder: (_) => _WordbookNameSheet(
@@ -142,6 +143,7 @@ Future<int?> showWordbookPickerSheet(
 }) {
   return showModalBottomSheet<int>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     builder: (sheetContext) {
@@ -254,6 +256,7 @@ Future<List<int>?> showWordbookMultiPickerSheet(
 }) {
   return showModalBottomSheet<List<int>>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     builder: (sheetContext) =>
@@ -393,6 +396,7 @@ enum WordAction { edit, move, addTo, delete }
 Future<WordAction?> showWordActionsSheet(BuildContext context) {
   return showModalBottomSheet<WordAction>(
     context: context,
+    useRootNavigator: true,
     useSafeArea: true,
     builder: (sheetContext) {
       final l10n = AppLocalizations.of(sheetContext);

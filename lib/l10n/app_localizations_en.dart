@@ -1471,4 +1471,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gemmaFootnote =>
       'Gemma is Google\'s open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.';
+
+  @override
+  String get navVocabulary => 'Words';
+
+  @override
+  String get navHistory => 'History';
+
+  @override
+  String get homeSectionStudy => 'Study';
+
+  @override
+  String homeStudySummary(int books, int words) {
+    return '$books wordbooks · $words words';
+  }
+
+  @override
+  String get homeStudyEmpty =>
+      'Save words from translations to study them here';
+
+  @override
+  String get homeStudyStart => 'Start studying';
 }

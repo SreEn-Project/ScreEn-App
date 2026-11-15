@@ -1436,4 +1436,24 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get gemmaFootnote =>
       'Gemma는 Google의 오픈 모델이에요. 작은 모델이라 번역 품질은 Gemini · Groq보다 낮을 수 있고, 처음 번역할 때 모델을 불러오느라 몇 초 걸려요.';
+
+  @override
+  String get navVocabulary => '단어장';
+
+  @override
+  String get navHistory => '기록';
+
+  @override
+  String get homeSectionStudy => '학습';
+
+  @override
+  String homeStudySummary(int books, int words) {
+    return '단어장 $books권 · 단어 $words개';
+  }
+
+  @override
+  String get homeStudyEmpty => '번역에서 단어를 저장하면 여기서 학습할 수 있어요';
+
+  @override
+  String get homeStudyStart => '학습 시작';
 }

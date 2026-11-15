@@ -71,7 +71,6 @@ class LanguageModelsScreen extends ConsumerWidget {
 
     return AppPage(
       title: l10n.languagesTitle,
-      withBottomNav: true,
       children: [
         AppSection(
           title: l10n.languagesSectionTarget,
