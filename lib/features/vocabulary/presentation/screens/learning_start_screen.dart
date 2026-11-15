@@ -115,98 +115,136 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
           const SizedBox(height: AppTokens.sectionGap),
           SectionTitle(l10n.learnTypes),
           const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
-            child: Column(
-              children: [
-                AppListTile(
-                  icon: Symbols.quiz_rounded,
-                  title: l10n.learnTest,
-                  subtitle: count == 0
-                      ? l10n.learnTestNeedWords
-                      : l10n.learnTestHint,
-                  enabled: count > 0,
-                  onTap: selected == null
-                      ? null
-                      : () => context.push(
-                          AppRoutes.wordTestPath(selection!.ids),
-                        ),
-                ),
-                const AppDivider(),
-                AppListTile(
-                  icon: Symbols.style_rounded,
-                  title: l10n.learnCards,
-                  subtitle: count == 0
-                      ? l10n.learnTestNeedWords
-                      : l10n.learnCardsHint,
-                  enabled: count > 0,
-                  onTap: selected == null
-                      ? null
-                      : () => context.push(
-                          AppRoutes.flashcardsPath(selection!.ids),
-                        ),
-                ),
-              ],
-            ),
+          _ModeGrid(
+            modes: [
+              _Mode(
+                icon: Symbols.quiz_rounded,
+                title: l10n.learnTest,
+                hint: count == 0 ? l10n.learnTestNeedWords : l10n.learnTestHint,
+                onTap: count == 0 || selected == null
+                    ? null
+                    : () =>
+                          context.push(AppRoutes.wordTestPath(selection!.ids)),
+              ),
+              _Mode(
+                icon: Symbols.style_rounded,
+                title: l10n.learnCards,
+                hint: count == 0
+                    ? l10n.learnTestNeedWords
+                    : l10n.learnCardsHint,
+                onTap: count == 0 || selected == null
+                    ? null
+                    : () => context.push(
+                        AppRoutes.flashcardsPath(selection!.ids),
+                      ),
+              ),
+            ],
           ),
           const SizedBox(height: AppTokens.sectionGap),
           SectionTitle(l10n.learnGames),
           const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
-            child: Column(
-              children: [
-                AppListTile(
-                  icon: Symbols.cable_rounded,
-                  title: l10n.learnMatch,
-                  subtitle: count == 0
-                      ? l10n.learnTestNeedWords
-                      : l10n.learnMatchHint,
-                  enabled: count > 0,
-                  onTap: selected == null
-                      ? null
-                      : () => context.push(
-                          AppRoutes.lineMatchPath(selection!.ids),
-                        ),
-                ),
-                const AppDivider(),
-                AppListTile(
-                  icon: Symbols.keyboard_rounded,
-                  title: l10n.learnFall,
-                  subtitle: count == 0
-                      ? l10n.learnTestNeedWords
-                      : l10n.learnFallHint,
-                  enabled: count > 0,
-                  onTap: selected == null
-                      ? null
-                      : () =>
-                            context.push(AppRoutes.fallingPath(selection!.ids)),
-                ),
-                const AppDivider(),
-                AppListTile(
-                  icon: Symbols.extension_rounded,
-                  title: l10n.learnAssemble,
-                  subtitle: count == 0
-                      ? l10n.learnTestNeedWords
-                      : l10n.learnAssembleHint,
-                  enabled: count > 0,
-                  onTap: selected == null
-                      ? null
-                      : () => context.push(
-                          AppRoutes.assemblyPath(selection!.ids),
-                        ),
-                ),
-              ],
-            ),
+          _ModeGrid(
+            modes: [
+              _Mode(
+                icon: Symbols.cable_rounded,
+                title: l10n.learnMatch,
+                hint: count == 0
+                    ? l10n.learnTestNeedWords
+                    : l10n.learnMatchHint,
+                onTap: count == 0 || selected == null
+                    ? null
+                    : () =>
+                          context.push(AppRoutes.lineMatchPath(selection!.ids)),
+              ),
+              _Mode(
+                icon: Symbols.keyboard_rounded,
+                title: l10n.learnFall,
+                hint: count == 0 ? l10n.learnTestNeedWords : l10n.learnFallHint,
+                onTap: count == 0 || selected == null
+                    ? null
+                    : () => context.push(AppRoutes.fallingPath(selection!.ids)),
+              ),
+              _Mode(
+                icon: Symbols.extension_rounded,
+                title: l10n.learnAssemble,
+                hint: count == 0
+                    ? l10n.learnTestNeedWords
+                    : l10n.learnAssembleHint,
+                onTap: count == 0 || selected == null
+                    ? null
+                    : () =>
+                          context.push(AppRoutes.assemblyPath(selection!.ids)),
+              ),
+            ],
           ),
         ],
       );
     }
 
     return AppPage(title: l10n.learnTitle, children: [body]);
+  }
+}
+
+class _Mode {
+  const _Mode({
+    required this.icon,
+    required this.title,
+    required this.hint,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String hint;
+  final VoidCallback? onTap;
+}
+
+/// 학습 방식을 2열 타일로 보여 준다 (목록 대신): 아이콘 · 이름 · 짧은 설명.
+class _ModeGrid extends StatelessWidget {
+  const _ModeGrid({required this.modes});
+
+  final List<_Mode> modes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = (constraints.maxWidth - AppTokens.space12) / 2;
+        return Wrap(
+          spacing: AppTokens.space12,
+          runSpacing: AppTokens.space12,
+          children: [
+            for (final mode in modes)
+              SizedBox(
+                width: width,
+                child: Opacity(
+                  opacity: mode.onTap == null ? 0.45 : 1,
+                  child: AppCard(
+                    onTap: mode.onTap,
+                    padding: const EdgeInsets.all(AppTokens.space16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        IconBadge(icon: mode.icon, size: 36),
+                        const SizedBox(height: AppTokens.space12),
+                        Text(mode.title, style: theme.textTheme.titleMedium),
+                        const SizedBox(height: AppTokens.space4),
+                        Text(
+                          mode.hint,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 }
