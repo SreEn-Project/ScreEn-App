@@ -1,6 +1,7 @@
 package com.example.translation_poc_app.overlay
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -70,20 +71,21 @@ fun PillButton(
     enabled: Boolean = true,
 ) {
     val colors = OverlayTheme.colors
-    val background = if (style == PillStyle.PRIMARY) colors.primary else colors.background
-    val content = if (style == PillStyle.PRIMARY) colors.onPrimary else colors.onSurface
+    val background = if (style == PillStyle.PRIMARY) colors.primary else colors.surface
+    val content = if (style == PillStyle.PRIMARY) colors.onPrimary else colors.primary
     Row(
         modifier = modifier
             .alpha(if (enabled) 1f else 0.4f)
             .then(
                 if (style == PillStyle.PRIMARY && enabled) {
-                    Modifier.overlayShadow(8.dp, CircleShape, colors.primary)
+                    Modifier.overlayShadow(4.dp, CircleShape, colors.primary)
                 } else {
                     Modifier
                 },
             )
             .clip(CircleShape)
             .background(background)
+            .then(if (style == PillStyle.SECONDARY) Modifier.border(1.dp, colors.outline, CircleShape) else Modifier)
             .pressable(enabled = enabled, onClick = onClick)
             .heightIn(min = 48.dp)
             .padding(horizontal = 20.dp),

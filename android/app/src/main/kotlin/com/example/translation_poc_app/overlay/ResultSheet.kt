@@ -212,12 +212,13 @@ private fun ColumnScope.ResultList(
 
     LazyColumn(
         modifier = Modifier.weight(1f, fill = false),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         if (paragraph != null) {
             item { ParagraphCard(paragraph, copied = copied == 0) { onCopy(paragraph); copied = 0 } }
         } else {
             itemsIndexed(result.items) { index, item ->
+                if (index > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(colors.outline))
                 ResultCard(item, copied = copied == index, onWord = onWord, onAdd = onAdd) {
                     item.translated?.let {
                         onCopy(it)
@@ -270,7 +271,7 @@ private fun ColumnScope.ResultList(
     }
 }
 
-/** 원문(회색 작은 글자) · 번역문(본문) 카드. 오른쪽 위 복사. */
+/** 번역문(본문) · 원문(회색 작은 글자) 평면 행. 오른쪽 위 복사. */
 @Composable
 private fun ResultCard(
     item: TranslatedItem,
@@ -280,23 +281,14 @@ private fun ResultCard(
     onCopy: () -> Unit,
 ) {
     val colors = OverlayTheme.colors
+    // 번역문이 먼저, 원문은 한 단계 낮춰 아래에. 항목은 카드 대신 평면 행 + 구분선으로 둔다 (리디자인 #188).
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(colors.background)
-            .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+            .padding(start = 0.dp, top = 12.dp, bottom = 12.dp, end = 0.dp),
     ) {
         Column(Modifier.weight(1f).padding(top = 2.dp)) {
             val originalStyle = OverlayTheme.caption.copy(color = colors.onSurfaceVariant)
-            if (onWord != null) {
-                WordPickText(item.original, originalStyle) { word ->
-                    onWord(WordTarget(word, item.original, item.sourceLanguage))
-                }
-            } else {
-                BasicText(item.original, style = originalStyle)
-            }
-            Spacer(Modifier.height(6.dp))
             if (item.translated != null) {
                 BasicText(item.translated, style = OverlayTheme.translated.copy(color = colors.onSurface))
             } else {
@@ -308,6 +300,14 @@ private fun ResultCard(
                     },
                     style = OverlayTheme.caption.copy(color = colors.onSurfaceVariant, fontStyle = FontStyle.Italic),
                 )
+            }
+            Spacer(Modifier.height(6.dp))
+            if (onWord != null) {
+                WordPickText(item.original, originalStyle) { word ->
+                    onWord(WordTarget(word, item.original, item.sourceLanguage))
+                }
+            } else {
+                BasicText(item.original, style = originalStyle)
             }
             if (onAdd != null && item.translated != null) {
                 Spacer(Modifier.height(8.dp))
