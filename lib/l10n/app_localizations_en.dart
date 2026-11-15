@@ -829,6 +829,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vocabSavedAt => 'Saved on';
 
   @override
+  String get vocabAddTo => 'Also add to another list';
+
+  @override
+  String get vocabAddToTitle => 'Add to';
+
+  @override
+  String get vocabAddedToast => 'Added to the list';
+
+  @override
+  String get vocabAddDuplicate => 'That list already has this word';
+
+  @override
+  String get vocabRemoveFromBook => 'Remove from this list';
+
+  @override
+  String get vocabRemoveFromBookTitle => 'Remove from this list?';
+
+  @override
+  String get vocabAddMeaning => 'Add meaning';
+
+  @override
+  String get vocabAddMeaningTitle => 'Add meaning';
+
+  @override
+  String get vocabEditMeaningTitle => 'Edit meaning';
+
+  @override
+  String get vocabSameWordTitle => 'This word is already saved';
+
+  @override
+  String get vocabSameWordAdd => 'Add meaning';
+
+  @override
+  String get vocabAlreadyInBook => 'This word is already in this list';
+
+  @override
+  String get vocabMeaningDuplicate => 'That meaning already exists';
+
+  @override
+  String get vocabMeaningLast => 'You can\'t delete the last meaning';
+
+  @override
+  String get vocabMeaningDeleteTitle => 'Delete this meaning?';
+
+  @override
+  String get vocabProgressByBook => 'Progress by list';
+
+  @override
+  String get vocabMemorizedShort => 'Memorized';
+
+  @override
+  String get vocabNotMemorizedShort => 'Learning';
+
+  @override
+  String vocabMeaningN(int n) {
+    return 'Meaning $n';
+  }
+
+  @override
+  String vocabSameWordMessage(String word, String meanings) {
+    return 'Add a meaning to “$word”?\nExisting: $meanings';
+  }
+
+  @override
+  String get vocabAllWords => 'All words';
+
+  @override
+  String vocabAllWordsCount(int count) {
+    return '$count';
+  }
+
+  @override
+  String vocabMoreMeanings(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String vocabOverallAccuracy(int percent, int correct, int attempt) {
+    return 'Overall accuracy $percent% ($correct/$attempt)';
+  }
+
+  @override
   String get vocabDeleteWord => 'Delete word';
 
   @override

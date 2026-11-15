@@ -262,6 +262,47 @@ final class GetWordsProvider
 
 String _$getWordsHash() => r'ea7f3d59d335db89f319330cc6dbf3c2fe30a37a';
 
+@ProviderFor(getAllWords)
+final getAllWordsProvider = GetAllWordsProvider._();
+
+final class GetAllWordsProvider
+    extends $FunctionalProvider<GetAllWords, GetAllWords, GetAllWords>
+    with $Provider<GetAllWords> {
+  GetAllWordsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getAllWordsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getAllWordsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetAllWords> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GetAllWords create(Ref ref) {
+    return getAllWords(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetAllWords value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetAllWords>(value),
+    );
+  }
+}
+
+String _$getAllWordsHash() => r'2966a87c60045e339b3926782cbd0f7611ac82f7';
+
 @ProviderFor(getWord)
 final getWordProvider = GetWordProvider._();
 
@@ -343,6 +384,367 @@ final class MoveWordProvider
 }
 
 String _$moveWordHash() => r'a2f4ab72946e776b8785c0a6bb0c3b7e5074e161';
+
+@ProviderFor(addWordToWordbook)
+final addWordToWordbookProvider = AddWordToWordbookProvider._();
+
+final class AddWordToWordbookProvider
+    extends
+        $FunctionalProvider<
+          AddWordToWordbook,
+          AddWordToWordbook,
+          AddWordToWordbook
+        >
+    with $Provider<AddWordToWordbook> {
+  AddWordToWordbookProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'addWordToWordbookProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$addWordToWordbookHash();
+
+  @$internal
+  @override
+  $ProviderElement<AddWordToWordbook> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AddWordToWordbook create(Ref ref) {
+    return addWordToWordbook(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AddWordToWordbook value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AddWordToWordbook>(value),
+    );
+  }
+}
+
+String _$addWordToWordbookHash() => r'ccbf8070510efd5cd4d407442e8ccc744e010174';
+
+@ProviderFor(removeWordFromWordbook)
+final removeWordFromWordbookProvider = RemoveWordFromWordbookProvider._();
+
+final class RemoveWordFromWordbookProvider
+    extends
+        $FunctionalProvider<
+          RemoveWordFromWordbook,
+          RemoveWordFromWordbook,
+          RemoveWordFromWordbook
+        >
+    with $Provider<RemoveWordFromWordbook> {
+  RemoveWordFromWordbookProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'removeWordFromWordbookProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$removeWordFromWordbookHash();
+
+  @$internal
+  @override
+  $ProviderElement<RemoveWordFromWordbook> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  RemoveWordFromWordbook create(Ref ref) {
+    return removeWordFromWordbook(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RemoveWordFromWordbook value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RemoveWordFromWordbook>(value),
+    );
+  }
+}
+
+String _$removeWordFromWordbookHash() =>
+    r'797ffb1e4e9008f30eb26bda9b5794e01039be2e';
+
+@ProviderFor(getWordWordbookIds)
+final getWordWordbookIdsProvider = GetWordWordbookIdsProvider._();
+
+final class GetWordWordbookIdsProvider
+    extends
+        $FunctionalProvider<
+          GetWordWordbookIds,
+          GetWordWordbookIds,
+          GetWordWordbookIds
+        >
+    with $Provider<GetWordWordbookIds> {
+  GetWordWordbookIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getWordWordbookIdsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getWordWordbookIdsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetWordWordbookIds> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GetWordWordbookIds create(Ref ref) {
+    return getWordWordbookIds(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetWordWordbookIds value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetWordWordbookIds>(value),
+    );
+  }
+}
+
+String _$getWordWordbookIdsHash() =>
+    r'e9c1225831965fa3c18aac7ca891fd76c75c3a08';
+
+@ProviderFor(getWordProgress)
+final getWordProgressProvider = GetWordProgressProvider._();
+
+final class GetWordProgressProvider
+    extends
+        $FunctionalProvider<GetWordProgress, GetWordProgress, GetWordProgress>
+    with $Provider<GetWordProgress> {
+  GetWordProgressProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getWordProgressProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getWordProgressHash();
+
+  @$internal
+  @override
+  $ProviderElement<GetWordProgress> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GetWordProgress create(Ref ref) {
+    return getWordProgress(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GetWordProgress value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GetWordProgress>(value),
+    );
+  }
+}
+
+String _$getWordProgressHash() => r'2459453f95bcd0b5c9acaf7518b7af6f951387e6';
+
+@ProviderFor(findSameWord)
+final findSameWordProvider = FindSameWordProvider._();
+
+final class FindSameWordProvider
+    extends $FunctionalProvider<FindSameWord, FindSameWord, FindSameWord>
+    with $Provider<FindSameWord> {
+  FindSameWordProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'findSameWordProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$findSameWordHash();
+
+  @$internal
+  @override
+  $ProviderElement<FindSameWord> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  FindSameWord create(Ref ref) {
+    return findSameWord(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FindSameWord value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FindSameWord>(value),
+    );
+  }
+}
+
+String _$findSameWordHash() => r'e0f5d1b905f8a496e32af571721d04e99146ad00';
+
+@ProviderFor(addWordMeaning)
+final addWordMeaningProvider = AddWordMeaningProvider._();
+
+final class AddWordMeaningProvider
+    extends $FunctionalProvider<AddWordMeaning, AddWordMeaning, AddWordMeaning>
+    with $Provider<AddWordMeaning> {
+  AddWordMeaningProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'addWordMeaningProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$addWordMeaningHash();
+
+  @$internal
+  @override
+  $ProviderElement<AddWordMeaning> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AddWordMeaning create(Ref ref) {
+    return addWordMeaning(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AddWordMeaning value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AddWordMeaning>(value),
+    );
+  }
+}
+
+String _$addWordMeaningHash() => r'604ee84ec5a0ce195b344a116b90a4602d6d61a1';
+
+@ProviderFor(updateWordMeaning)
+final updateWordMeaningProvider = UpdateWordMeaningProvider._();
+
+final class UpdateWordMeaningProvider
+    extends
+        $FunctionalProvider<
+          UpdateWordMeaning,
+          UpdateWordMeaning,
+          UpdateWordMeaning
+        >
+    with $Provider<UpdateWordMeaning> {
+  UpdateWordMeaningProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'updateWordMeaningProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$updateWordMeaningHash();
+
+  @$internal
+  @override
+  $ProviderElement<UpdateWordMeaning> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  UpdateWordMeaning create(Ref ref) {
+    return updateWordMeaning(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UpdateWordMeaning value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UpdateWordMeaning>(value),
+    );
+  }
+}
+
+String _$updateWordMeaningHash() => r'07727a3e9da863d917c69206c0994d25a8745d22';
+
+@ProviderFor(deleteWordMeaning)
+final deleteWordMeaningProvider = DeleteWordMeaningProvider._();
+
+final class DeleteWordMeaningProvider
+    extends
+        $FunctionalProvider<
+          DeleteWordMeaning,
+          DeleteWordMeaning,
+          DeleteWordMeaning
+        >
+    with $Provider<DeleteWordMeaning> {
+  DeleteWordMeaningProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'deleteWordMeaningProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$deleteWordMeaningHash();
+
+  @$internal
+  @override
+  $ProviderElement<DeleteWordMeaning> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  DeleteWordMeaning create(Ref ref) {
+    return deleteWordMeaning(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(DeleteWordMeaning value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<DeleteWordMeaning>(value),
+    );
+  }
+}
+
+String _$deleteWordMeaningHash() => r'90ec1f93aafd60837eab352459c718ce00799250';
 
 @ProviderFor(deleteWord)
 final deleteWordProvider = DeleteWordProvider._();

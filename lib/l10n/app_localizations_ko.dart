@@ -812,6 +812,88 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vocabSavedAt => '저장한 날';
 
   @override
+  String get vocabAddTo => '다른 단어장에도 넣기';
+
+  @override
+  String get vocabAddToTitle => '넣을 단어장';
+
+  @override
+  String get vocabAddedToast => '단어장에 넣었어요';
+
+  @override
+  String get vocabAddDuplicate => '그 단어장에 같은 단어가 이미 있어요';
+
+  @override
+  String get vocabRemoveFromBook => '이 단어장에서 빼기';
+
+  @override
+  String get vocabRemoveFromBookTitle => '이 단어장에서 뺄까요?';
+
+  @override
+  String get vocabAddMeaning => '뜻 추가';
+
+  @override
+  String get vocabAddMeaningTitle => '뜻 추가';
+
+  @override
+  String get vocabEditMeaningTitle => '뜻 수정';
+
+  @override
+  String get vocabSameWordTitle => '이미 저장된 단어예요';
+
+  @override
+  String get vocabSameWordAdd => '뜻 추가';
+
+  @override
+  String get vocabAlreadyInBook => '이 단어장에 이미 있는 단어예요';
+
+  @override
+  String get vocabMeaningDuplicate => '같은 뜻이 이미 있어요';
+
+  @override
+  String get vocabMeaningLast => '마지막 뜻은 지울 수 없어요';
+
+  @override
+  String get vocabMeaningDeleteTitle => '이 뜻을 삭제할까요?';
+
+  @override
+  String get vocabProgressByBook => '단어장별 진도';
+
+  @override
+  String get vocabMemorizedShort => '외움';
+
+  @override
+  String get vocabNotMemorizedShort => '외우는 중';
+
+  @override
+  String vocabMeaningN(int n) {
+    return '뜻 $n';
+  }
+
+  @override
+  String vocabSameWordMessage(String word, String meanings) {
+    return '“$word”에 뜻을 추가할까요?\n기존 뜻: $meanings';
+  }
+
+  @override
+  String get vocabAllWords => '전체 단어';
+
+  @override
+  String vocabAllWordsCount(int count) {
+    return '$count개';
+  }
+
+  @override
+  String vocabMoreMeanings(int count) {
+    return '외 $count개';
+  }
+
+  @override
+  String vocabOverallAccuracy(int percent, int correct, int attempt) {
+    return '전체 정답률 $percent% ($correct/$attempt)';
+  }
+
+  @override
   String get vocabDeleteWord => '단어 삭제';
 
   @override

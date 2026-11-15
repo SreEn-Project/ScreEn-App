@@ -19,9 +19,22 @@ class WordDetailViewModel extends _$WordDetailViewModel {
 
   Future<void> delete() => ref.read(deleteWordProvider)(id);
 
-  /// 다른 단어장으로 옮기고 새로 읽는다.
-  Future<void> move(int toWordbookId) async {
-    await ref.read(moveWordProvider)(MoveWordParams(id, toWordbookId));
-    state = AsyncData(await ref.read(getWordProvider)(id));
+  /// 뜻 하나를 지우고 새로 읽는다. 마지막 뜻이면 false.
+  Future<bool> deleteMeaning(int meaningId) async {
+    final ok = await ref.read(deleteWordMeaningProvider)(meaningId);
+    if (ok) await reload();
+    return ok;
   }
+
+  /// 단어가 들어 있는 단어장 id.
+  Future<List<int>> wordbookIds() => ref.read(getWordWordbookIdsProvider)(id);
+
+  /// 다른 단어장에도 넣는다. 이미 있거나 그 단어장에 같은 글자의 단어가 있으면 false.
+  Future<bool> addTo(int wordbookId) =>
+      ref.read(addWordToWordbookProvider)(WordbookLinkParams(id, wordbookId));
 }
+
+/// 단어가 들어 있는 단어장마다의 진도 (외움 · 정답률).
+@riverpod
+Future<List<WordbookProgress>> wordProgress(Ref ref, int id) =>
+    ref.watch(getWordProgressProvider)(id);

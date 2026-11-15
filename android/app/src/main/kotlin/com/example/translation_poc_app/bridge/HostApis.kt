@@ -171,14 +171,34 @@ class VocabularyHostApiImpl(private val repository: VocabularyRepository) : Voca
 
     override suspend fun getWord(id: Long): VocabWord? = repository.word(id)?.toPigeon()
 
-    override suspend fun moveWord(id: Long, wordbookId: Long) = repository.moveWord(id, wordbookId)
+    override suspend fun getWordProgress(id: Long): List<WordbookProgress> =
+        repository.progressOf(id).map { it.toPigeon() }
+
+    override suspend fun findSameWord(word: String, sourceLanguage: String, targetLanguage: String): VocabWord? =
+        repository.findSame(word, sourceLanguage, targetLanguage)?.toPigeon()
+
+    override suspend fun getWordWordbookIds(id: Long): List<Long> = repository.wordbookIdsOf(id)
+
+    override suspend fun moveWord(id: Long, fromWordbookId: Long, toWordbookId: Long) =
+        repository.moveWord(id, fromWordbookId, toWordbookId)
+
+    override suspend fun addWordToWordbook(id: Long, wordbookId: Long): Boolean =
+        repository.addToWordbook(id, wordbookId)
+
+    override suspend fun removeWordFromWordbook(id: Long, wordbookId: Long) =
+        repository.removeFromWordbook(id, wordbookId)
 
     override suspend fun deleteWord(id: Long) = repository.deleteWord(id)
 
-    override suspend fun setMemorized(id: Long, memorized: Boolean) = repository.setMemorized(id, memorized)
+    override suspend fun setMemorized(wordbookId: Long, id: Long, memorized: Boolean) =
+        repository.setMemorized(wordbookId, id, memorized)
 
     override suspend fun recordAnswers(answers: List<WordAnswer>) =
-        repository.recordAnswers(answers.map { it.wordId to it.correct })
+        repository.recordAnswers(
+            answers.map {
+                com.example.translation_poc_app.data.vocabulary.WordAnswerEntry(it.wordbookId, it.wordId, it.correct)
+            },
+        )
 
     override suspend fun saveWord(wordbookId: Long, input: VocabWordInput): Long? =
         repository.saveWord(
@@ -209,6 +229,25 @@ class VocabularyHostApiImpl(private val repository: VocabularyRepository) : Voca
                 targetLanguage = input.targetLanguage,
             ),
         )
+
+    private fun VocabWordInput.toDraft() = WordDraft(
+        word = word,
+        meaning = meaning,
+        pronunciation = pronunciation,
+        partOfSpeech = partOfSpeech,
+        contextMeaning = contextMeaning,
+        sentence = sentence,
+        sourceLanguage = sourceLanguage,
+        targetLanguage = targetLanguage,
+    )
+
+    override suspend fun addWordMeaning(id: Long, input: VocabWordInput): Boolean =
+        repository.addMeaning(id, input.toDraft())
+
+    override suspend fun updateWordMeaning(meaningId: Long, input: VocabWordInput): Boolean =
+        repository.updateMeaning(meaningId, input.toDraft())
+
+    override suspend fun deleteWordMeaning(meaningId: Long): Boolean = repository.deleteMeaning(meaningId)
 }
 
 /** 서비스 상태 조회 · 시작 · 중지 (NA-01, NA-02). */

@@ -54,7 +54,7 @@ final class LineMatchViewModelProvider
 }
 
 String _$lineMatchViewModelHash() =>
-    r'a3f67c5357fffd568c536c9f02db52913df6be26';
+    r'd4f9f27d020920c36b70df742832010e5fd03802';
 
 /// 선 잇기 매칭 (AD-11).
 

@@ -54,7 +54,7 @@ final class WordDetailViewModelProvider
 }
 
 String _$wordDetailViewModelHash() =>
-    r'70743f2729df7e40dc20307c2e058592b462b303';
+    r'15b46ff42b6697df1991585d5d918ac027b0196d';
 
 /// 단어 상세 (AD-06). 단어가 없으면(이미 지워짐) null.
 
@@ -106,4 +106,90 @@ abstract class _$WordDetailViewModel extends $AsyncNotifier<VocabularyWord?> {
             >;
     return element.handleCreate(ref, () => build(_$args));
   }
+}
+
+/// 단어가 들어 있는 단어장마다의 진도 (외움 · 정답률).
+
+@ProviderFor(wordProgress)
+final wordProgressProvider = WordProgressFamily._();
+
+/// 단어가 들어 있는 단어장마다의 진도 (외움 · 정답률).
+
+final class WordProgressProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<WordbookProgress>>,
+          List<WordbookProgress>,
+          FutureOr<List<WordbookProgress>>
+        >
+    with
+        $FutureModifier<List<WordbookProgress>>,
+        $FutureProvider<List<WordbookProgress>> {
+  /// 단어가 들어 있는 단어장마다의 진도 (외움 · 정답률).
+  WordProgressProvider._({
+    required WordProgressFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'wordProgressProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$wordProgressHash();
+
+  @override
+  String toString() {
+    return r'wordProgressProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<WordbookProgress>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<WordbookProgress>> create(Ref ref) {
+    final argument = this.argument as int;
+    return wordProgress(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WordProgressProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$wordProgressHash() => r'3a94a21399145011588431d81d137fdda65023c8';
+
+/// 단어가 들어 있는 단어장마다의 진도 (외움 · 정답률).
+
+final class WordProgressFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<WordbookProgress>>, int> {
+  WordProgressFamily._()
+    : super(
+        retry: null,
+        name: r'wordProgressProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// 단어가 들어 있는 단어장마다의 진도 (외움 · 정답률).
+
+  WordProgressProvider call(int id) =>
+      WordProgressProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'wordProgressProvider';
 }

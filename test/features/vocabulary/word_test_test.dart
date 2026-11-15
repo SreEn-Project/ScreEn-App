@@ -47,6 +47,19 @@ void main() {
   });
 
   group('CreateWordTest', () {
+    test('두 단어장에 든 단어는 여러 단어장을 같이 골라도 한 번만 낸다', () async {
+      await repository.addToWordbook(3, 1);
+      final questions = await CreateWordTest(repository)(
+        CreateWordTestParams(
+          WordbookSelection([1, 2]),
+          WordTestMode.typing,
+          random: Random(1),
+        ),
+      );
+      expect(questions, hasLength(5));
+      expect(questions.where((q) => q.word == 'cherry'), hasLength(1));
+    });
+
     test('입력형은 단어장의 단어 수만큼 문제를 낸다 (10개까지)', () async {
       final questions = await CreateWordTest(repository)(
         CreateWordTestParams(
@@ -124,6 +137,7 @@ void main() {
     test('입력형은 대소문자와 앞뒤 공백을 무시한다', () {
       const q = WordTestQuestion(
         wordId: 1,
+        wordbookId: 1,
         mode: WordTestMode.typing,
         word: 'Apple',
         meaning: '사과',
@@ -136,6 +150,7 @@ void main() {
     test('4지선다는 고른 뜻이 정답 뜻이어야 한다', () {
       const q = WordTestQuestion(
         wordId: 1,
+        wordbookId: 1,
         mode: WordTestMode.choice,
         word: 'apple',
         meaning: '사과',

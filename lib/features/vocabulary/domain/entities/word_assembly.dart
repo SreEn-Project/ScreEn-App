@@ -24,6 +24,7 @@ class AssemblyTile {
 class AssemblyQuestion {
   const AssemblyQuestion({
     required this.wordId,
+    required this.wordbookId,
     required this.mode,
     required this.word,
     required this.meaning,
@@ -32,6 +33,9 @@ class AssemblyQuestion {
   });
 
   final int wordId;
+
+  /// 이 단어를 가져온 단어장 (진도가 쌓일 곳).
+  final int wordbookId;
   final AssemblyMode mode;
   final String word;
   final String meaning;
@@ -93,6 +97,7 @@ class AssemblyQuestion {
     }
     return AssemblyQuestion(
       wordId: word.id,
+      wordbookId: word.wordbookId,
       mode: mode,
       word: word.word,
       meaning: word.meaning,

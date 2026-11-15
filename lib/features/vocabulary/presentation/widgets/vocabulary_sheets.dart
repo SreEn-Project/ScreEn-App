@@ -387,9 +387,9 @@ Future<bool> showDeleteConfirmSheet(
   );
 }
 
-enum WordAction { edit, move, delete }
+enum WordAction { edit, move, addTo, delete }
 
-/// 단어 하나에 할 동작 고르기 (AD-05): 수정 · 다른 단어장으로 이동 · 삭제.
+/// 단어 하나에 할 동작 고르기 (AD-05): 수정 · 다른 단어장으로 이동 · 다른 단어장에도 넣기 · 이 단어장에서 빼기.
 Future<WordAction?> showWordActionsSheet(BuildContext context) {
   return showModalBottomSheet<WordAction>(
     context: context,
@@ -423,8 +423,14 @@ Future<WordAction?> showWordActionsSheet(BuildContext context) {
                 ),
                 const AppDivider(),
                 AppListTile(
+                  icon: Symbols.library_add_rounded,
+                  title: l10n.vocabAddTo,
+                  onTap: () => Navigator.of(sheetContext).pop(WordAction.addTo),
+                ),
+                const AppDivider(),
+                AppListTile(
                   icon: Symbols.delete_rounded,
-                  title: l10n.vocabDeleteWord,
+                  title: l10n.vocabRemoveFromBook,
                   onTap: () =>
                       Navigator.of(sheetContext).pop(WordAction.delete),
                 ),

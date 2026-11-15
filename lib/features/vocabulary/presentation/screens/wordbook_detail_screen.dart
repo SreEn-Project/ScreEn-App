@@ -232,11 +232,28 @@ class WordbookDetailScreen extends ConsumerWidget {
           exceptId: wordbookId,
         );
         if (target != null) await model.move(word.id, target);
+      case WordAction.addTo:
+        final l10n = AppLocalizations.of(context);
+        final books = await ref.read(wordbooksViewModelProvider.future);
+        if (!context.mounted) return;
+        final target = await showWordbookPickerSheet(
+          context,
+          books: books,
+          exceptId: wordbookId,
+          title: l10n.vocabAddToTitle,
+        );
+        if (target == null || !context.mounted) return;
+        final added = await model.addTo(word.id, target);
+        if (!context.mounted) return;
+        AppToast.show(
+          context,
+          added ? l10n.vocabAddedToast : l10n.vocabAddDuplicate,
+        );
       case WordAction.delete:
         final l10n = AppLocalizations.of(context);
         final confirmed = await showDeleteConfirmSheet(
           context,
-          title: l10n.vocabDeleteWordTitle,
+          title: l10n.vocabRemoveFromBookTitle,
           body: word.word,
         );
         if (confirmed) await model.delete(word.id);

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:translation_poc_app/features/vocabulary/di.dart';
 import 'package:translation_poc_app/features/vocabulary/domain/entities/vocabulary.dart';
+import 'package:translation_poc_app/features/vocabulary/presentation/view_models/all_words_view_model.dart';
 import 'package:translation_poc_app/features/vocabulary/presentation/view_models/word_detail_view_model.dart';
 import 'package:translation_poc_app/features/vocabulary/presentation/view_models/wordbook_detail_view_model.dart';
 import 'package:translation_poc_app/features/vocabulary/presentation/view_models/wordbooks_view_model.dart';
@@ -155,6 +156,16 @@ void main() {
       expect(repository.savedWords.any((w) => w.id == 3), isFalse);
     });
 
+    test('다른 단어장에도 든 단어를 빼면 그 단어장에는 남는다', () async {
+      await ready();
+      expect(await model().addTo(3, 2), isTrue);
+      await model().delete(3);
+      expect(now().words.map((w) => w.id), [2, 1]);
+      expect(repository.savedWords.any((w) => w.id == 3), isTrue);
+      expect(await repository.words(2), isNotEmpty);
+      expect((await repository.words(2)).map((w) => w.id), contains(3));
+    });
+
     test('이동하면 이 단어장에서 사라진다', () async {
       await ready();
       await model().move(3, 2);
@@ -173,6 +184,60 @@ void main() {
     });
   });
 
+  group('단어장별 진도', () {
+    test('외움 표시는 그 단어장에서만 바뀐다', () async {
+      await container.read(wordDetailViewModelProvider(3).future);
+      await repository.addToWordbook(3, 2);
+      await repository.setMemorized(2, 3, true);
+      expect(
+        (await repository.words(2)).firstWhere((w) => w.id == 3).memorized,
+        isTrue,
+      );
+      expect(
+        (await repository.words(1)).firstWhere((w) => w.id == 3).memorized,
+        isFalse,
+      );
+    });
+
+    test('푼 결과는 푼 단어장의 진도에만 쌓인다', () async {
+      await repository.addToWordbook(3, 2);
+      await repository.recordAnswers([
+        const WordAnswer(3, wordbookId: 2, correct: true),
+      ]);
+      final progress = {
+        for (final p in await repository.progressOf(3)) p.wordbookId: p,
+      };
+      expect(progress[2]!.attemptCount, 1);
+      expect(progress[1]!.attemptCount, 0);
+    });
+  });
+
+  group('전체 단어', () {
+    test('여러 단어장에 든 단어는 한 번만 나오고 진도는 합쳐진다', () async {
+      await repository.addToWordbook(3, 2);
+      await repository.recordAnswers([
+        const WordAnswer(3, wordbookId: 1, correct: true),
+        const WordAnswer(3, wordbookId: 2, correct: false),
+      ]);
+      final state = await container.read(allWordsViewModelProvider.future);
+      final ids = state.words.map((w) => w.id).toList();
+      expect(ids.toSet(), hasLength(ids.length));
+      final word = state.words.firstWhere((w) => w.id == 3);
+      expect(word.wordbookIds, [1, 2]);
+      expect(word.attemptCount, 2);
+      expect(word.correctCount, 1);
+    });
+
+    test('검색은 모든 단어장에서 찾는다', () async {
+      await container.read(allWordsViewModelProvider.future);
+      await container
+          .read(allWordsViewModelProvider.notifier)
+          .setQuery('apple');
+      final state = container.read(allWordsViewModelProvider).value!;
+      expect(state.words.map((w) => w.word), everyElement(contains('Apple')));
+    });
+  });
+
   group('단어 상세', () {
     test('저장한 단어를 읽는다', () async {
       final word = await container.read(wordDetailViewModelProvider(2).future);
@@ -186,20 +251,24 @@ void main() {
       );
     });
 
-    test('다른 단어장으로 옮긴다', () async {
+    test('다른 단어장에도 넣으면 두 곳에 든다', () async {
       final provider = wordDetailViewModelProvider(3);
       container.listen(provider, (_, _) {});
       await container.read(provider.future);
-      await container.read(provider.notifier).move(2);
-      expect(container.read(provider).value?.wordbookId, 2);
+      final model = container.read(provider.notifier);
+      expect(await model.addTo(2), isTrue);
+      expect(await model.wordbookIds(), [1, 2]);
+      // 같은 단어 하나라서 두 단어장에서 같은 id로 보인다.
+      expect(repository.savedWords.where((w) => w.id == 3), hasLength(1));
     });
 
-    test('옮길 곳에 같은 단어가 있으면 단어가 사라진다', () async {
+    test('그 단어장에 같은 글자가 있거나 이미 들어 있으면 넣지 않는다', () async {
       final provider = wordDetailViewModelProvider(1);
       container.listen(provider, (_, _) {});
       await container.read(provider.future);
-      await container.read(provider.notifier).move(2);
-      expect(container.read(provider).value, isNull);
+      final model = container.read(provider.notifier);
+      expect(await model.addTo(2), isFalse);
+      expect(await model.addTo(1), isFalse);
     });
 
     test('삭제하면 저장소에서 지운다', () async {

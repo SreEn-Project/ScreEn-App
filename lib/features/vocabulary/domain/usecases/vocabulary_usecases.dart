@@ -110,6 +110,113 @@ final class GetWords implements UseCase<List<VocabularyWord>, GetWordsParams> {
   }
 }
 
+class GetAllWordsParams {
+  const GetAllWordsParams({
+    this.query = '',
+    this.sort = WordSort.newest,
+    this.filter = WordFilter.all,
+  });
+
+  final String query;
+  final WordSort sort;
+  final WordFilter filter;
+}
+
+/// 전체 단어: 모든 단어장의 단어를 한 단어씩 모아 보여 준다 (AD-05).
+/// 정답률 · 외움은 단어가 들어 있는 모든 단어장의 진도를 합친 값이다
+/// (맞힌 횟수 · 푼 횟수는 합, 외움은 든 모든 단어장에서 외웠을 때만).
+final class GetAllWords
+    implements UseCase<List<VocabularyWord>, GetAllWordsParams> {
+  const GetAllWords(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<VocabularyWord>> call(GetAllWordsParams params) async {
+    final byId = <int, VocabularyWord>{};
+    final books = <int, List<int>>{};
+    final allMemorized = <int, bool>{};
+    for (final book in await _repository.wordbooks()) {
+      final words = await _repository.words(
+        book.id,
+        query: params.query.trim(),
+        sort: WordSort.newest,
+      );
+      for (final w in words) {
+        books.putIfAbsent(w.id, () => []).add(book.id);
+        allMemorized[w.id] = (allMemorized[w.id] ?? true) && w.memorized;
+        final first = byId[w.id];
+        byId[w.id] = first == null
+            ? w
+            : VocabularyWord(
+                id: first.id,
+                wordbookId: first.wordbookId,
+                word: first.word,
+                meaning: first.meaning,
+                pronunciation: first.pronunciation,
+                partOfSpeech: first.partOfSpeech,
+                contextMeaning: first.contextMeaning,
+                sentence: first.sentence,
+                sourceApp: first.sourceApp,
+                sourceLanguage: first.sourceLanguage,
+                targetLanguage: first.targetLanguage,
+                memorized: first.memorized,
+                savedAt: first.savedAt,
+                correctCount: first.correctCount + w.correctCount,
+                attemptCount: first.attemptCount + w.attemptCount,
+                meanings: first.meanings,
+              );
+      }
+    }
+    final merged = [
+      for (final w in byId.values)
+        VocabularyWord(
+          id: w.id,
+          wordbookId: w.wordbookId,
+          word: w.word,
+          meaning: w.meaning,
+          pronunciation: w.pronunciation,
+          partOfSpeech: w.partOfSpeech,
+          contextMeaning: w.contextMeaning,
+          sentence: w.sentence,
+          sourceApp: w.sourceApp,
+          sourceLanguage: w.sourceLanguage,
+          targetLanguage: w.targetLanguage,
+          memorized: allMemorized[w.id] ?? false,
+          savedAt: w.savedAt,
+          correctCount: w.correctCount,
+          attemptCount: w.attemptCount,
+          meanings: w.meanings,
+          wordbookIds: books[w.id] ?? const [],
+        ),
+    ].where(params.filter.matches).toList();
+    switch (params.sort) {
+      case WordSort.newest:
+        merged.sort((a, b) => b.savedAt.compareTo(a.savedAt));
+      case WordSort.oldest:
+        merged.sort((a, b) => a.savedAt.compareTo(b.savedAt));
+      case WordSort.alphabetical:
+        merged.sort(
+          (a, b) => a.word.toLowerCase().compareTo(b.word.toLowerCase()),
+        );
+      case WordSort.accuracyHigh || WordSort.accuracyLow:
+        final high = params.sort == WordSort.accuracyHigh;
+        merged.sort((a, b) {
+          final x = a.accuracy;
+          final y = b.accuracy;
+          if (x == null && y == null) return 0;
+          if (x == null) return 1;
+          if (y == null) return -1;
+          final byRate = high ? y.compareTo(x) : x.compareTo(y);
+          return byRate != 0
+              ? byRate
+              : b.attemptCount.compareTo(a.attemptCount);
+        });
+    }
+    return merged;
+  }
+}
+
 /// 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18).
 final class RecordWordAnswers implements UseCase<void, List<WordAnswer>> {
   const RecordWordAnswers(this._repository);
@@ -132,10 +239,11 @@ final class GetWord implements UseCase<VocabularyWord?, int> {
 }
 
 class MoveWordParams {
-  const MoveWordParams(this.id, this.wordbookId);
+  const MoveWordParams(this.id, this.fromWordbookId, this.toWordbookId);
 
   final int id;
-  final int wordbookId;
+  final int fromWordbookId;
+  final int toWordbookId;
 }
 
 /// 단어를 다른 단어장으로 옮기기 (AD-05, AD-06).
@@ -145,11 +253,54 @@ final class MoveWord implements UseCase<void, MoveWordParams> {
   final VocabularyRepository _repository;
 
   @override
-  Future<void> call(MoveWordParams params) =>
-      _repository.moveWord(params.id, params.wordbookId);
+  Future<void> call(MoveWordParams params) => _repository.moveWord(
+    params.id,
+    params.fromWordbookId,
+    params.toWordbookId,
+  );
 }
 
-/// 단어 삭제 (AD-05, AD-06).
+class WordbookLinkParams {
+  const WordbookLinkParams(this.id, this.wordbookId);
+
+  final int id;
+  final int wordbookId;
+}
+
+/// 단어를 다른 단어장에도 넣기. 넣었으면 true, 이미 있거나 같은 글자가 있으면 false.
+final class AddWordToWordbook implements UseCase<bool, WordbookLinkParams> {
+  const AddWordToWordbook(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(WordbookLinkParams params) =>
+      _repository.addToWordbook(params.id, params.wordbookId);
+}
+
+/// 단어를 한 단어장에서만 빼기. 마지막 단어장이었으면 단어도 지워진다.
+final class RemoveWordFromWordbook
+    implements UseCase<void, WordbookLinkParams> {
+  const RemoveWordFromWordbook(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<void> call(WordbookLinkParams params) =>
+      _repository.removeFromWordbook(params.id, params.wordbookId);
+}
+
+/// 단어가 들어 있는 단어장 id.
+final class GetWordWordbookIds implements UseCase<List<int>, int> {
+  const GetWordWordbookIds(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<int>> call(int id) => _repository.wordbookIdsOf(id);
+}
+
+/// 단어 삭제 (모든 단어장에서, AD-05, AD-06).
 final class DeleteWord implements UseCase<void, int> {
   const DeleteWord(this._repository);
 
@@ -160,13 +311,20 @@ final class DeleteWord implements UseCase<void, int> {
 }
 
 class SetMemorizedParams {
-  const SetMemorizedParams(this.id, {required this.memorized});
+  const SetMemorizedParams(
+    this.id, {
+    required this.wordbookId,
+    required this.memorized,
+  });
 
   final int id;
+
+  /// 외움 표시는 단어장마다 따로다.
+  final int wordbookId;
   final bool memorized;
 }
 
-/// 외운 단어 표시 (AD-05).
+/// 외운 단어 표시 (AD-05). 그 단어장에서만 바뀐다.
 final class SetWordMemorized implements UseCase<void, SetMemorizedParams> {
   const SetWordMemorized(this._repository);
 
@@ -174,7 +332,7 @@ final class SetWordMemorized implements UseCase<void, SetMemorizedParams> {
 
   @override
   Future<void> call(SetMemorizedParams params) =>
-      _repository.setMemorized(params.id, params.memorized);
+      _repository.setMemorized(params.wordbookId, params.id, params.memorized);
 }
 
 class SaveWordParams {
@@ -224,16 +382,19 @@ final class UpdateWord implements UseCase<bool, UpdateWordParams> {
   }
 }
 
-/// 고른 단어장들의 단어를 하나로 합친다 (AD-07). 단어 id는 단어장과 상관없이 유일하다.
+/// 고른 단어장들의 단어를 하나로 합친다 (AD-07). 단어 id는 단어장과 상관없이 유일하고,
+/// 한 단어가 여러 단어장에 들어 있으면 한 번만 담는다.
 Future<List<VocabularyWord>> _wordsOf(
   VocabularyRepository repository,
   WordbookSelection selection,
 ) async {
-  final all = <VocabularyWord>[];
+  final all = <int, VocabularyWord>{};
   for (final id in selection.ids) {
-    all.addAll(await repository.words(id));
+    for (final word in await repository.words(id)) {
+      all.putIfAbsent(word.id, () => word);
+    }
   }
-  return all;
+  return all.values.toList();
 }
 
 class CreateWordTestParams {
@@ -274,6 +435,7 @@ final class CreateWordTest
         for (final word in targets)
           WordTestQuestion(
             wordId: word.id,
+            wordbookId: word.wordbookId,
             mode: WordTestMode.typing,
             word: word.word,
             meaning: word.meaning,
@@ -283,9 +445,12 @@ final class CreateWordTest
 
     // 같은 단어장 → 다른 단어장 순으로 오답 후보를 모은다.
     final others = <VocabularyWord>[];
+    final seen = {for (final word in targets) word.id};
     for (final book in await _repository.wordbooks()) {
       if (params.selection.contains(book.id)) continue;
-      others.addAll(await _repository.words(book.id));
+      for (final word in await _repository.words(book.id)) {
+        if (seen.add(word.id)) others.add(word);
+      }
     }
     final questions = <WordTestQuestion>[];
     for (final word in targets) {
@@ -308,6 +473,7 @@ final class CreateWordTest
       questions.add(
         WordTestQuestion(
           wordId: word.id,
+          wordbookId: word.wordbookId,
           mode: WordTestMode.choice,
           word: word.word,
           meaning: word.meaning,
@@ -462,10 +628,13 @@ final class GetWordOfTheDay
 
   @override
   Future<DailyWord?> call(GetWordOfTheDayParams params) async {
-    final all = <VocabularyWord>[];
+    final unique = <int, VocabularyWord>{};
     for (final book in await _repository.wordbooks()) {
-      all.addAll(await _repository.words(book.id));
+      for (final word in await _repository.words(book.id)) {
+        unique.putIfAbsent(word.id, () => word);
+      }
     }
+    final all = unique.values.toList();
     if (all.isEmpty) return null;
     all.sort((a, b) => a.id.compareTo(b.id));
 
@@ -492,4 +661,84 @@ final class GetWordOfTheDay
       choices: [word.meaning, ...wrong]..shuffle(random),
     );
   }
+}
+
+/// 단어가 들어 있는 단어장마다의 진도.
+final class GetWordProgress implements UseCase<List<WordbookProgress>, int> {
+  const GetWordProgress(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<List<WordbookProgress>> call(int id) => _repository.progressOf(id);
+}
+
+class FindSameWordParams {
+  const FindSameWordParams(this.draft);
+
+  final WordDraft draft;
+}
+
+/// 저장하기 전에 같은 단어(글자 · 언어쌍)가 이미 있는지 찾는다. 있으면 그 단어.
+final class FindSameWord
+    implements UseCase<VocabularyWord?, FindSameWordParams> {
+  const FindSameWord(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<VocabularyWord?> call(FindSameWordParams params) {
+    final draft = params.draft;
+    final word = draft.word.trim();
+    if (word.isEmpty) return Future.value();
+    return _repository.findSame(
+      word,
+      draft.sourceLanguage,
+      draft.targetLanguage,
+    );
+  }
+}
+
+class MeaningParams {
+  const MeaningParams(this.id, this.draft);
+
+  /// 단어 id (뜻 더하기) 또는 뜻 id (뜻 고치기).
+  final int id;
+  final WordDraft draft;
+}
+
+/// 단어에 뜻 더하기. 비었거나 같은 뜻이 이미 있으면 false.
+final class AddWordMeaning implements UseCase<bool, MeaningParams> {
+  const AddWordMeaning(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(MeaningParams params) {
+    if (params.draft.meaning.trim().isEmpty) return Future.value(false);
+    return _repository.addMeaning(params.id, params.draft);
+  }
+}
+
+/// 뜻 하나 고치기. 비었거나 같은 단어의 다른 뜻과 겹치면 false.
+final class UpdateWordMeaning implements UseCase<bool, MeaningParams> {
+  const UpdateWordMeaning(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(MeaningParams params) {
+    if (params.draft.meaning.trim().isEmpty) return Future.value(false);
+    return _repository.updateMeaning(params.id, params.draft);
+  }
+}
+
+/// 뜻 하나 지우기. 마지막 뜻이면 false.
+final class DeleteWordMeaning implements UseCase<bool, int> {
+  const DeleteWordMeaning(this._repository);
+
+  final VocabularyRepository _repository;
+
+  @override
+  Future<bool> call(int meaningId) => _repository.deleteMeaning(meaningId);
 }

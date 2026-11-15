@@ -53,7 +53,7 @@ final class WordTestViewModelProvider
   }
 }
 
-String _$wordTestViewModelHash() => r'7be634472b5c33c23fd7c57118f508d94f9dcc96';
+String _$wordTestViewModelHash() => r'0dc28975301ca738e9d480ada80f5192ad0636bf';
 
 /// 암기 테스트 (AD-09, L-03): 방식 고르기 → 문제 풀기(제출하면 바로 정답 · 오답) → 점수와 틀린 단어.
 

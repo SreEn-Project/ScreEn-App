@@ -43,15 +43,42 @@ class VocabularyRepositoryImpl implements VocabularyRepository {
       (await _dataSource.getWord(id))?.toEntity();
 
   @override
-  Future<void> moveWord(int id, int wordbookId) =>
-      _dataSource.moveWord(id, wordbookId);
+  Future<List<int>> wordbookIdsOf(int id) => _dataSource.getWordWordbookIds(id);
+
+  @override
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId) =>
+      _dataSource.moveWord(id, fromWordbookId, toWordbookId);
+
+  @override
+  Future<bool> addToWordbook(int id, int wordbookId) =>
+      _dataSource.addWordToWordbook(id, wordbookId);
+
+  @override
+  Future<void> removeFromWordbook(int id, int wordbookId) =>
+      _dataSource.removeWordFromWordbook(id, wordbookId);
 
   @override
   Future<void> deleteWord(int id) => _dataSource.deleteWord(id);
 
   @override
-  Future<void> setMemorized(int id, bool memorized) =>
-      _dataSource.setMemorized(id, memorized);
+  Future<List<WordbookProgress>> progressOf(int id) async => [
+    for (final p in await _dataSource.getWordProgress(id)) p.toEntity(),
+  ];
+
+  @override
+  Future<VocabularyWord?> findSame(
+    String word,
+    String sourceLanguage,
+    String targetLanguage,
+  ) async => (await _dataSource.findSameWord(
+    word,
+    sourceLanguage,
+    targetLanguage,
+  ))?.toEntity();
+
+  @override
+  Future<void> setMemorized(int wordbookId, int id, bool memorized) =>
+      _dataSource.setMemorized(wordbookId, id, memorized);
 
   @override
   Future<void> recordAnswers(List<WordAnswer> answers) =>
@@ -64,4 +91,16 @@ class VocabularyRepositoryImpl implements VocabularyRepository {
   @override
   Future<bool> updateWord(int id, WordDraft draft) =>
       _dataSource.updateWord(id, draft.toPigeon());
+
+  @override
+  Future<bool> addMeaning(int id, WordDraft draft) =>
+      _dataSource.addWordMeaning(id, draft.toPigeon());
+
+  @override
+  Future<bool> updateMeaning(int meaningId, WordDraft draft) =>
+      _dataSource.updateWordMeaning(meaningId, draft.toPigeon());
+
+  @override
+  Future<bool> deleteMeaning(int meaningId) =>
+      _dataSource.deleteWordMeaning(meaningId);
 }

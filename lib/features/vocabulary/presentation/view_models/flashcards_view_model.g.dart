@@ -54,7 +54,7 @@ final class FlashcardsViewModelProvider
 }
 
 String _$flashcardsViewModelHash() =>
-    r'590a870fb79edd2acd168af24789d4acce1c4b54';
+    r'8cca655f6bee77d10c4c56c85b7ec9af892b9c2a';
 
 /// 카드 학습 (AD-08): 카드를 한 장씩 넘기며 외움 · 못 외움을 기록하고, 결과에서 못 외운 단어만 다시 본다.
 

@@ -167,7 +167,11 @@ class AssemblyViewModel extends _$AssemblyViewModel {
     );
     unawaited(
       ref.read(recordWordAnswersProvider)([
-        WordAnswer(question.wordId, correct: result.correct),
+        WordAnswer(
+          question.wordId,
+          wordbookId: question.wordbookId,
+          correct: result.correct,
+        ),
       ]),
     );
   }

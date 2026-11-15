@@ -67,7 +67,11 @@ class FlashcardsViewModel extends _$FlashcardsViewModel {
           : current.copyWith(unknown: [...current.unknown, word]),
     );
     await ref.read(setWordMemorizedProvider)(
-      SetMemorizedParams(word.id, memorized: memorized),
+      SetMemorizedParams(
+        word.id,
+        wordbookId: word.wordbookId,
+        memorized: memorized,
+      ),
     );
   }
 

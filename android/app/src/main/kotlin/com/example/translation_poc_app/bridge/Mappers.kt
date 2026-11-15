@@ -105,23 +105,43 @@ fun com.example.translation_poc_app.data.vocabulary.WordbookRow.toPigeon() = Wor
     createdAtMs = createdAt,
 )
 
-fun com.example.translation_poc_app.data.vocabulary.WordEntity.toPigeon() = VocabWord(
+fun com.example.translation_poc_app.data.vocabulary.WordMeaningEntity.toPigeon() = WordMeaning(
     id = id,
-    wordbookId = wordbookId,
-    word = word,
     meaning = meaning,
-    pronunciation = pronunciation,
-    partOfSpeech = partOfSpeech,
     contextMeaning = contextMeaning,
     sentence = sentence,
     sourceApp = sourceApp,
-    sourceLanguage = sourceLanguage,
-    targetLanguage = targetLanguage,
+)
+
+fun com.example.translation_poc_app.data.vocabulary.WordbookWordEntity.toPigeon() = WordbookProgress(
+    wordbookId = wordbookId,
     memorized = memorized,
-    createdAtMs = createdAt,
     correctCount = correctCount.toLong(),
     attemptCount = attemptCount.toLong(),
 )
+
+/** 단어 + 모든 뜻. 대표 뜻(첫 뜻)은 기존 필드에도 담는다. 진도는 [WordWithMeanings.row]의 단어장 기준. */
+fun com.example.translation_poc_app.data.vocabulary.WordWithMeanings.toPigeon(): VocabWord {
+    val primary = meanings.firstOrNull()
+    return VocabWord(
+        id = row.id,
+        wordbookId = row.wordbookId,
+        word = row.word,
+        meaning = primary?.meaning.orEmpty(),
+        pronunciation = row.pronunciation,
+        partOfSpeech = row.partOfSpeech,
+        contextMeaning = primary?.contextMeaning,
+        sentence = primary?.sentence,
+        sourceApp = primary?.sourceApp,
+        sourceLanguage = row.sourceLanguage,
+        targetLanguage = row.targetLanguage,
+        memorized = row.memorized,
+        createdAtMs = row.createdAt,
+        correctCount = row.correctCount.toLong(),
+        attemptCount = row.attemptCount.toLong(),
+        meanings = meanings.map { it.toPigeon() },
+    )
+}
 
 fun VocabSort.toNative() = when (this) {
     VocabSort.NEWEST -> com.example.translation_poc_app.data.vocabulary.WordSort.NEWEST

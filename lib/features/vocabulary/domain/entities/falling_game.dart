@@ -16,6 +16,7 @@ class FallingBlock {
   FallingBlock({
     required this.id,
     required this.wordId,
+    required this.wordbookId,
     required this.text,
     required this.answers,
     required this.lane,
@@ -23,6 +24,9 @@ class FallingBlock {
 
   final int id;
   final int wordId;
+
+  /// 이 단어를 가져온 단어장 (진도가 쌓일 곳).
+  final int wordbookId;
 
   /// 블록에 적힌 글 (방식에 따라 단어 또는 뜻).
   final String text;
@@ -140,6 +144,7 @@ class FallingGame {
         FallingBlock(
           id: _nextBlockId++,
           wordId: word.id,
+          wordbookId: word.wordbookId,
           text: mode == FallingMode.meaning ? word.word : word.meaning,
           answers: _answersOf(word),
           lane: pool[_random.nextInt(pool.length)],
@@ -161,7 +166,9 @@ class FallingGame {
     for (final b in landed) {
       blocks.remove(b);
       missedIds.add(b.wordId);
-      answers.add(WordAnswer(b.wordId, correct: false));
+      answers.add(
+        WordAnswer(b.wordId, wordbookId: b.wordbookId, correct: false),
+      );
       lives--;
       combo = 0;
     }
@@ -190,7 +197,9 @@ class FallingGame {
     if (hit == null) return false;
     blocks.remove(hit);
     lastDestroyed = hit;
-    answers.add(WordAnswer(hit.wordId, correct: true));
+    answers.add(
+      WordAnswer(hit.wordId, wordbookId: hit.wordbookId, correct: true),
+    );
     combo++;
     if (combo > bestCombo) bestCombo = combo;
     destroyed++;

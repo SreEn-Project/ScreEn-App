@@ -262,8 +262,14 @@ class FakeVocabularyRepository implements VocabularyRepository {
 
   int _nextId = 100;
 
+  /// 단어 id → 대표 단어장([VocabularyWord.wordbookId]) 말고 더 들어 있는 단어장 id.
+  final Map<int, Set<int>> extraBooks = {};
+
+  bool _in(VocabularyWord w, int bookId) =>
+      w.wordbookId == bookId || (extraBooks[w.id]?.contains(bookId) ?? false);
+
   Wordbook _counted(Wordbook book) {
-    final inBook = savedWords.where((w) => w.wordbookId == book.id);
+    final inBook = savedWords.where((w) => _in(w, book.id));
     return Wordbook(
       id: book.id,
       name: book.name,
@@ -318,7 +324,12 @@ class FakeVocabularyRepository implements VocabularyRepository {
   @override
   Future<void> deleteWordbook(int id) async {
     books.removeWhere((b) => b.id == id);
-    savedWords.removeWhere((w) => w.wordbookId == id);
+    savedWords.removeWhere(
+      (w) => w.wordbookId == id && !extraBooks.containsKey(w.id),
+    );
+    for (final extra in extraBooks.values) {
+      extra.remove(id);
+    }
   }
 
   @override
@@ -328,15 +339,19 @@ class FakeVocabularyRepository implements VocabularyRepository {
     WordSort sort = WordSort.newest,
   }) async {
     final q = query.toLowerCase();
-    final found = savedWords
-        .where(
-          (w) =>
-              w.wordbookId == wordbookId &&
-              (q.isEmpty ||
-                  w.word.toLowerCase().contains(q) ||
-                  w.meaning.toLowerCase().contains(q)),
-        )
-        .toList();
+    final found =
+        [
+              for (final w in savedWords)
+                if (_in(w, wordbookId)) _view(w, wordbookId),
+            ]
+            .where(
+              (w) =>
+                  true &&
+                  (q.isEmpty ||
+                      w.word.toLowerCase().contains(q) ||
+                      w.meaning.toLowerCase().contains(q)),
+            )
+            .toList();
     found.sort(
       (a, b) => switch (sort) {
         WordSort.newest => b.savedAt.compareTo(a.savedAt),
@@ -352,8 +367,173 @@ class FakeVocabularyRepository implements VocabularyRepository {
   }
 
   @override
-  Future<VocabularyWord?> word(int id) async =>
-      savedWords.where((w) => w.id == id).firstOrNull;
+  Future<VocabularyWord?> word(int id) async {
+    final w = savedWords.where((w) => w.id == id).firstOrNull;
+    return w == null ? null : _view(w, w.wordbookId);
+  }
+
+  /// 단어장 [bookId]에서 본 단어: 그 단어장의 진도와 모든 뜻을 담는다.
+  VocabularyWord _view(VocabularyWord w, int bookId) {
+    final progress = bookId == w.wordbookId
+        ? WordbookProgress(
+            wordbookId: bookId,
+            memorized: w.memorized,
+            correctCount: w.correctCount,
+            attemptCount: w.attemptCount,
+          )
+        : (_progress['${w.id}:$bookId'] ??
+              WordbookProgress(wordbookId: bookId, memorized: false));
+    return _copy(
+      w,
+      wordbookId: bookId,
+      memorized: progress.memorized,
+      correctCount: progress.correctCount,
+      attemptCount: progress.attemptCount,
+      meanings: [
+        WordMeaning(
+          id: -w.id,
+          meaning: w.meaning,
+          contextMeaning: w.contextMeaning,
+          sentence: w.sentence,
+          sourceApp: w.sourceApp,
+        ),
+        ...?extraMeanings[w.id],
+      ],
+    );
+  }
+
+  /// (단어, 대표가 아닌 단어장) → 진도.
+  final Map<String, WordbookProgress> _progress = {};
+
+  /// 단어 id → 대표 뜻 말고 더 있는 뜻.
+  final Map<int, List<WordMeaning>> extraMeanings = {};
+  int _nextMeaningId = 1000;
+
+  @override
+  Future<List<WordbookProgress>> progressOf(int id) async {
+    final w = savedWords.where((w) => w.id == id).firstOrNull;
+    if (w == null) return [];
+    return [
+      for (final bookId in await wordbookIdsOf(id))
+        () {
+          final v = _view(w, bookId);
+          return WordbookProgress(
+            wordbookId: bookId,
+            memorized: v.memorized,
+            correctCount: v.correctCount,
+            attemptCount: v.attemptCount,
+          );
+        }(),
+    ];
+  }
+
+  @override
+  Future<VocabularyWord?> findSame(
+    String word,
+    String sourceLanguage,
+    String targetLanguage,
+  ) async {
+    final w = savedWords
+        .where(
+          (w) =>
+              w.word == word &&
+              w.sourceLanguage == sourceLanguage &&
+              w.targetLanguage == targetLanguage,
+        )
+        .firstOrNull;
+    return w == null ? null : _view(w, w.wordbookId);
+  }
+
+  @override
+  Future<bool> addMeaning(int id, WordDraft draft) async {
+    final w = savedWords.where((w) => w.id == id).firstOrNull;
+    final meaning = draft.meaning.trim();
+    if (w == null || meaning.isEmpty) return false;
+    final all = _view(w, w.wordbookId).meanings;
+    if (all.any((m) => m.meaning.toLowerCase() == meaning.toLowerCase())) {
+      return false;
+    }
+    (extraMeanings[id] ??= []).add(
+      WordMeaning(
+        id: _nextMeaningId++,
+        meaning: meaning,
+        contextMeaning: draft.contextMeaning,
+        sentence: draft.sentence,
+      ),
+    );
+    return true;
+  }
+
+  @override
+  Future<bool> updateMeaning(int meaningId, WordDraft draft) async {
+    final meaning = draft.meaning.trim();
+    if (meaning.isEmpty) return false;
+    if (meaningId < 0) {
+      final i = savedWords.indexWhere((w) => w.id == -meaningId);
+      if (i < 0) return false;
+      final w = savedWords[i];
+      savedWords[i] = VocabularyWord(
+        id: w.id,
+        wordbookId: w.wordbookId,
+        word: w.word,
+        meaning: meaning,
+        pronunciation: w.pronunciation,
+        partOfSpeech: w.partOfSpeech,
+        contextMeaning: draft.contextMeaning,
+        sentence: draft.sentence,
+        sourceApp: w.sourceApp,
+        sourceLanguage: w.sourceLanguage,
+        targetLanguage: w.targetLanguage,
+        memorized: w.memorized,
+        savedAt: w.savedAt,
+        correctCount: w.correctCount,
+        attemptCount: w.attemptCount,
+      );
+      return true;
+    }
+    for (final list in extraMeanings.values) {
+      final i = list.indexWhere((m) => m.id == meaningId);
+      if (i < 0) continue;
+      list[i] = WordMeaning(
+        id: meaningId,
+        meaning: meaning,
+        contextMeaning: draft.contextMeaning,
+        sentence: draft.sentence,
+      );
+      return true;
+    }
+    return false;
+  }
+
+  @override
+  Future<bool> deleteMeaning(int meaningId) async {
+    if (meaningId < 0) {
+      // 대표 뜻을 지우면 다음 뜻이 대표가 된다.
+      final id = -meaningId;
+      final extras = extraMeanings[id];
+      if (extras == null || extras.isEmpty) return false;
+      final next = extras.removeAt(0);
+      await updateMeaning(
+        meaningId,
+        WordDraft(
+          word: '',
+          meaning: next.meaning,
+          contextMeaning: next.contextMeaning,
+          sentence: next.sentence,
+          sourceLanguage: 'en',
+          targetLanguage: 'ko',
+        ),
+      );
+      return true;
+    }
+    for (final list in extraMeanings.values) {
+      if (list.any((m) => m.id == meaningId)) {
+        list.removeWhere((m) => m.id == meaningId);
+        return true;
+      }
+    }
+    return false;
+  }
 
   VocabularyWord _copy(
     VocabularyWord w, {
@@ -361,7 +541,9 @@ class FakeVocabularyRepository implements VocabularyRepository {
     bool? memorized,
     int? correctCount,
     int? attemptCount,
+    List<WordMeaning>? meanings,
   }) => VocabularyWord(
+    meanings: meanings ?? w.meanings,
     id: w.id,
     wordbookId: wordbookId ?? w.wordbookId,
     word: w.word,
@@ -380,17 +562,46 @@ class FakeVocabularyRepository implements VocabularyRepository {
   );
 
   @override
-  Future<void> moveWord(int id, int wordbookId) async {
+  Future<List<int>> wordbookIdsOf(int id) async {
+    final w = savedWords.where((w) => w.id == id).firstOrNull;
+    if (w == null) return [];
+    return ({w.wordbookId, ...?extraBooks[id]}.toList()..sort());
+  }
+
+  @override
+  Future<bool> addToWordbook(int id, int wordbookId) async {
+    final w = savedWords.where((w) => w.id == id).firstOrNull;
+    if (w == null || _in(w, wordbookId)) return false;
+    if (savedWords.any((o) => _in(o, wordbookId) && o.word == w.word)) {
+      return false;
+    }
+    (extraBooks[id] ??= {}).add(wordbookId);
+    return true;
+  }
+
+  @override
+  Future<void> removeFromWordbook(int id, int wordbookId) async {
+    final index = savedWords.indexWhere((w) => w.id == id);
+    if (index < 0) return;
+    final ids = (await wordbookIdsOf(id))..remove(wordbookId);
+    if (ids.isEmpty) {
+      savedWords.removeAt(index);
+      extraBooks.remove(id);
+      return;
+    }
+    extraBooks[id] = {...ids.skip(1)};
+    savedWords[index] = _copy(savedWords[index], wordbookId: ids.first);
+  }
+
+  @override
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId) async {
     final index = savedWords.indexWhere((w) => w.id == id);
     final moving = savedWords[index];
     final duplicate = savedWords.any(
-      (w) => w.wordbookId == wordbookId && w.word == moving.word,
+      (w) => _in(w, toWordbookId) && w.word == moving.word,
     );
-    if (duplicate) {
-      savedWords.removeAt(index);
-    } else {
-      savedWords[index] = _copy(moving, wordbookId: wordbookId);
-    }
+    if (!duplicate) await addToWordbook(id, toWordbookId);
+    await removeFromWordbook(id, fromWordbookId);
   }
 
   @override
@@ -398,9 +609,20 @@ class FakeVocabularyRepository implements VocabularyRepository {
       savedWords.removeWhere((w) => w.id == id);
 
   @override
-  Future<void> setMemorized(int id, bool memorized) async {
+  Future<void> setMemorized(int wordbookId, int id, bool memorized) async {
     final index = savedWords.indexWhere((w) => w.id == id);
-    savedWords[index] = _copy(savedWords[index], memorized: memorized);
+    final w = savedWords[index];
+    if (w.wordbookId == wordbookId) {
+      savedWords[index] = _copy(w, memorized: memorized);
+      return;
+    }
+    final old = _view(w, wordbookId);
+    _progress['$id:$wordbookId'] = WordbookProgress(
+      wordbookId: wordbookId,
+      memorized: memorized,
+      correctCount: old.correctCount,
+      attemptCount: old.attemptCount,
+    );
   }
 
   /// 테스트에서 확인하려고 받은 결과를 모아 둔다.
@@ -413,27 +635,53 @@ class FakeVocabularyRepository implements VocabularyRepository {
       final i = savedWords.indexWhere((w) => w.id == a.wordId);
       if (i < 0) continue;
       final w = savedWords[i];
-      savedWords[i] = _copy(
-        w,
-        correctCount: w.correctCount + (a.correct ? 1 : 0),
-        attemptCount: w.attemptCount + 1,
+      if (w.wordbookId == a.wordbookId) {
+        savedWords[i] = _copy(
+          w,
+          correctCount: w.correctCount + (a.correct ? 1 : 0),
+          attemptCount: w.attemptCount + 1,
+        );
+        continue;
+      }
+      final old = _view(w, a.wordbookId);
+      _progress['${a.wordId}:${a.wordbookId}'] = WordbookProgress(
+        wordbookId: a.wordbookId,
+        memorized: old.memorized,
+        correctCount: old.correctCount + (a.correct ? 1 : 0),
+        attemptCount: old.attemptCount + 1,
       );
     }
   }
 
   @override
   Future<int?> saveWord(int wordbookId, WordDraft draft) async {
-    if (draft.word.trim().isEmpty || draft.meaning.trim().isEmpty) return null;
+    final text = draft.word.trim();
+    final meaning = draft.meaning.trim();
+    if (text.isEmpty || meaning.isEmpty) return null;
+    // 같은 단어가 있으면(어느 단어장이든) 그 단어를 이 단어장에도 넣고 새 뜻이면 뜻을 더한다.
+    final existing = savedWords
+        .where(
+          (w) =>
+              w.word == text &&
+              (_in(w, wordbookId) ||
+                  (w.sourceLanguage == draft.sourceLanguage &&
+                      w.targetLanguage == draft.targetLanguage)),
+        )
+        .firstOrNull;
+    if (existing != null) {
+      if (!_in(existing, wordbookId)) {
+        (extraBooks[existing.id] ??= {}).add(wordbookId);
+      }
+      await addMeaning(existing.id, draft);
+      return existing.id;
+    }
     final id = _nextId++;
-    savedWords.removeWhere(
-      (w) => w.wordbookId == wordbookId && w.word == draft.word.trim(),
-    );
     savedWords.add(
       VocabularyWord(
         id: id,
         wordbookId: wordbookId,
-        word: draft.word.trim(),
-        meaning: draft.meaning.trim(),
+        word: text,
+        meaning: meaning,
         pronunciation: draft.pronunciation,
         partOfSpeech: draft.partOfSpeech,
         contextMeaning: draft.contextMeaning,

@@ -587,7 +587,134 @@ class Wordbook {
   }
 }
 
-/// 저장한 단어 (AD-03, AD-05, AD-06).
+/// 단어의 뜻 하나. 한 단어에 여러 개 둘 수 있다.
+class WordMeaning {
+  WordMeaning({
+    required this.id,
+    required this.meaning,
+    this.contextMeaning,
+    this.sentence,
+    this.sourceApp,
+  });
+
+  int id;
+
+  String meaning;
+
+  String? contextMeaning;
+
+  String? sentence;
+
+  String? sourceApp;
+
+  List<Object?> _toList() {
+    return <Object?>[id, meaning, contextMeaning, sentence, sourceApp];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static WordMeaning decode(Object result) {
+    result as List<Object?>;
+    return WordMeaning(
+      id: result[0]! as int,
+      meaning: result[1]! as String,
+      contextMeaning: result[2] as String?,
+      sentence: result[3] as String?,
+      sourceApp: result[4] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! WordMeaning || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(id, other.id) &&
+        _deepEquals(meaning, other.meaning) &&
+        _deepEquals(contextMeaning, other.contextMeaning) &&
+        _deepEquals(sentence, other.sentence) &&
+        _deepEquals(sourceApp, other.sourceApp);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'WordMeaning(id: $id, meaning: $meaning, contextMeaning: $contextMeaning, sentence: $sentence, sourceApp: $sourceApp)';
+  }
+}
+
+/// 단어가 들어 있는 단어장 하나에서의 학습 진도.
+class WordbookProgress {
+  WordbookProgress({
+    required this.wordbookId,
+    required this.memorized,
+    required this.correctCount,
+    required this.attemptCount,
+  });
+
+  int wordbookId;
+
+  bool memorized;
+
+  int correctCount;
+
+  int attemptCount;
+
+  List<Object?> _toList() {
+    return <Object?>[wordbookId, memorized, correctCount, attemptCount];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static WordbookProgress decode(Object result) {
+    result as List<Object?>;
+    return WordbookProgress(
+      wordbookId: result[0]! as int,
+      memorized: result[1]! as bool,
+      correctCount: result[2]! as int,
+      attemptCount: result[3]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! WordbookProgress || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(wordbookId, other.wordbookId) &&
+        _deepEquals(memorized, other.memorized) &&
+        _deepEquals(correctCount, other.correctCount) &&
+        _deepEquals(attemptCount, other.attemptCount);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'WordbookProgress(wordbookId: $wordbookId, memorized: $memorized, correctCount: $correctCount, attemptCount: $attemptCount)';
+  }
+}
+
+/// 저장한 단어 (AD-03, AD-05, AD-06). [wordbookId]는 목록에서 가져온 단어장(상세에서는 들어 있는 첫 단어장).
+/// [meaning] · [contextMeaning] · [sentence] · [sourceApp]은 대표 뜻(첫 뜻)이고 [meanings]가 전체다.
+/// [memorized] · [correctCount] · [attemptCount]는 [wordbookId] 단어장에서의 진도다.
 class VocabWord {
   VocabWord({
     required this.id,
@@ -605,6 +732,7 @@ class VocabWord {
     required this.createdAtMs,
     required this.correctCount,
     required this.attemptCount,
+    required this.meanings,
   });
 
   int id;
@@ -641,6 +769,9 @@ class VocabWord {
 
   int attemptCount;
 
+  /// 모든 뜻 (대표 뜻이 맨 앞).
+  List<WordMeaning> meanings;
+
   List<Object?> _toList() {
     return <Object?>[
       id,
@@ -658,6 +789,7 @@ class VocabWord {
       createdAtMs,
       correctCount,
       attemptCount,
+      meanings,
     ];
   }
 
@@ -683,6 +815,7 @@ class VocabWord {
       createdAtMs: result[12]! as int,
       correctCount: result[13]! as int,
       attemptCount: result[14]! as int,
+      meanings: (result[15]! as List<Object?>).cast<WordMeaning>(),
     );
   }
 
@@ -709,7 +842,8 @@ class VocabWord {
         _deepEquals(memorized, other.memorized) &&
         _deepEquals(createdAtMs, other.createdAtMs) &&
         _deepEquals(correctCount, other.correctCount) &&
-        _deepEquals(attemptCount, other.attemptCount);
+        _deepEquals(attemptCount, other.attemptCount) &&
+        _deepEquals(meanings, other.meanings);
   }
 
   @override
@@ -718,20 +852,26 @@ class VocabWord {
 
   @override
   String toString() {
-    return 'VocabWord(id: $id, wordbookId: $wordbookId, word: $word, meaning: $meaning, pronunciation: $pronunciation, partOfSpeech: $partOfSpeech, contextMeaning: $contextMeaning, sentence: $sentence, sourceApp: $sourceApp, sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage, memorized: $memorized, createdAtMs: $createdAtMs, correctCount: $correctCount, attemptCount: $attemptCount)';
+    return 'VocabWord(id: $id, wordbookId: $wordbookId, word: $word, meaning: $meaning, pronunciation: $pronunciation, partOfSpeech: $partOfSpeech, contextMeaning: $contextMeaning, sentence: $sentence, sourceApp: $sourceApp, sourceLanguage: $sourceLanguage, targetLanguage: $targetLanguage, memorized: $memorized, createdAtMs: $createdAtMs, correctCount: $correctCount, attemptCount: $attemptCount, meanings: $meanings)';
   }
 }
 
-/// 단어 하나를 푼 결과 (AD-18).
+/// 단어 하나를 푼 결과 (AD-18). 푼 단어장([wordbookId])의 진도에 쌓인다.
 class WordAnswer {
-  WordAnswer({required this.wordId, required this.correct});
+  WordAnswer({
+    required this.wordbookId,
+    required this.wordId,
+    required this.correct,
+  });
+
+  int wordbookId;
 
   int wordId;
 
   bool correct;
 
   List<Object?> _toList() {
-    return <Object?>[wordId, correct];
+    return <Object?>[wordbookId, wordId, correct];
   }
 
   Object encode() {
@@ -740,7 +880,11 @@ class WordAnswer {
 
   static WordAnswer decode(Object result) {
     result as List<Object?>;
-    return WordAnswer(wordId: result[0]! as int, correct: result[1]! as bool);
+    return WordAnswer(
+      wordbookId: result[0]! as int,
+      wordId: result[1]! as int,
+      correct: result[2]! as bool,
+    );
   }
 
   @override
@@ -752,7 +896,8 @@ class WordAnswer {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(wordId, other.wordId) &&
+    return _deepEquals(wordbookId, other.wordbookId) &&
+        _deepEquals(wordId, other.wordId) &&
         _deepEquals(correct, other.correct);
   }
 
@@ -762,7 +907,7 @@ class WordAnswer {
 
   @override
   String toString() {
-    return 'WordAnswer(wordId: $wordId, correct: $correct)';
+    return 'WordAnswer(wordbookId: $wordbookId, wordId: $wordId, correct: $correct)';
   }
 }
 
@@ -984,20 +1129,26 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is Wordbook) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    } else if (value is VocabWord) {
+    } else if (value is WordMeaning) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    } else if (value is WordAnswer) {
+    } else if (value is WordbookProgress) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    } else if (value is VocabWordInput) {
+    } else if (value is VocabWord) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    } else if (value is ServiceStateChanged) {
+    } else if (value is WordAnswer) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    } else if (value is SettingsChanged) {
+    } else if (value is VocabWordInput) {
       buffer.putUint8(146);
+      writeValue(buffer, value.encode());
+    } else if (value is ServiceStateChanged) {
+      buffer.putUint8(147);
+      writeValue(buffer, value.encode());
+    } else if (value is SettingsChanged) {
+      buffer.putUint8(148);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1042,14 +1193,18 @@ class _PigeonCodec extends StandardMessageCodec {
       case 141:
         return Wordbook.decode(readValue(buffer)!);
       case 142:
-        return VocabWord.decode(readValue(buffer)!);
+        return WordMeaning.decode(readValue(buffer)!);
       case 143:
-        return WordAnswer.decode(readValue(buffer)!);
+        return WordbookProgress.decode(readValue(buffer)!);
       case 144:
-        return VocabWordInput.decode(readValue(buffer)!);
+        return VocabWord.decode(readValue(buffer)!);
       case 145:
-        return ServiceStateChanged.decode(readValue(buffer)!);
+        return WordAnswer.decode(readValue(buffer)!);
       case 146:
+        return VocabWordInput.decode(readValue(buffer)!);
+      case 147:
+        return ServiceStateChanged.decode(readValue(buffer)!);
+      case 148:
         return SettingsChanged.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -2114,6 +2269,7 @@ class VocabularyHostApi {
     return (pigeonVar_replyValue! as List<Object?>).cast<VocabWord>();
   }
 
+  /// 단어장을 모르는 상세 화면용: 들어 있는 첫 단어장 기준으로 돌려준다.
   Future<VocabWord?> getWord(int id) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWord$pigeonVar_messageChannelSuffix';
@@ -2135,10 +2291,123 @@ class VocabularyHostApi {
     return pigeonVar_replyValue as VocabWord?;
   }
 
-  /// 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽을 지운다).
-  Future<void> moveWord(int id, int wordbookId) async {
+  /// 단어가 들어 있는 단어장마다의 진도 (단어장 id 순).
+  Future<List<WordbookProgress>> getWordProgress(int id) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWordProgress$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<WordbookProgress>();
+  }
+
+  /// 같은 단어(글자 · 언어쌍)가 이미 저장돼 있으면 돌려준다. 저장 전에 "뜻을 더할까요?"를 물을 때 쓴다.
+  Future<VocabWord?> findSameWord(
+    String word,
+    String sourceLanguage,
+    String targetLanguage,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.findSameWord$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[word, sourceLanguage, targetLanguage],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as VocabWord?;
+  }
+
+  /// 단어가 들어 있는 단어장 id (id 순). 한 단어가 여러 단어장에 들 수 있다.
+  Future<List<int>> getWordWordbookIds(int id) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWordWordbookIds$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<int>();
+  }
+
+  /// [fromWordbookId]에서 [toWordbookId]로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽에서만 뺀다).
+  Future<void> moveWord(int id, int fromWordbookId, int toWordbookId) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.moveWord$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id, fromWordbookId, toWordbookId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// 단어를 다른 단어장에도 넣는다. 이미 들어 있거나 그 단어장에 같은 글자의 단어가 있으면 false.
+  Future<bool> addWordToWordbook(int id, int wordbookId) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.addWordToWordbook$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id, wordbookId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// 한 단어장에서만 뺀다. 마지막 단어장이었으면 단어도 지운다.
+  Future<void> removeWordFromWordbook(int id, int wordbookId) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.removeWordFromWordbook$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -2156,6 +2425,7 @@ class VocabularyHostApi {
     );
   }
 
+  /// 모든 단어장에서 지운다.
   Future<void> deleteWord(int id) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.deleteWord$pigeonVar_messageChannelSuffix';
@@ -2176,7 +2446,8 @@ class VocabularyHostApi {
     );
   }
 
-  Future<void> setMemorized(int id, bool memorized) async {
+  /// [wordbookId] 단어장에서의 외움 표시.
+  Future<void> setMemorized(int wordbookId, int id, bool memorized) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.setMemorized$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -2185,7 +2456,7 @@ class VocabularyHostApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[id, memorized],
+      <Object?>[wordbookId, id, memorized],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -2217,8 +2488,8 @@ class VocabularyHostApi {
     );
   }
 
-  /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
-  /// 저장한 단어의 id를 돌려준다.
+  /// 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어가 이미 있으면 그 단어를 이 단어장에도 넣고,
+  /// 새로운 뜻이면 뜻을 더한다. 저장한 단어의 id를 돌려준다.
   Future<int?> saveWord(int wordbookId, VocabWordInput input) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.saveWord$pigeonVar_messageChannelSuffix';
@@ -2240,8 +2511,8 @@ class VocabularyHostApi {
     return pigeonVar_replyValue as int?;
   }
 
-  /// 저장된 단어의 내용(단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문)을 고친다. 외운 표시 · 정답률 · 저장 시각 · 언어는 유지한다.
-  /// 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
+  /// 저장된 단어의 공통 부분(단어 · 발음 · 품사)과 대표 뜻(뜻 · 문맥 뜻 · 예문)을 고친다. 진도 · 저장 시각 · 언어는 유지한다.
+  /// 단어 · 뜻이 비었거나 들어 있는 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
   Future<bool> updateWord(int id, VocabWordInput input) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.updateWord$pigeonVar_messageChannelSuffix';
@@ -2252,6 +2523,72 @@ class VocabularyHostApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[id, input],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// 단어에 뜻을 더한다 (input의 뜻 · 문맥 뜻 · 예문만 쓴다). 비었거나 같은 뜻이 이미 있으면 false.
+  Future<bool> addWordMeaning(int id, VocabWordInput input) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.addWordMeaning$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id, input],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// 뜻 하나를 고친다 (뜻 · 문맥 뜻 · 예문). 비었거나 같은 단어의 다른 뜻과 겹치면 false.
+  Future<bool> updateWordMeaning(int meaningId, VocabWordInput input) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.updateWordMeaning$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[meaningId, input],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// 뜻 하나를 지운다. 마지막 뜻이면 false.
+  Future<bool> deleteWordMeaning(int meaningId) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.deleteWordMeaning$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[meaningId],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

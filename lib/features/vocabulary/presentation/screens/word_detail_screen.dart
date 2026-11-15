@@ -84,18 +84,27 @@ class WordDetailScreen extends ConsumerWidget {
           ],
         ),
       ],
-      block(l10n.vocabMeaning, w.meaning, style: theme.textTheme.titleLarge),
-      if (w.contextMeaning != null)
-        block(l10n.vocabContextMeaning, w.contextMeaning!),
-      if (w.sentence != null)
-        block(
-          l10n.vocabSentence,
-          w.sentence!,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-      if (w.sourceApp != null) block(l10n.vocabSourceApp, w.sourceApp!),
+      ..._meaningBlocks(context, ref, w),
+      const SizedBox(height: AppTokens.space12),
+      AppButton.secondary(
+        label: l10n.vocabAddMeaning,
+        leading: const Icon(Symbols.add_rounded, size: 20),
+        onPressed: () async {
+          final added = await showWordEditSheet(
+            context,
+            title: l10n.vocabAddMeaningTitle,
+            initial: WordDraft(
+              word: w.word,
+              meaning: '',
+              sourceLanguage: w.sourceLanguage,
+              targetLanguage: w.targetLanguage,
+            ),
+            meaningOfWordId: w.id,
+          );
+          if (added != null) await model.reload();
+        },
+      ),
+      ..._progressBlock(context, ref),
       block(l10n.vocabSavedAt, saved),
       const SizedBox(height: AppTokens.sectionGap + AppTokens.space8),
       AppButton.secondary(
@@ -113,9 +122,9 @@ class WordDetailScreen extends ConsumerWidget {
       ),
       const SizedBox(height: AppTokens.space8),
       AppButton.secondary(
-        label: l10n.vocabMove,
-        leading: const Icon(Symbols.drive_file_move_rounded, size: 20),
-        onPressed: () => _move(context, ref, w),
+        label: l10n.vocabAddTo,
+        leading: const Icon(Symbols.library_add_rounded, size: 20),
+        onPressed: () => _addTo(context, ref, w),
       ),
       const SizedBox(height: AppTokens.space8),
       Center(
@@ -136,25 +145,199 @@ class WordDetailScreen extends ConsumerWidget {
     ];
   }
 
-  Future<void> _move(
+  /// 뜻마다 한 덩어리: 뜻 · 문맥 뜻 · 예문, 고치기 · 지우기 (마지막 뜻은 지울 수 없다).
+  List<Widget> _meaningBlocks(
+    BuildContext context,
+    WidgetRef ref,
+    VocabularyWord w,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final model = ref.read(wordDetailViewModelProvider(wordId).notifier);
+    final meanings = w.meanings.isEmpty
+        ? [
+            WordMeaning(
+              id: -w.id,
+              meaning: w.meaning,
+              contextMeaning: w.contextMeaning,
+              sentence: w.sentence,
+              sourceApp: w.sourceApp,
+            ),
+          ]
+        : w.meanings;
+    return [
+      for (var i = 0; i < meanings.length; i++)
+        Padding(
+          padding: const EdgeInsets.only(top: AppTokens.sectionGap),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: SectionTitle(
+                      meanings.length == 1
+                          ? l10n.vocabMeaning
+                          : l10n.vocabMeaningN(i + 1),
+                    ),
+                  ),
+                  AppIconButton(
+                    icon: Symbols.edit_rounded,
+                    tooltip: l10n.vocabEditWord,
+                    plain: true,
+                    size: 32,
+                    onPressed: () async {
+                      final m = meanings[i];
+                      final edited = await showWordEditSheet(
+                        context,
+                        title: l10n.vocabEditMeaningTitle,
+                        initial: WordDraft(
+                          word: w.word,
+                          meaning: m.meaning,
+                          contextMeaning: m.contextMeaning,
+                          sentence: m.sentence,
+                          sourceLanguage: w.sourceLanguage,
+                          targetLanguage: w.targetLanguage,
+                        ),
+                        editingMeaningId: m.id,
+                      );
+                      if (edited != null) await model.reload();
+                    },
+                  ),
+                  if (meanings.length > 1)
+                    AppIconButton(
+                      icon: Symbols.delete_rounded,
+                      tooltip: l10n.vocabDeleteWord,
+                      plain: true,
+                      size: 32,
+                      onPressed: () async {
+                        final confirmed = await showDeleteConfirmSheet(
+                          context,
+                          title: l10n.vocabMeaningDeleteTitle,
+                          body: meanings[i].meaning,
+                        );
+                        if (confirmed) {
+                          await model.deleteMeaning(meanings[i].id);
+                        }
+                      },
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppTokens.space4),
+              SelectableText(
+                meanings[i].meaning,
+                style: theme.textTheme.titleLarge,
+              ),
+              if (meanings[i].contextMeaning != null) ...[
+                const SizedBox(height: AppTokens.space8),
+                SelectableText(
+                  meanings[i].contextMeaning!,
+                  style: theme.textTheme.bodyLarge,
+                ),
+              ],
+              if (meanings[i].sentence != null) ...[
+                const SizedBox(height: AppTokens.space8),
+                SelectableText(
+                  meanings[i].sentence!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+              if (meanings[i].sourceApp != null) ...[
+                const SizedBox(height: AppTokens.space4),
+                Text(
+                  meanings[i].sourceApp!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+    ];
+  }
+
+  /// 들어 있는 단어장마다의 진도 (외움 · 정답률).
+  List<Widget> _progressBlock(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final progress = ref.watch(wordProgressProvider(wordId)).value ?? const [];
+    final books = ref.watch(wordbooksViewModelProvider).value ?? const [];
+    if (progress.isEmpty) return const [];
+    return [
+      const SizedBox(height: AppTokens.sectionGap),
+      SectionTitle(l10n.vocabProgressByBook),
+      const SizedBox(height: AppTokens.space8),
+      if (progress.length > 1 && progress.any((p) => p.attemptCount > 0))
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppTokens.space8),
+          child: Text(() {
+            final correct = progress.fold(0, (a, p) => a + p.correctCount);
+            final attempt = progress.fold(0, (a, p) => a + p.attemptCount);
+            return l10n.vocabOverallAccuracy(
+              (correct * 100 / attempt).round(),
+              correct,
+              attempt,
+            );
+          }(), style: theme.textTheme.bodySmall),
+        ),
+      for (final p in progress)
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppTokens.space8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  books.where((b) => b.id == p.wordbookId).firstOrNull?.name ??
+                      '',
+                  style: theme.textTheme.bodyLarge,
+                ),
+              ),
+              if (p.accuracy != null) ...[
+                Text(
+                  l10n.vocabAccuracy((p.accuracy! * 100).round()),
+                  style: theme.textTheme.bodySmall,
+                ),
+                const SizedBox(width: AppTokens.space8),
+              ],
+              AppBadge(
+                label: p.memorized
+                    ? l10n.vocabMemorizedShort
+                    : l10n.vocabNotMemorizedShort,
+              ),
+            ],
+          ),
+        ),
+    ];
+  }
+
+  Future<void> _addTo(
     BuildContext context,
     WidgetRef ref,
     VocabularyWord word,
   ) async {
+    final l10n = AppLocalizations.of(context);
+    final model = ref.read(wordDetailViewModelProvider(wordId).notifier);
+    final members = await model.wordbookIds();
     final books = await ref.read(wordbooksViewModelProvider.future);
     if (!context.mounted) return;
     final target = await showWordbookPickerSheet(
       context,
-      books: books,
-      exceptId: word.wordbookId,
+      books: [
+        for (final book in books)
+          if (!members.contains(book.id)) book,
+      ],
+      title: l10n.vocabAddToTitle,
     );
-    if (target == null) return;
-    final model = ref.read(wordDetailViewModelProvider(wordId).notifier);
-    await model.move(target);
-    // 옮길 단어장에 같은 단어가 있어 합쳐졌으면 이 단어는 사라진다.
-    if (context.mounted &&
-        ref.read(wordDetailViewModelProvider(wordId)).value == null) {
-      context.pop();
-    }
+    if (target == null || !context.mounted) return;
+    final added = await model.addTo(target);
+    if (!context.mounted) return;
+    AppToast.show(
+      context,
+      added ? l10n.vocabAddedToast : l10n.vocabAddDuplicate,
+    );
   }
 }

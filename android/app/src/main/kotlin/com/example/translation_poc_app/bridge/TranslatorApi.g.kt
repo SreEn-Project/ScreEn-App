@@ -678,7 +678,119 @@ data class Wordbook (
 }
 
 /**
- * 저장한 단어 (AD-03, AD-05, AD-06).
+ * 단어의 뜻 하나. 한 단어에 여러 개 둘 수 있다.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class WordMeaning (
+  val id: Long,
+  val meaning: String,
+  val contextMeaning: String? = null,
+  val sentence: String? = null,
+  val sourceApp: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): WordMeaning {
+      val id = pigeonVar_list[0] as Long
+      val meaning = pigeonVar_list[1] as String
+      val contextMeaning = pigeonVar_list[2] as String?
+      val sentence = pigeonVar_list[3] as String?
+      val sourceApp = pigeonVar_list[4] as String?
+      return WordMeaning(id, meaning, contextMeaning, sentence, sourceApp)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      meaning,
+      contextMeaning,
+      sentence,
+      sourceApp,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as WordMeaning
+    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.meaning, other.meaning) && TranslatorApiPigeonUtils.deepEquals(this.contextMeaning, other.contextMeaning) && TranslatorApiPigeonUtils.deepEquals(this.sentence, other.sentence) && TranslatorApiPigeonUtils.deepEquals(this.sourceApp, other.sourceApp)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.id)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.meaning)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.contextMeaning)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.sentence)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.sourceApp)
+    return result
+  }
+  override fun toString(): String {
+    return "WordMeaning(id=$id, meaning=$meaning, contextMeaning=$contextMeaning, sentence=$sentence, sourceApp=$sourceApp)"
+  }
+}
+
+/**
+ * 단어가 들어 있는 단어장 하나에서의 학습 진도.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class WordbookProgress (
+  val wordbookId: Long,
+  val memorized: Boolean,
+  val correctCount: Long,
+  val attemptCount: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): WordbookProgress {
+      val wordbookId = pigeonVar_list[0] as Long
+      val memorized = pigeonVar_list[1] as Boolean
+      val correctCount = pigeonVar_list[2] as Long
+      val attemptCount = pigeonVar_list[3] as Long
+      return WordbookProgress(wordbookId, memorized, correctCount, attemptCount)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      wordbookId,
+      memorized,
+      correctCount,
+      attemptCount,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as WordbookProgress
+    return TranslatorApiPigeonUtils.deepEquals(this.wordbookId, other.wordbookId) && TranslatorApiPigeonUtils.deepEquals(this.memorized, other.memorized) && TranslatorApiPigeonUtils.deepEquals(this.correctCount, other.correctCount) && TranslatorApiPigeonUtils.deepEquals(this.attemptCount, other.attemptCount)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wordbookId)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.memorized)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.correctCount)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.attemptCount)
+    return result
+  }
+  override fun toString(): String {
+    return "WordbookProgress(wordbookId=$wordbookId, memorized=$memorized, correctCount=$correctCount, attemptCount=$attemptCount)"
+  }
+}
+
+/**
+ * 저장한 단어 (AD-03, AD-05, AD-06). [wordbookId]는 목록에서 가져온 단어장(상세에서는 들어 있는 첫 단어장).
+ * [meaning] · [contextMeaning] · [sentence] · [sourceApp]은 대표 뜻(첫 뜻)이고 [meanings]가 전체다.
+ * [memorized] · [correctCount] · [attemptCount]는 [wordbookId] 단어장에서의 진도다.
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
@@ -701,7 +813,9 @@ data class VocabWord (
   val createdAtMs: Long,
   /** 테스트 · 게임에서 맞힌 횟수와 푼 횟수 (AD-18). */
   val correctCount: Long,
-  val attemptCount: Long
+  val attemptCount: Long,
+  /** 모든 뜻 (대표 뜻이 맨 앞). */
+  val meanings: List<WordMeaning>
 )
  {
   companion object {
@@ -721,7 +835,8 @@ data class VocabWord (
       val createdAtMs = pigeonVar_list[12] as Long
       val correctCount = pigeonVar_list[13] as Long
       val attemptCount = pigeonVar_list[14] as Long
-      return VocabWord(id, wordbookId, word, meaning, pronunciation, partOfSpeech, contextMeaning, sentence, sourceApp, sourceLanguage, targetLanguage, memorized, createdAtMs, correctCount, attemptCount)
+      val meanings = pigeonVar_list[15] as List<WordMeaning>
+      return VocabWord(id, wordbookId, word, meaning, pronunciation, partOfSpeech, contextMeaning, sentence, sourceApp, sourceLanguage, targetLanguage, memorized, createdAtMs, correctCount, attemptCount, meanings)
     }
   }
   fun toList(): List<Any?> {
@@ -741,6 +856,7 @@ data class VocabWord (
       createdAtMs,
       correctCount,
       attemptCount,
+      meanings,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -751,7 +867,7 @@ data class VocabWord (
       return true
     }
     val other = other as VocabWord
-    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.wordbookId, other.wordbookId) && TranslatorApiPigeonUtils.deepEquals(this.word, other.word) && TranslatorApiPigeonUtils.deepEquals(this.meaning, other.meaning) && TranslatorApiPigeonUtils.deepEquals(this.pronunciation, other.pronunciation) && TranslatorApiPigeonUtils.deepEquals(this.partOfSpeech, other.partOfSpeech) && TranslatorApiPigeonUtils.deepEquals(this.contextMeaning, other.contextMeaning) && TranslatorApiPigeonUtils.deepEquals(this.sentence, other.sentence) && TranslatorApiPigeonUtils.deepEquals(this.sourceApp, other.sourceApp) && TranslatorApiPigeonUtils.deepEquals(this.sourceLanguage, other.sourceLanguage) && TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.memorized, other.memorized) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs) && TranslatorApiPigeonUtils.deepEquals(this.correctCount, other.correctCount) && TranslatorApiPigeonUtils.deepEquals(this.attemptCount, other.attemptCount)
+    return TranslatorApiPigeonUtils.deepEquals(this.id, other.id) && TranslatorApiPigeonUtils.deepEquals(this.wordbookId, other.wordbookId) && TranslatorApiPigeonUtils.deepEquals(this.word, other.word) && TranslatorApiPigeonUtils.deepEquals(this.meaning, other.meaning) && TranslatorApiPigeonUtils.deepEquals(this.pronunciation, other.pronunciation) && TranslatorApiPigeonUtils.deepEquals(this.partOfSpeech, other.partOfSpeech) && TranslatorApiPigeonUtils.deepEquals(this.contextMeaning, other.contextMeaning) && TranslatorApiPigeonUtils.deepEquals(this.sentence, other.sentence) && TranslatorApiPigeonUtils.deepEquals(this.sourceApp, other.sourceApp) && TranslatorApiPigeonUtils.deepEquals(this.sourceLanguage, other.sourceLanguage) && TranslatorApiPigeonUtils.deepEquals(this.targetLanguage, other.targetLanguage) && TranslatorApiPigeonUtils.deepEquals(this.memorized, other.memorized) && TranslatorApiPigeonUtils.deepEquals(this.createdAtMs, other.createdAtMs) && TranslatorApiPigeonUtils.deepEquals(this.correctCount, other.correctCount) && TranslatorApiPigeonUtils.deepEquals(this.attemptCount, other.attemptCount) && TranslatorApiPigeonUtils.deepEquals(this.meanings, other.meanings)
   }
 
   override fun hashCode(): Int {
@@ -771,32 +887,36 @@ data class VocabWord (
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.createdAtMs)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.correctCount)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.attemptCount)
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.meanings)
     return result
   }
   override fun toString(): String {
-    return "VocabWord(id=$id, wordbookId=$wordbookId, word=$word, meaning=$meaning, pronunciation=$pronunciation, partOfSpeech=$partOfSpeech, contextMeaning=$contextMeaning, sentence=$sentence, sourceApp=$sourceApp, sourceLanguage=$sourceLanguage, targetLanguage=$targetLanguage, memorized=$memorized, createdAtMs=$createdAtMs, correctCount=$correctCount, attemptCount=$attemptCount)"
+    return "VocabWord(id=$id, wordbookId=$wordbookId, word=$word, meaning=$meaning, pronunciation=$pronunciation, partOfSpeech=$partOfSpeech, contextMeaning=$contextMeaning, sentence=$sentence, sourceApp=$sourceApp, sourceLanguage=$sourceLanguage, targetLanguage=$targetLanguage, memorized=$memorized, createdAtMs=$createdAtMs, correctCount=$correctCount, attemptCount=$attemptCount, meanings=$meanings)"
   }
 }
 
 /**
- * 단어 하나를 푼 결과 (AD-18).
+ * 단어 하나를 푼 결과 (AD-18). 푼 단어장([wordbookId])의 진도에 쌓인다.
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
 data class WordAnswer (
+  val wordbookId: Long,
   val wordId: Long,
   val correct: Boolean
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): WordAnswer {
-      val wordId = pigeonVar_list[0] as Long
-      val correct = pigeonVar_list[1] as Boolean
-      return WordAnswer(wordId, correct)
+      val wordbookId = pigeonVar_list[0] as Long
+      val wordId = pigeonVar_list[1] as Long
+      val correct = pigeonVar_list[2] as Boolean
+      return WordAnswer(wordbookId, wordId, correct)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
+      wordbookId,
       wordId,
       correct,
     )
@@ -809,17 +929,18 @@ data class WordAnswer (
       return true
     }
     val other = other as WordAnswer
-    return TranslatorApiPigeonUtils.deepEquals(this.wordId, other.wordId) && TranslatorApiPigeonUtils.deepEquals(this.correct, other.correct)
+    return TranslatorApiPigeonUtils.deepEquals(this.wordbookId, other.wordbookId) && TranslatorApiPigeonUtils.deepEquals(this.wordId, other.wordId) && TranslatorApiPigeonUtils.deepEquals(this.correct, other.correct)
   }
 
   override fun hashCode(): Int {
     var result = javaClass.hashCode()
+    result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wordbookId)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.wordId)
     result = 31 * result + TranslatorApiPigeonUtils.deepHash(this.correct)
     return result
   }
   override fun toString(): String {
-    return "WordAnswer(wordId=$wordId, correct=$correct)"
+    return "WordAnswer(wordbookId=$wordbookId, wordId=$wordId, correct=$correct)"
   }
 }
 
@@ -1042,25 +1163,35 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
       }
       142.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VocabWord.fromList(it)
+          WordMeaning.fromList(it)
         }
       }
       143.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          WordAnswer.fromList(it)
+          WordbookProgress.fromList(it)
         }
       }
       144.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VocabWordInput.fromList(it)
+          VocabWord.fromList(it)
         }
       }
       145.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ServiceStateChanged.fromList(it)
+          WordAnswer.fromList(it)
         }
       }
       146.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VocabWordInput.fromList(it)
+        }
+      }
+      147.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ServiceStateChanged.fromList(it)
+        }
+      }
+      148.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           SettingsChanged.fromList(it)
         }
@@ -1122,24 +1253,32 @@ private open class TranslatorApiPigeonCodec : StandardMessageCodec() {
         stream.write(141)
         writeValue(stream, value.toList())
       }
-      is VocabWord -> {
+      is WordMeaning -> {
         stream.write(142)
         writeValue(stream, value.toList())
       }
-      is WordAnswer -> {
+      is WordbookProgress -> {
         stream.write(143)
         writeValue(stream, value.toList())
       }
-      is VocabWordInput -> {
+      is VocabWord -> {
         stream.write(144)
         writeValue(stream, value.toList())
       }
-      is ServiceStateChanged -> {
+      is WordAnswer -> {
         stream.write(145)
         writeValue(stream, value.toList())
       }
-      is SettingsChanged -> {
+      is VocabWordInput -> {
         stream.write(146)
+        writeValue(stream, value.toList())
+      }
+      is ServiceStateChanged -> {
+        stream.write(147)
+        writeValue(stream, value.toList())
+      }
+      is SettingsChanged -> {
+        stream.write(148)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -2103,23 +2242,42 @@ interface VocabularyHostApi {
   suspend fun deleteWordbook(id: Long)
   /** [query]는 단어 · 뜻에서 찾을 글자(빈 문자열 = 전부). */
   suspend fun getWords(wordbookId: Long, query: String, sort: VocabSort): List<VocabWord>
+  /** 단어장을 모르는 상세 화면용: 들어 있는 첫 단어장 기준으로 돌려준다. */
   suspend fun getWord(id: Long): VocabWord?
-  /** 다른 단어장으로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽을 지운다). */
-  suspend fun moveWord(id: Long, wordbookId: Long)
+  /** 단어가 들어 있는 단어장마다의 진도 (단어장 id 순). */
+  suspend fun getWordProgress(id: Long): List<WordbookProgress>
+  /** 같은 단어(글자 · 언어쌍)가 이미 저장돼 있으면 돌려준다. 저장 전에 "뜻을 더할까요?"를 물을 때 쓴다. */
+  suspend fun findSameWord(word: String, sourceLanguage: String, targetLanguage: String): VocabWord?
+  /** 단어가 들어 있는 단어장 id (id 순). 한 단어가 여러 단어장에 들 수 있다. */
+  suspend fun getWordWordbookIds(id: Long): List<Long>
+  /** [fromWordbookId]에서 [toWordbookId]로 옮긴다. 거기에 같은 단어가 있으면 합친다(옮기는 쪽에서만 뺀다). */
+  suspend fun moveWord(id: Long, fromWordbookId: Long, toWordbookId: Long)
+  /** 단어를 다른 단어장에도 넣는다. 이미 들어 있거나 그 단어장에 같은 글자의 단어가 있으면 false. */
+  suspend fun addWordToWordbook(id: Long, wordbookId: Long): Boolean
+  /** 한 단어장에서만 뺀다. 마지막 단어장이었으면 단어도 지운다. */
+  suspend fun removeWordFromWordbook(id: Long, wordbookId: Long)
+  /** 모든 단어장에서 지운다. */
   suspend fun deleteWord(id: Long)
-  suspend fun setMemorized(id: Long, memorized: Boolean)
+  /** [wordbookId] 단어장에서의 외움 표시. */
+  suspend fun setMemorized(wordbookId: Long, id: Long, memorized: Boolean)
   /** 테스트 · 게임에서 푼 결과를 단어별 정답률에 쌓는다 (AD-18). */
   suspend fun recordAnswers(answers: List<WordAnswer>)
   /**
-   * 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어장에 같은 단어가 있으면 내용만 새로 고친다.
-   * 저장한 단어의 id를 돌려준다.
+   * 단어를 저장한다. 단어 · 뜻이 비어 있으면 null. 같은 단어가 이미 있으면 그 단어를 이 단어장에도 넣고,
+   * 새로운 뜻이면 뜻을 더한다. 저장한 단어의 id를 돌려준다.
    */
   suspend fun saveWord(wordbookId: Long, input: VocabWordInput): Long?
   /**
-   * 저장된 단어의 내용(단어 · 뜻 · 발음 · 품사 · 문맥 뜻 · 예문)을 고친다. 외운 표시 · 정답률 · 저장 시각 · 언어는 유지한다.
-   * 단어 · 뜻이 비었거나 같은 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
+   * 저장된 단어의 공통 부분(단어 · 발음 · 품사)과 대표 뜻(뜻 · 문맥 뜻 · 예문)을 고친다. 진도 · 저장 시각 · 언어는 유지한다.
+   * 단어 · 뜻이 비었거나 들어 있는 단어장의 다른 단어와 겹치거나 단어가 없으면 false.
    */
   suspend fun updateWord(id: Long, input: VocabWordInput): Boolean
+  /** 단어에 뜻을 더한다 (input의 뜻 · 문맥 뜻 · 예문만 쓴다). 비었거나 같은 뜻이 이미 있으면 false. */
+  suspend fun addWordMeaning(id: Long, input: VocabWordInput): Boolean
+  /** 뜻 하나를 고친다 (뜻 · 문맥 뜻 · 예문). 비었거나 같은 단어의 다른 뜻과 겹치면 false. */
+  suspend fun updateWordMeaning(meaningId: Long, input: VocabWordInput): Boolean
+  /** 뜻 하나를 지운다. 마지막 뜻이면 false. */
+  suspend fun deleteWordMeaning(meaningId: Long): Boolean
 
   companion object {
     /** The codec used by VocabularyHostApi. */
@@ -2247,7 +2405,88 @@ interface VocabularyHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWordProgress$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getWordProgress(idArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.findSameWord$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val wordArg = args[0] as String
+            val sourceLanguageArg = args[1] as String
+            val targetLanguageArg = args[2] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.findSameWord(wordArg, sourceLanguageArg, targetLanguageArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.getWordWordbookIds$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.getWordWordbookIds(idArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.moveWord$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val fromWordbookIdArg = args[1] as Long
+            val toWordbookIdArg = args[2] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.moveWord(idArg, fromWordbookIdArg, toWordbookIdArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.addWordToWordbook$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
@@ -2255,7 +2494,27 @@ interface VocabularyHostApi {
             val wordbookIdArg = args[1] as Long
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.moveWord(idArg, wordbookIdArg)
+                listOf(api.addWordToWordbook(idArg, wordbookIdArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.removeWordFromWordbook$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val wordbookIdArg = args[1] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.removeWordFromWordbook(idArg, wordbookIdArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
@@ -2292,11 +2551,12 @@ interface VocabularyHostApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val idArg = args[0] as Long
-            val memorizedArg = args[1] as Boolean
+            val wordbookIdArg = args[0] as Long
+            val idArg = args[1] as Long
+            val memorizedArg = args[2] as Boolean
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.setMemorized(idArg, memorizedArg)
+                api.setMemorized(wordbookIdArg, idArg, memorizedArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
@@ -2358,6 +2618,65 @@ interface VocabularyHostApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 listOf(api.updateWord(idArg, inputArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.addWordMeaning$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val idArg = args[0] as Long
+            val inputArg = args[1] as VocabWordInput
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.addWordMeaning(idArg, inputArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.updateWordMeaning$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val meaningIdArg = args[0] as Long
+            val inputArg = args[1] as VocabWordInput
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.updateWordMeaning(meaningIdArg, inputArg))
+              } catch (exception: Throwable) {
+                TranslatorApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.translation_poc_app.VocabularyHostApi.deleteWordMeaning$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val meaningIdArg = args[0] as Long
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.deleteWordMeaning(meaningIdArg))
               } catch (exception: Throwable) {
                 TranslatorApiPigeonUtils.wrapError(exception)
               }

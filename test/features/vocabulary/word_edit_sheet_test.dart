@@ -330,4 +330,111 @@ void main() {
     // 상세 화면도 새 내용으로 바뀐다.
     expect(find.text('apple'), findsOneWidget);
   });
+
+  Future<(FakeVocabularyRepository, Finder)> openAddSheet(
+    WidgetTester tester,
+    List<VocabularyWord> words,
+  ) async {
+    final repository = FakeVocabularyRepository(books: [_book], words: words);
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.75;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: fakeNativeOverrides(vocabulary: repository),
+        child: MaterialApp.router(
+          theme: AppTheme.light,
+          locale: const Locale('ko'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: createRouter(
+            initialLocation: AppRoutes.wordbookPath(1),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('단어 추가'));
+    await tester.pumpAndSettle();
+    return (
+      repository,
+      find.descendant(
+        of: find.byType(WordEditSheet),
+        matching: find.byType(TextField),
+      ),
+    );
+  }
+
+  VocabularyWord saved(int id, String word, String meaning) => VocabularyWord(
+    id: id,
+    wordbookId: 1,
+    word: word,
+    meaning: meaning,
+    sourceLanguage: 'und',
+    targetLanguage: 'ko',
+    memorized: false,
+    savedAt: DateTime(2026, 10, 1),
+  );
+
+  testWidgets('같은 단어에 다른 뜻을 저장하려 하면 뜻을 추가할지 묻는다', (tester) async {
+    final (repository, fields) = await openAddSheet(tester, [
+      saved(1, 'bank', '은행'),
+    ]);
+    await tester.enterText(fields.at(0), 'bank');
+    await tester.enterText(fields.at(1), '둑');
+    await tester.pump();
+    await tester.tap(find.text('저장').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('이미 저장된 단어예요'), findsOneWidget);
+    // 취소하면 아무것도 저장되지 않고 시트가 그대로 남는다.
+    await tester.tap(find.text('취소'));
+    await tester.pumpAndSettle();
+    expect(repository.extraMeanings, isEmpty);
+    expect(find.byType(WordEditSheet), findsOneWidget);
+
+    await tester.tap(find.text('저장').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('뜻 추가').last);
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+    expect(repository.savedWords, hasLength(1));
+    expect(repository.extraMeanings[1]!.map((m) => m.meaning), ['둑']);
+  });
+
+  testWidgets('이 단어장에 같은 단어 · 같은 뜻이 있으면 안내하고 저장하지 않는다', (tester) async {
+    final (repository, fields) = await openAddSheet(tester, [
+      saved(1, 'bank', '은행'),
+    ]);
+    await tester.enterText(fields.at(0), 'bank');
+    await tester.enterText(fields.at(1), '은행');
+    await tester.pump();
+    await tester.tap(find.text('저장').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('이 단어장에 이미 있는 단어예요'), findsOneWidget);
+    expect(repository.savedWords, hasLength(1));
+    expect(repository.extraMeanings, isEmpty);
+  });
+
+  testWidgets('처음 만들 때 뜻을 여러 개 넣고 뜻마다 문맥 뜻 · 예문을 붙인다', (tester) async {
+    final (repository, fields) = await openAddSheet(tester, []);
+    await tester.enterText(fields.at(0), 'bank');
+    await tester.enterText(fields.at(1), '은행');
+    await tester.tap(find.widgetWithText(AppAddChip, '뜻 추가'));
+    await tester.pumpAndSettle();
+    // 새로 생긴 칸: 뜻 · 문맥 뜻 · 예문.
+    expect(fields, findsNWidgets(5));
+    await tester.enterText(fields.at(2), '둑');
+    await tester.enterText(fields.at(3), '강가');
+    await tester.enterText(fields.at(4), 'We sat on the bank.');
+    await tester.pump();
+    await tester.tap(find.text('저장').last);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    expect(repository.savedWords, hasLength(1));
+    final extra = repository.extraMeanings[repository.savedWords.single.id]!;
+    expect(extra.map((m) => m.meaning), ['둑']);
+    expect(extra.single.contextMeaning, '강가');
+    expect(extra.single.sentence, 'We sat on the bank.');
+  });
 }
