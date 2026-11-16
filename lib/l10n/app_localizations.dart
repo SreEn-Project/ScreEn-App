@@ -2810,23 +2810,59 @@ abstract class AppLocalizations {
   /// **'Study record'**
   String get homeStudyRecord;
 
-  /// No description provided for @homeStatWords.
-  ///
-  /// In en, this message translates to:
-  /// **'Words'**
-  String get homeStatWords;
-
   /// No description provided for @homeStatMemorized.
   ///
   /// In en, this message translates to:
-  /// **'Memorized'**
+  /// **'Words memorized'**
   String get homeStatMemorized;
 
-  /// No description provided for @homeStatAccuracy.
+  /// No description provided for @homeStreakUnit.
   ///
   /// In en, this message translates to:
-  /// **'Accuracy'**
-  String get homeStatAccuracy;
+  /// **'day streak'**
+  String get homeStreakUnit;
+
+  /// No description provided for @homeStreakStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Study today to start your streak'**
+  String get homeStreakStart;
+
+  /// No description provided for @homeStreakKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Study today to keep your streak'**
+  String get homeStreakKeep;
+
+  /// No description provided for @homeStreakDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done for today!'**
+  String get homeStreakDone;
+
+  /// No description provided for @homeStreakBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best {days} days'**
+  String homeStreakBest(int days);
+
+  /// No description provided for @homeMemorizedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {words} words'**
+  String homeMemorizedOf(int words);
+
+  /// No description provided for @homeRankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My wordbook ranking'**
+  String get homeRankTitle;
+
+  /// No description provided for @homeRankCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String homeRankCount(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -18,6 +21,9 @@ import '../../../settings/presentation/view_models/engine_view_model.dart';
 import '../../../history/domain/entities/history_entry.dart';
 import '../../../history/presentation/view_models/history_view_model.dart';
 import '../../../history/presentation/widgets/history_card.dart';
+import '../../../study_log/domain/entities/study_streak.dart';
+import '../../../study_log/presentation/view_models/study_streak_view_model.dart';
+import '../../../vocabulary/domain/entities/vocabulary.dart';
 import '../view_models/service_view_model.dart';
 import '../../../vocabulary/presentation/view_models/wordbooks_view_model.dart';
 import '../../../vocabulary/presentation/widgets/word_of_the_day_card.dart';
@@ -53,6 +59,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // 학습하면 단어장 통계가 바뀌므로, 그때 연속 일수도 다시 읽는다.
+    ref.listen(
+      wordbooksViewModelProvider,
+      (_, _) => ref.read(studyStreakViewModelProvider.notifier).refresh(),
+    );
     final engine = ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
     final locale = Localizations.localeOf(context);
     final targetName = SupportedLanguage.byCode(
@@ -73,8 +84,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final wordCount = books?.fold<int>(0, (sum, b) => sum + b.wordCount) ?? 0;
     final memorizedCount =
         books?.fold<int>(0, (sum, b) => sum + b.memorizedCount) ?? 0;
-    final correct = books?.fold<int>(0, (sum, b) => sum + b.correctCount) ?? 0;
-    final attempts = books?.fold<int>(0, (sum, b) => sum + b.attemptCount) ?? 0;
 
     return AppPage(
       withBottomNav: true,
@@ -83,11 +92,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const _SectionDivider(),
         // 학습 앱: 학습 기록이 맨 위. 번역 시작은 그 아래 카드에서.
         _StudyCard(
+          streak:
+              ref.watch(studyStreakViewModelProvider).value ??
+              StudyStreak.empty,
           words: wordCount,
           memorized: memorizedCount,
-          accuracyPercent: attempts == 0
-              ? null
-              : (correct * 100 / attempts).round(),
+          ranking:
+              ([...?books]..sort(
+                    (a, b) => b.memorizedCount.compareTo(a.memorizedCount),
+                  ))
+                  .take(3)
+                  .toList(),
           empty: bookCount == 0,
           canStart: wordCount > 0,
           onOpen: () => context.go(AppRoutes.vocabulary),
@@ -306,21 +321,24 @@ class _StatusCard extends StatelessWidget {
   }
 }
 
-/// 학습 기록 구역(홈 맨 위): 큰 숫자 3개 + 학습 시작 (카드 없이).
+/// 학습 기록 구역(홈 맨 위): 연속 일수 · 외운 단어 · 내 단어장 순위 + 학습 시작 (카드 없이).
+/// 순위는 다른 사람과의 비교가 아니라(서버 없음, D-072) 내 단어장끼리 외운 단어 수 비교.
 class _StudyCard extends StatelessWidget {
   const _StudyCard({
+    required this.streak,
     required this.words,
     required this.memorized,
-    required this.accuracyPercent,
+    required this.ranking,
     required this.empty,
     required this.canStart,
     required this.onOpen,
     required this.onStart,
   });
 
+  final StudyStreak streak;
   final int words;
   final int memorized;
-  final int? accuracyPercent;
+  final List<Wordbook> ranking;
   final bool empty;
   final bool canStart;
   final VoidCallback onOpen;
@@ -331,28 +349,58 @@ class _StudyCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final locale = Localizations.localeOf(context).languageCode;
+    final today = DateTime.now();
 
-    Widget stat(String label, String value) => Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: theme.textTheme.headlineLarge?.copyWith(
-              color: colors.primary,
+    final streakHint = streak.studiedToday
+        ? l10n.homeStreakDone
+        : streak.current > 0
+        ? l10n.homeStreakKeep
+        : l10n.homeStreakStart;
+
+    Widget dayDot(int index) {
+      final date = DateTime(today.year, today.month, today.day - (6 - index));
+      final done = streak.week[index];
+      final isToday = index == 6;
+      final label = DateFormat.E(locale).format(date);
+      return Expanded(
+        child: Column(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: done ? colors.primary : null,
+                border: done
+                    ? null
+                    : Border.all(
+                        color: isToday ? colors.primary : colors.outline,
+                        width: isToday ? 1.5 : 1,
+                      ),
+              ),
+              child: done
+                  ? Icon(
+                      Symbols.check_rounded,
+                      size: 16,
+                      color: colors.onPrimary,
+                    )
+                  : null,
             ),
-          ),
-          const SizedBox(height: AppTokens.space4),
-          Text(label, style: theme.textTheme.bodySmall),
-        ],
-      ),
-    );
-    Widget gap() => Container(
-      width: 1,
-      height: 48,
-      margin: const EdgeInsets.only(right: AppTokens.space16),
-      color: colors.outline,
-    );
+            const SizedBox(height: AppTokens.space4),
+            Text(
+              label.characters.first,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isToday ? colors.primary : colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final top = ranking.isEmpty ? 1 : math.max(1, ranking.first.memorizedCount);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -371,19 +419,113 @@ class _StudyCard extends StatelessWidget {
         const SizedBox(height: AppTokens.space12),
         if (empty)
           Text(l10n.homeStudyEmpty, style: theme.textTheme.bodySmall)
-        else
+        else ...[
+          // 연속 일수: 가장 크게.
           Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              stat(l10n.homeStatWords, '$words'),
-              gap(),
-              stat(l10n.homeStatMemorized, '$memorized'),
-              gap(),
-              stat(
-                l10n.homeStatAccuracy,
-                accuracyPercent == null ? '-' : '$accuracyPercent%',
+              Icon(
+                Symbols.local_fire_department_rounded,
+                fill: 1,
+                color: streak.current > 0
+                    ? colors.primary
+                    : colors.onSurfaceVariant,
+              ),
+              const SizedBox(width: AppTokens.space4),
+              Text(
+                '${streak.current}',
+                style: theme.textTheme.displaySmall?.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(width: AppTokens.space8),
+              Text(l10n.homeStreakUnit, style: theme.textTheme.titleMedium),
+              const Spacer(),
+              if (streak.best > 0)
+                Text(
+                  l10n.homeStreakBest(streak.best),
+                  style: theme.textTheme.bodySmall,
+                ),
+            ],
+          ),
+          const SizedBox(height: AppTokens.space4),
+          Text(streakHint, style: theme.textTheme.bodySmall),
+          const SizedBox(height: AppTokens.space16),
+          Row(children: [for (var i = 0; i < 7; i++) dayDot(i)]),
+          const SizedBox(height: AppTokens.space24),
+          // 외운 단어.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$memorized',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  color: colors.primary,
+                ),
+              ),
+              const SizedBox(width: AppTokens.space8),
+              Expanded(
+                child: Text(
+                  '${l10n.homeStatMemorized} · ${l10n.homeMemorizedOf(words)}',
+                  style: theme.textTheme.bodySmall,
+                ),
               ),
             ],
           ),
+          const SizedBox(height: AppTokens.space8),
+          _Bar(value: words == 0 ? 0 : memorized / words),
+          if (ranking.length > 1) ...[
+            const SizedBox(height: AppTokens.space24),
+            Text(l10n.homeRankTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppTokens.space8),
+            for (var i = 0; i < ranking.length; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      child: Text(
+                        '${i + 1}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: i == 0
+                              ? colors.primary
+                              : colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        ranking[i].name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(width: AppTokens.space12),
+                    Expanded(
+                      flex: 4,
+                      child: _Bar(value: ranking[i].memorizedCount / top),
+                    ),
+                    const SizedBox(width: AppTokens.space12),
+                    SizedBox(
+                      width: 40,
+                      child: Text(
+                        l10n.homeRankCount(ranking[i].memorizedCount),
+                        textAlign: TextAlign.end,
+                        style: theme.textTheme.labelLarge,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ],
         const SizedBox(height: AppTokens.space24),
         AppButton.secondary(
           label: l10n.homeStudyStart,
@@ -391,6 +533,30 @@ class _StudyCard extends StatelessWidget {
           onPressed: canStart ? onStart : null,
         ),
       ],
+    );
+  }
+}
+
+/// 가는 진행 막대 (0~1).
+class _Bar extends StatelessWidget {
+  const _Bar({required this.value});
+
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: Stack(
+        children: [
+          Container(height: 6, color: colors.outline.withValues(alpha: 0.5)),
+          FractionallySizedBox(
+            widthFactor: value.clamp(0.0, 1.0),
+            child: Container(height: 6, color: colors.primary),
+          ),
+        ],
+      ),
     );
   }
 }

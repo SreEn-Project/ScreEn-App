@@ -519,7 +519,16 @@
   "themeDark": "다크",
   "themeSystem": "시스템",
   "homeStudyRecord": "학습 기록",
-  "homeStatWords": "단어",
-  "homeStatMemorized": "외움",
-  "homeStatAccuracy": "정확도"
+  "homeStatMemorized": "외운 단어",
+  "homeStreakUnit": "일 연속",
+  "homeStreakStart": "오늘 공부하면 연속 기록이 시작돼요",
+  "homeStreakKeep": "오늘 학습하면 연속이 이어져요",
+  "homeStreakDone": "오늘 학습 완료!",
+  "homeStreakBest": "최고 {days}일",
+  "@homeStreakBest": {"placeholders": {"days": {"type": "int"}}},
+  "homeMemorizedOf": "전체 {words}개 중",
+  "@homeMemorizedOf": {"placeholders": {"words": {"type": "int"}}},
+  "homeRankTitle": "내 단어장 순위",
+  "homeRankCount": "{count}개",
+  "@homeRankCount": {"placeholders": {"count": {"type": "int"}}}
 }

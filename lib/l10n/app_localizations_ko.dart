@@ -1473,11 +1473,35 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeStudyRecord => '학습 기록';
 
   @override
-  String get homeStatWords => '단어';
+  String get homeStatMemorized => '외운 단어';
 
   @override
-  String get homeStatMemorized => '외움';
+  String get homeStreakUnit => '일 연속';
 
   @override
-  String get homeStatAccuracy => '정확도';
+  String get homeStreakStart => '오늘 공부하면 연속 기록이 시작돼요';
+
+  @override
+  String get homeStreakKeep => '오늘 학습하면 연속이 이어져요';
+
+  @override
+  String get homeStreakDone => '오늘 학습 완료!';
+
+  @override
+  String homeStreakBest(int days) {
+    return '최고 $days일';
+  }
+
+  @override
+  String homeMemorizedOf(int words) {
+    return '전체 $words개 중';
+  }
+
+  @override
+  String get homeRankTitle => '내 단어장 순위';
+
+  @override
+  String homeRankCount(int count) {
+    return '$count개';
+  }
 }

@@ -4,9 +4,12 @@ import '../datasources/vocabulary_native_data_source.dart';
 import '../mappers/vocabulary_mapper.dart';
 
 class VocabularyRepositoryImpl implements VocabularyRepository {
-  const VocabularyRepositoryImpl(this._dataSource);
+  const VocabularyRepositoryImpl(this._dataSource, {this.onStudied});
 
   final VocabularyNativeDataSource _dataSource;
+
+  /// 답을 기록하거나 외움 표시를 바꿀 때 호출한다 (연속 학습 일수용, D-072).
+  final Future<void> Function()? onStudied;
 
   @override
   Future<List<Wordbook>> wordbooks() async => [
@@ -77,12 +80,16 @@ class VocabularyRepositoryImpl implements VocabularyRepository {
   ))?.toEntity();
 
   @override
-  Future<void> setMemorized(int wordbookId, int id, bool memorized) =>
-      _dataSource.setMemorized(wordbookId, id, memorized);
+  Future<void> setMemorized(int wordbookId, int id, bool memorized) async {
+    await _dataSource.setMemorized(wordbookId, id, memorized);
+    await onStudied?.call();
+  }
 
   @override
-  Future<void> recordAnswers(List<WordAnswer> answers) =>
-      _dataSource.recordAnswers([for (final a in answers) a.toPigeon()]);
+  Future<void> recordAnswers(List<WordAnswer> answers) async {
+    await _dataSource.recordAnswers([for (final a in answers) a.toPigeon()]);
+    if (answers.isNotEmpty) await onStudied?.call();
+  }
 
   @override
   Future<int?> saveWord(int wordbookId, WordDraft draft) =>

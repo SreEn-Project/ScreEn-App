@@ -1509,11 +1509,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeStudyRecord => 'Study record';
 
   @override
-  String get homeStatWords => 'Words';
+  String get homeStatMemorized => 'Words memorized';
 
   @override
-  String get homeStatMemorized => 'Memorized';
+  String get homeStreakUnit => 'day streak';
 
   @override
-  String get homeStatAccuracy => 'Accuracy';
+  String get homeStreakStart => 'Study today to start your streak';
+
+  @override
+  String get homeStreakKeep => 'Study today to keep your streak';
+
+  @override
+  String get homeStreakDone => 'Done for today!';
+
+  @override
+  String homeStreakBest(int days) {
+    return 'Best $days days';
+  }
+
+  @override
+  String homeMemorizedOf(int words) {
+    return 'of $words words';
+  }
+
+  @override
+  String get homeRankTitle => 'My wordbook ranking';
+
+  @override
+  String homeRankCount(int count) {
+    return '$count';
+  }
 }

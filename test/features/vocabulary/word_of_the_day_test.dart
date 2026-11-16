@@ -71,7 +71,7 @@ void main() {
     WidgetTester tester,
     FakeVocabularyRepository repo,
   ) async {
-    tester.view.physicalSize = const Size(1080, 3000);
+    tester.view.physicalSize = const Size(1080, 4800);
     tester.view.devicePixelRatio = 2.75;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(

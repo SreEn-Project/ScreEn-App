@@ -527,7 +527,16 @@
   "themeDark": "Dark",
   "themeSystem": "System",
   "homeStudyRecord": "Study record",
-  "homeStatWords": "Words",
-  "homeStatMemorized": "Memorized",
-  "homeStatAccuracy": "Accuracy"
+  "homeStatMemorized": "Words memorized",
+  "homeStreakUnit": "day streak",
+  "homeStreakStart": "Study today to start your streak",
+  "homeStreakKeep": "Study today to keep your streak",
+  "homeStreakDone": "Done for today!",
+  "homeStreakBest": "Best {days} days",
+  "@homeStreakBest": {"placeholders": {"days": {"type": "int"}}},
+  "homeMemorizedOf": "of {words} words",
+  "@homeMemorizedOf": {"placeholders": {"words": {"type": "int"}}},
+  "homeRankTitle": "My wordbook ranking",
+  "homeRankCount": "{count}",
+  "@homeRankCount": {"placeholders": {"count": {"type": "int"}}}
 }
