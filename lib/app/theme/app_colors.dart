@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// 색 토큰. 값의 근거와 용도는 docs/design.md 참고.
 /// 화면 코드에서는 이 파일을 직접 쓰지 말고 `Theme.of(context)`로 가져온다.
 abstract final class AppColors {
-  static const lightBackground = Color(0xFFFAFBFA);
+  static const lightBackground = Color(0xFFFFFFFF);
   static const darkBackground = Color(0xFF0B1A16);
 
   static const lightAccent = Color(0xFF72C613);

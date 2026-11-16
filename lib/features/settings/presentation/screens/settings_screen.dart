@@ -37,10 +37,8 @@ class SettingsScreen extends StatelessWidget {
         const _EngineSection(),
         AppSection(
           title: l10n.languagesTitle,
-          child: AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
+          child: AppCard.flat(
+            padding: EdgeInsets.zero,
             child: AppListTile(
               icon: Symbols.translate_rounded,
               title: l10n.languagesTitle,
@@ -56,10 +54,8 @@ class SettingsScreen extends StatelessWidget {
         const _ThemeSection(),
         AppSection(
           title: l10n.settingsSectionEtc,
-          child: AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
+          child: AppCard.flat(
+            padding: EdgeInsets.zero,
             child: AppListTile(
               icon: Symbols.info_rounded,
               title: l10n.settingsAbout,
@@ -92,10 +88,8 @@ class _EngineSection extends ConsumerWidget {
         ref.watch(gemmaViewModelProvider).value?.isReady ?? false;
     return AppSection(
       title: l10n.settingsSectionEngine,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             for (final engine in EngineType.values) ...[
@@ -199,8 +193,10 @@ class _Labeled extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.rowPaddingH,
+      padding: EdgeInsets.symmetric(
+        horizontal: FlatScope.of(context)
+            ? FlatScope.rowPaddingH
+            : AppTokens.rowPaddingH,
         vertical: AppTokens.rowPaddingV,
       ),
       child: Column(
@@ -239,10 +235,8 @@ class _CaptureSection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsSectionCapture,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -285,10 +279,8 @@ class _DisplaySection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsSectionDisplay,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -359,10 +351,8 @@ class _QuickLanguagesSection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsQuickLanguages,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: AppListTile(
           icon: Symbols.translate_rounded,
           title: l10n.settingsQuickLanguagesDetail,
@@ -448,10 +438,8 @@ class _AutoTranslateSection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsSectionAuto,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

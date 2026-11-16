@@ -80,7 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       withBottomNav: true,
       children: [
         const _Header(),
-        const SizedBox(height: AppTokens.space24),
+        const _SectionDivider(),
         // 학습 앱: 학습 기록이 맨 위. 번역 시작은 그 아래 카드에서.
         _StudyCard(
           words: wordCount,
@@ -93,9 +93,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           onOpen: () => context.go(AppRoutes.vocabulary),
           onStart: () => context.push(AppRoutes.learning),
         ),
-        const SizedBox(height: AppTokens.space12),
-        const WordOfTheDayCard(),
-        const SizedBox(height: AppTokens.sectionGap),
+        const _SectionDivider(),
         // 번역 상태와 시작/중지는 한 덩어리: 화면에서 가장 먼저 읽히는 곳.
         _StatusCard(
           state: service,
@@ -129,13 +127,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
         ),
-        const SizedBox(height: AppTokens.sectionGap),
+        const _SectionDivider(),
+        const WordOfTheDayCard(),
+        const _SectionDivider(),
         SectionTitle(l10n.homeSectionSetup),
-        const SizedBox(height: AppTokens.space12),
-        AppCard(
-          padding: const EdgeInsets.symmetric(
-            vertical: AppTokens.cardListPaddingV,
-          ),
+        const SizedBox(height: AppTokens.space8),
+        AppCard.flat(
           child: Column(
             children: [
               AppListTile(
@@ -161,7 +158,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
         ),
-        const SizedBox(height: AppTokens.sectionGap),
+        const _SectionDivider(),
         SectionTitle(
           l10n.homeRecent,
           action: AppButton.text(
@@ -211,7 +208,20 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// 번역 상태 카드(흰 바탕): 서비스 상태 + 언어 방향 + 엔진 + 시작/중지 버튼.
+/// 섹션 사이 가는 선 + 넉넉한 여백. 카드 대신 구역을 이 선으로 나눈다.
+class _SectionDivider extends StatelessWidget {
+  const _SectionDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: AppTokens.space24),
+      child: AppDivider(indent: 0),
+    );
+  }
+}
+
+/// 번역 구역: 서비스 상태 + 큰 언어 방향 + 시작/중지 버튼 (카드 없이).
 class _StatusCard extends StatelessWidget {
   const _StatusCard({
     required this.state,
@@ -233,79 +243,70 @@ class _StatusCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return AppCard(
-      padding: const EdgeInsets.all(AppTokens.pagePadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              AppStatusPill(
-                label: switch (state) {
-                  ServiceStatus.running => l10n.homeStatusOn,
-                  ServiceStatus.waitingConsent => l10n.homeStatusStarting,
-                  ServiceStatus.error => l10n.homeStatusError,
-                  ServiceStatus.stopped => l10n.homeStatusOff,
-                },
-                active: state == ServiceStatus.running,
-              ),
-              const Spacer(),
-              Icon(Symbols.memory_rounded, size: 16, color: colors.primary),
-              const SizedBox(width: 6),
-              Text(
-                engine,
-                style: theme.textTheme.labelLarge?.copyWith(fontSize: 13),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            AppStatusPill(
+              label: switch (state) {
+                ServiceStatus.running => l10n.homeStatusOn,
+                ServiceStatus.waitingConsent => l10n.homeStatusStarting,
+                ServiceStatus.error => l10n.homeStatusError,
+                ServiceStatus.stopped => l10n.homeStatusOff,
+              },
+              active: state == ServiceStatus.running,
+            ),
+            const Spacer(),
+            Icon(Symbols.memory_rounded, size: 16, color: colors.primary),
+            const SizedBox(width: 6),
+            Text(
+              engine,
+              style: theme.textTheme.labelLarge?.copyWith(fontSize: 13),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppTokens.space16),
+        Text(
+          l10n.homeSourceAuto,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colors.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTokens.space16),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  l10n.homeSourceAuto,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTokens.space12,
-                ),
-                child: Icon(
-                  Symbols.arrow_forward_rounded,
+        ),
+        const SizedBox(height: AppTokens.space4),
+        Row(
+          children: [
+            Icon(Symbols.arrow_forward_rounded, color: colors.primary),
+            const SizedBox(width: AppTokens.space8),
+            Flexible(
+              child: Text(
+                targetLanguage,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.headlineLarge?.copyWith(
                   color: colors.primary,
                 ),
               ),
-              Flexible(
-                child: Text(
-                  targetLanguage,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: colors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppTokens.space8),
-          Text(switch (state) {
-            ServiceStatus.running => l10n.homeServiceRunningHint,
-            ServiceStatus.waitingConsent => l10n.homeServiceStartingHint,
-            ServiceStatus.error => l10n.homeServiceErrorHint,
-            ServiceStatus.stopped => l10n.homeServiceHint,
-          }, style: theme.textTheme.bodySmall),
-          const SizedBox(height: AppTokens.space16),
-          action,
-          const SizedBox(height: AppTokens.space12),
-          Center(child: hint),
-        ],
-      ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppTokens.space8),
+        Text(switch (state) {
+          ServiceStatus.running => l10n.homeServiceRunningHint,
+          ServiceStatus.waitingConsent => l10n.homeServiceStartingHint,
+          ServiceStatus.error => l10n.homeServiceErrorHint,
+          ServiceStatus.stopped => l10n.homeServiceHint,
+        }, style: theme.textTheme.bodySmall),
+        const SizedBox(height: AppTokens.space24),
+        action,
+        const SizedBox(height: AppTokens.space12),
+        Center(child: hint),
+      ],
     );
   }
 }
 
-/// 학습 기록 카드(홈 맨 위): 단어 수 · 외운 수 · 정답률 + 학습 시작.
+/// 학습 기록 구역(홈 맨 위): 큰 숫자 3개 + 학습 시작 (카드 없이).
 class _StudyCard extends StatelessWidget {
   const _StudyCard({
     required this.words,
@@ -337,7 +338,7 @@ class _StudyCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: theme.textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.headlineLarge?.copyWith(
               color: colors.primary,
             ),
           ),
@@ -346,45 +347,50 @@ class _StudyCard extends StatelessWidget {
         ],
       ),
     );
+    Widget gap() => Container(
+      width: 1,
+      height: 48,
+      margin: const EdgeInsets.only(right: AppTokens.space16),
+      color: colors.outline,
+    );
 
-    return AppCard(
-      padding: const EdgeInsets.all(AppTokens.pagePadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.homeStudyRecord,
+                style: theme.textTheme.titleLarge,
+              ),
+            ),
+            AppButton.text(label: l10n.vocabTitle, onPressed: onOpen),
+          ],
+        ),
+        const SizedBox(height: AppTokens.space12),
+        if (empty)
+          Text(l10n.homeStudyEmpty, style: theme.textTheme.bodySmall)
+        else
           Row(
             children: [
-              Expanded(
-                child: Text(
-                  l10n.homeStudyRecord,
-                  style: theme.textTheme.titleLarge,
-                ),
+              stat(l10n.homeStatWords, '$words'),
+              gap(),
+              stat(l10n.homeStatMemorized, '$memorized'),
+              gap(),
+              stat(
+                l10n.homeStatAccuracy,
+                accuracyPercent == null ? '-' : '$accuracyPercent%',
               ),
-              AppButton.text(label: l10n.vocabTitle, onPressed: onOpen),
             ],
           ),
-          const SizedBox(height: AppTokens.space12),
-          if (empty)
-            Text(l10n.homeStudyEmpty, style: theme.textTheme.bodySmall)
-          else
-            Row(
-              children: [
-                stat(l10n.homeStatWords, '$words'),
-                stat(l10n.homeStatMemorized, '$memorized'),
-                stat(
-                  l10n.homeStatAccuracy,
-                  accuracyPercent == null ? '-' : '$accuracyPercent%',
-                ),
-              ],
-            ),
-          const SizedBox(height: AppTokens.space16),
-          AppButton(
-            label: l10n.homeStudyStart,
-            height: 48,
-            onPressed: canStart ? onStart : null,
-          ),
-        ],
-      ),
+        const SizedBox(height: AppTokens.space24),
+        AppButton.secondary(
+          label: l10n.homeStudyStart,
+          height: 48,
+          onPressed: canStart ? onStart : null,
+        ),
+      ],
     );
   }
 }
@@ -458,16 +464,13 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
             ),
           )
         else
-          AppCard(
-            padding: const EdgeInsets.symmetric(horizontal: AppTokens.space16),
-            child: Column(
-              children: [
-                for (final (i, entry) in entries.indexed) ...[
-                  if (i > 0) const AppDivider(indent: 0),
-                  HistoryCard(entry: entry, flat: true),
-                ],
+          Column(
+            children: [
+              for (final (i, entry) in entries.indexed) ...[
+                if (i > 0) const AppDivider(indent: 0),
+                HistoryCard(entry: entry, flat: true),
               ],
-            ),
+            ],
           ),
       ],
     );

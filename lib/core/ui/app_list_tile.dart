@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_tokens.dart';
+import 'app_card.dart';
 import 'icon_badge.dart';
 import 'pressable.dart';
 
@@ -19,10 +20,7 @@ class AppListTile extends StatelessWidget {
     this.onTap,
     this.enabled = true,
     this.selected = false,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: AppTokens.rowPaddingH,
-      vertical: AppTokens.rowPaddingV,
-    ),
+    this.padding,
   });
 
   final String title;
@@ -37,7 +35,7 @@ class AppListTile extends StatelessWidget {
 
   /// 고른 항목: 오른쪽에 체크 표시 ([trailing]이 없을 때).
   final bool selected;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +55,14 @@ class AppListTile extends StatelessWidget {
             : null);
 
     final row = Padding(
-      padding: padding,
+      padding:
+          padding ??
+          EdgeInsets.symmetric(
+            horizontal: FlatScope.of(context)
+                ? FlatScope.rowPaddingH
+                : AppTokens.rowPaddingH,
+            vertical: AppTokens.rowPaddingV,
+          ),
       child: Row(
         children: [
           if (icon != null) ...[
@@ -99,15 +104,22 @@ class AppListTile extends StatelessWidget {
 
 /// 카드 안 항목 사이 가는 구분선.
 class AppDivider extends StatelessWidget {
-  const AppDivider({super.key, this.indent = AppTokens.rowPaddingH});
+  const AppDivider({super.key, this.indent});
 
-  final double indent;
+  /// null이면 평평한 구역 안에서는 [FlatScope.rowPaddingH], 카드 안에서는 행 패딩에 맞춘다.
+  final double? indent;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.symmetric(horizontal: indent),
+      margin: EdgeInsets.symmetric(
+        horizontal:
+            indent ??
+            (FlatScope.of(context)
+                ? FlatScope.rowPaddingH
+                : AppTokens.rowPaddingH),
+      ),
       color: Theme.of(context).colorScheme.outline,
     );
   }

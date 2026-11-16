@@ -48,8 +48,8 @@ class LanguageModelsScreen extends ConsumerWidget {
         .where((l) => !models.installed.contains(l.code))
         .toList();
 
-    Widget group(List<SupportedLanguage> languages) => AppCard(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+    Widget group(List<SupportedLanguage> languages) => AppCard.flat(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           for (var i = 0; i < languages.length; i++) ...[
@@ -74,8 +74,8 @@ class LanguageModelsScreen extends ConsumerWidget {
       children: [
         AppSection(
           title: l10n.languagesSectionTarget,
-          child: AppCard(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+          child: AppCard.flat(
+            padding: EdgeInsets.zero,
             child: AppListTile(
               icon: Symbols.translate_rounded,
               title: l10n.homeTargetLanguage,
@@ -90,8 +90,8 @@ class LanguageModelsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AppCard(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+              AppCard.flat(
+                padding: EdgeInsets.zero,
                 child: AppListTile(
                   icon: Symbols.wifi_rounded,
                   title: l10n.modelsWifiOnly,
@@ -155,7 +155,12 @@ class _ModelRow extends StatelessWidget {
         : l10n.modelsSize(sizeMb);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
+      padding: EdgeInsets.fromLTRB(
+        FlatScope.of(context) ? FlatScope.rowPaddingH : 20,
+        12,
+        12,
+        12,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
