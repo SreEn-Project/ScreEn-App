@@ -28,23 +28,13 @@ class StudySetupHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return AppCard(
-      child: Row(
-        children: [
-          IconBadge(icon: icon, size: 44),
-          const SizedBox(width: AppTokens.space12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: theme.textTheme.titleMedium),
-                const SizedBox(height: AppTokens.space4),
-                Text(subtitle, style: theme.textTheme.bodySmall),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: theme.textTheme.headlineMedium),
+        const SizedBox(height: AppTokens.space4),
+        Text(subtitle, style: theme.textTheme.bodySmall),
+      ],
     );
   }
 }
@@ -74,11 +64,11 @@ class StudyModeCard<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return AppCard(
+    return AppCard.flat(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.testMode, style: theme.textTheme.labelLarge),
+          Text(l10n.testMode, style: theme.textTheme.titleMedium),
           const SizedBox(height: AppTokens.space12),
           AppSegmented<T>(
             values: values,
@@ -146,19 +136,12 @@ class StudyProgress extends StatelessWidget {
               style: theme.textTheme.titleMedium,
             ),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: ShapeDecoration(
-                shape: const StadiumBorder(),
-                color: colors.primaryContainer,
-              ),
-              child: PopEffect(
-                trigger: correct,
-                child: Text(
-                  l10n.testCorrectSoFar(correct),
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colors.onPrimaryContainer,
-                  ),
+            PopEffect(
+              trigger: correct,
+              child: Text(
+                l10n.testCorrectSoFar(correct),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colors.primary,
                 ),
               ),
             ),
@@ -182,11 +165,8 @@ class StudyPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    return AppCard(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.pagePadding,
-        vertical: AppTokens.sectionGap + AppTokens.space8,
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppTokens.space24),
       child: SizedBox(
         width: double.infinity,
         child: Column(
@@ -211,7 +191,10 @@ class StudyPrompt extends StatelessWidget {
                 text,
                 key: ValueKey(text),
                 textAlign: TextAlign.center,
-                style: theme.textTheme.headlineMedium,
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ],
@@ -339,7 +322,8 @@ class _StudyResultHeroState extends State<StudyResultHero> {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        AppCard(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppTokens.space16),
           child: SizedBox(
             width: double.infinity,
             child: Column(
@@ -357,7 +341,13 @@ class _StudyResultHeroState extends State<StudyResultHero> {
                   ),
                 ),
                 const SizedBox(height: AppTokens.space16),
-                Text(widget.score, style: theme.textTheme.headlineMedium),
+                Text(
+                  widget.score,
+                  style: theme.textTheme.displaySmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: AppTokens.space4),
                 Text(widget.caption, style: theme.textTheme.bodySmall),
               ],

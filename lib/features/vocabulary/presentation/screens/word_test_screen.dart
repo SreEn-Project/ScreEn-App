@@ -188,7 +188,6 @@ class _RunningState extends ConsumerState<_Running> {
             child: AppCard(
               onTap: revealed ? null : () => model.submit(text),
               color: fill,
-              shadow: fill == null,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppTokens.rowPaddingH,
                 vertical: AppTokens.space16,
@@ -316,7 +315,7 @@ class _Result extends ConsumerWidget {
           const SizedBox(height: AppTokens.sectionGap),
           SectionTitle(l10n.testWrongWords),
           const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
+          AppCard.flat(
             padding: const EdgeInsets.symmetric(
               vertical: AppTokens.cardListPaddingV,
             ),

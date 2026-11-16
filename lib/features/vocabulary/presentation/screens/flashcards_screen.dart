@@ -376,7 +376,7 @@ class _Result extends ConsumerWidget {
         ],
       ),
       children: [
-        AppCard(
+        AppCard.flat(
           child: SizedBox(
             width: double.infinity,
             child: Column(
@@ -401,7 +401,7 @@ class _Result extends ConsumerWidget {
           const SizedBox(height: AppTokens.sectionGap),
           SectionTitle(l10n.cardsUnknownWords),
           const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
+          AppCard.flat(
             padding: const EdgeInsets.symmetric(
               vertical: AppTokens.cardListPaddingV,
             ),
