@@ -5,6 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
+import '../../../../app/theme/theme_mode_provider.dart';
 import '../../../gemma/presentation/view_models/gemma_view_model.dart';
 import '../../../language/domain/entities/supported_language.dart';
 import '../../domain/entities/translator_settings.dart';
@@ -34,16 +35,27 @@ class SettingsScreen extends StatelessWidget {
       withBottomNav: true,
       children: [
         const _EngineSection(),
+        AppSection(
+          title: l10n.languagesTitle,
+          child: AppCard.flat(
+            padding: EdgeInsets.zero,
+            child: AppListTile(
+              icon: Symbols.translate_rounded,
+              title: l10n.languagesTitle,
+              subtitle: l10n.modelsBody,
+              onTap: () => context.push(AppRoutes.languages),
+            ),
+          ),
+        ),
         const _CaptureSection(),
         const _DisplaySection(),
         const _QuickLanguagesSection(),
         const _AutoTranslateSection(),
+        const _ThemeSection(),
         AppSection(
           title: l10n.settingsSectionEtc,
-          child: AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
+          child: AppCard.flat(
+            padding: EdgeInsets.zero,
             child: AppListTile(
               icon: Symbols.info_rounded,
               title: l10n.settingsAbout,
@@ -76,10 +88,8 @@ class _EngineSection extends ConsumerWidget {
         ref.watch(gemmaViewModelProvider).value?.isReady ?? false;
     return AppSection(
       title: l10n.settingsSectionEngine,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           children: [
             for (final engine in EngineType.values) ...[
@@ -99,14 +109,12 @@ class _EngineSection extends ConsumerWidget {
               const AppDivider(),
             ],
             AppListTile(
-              icon: Symbols.memory_rounded,
               title: l10n.settingsGemma,
               subtitle: l10n.settingsGemmaDetail,
               onTap: () => context.push(AppRoutes.gemma),
             ),
             const AppDivider(),
             AppListTile(
-              icon: Symbols.tune_rounded,
               title: l10n.settingsAiSetup,
               subtitle: l10n.settingsAiSetupDetail,
               onTap: () => context.push(AppRoutes.aiSetup),
@@ -137,7 +145,6 @@ class _EngineTile extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return AppListTile(
-      icon: engineIcon(engine),
       title: l10n.engineName(engine),
       subtitle: disabledReason ?? l10n.engineDetail(engine),
       enabled: disabledReason == null,
@@ -186,8 +193,10 @@ class _Labeled extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTokens.rowPaddingH,
+      padding: EdgeInsets.symmetric(
+        horizontal: FlatScope.of(context)
+            ? FlatScope.rowPaddingH
+            : AppTokens.rowPaddingH,
         vertical: AppTokens.rowPaddingV,
       ),
       child: Column(
@@ -226,10 +235,8 @@ class _CaptureSection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsSectionCapture,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -244,7 +251,6 @@ class _CaptureSection extends ConsumerWidget {
             ),
             const AppDivider(),
             AppListTile(
-              icon: Symbols.restart_alt_rounded,
               title: l10n.settingsResetFixedRegion,
               subtitle: settings.hasFixedRegion
                   ? null
@@ -273,10 +279,8 @@ class _DisplaySection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsSectionDisplay,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -347,10 +351,8 @@ class _QuickLanguagesSection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsQuickLanguages,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: AppListTile(
           icon: Symbols.translate_rounded,
           title: l10n.settingsQuickLanguagesDetail,
@@ -436,10 +438,8 @@ class _AutoTranslateSection extends ConsumerWidget {
 
     return AppSection(
       title: l10n.settingsSectionAuto,
-      child: AppCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppTokens.cardListPaddingV,
-        ),
+      child: AppCard.flat(
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -473,6 +473,34 @@ class _AutoTranslateSection extends ConsumerWidget {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 테마: 시스템 · 라이트 · 다크. 값은 기기에만 저장되고 바로 반영된다.
+class _ThemeSection extends ConsumerWidget {
+  const _ThemeSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final mode = ref.watch(themeModeProvider);
+
+    return AppSection(
+      title: l10n.settingsSectionTheme,
+      child: AppCard(
+        padding: const EdgeInsets.all(AppTokens.pagePadding),
+        child: AppSegmented<ThemeMode>(
+          values: const [ThemeMode.light, ThemeMode.dark, ThemeMode.system],
+          selected: mode,
+          label: (m) => switch (m) {
+            ThemeMode.light => l10n.themeLight,
+            ThemeMode.dark => l10n.themeDark,
+            ThemeMode.system => l10n.themeSystem,
+          },
+          onChanged: ref.read(themeModeProvider.notifier).set,
         ),
       ),
     );

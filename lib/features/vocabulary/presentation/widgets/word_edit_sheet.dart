@@ -28,6 +28,7 @@ Future<String?> showWordEditSheet(
 }) {
   return showModalBottomSheet<String>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     builder: (_) => WordEditSheet(

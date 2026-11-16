@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/bridge/bridge_providers.dart';
+import '../study_log/di.dart';
 import 'data/datasources/vocabulary_native_data_source.dart';
 import 'data/repositories/vocabulary_repository_impl.dart';
 import 'domain/repositories/vocabulary_repository.dart';
@@ -13,6 +14,7 @@ part 'di.g.dart';
 @Riverpod(keepAlive: true)
 VocabularyRepository vocabularyRepository(Ref ref) => VocabularyRepositoryImpl(
   VocabularyNativeDataSource(ref.watch(vocabularyHostApiProvider)),
+  onStudied: ref.watch(studyLogRepositoryProvider).markToday,
 );
 
 @riverpod

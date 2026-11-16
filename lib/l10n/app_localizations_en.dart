@@ -1471,4 +1471,73 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gemmaFootnote =>
       'Gemma is Google\'s open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.';
+
+  @override
+  String get navVocabulary => 'Words';
+
+  @override
+  String get navHistory => 'History';
+
+  @override
+  String get homeSectionStudy => 'Study';
+
+  @override
+  String homeStudySummary(int books, int words) {
+    return '$books wordbooks · $words words';
+  }
+
+  @override
+  String get homeStudyEmpty =>
+      'Save words from translations to study them here';
+
+  @override
+  String get homeStudyStart => 'Start studying';
+
+  @override
+  String get settingsSectionTheme => 'Theme';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get homeStudyRecord => 'Study record';
+
+  @override
+  String get homeStatMemorized => 'Words memorized';
+
+  @override
+  String get homeStreakUnit => 'day streak';
+
+  @override
+  String get homeStreakStart => 'Study today to start your streak';
+
+  @override
+  String get homeStreakKeep => 'Study today to keep your streak';
+
+  @override
+  String get homeStreakDone => 'Done for today!';
+
+  @override
+  String homeStreakBest(int days) {
+    return 'Best $days days';
+  }
+
+  @override
+  String homeMemorizedOf(int words) {
+    return 'of $words words';
+  }
+
+  @override
+  String get homeRankTitle => 'My wordbook ranking';
+
+  @override
+  String homeRankCount(int count) {
+    return '$count';
+  }
 }

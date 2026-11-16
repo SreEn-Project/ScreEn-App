@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -18,7 +21,11 @@ import '../../../settings/presentation/view_models/engine_view_model.dart';
 import '../../../history/domain/entities/history_entry.dart';
 import '../../../history/presentation/view_models/history_view_model.dart';
 import '../../../history/presentation/widgets/history_card.dart';
+import '../../../study_log/domain/entities/study_streak.dart';
+import '../../../study_log/presentation/view_models/study_streak_view_model.dart';
+import '../../../vocabulary/domain/entities/vocabulary.dart';
 import '../view_models/service_view_model.dart';
+import '../../../vocabulary/presentation/view_models/wordbooks_view_model.dart';
 import '../../../vocabulary/presentation/widgets/word_of_the_day_card.dart';
 
 /// 홈 (S-03, FL-03).
@@ -52,6 +59,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // 학습하면 단어장 통계가 바뀌므로, 그때 연속 일수도 다시 읽는다.
+    ref.listen(
+      wordbooksViewModelProvider,
+      (_, _) => ref.read(studyStreakViewModelProvider.notifier).refresh(),
+    );
     final engine = ref.watch(engineViewModelProvider).value ?? EngineType.mlKit;
     final locale = Localizations.localeOf(context);
     final targetName = SupportedLanguage.byCode(
@@ -67,113 +79,109 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final permissionsMissing =
         ref.watch(permissionViewModelProvider).value?.allGranted == false;
 
+    final books = ref.watch(wordbooksViewModelProvider).value;
+    final bookCount = books?.length ?? 0;
+    final wordCount = books?.fold<int>(0, (sum, b) => sum + b.wordCount) ?? 0;
+    final memorizedCount =
+        books?.fold<int>(0, (sum, b) => sum + b.memorizedCount) ?? 0;
+
     return AppPage(
       withBottomNav: true,
       children: [
         const _Header(),
-        const SizedBox(height: 24),
+        const _SectionDivider(),
+        // 학습 앱: 학습 기록이 맨 위. 번역 시작은 그 아래 카드에서.
+        _StudyCard(
+          streak:
+              ref.watch(studyStreakViewModelProvider).value ??
+              StudyStreak.empty,
+          words: wordCount,
+          memorized: memorizedCount,
+          ranking:
+              ([...?books]..sort(
+                    (a, b) => b.memorizedCount.compareTo(a.memorizedCount),
+                  ))
+                  .take(3)
+                  .toList(),
+          empty: bookCount == 0,
+          canStart: wordCount > 0,
+          onOpen: () => context.go(AppRoutes.vocabulary),
+          onStart: () => context.push(AppRoutes.learning),
+        ),
+        const _SectionDivider(),
+        // 번역 상태와 시작/중지는 한 덩어리: 화면에서 가장 먼저 읽히는 곳.
         _StatusCard(
           state: service,
           targetLanguage: targetName,
           engine: l10n.engineName(engine),
-        ),
-        const SizedBox(height: 20),
-        AppButton(
-          label: switch (service) {
-            ServiceStatus.running => l10n.homeStop,
-            ServiceStatus.waitingConsent => l10n.homeStarting,
-            ServiceStatus.stopped || ServiceStatus.error => l10n.homeStart,
-          },
-          height: AppTokens.largeButtonHeight + 4,
-          leading: StatusDot(
-            active: running,
-            inactiveColor: Theme.of(context).colorScheme.onPrimary
-                .withValues(alpha: 0.5),
-          ),
-          onPressed: permissionsMissing && !running
-              ? null
-              : () => ref.read(serviceViewModelProvider.notifier).toggle(),
-        ),
-        const SizedBox(height: 12),
-        if (permissionsMissing && !running)
-          Center(
-            child: AppButton.text(
-              label: l10n.homePermissionsNeeded,
-              trailingIcon: Symbols.arrow_forward_rounded,
-              onPressed: () => context.push(AppRoutes.permission),
+          action: AppButton(
+            label: switch (service) {
+              ServiceStatus.running => l10n.homeStop,
+              ServiceStatus.waitingConsent => l10n.homeStarting,
+              ServiceStatus.stopped || ServiceStatus.error => l10n.homeStart,
+            },
+            height: AppTokens.largeButtonHeight,
+            leading: StatusDot(
+              active: running,
+              inactiveColor: Theme.of(context).colorScheme.onPrimary
+                  .withValues(alpha: 0.5),
             ),
-          )
-        else
-          Text(
-            l10n.homeAreaHint,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall,
+            onPressed: permissionsMissing && !running
+                ? null
+                : () => ref.read(serviceViewModelProvider.notifier).toggle(),
           ),
-        const SizedBox(height: 28),
+          hint: permissionsMissing && !running
+              ? AppButton.text(
+                  label: l10n.homePermissionsNeeded,
+                  trailingIcon: Symbols.arrow_forward_rounded,
+                  onPressed: () => context.push(AppRoutes.permission),
+                )
+              : Text(
+                  l10n.homeAreaHint,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+        ),
+        const _SectionDivider(),
+        const WordOfTheDayCard(),
+        const _SectionDivider(),
         SectionTitle(l10n.homeSectionSetup),
-        const SizedBox(height: 12),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+        const SizedBox(height: AppTokens.space8),
+        AppCard.flat(
+          child: Column(
             children: [
-              Expanded(
-                child: _SetupTile(
-                  icon: Symbols.translate_rounded,
-                  label: l10n.homeTargetLanguage,
-                  value: targetName,
-                  onTap: () => context.push(AppRoutes.targetLanguage),
-                ),
+              AppListTile(
+                title: l10n.homeTargetLanguage,
+                value: targetName,
+                onTap: () => context.push(AppRoutes.targetLanguage),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _SetupTile(
-                  icon: Symbols.download_rounded,
-                  label: l10n.homeModels,
-                  value: l10n.homeModelsReady(models.installed.length),
-                  footer: models.downloading.isEmpty
-                      ? null
-                      : l10n.homeModelsDownloading(models.downloading.length),
-                  busy: models.downloading.isNotEmpty,
-                  onTap: () => context.go(AppRoutes.languages),
-                ),
+              const AppDivider(),
+              AppListTile(
+                title: l10n.homeModels,
+                value: l10n.homeModelsReady(models.installed.length),
+                subtitle: models.downloading.isEmpty
+                    ? null
+                    : l10n.homeModelsDownloading(models.downloading.length),
+                onTap: () => context.push(AppRoutes.languages),
+              ),
+              const AppDivider(),
+              AppListTile(
+                title: l10n.homeEngine,
+                value: l10n.engineName(engine),
+                onTap: () => context.go(AppRoutes.settings),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: AppListTile(
-            icon: engineIcon(engine),
-            title: l10n.homeEngine,
-            value: l10n.engineName(engine),
-            onTap: () => context.go(AppRoutes.settings),
-          ),
-        ),
-        const SizedBox(height: 12),
-        const WordOfTheDayCard(),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: AppListTile(
-            icon: Symbols.menu_book_rounded,
-            title: l10n.vocabTitle,
-            subtitle: l10n.vocabHomeHint,
-            onTap: () => context.push(AppRoutes.vocabulary),
-          ),
-        ),
-        const SizedBox(height: 28),
+        const _SectionDivider(),
         SectionTitle(
           l10n.homeRecent,
           action: AppButton.text(
             label: l10n.homeRecentSeeAll,
-            onPressed: () async {
-              await context.push(AppRoutes.history);
-              // 기록 화면에서 지웠을 수 있다.
-              ref.invalidate(recentHistoryProvider);
-            },
+            onPressed: () => context.go(AppRoutes.history),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppTokens.space12),
         const _RecentSection(),
       ],
     );
@@ -215,17 +223,34 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// 그라데이션 상태 카드: 서비스 상태 + 언어 방향 + 엔진.
+/// 섹션 사이 가는 선 + 넉넉한 여백. 카드 대신 구역을 이 선으로 나눈다.
+class _SectionDivider extends StatelessWidget {
+  const _SectionDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: AppTokens.space24),
+      child: AppDivider(indent: 0),
+    );
+  }
+}
+
+/// 번역 구역: 서비스 상태 + 큰 언어 방향 + 시작/중지 버튼 (카드 없이).
 class _StatusCard extends StatelessWidget {
   const _StatusCard({
     required this.state,
     required this.targetLanguage,
     required this.engine,
+    required this.action,
+    required this.hint,
   });
 
   final ServiceStatus state;
   final String targetLanguage;
   final String engine;
+  final Widget action;
+  final Widget hint;
 
   @override
   Widget build(BuildContext context) {
@@ -233,118 +258,303 @@ class _StatusCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return AppCard(
-      gradient: context.tokens.heroGradient,
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppStatusPill(
-            label: switch (state) {
-              ServiceStatus.running => l10n.homeStatusOn,
-              ServiceStatus.waitingConsent => l10n.homeStatusStarting,
-              ServiceStatus.error => l10n.homeStatusError,
-              ServiceStatus.stopped => l10n.homeStatusOff,
-            },
-            active: state == ServiceStatus.running,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            AppStatusPill(
+              label: switch (state) {
+                ServiceStatus.running => l10n.homeStatusOn,
+                ServiceStatus.waitingConsent => l10n.homeStatusStarting,
+                ServiceStatus.error => l10n.homeStatusError,
+                ServiceStatus.stopped => l10n.homeStatusOff,
+              },
+              active: state == ServiceStatus.running,
+            ),
+            const Spacer(),
+            Icon(Symbols.memory_rounded, size: 16, color: colors.primary),
+            const SizedBox(width: 6),
+            Text(
+              engine,
+              style: theme.textTheme.labelLarge?.copyWith(fontSize: 13),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppTokens.space16),
+        Text(
+          l10n.homeSourceAuto,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colors.onSurfaceVariant,
           ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Flexible(
-                child: Text(
-                  l10n.homeSourceAuto,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Icon(
-                  Symbols.arrow_forward_rounded,
+        ),
+        const SizedBox(height: AppTokens.space4),
+        Row(
+          children: [
+            Icon(Symbols.arrow_forward_rounded, color: colors.primary),
+            const SizedBox(width: AppTokens.space8),
+            Flexible(
+              child: Text(
+                targetLanguage,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.headlineLarge?.copyWith(
                   color: colors.primary,
                 ),
               ),
-              Flexible(
-                child: Text(
-                  targetLanguage,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    color: colors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(switch (state) {
-            ServiceStatus.running => l10n.homeServiceRunningHint,
-            ServiceStatus.waitingConsent => l10n.homeServiceStartingHint,
-            ServiceStatus.error => l10n.homeServiceErrorHint,
-            ServiceStatus.stopped => l10n.homeServiceHint,
-          }, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(Symbols.memory_rounded, size: 16, color: colors.primary),
-              const SizedBox(width: 6),
-              Text(
-                engine,
-                style: theme.textTheme.labelLarge?.copyWith(fontSize: 13),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppTokens.space8),
+        Text(switch (state) {
+          ServiceStatus.running => l10n.homeServiceRunningHint,
+          ServiceStatus.waitingConsent => l10n.homeServiceStartingHint,
+          ServiceStatus.error => l10n.homeServiceErrorHint,
+          ServiceStatus.stopped => l10n.homeServiceHint,
+        }, style: theme.textTheme.bodySmall),
+        const SizedBox(height: AppTokens.space24),
+        action,
+        const SizedBox(height: AppTokens.space12),
+        Center(child: hint),
+      ],
     );
   }
 }
 
-class _SetupTile extends StatelessWidget {
-  const _SetupTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.onTap,
-    this.footer,
-    this.busy = false,
+/// 학습 기록 구역(홈 맨 위): 연속 일수 · 외운 단어 · 내 단어장 순위 + 학습 시작 (카드 없이).
+/// 순위는 다른 사람과의 비교가 아니라(서버 없음, D-072) 내 단어장끼리 외운 단어 수 비교.
+class _StudyCard extends StatelessWidget {
+  const _StudyCard({
+    required this.streak,
+    required this.words,
+    required this.memorized,
+    required this.ranking,
+    required this.empty,
+    required this.canStart,
+    required this.onOpen,
+    required this.onStart,
   });
 
-  final IconData icon;
-  final String label;
-  final String value;
-  final String? footer;
-  final bool busy;
-  final VoidCallback onTap;
+  final StudyStreak streak;
+  final int words;
+  final int memorized;
+  final List<Wordbook> ranking;
+  final bool empty;
+  final bool canStart;
+  final VoidCallback onOpen;
+  final VoidCallback onStart;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final locale = Localizations.localeOf(context).languageCode;
+    final today = DateTime.now();
 
-    return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IconBadge(icon: icon, size: 40),
-          const SizedBox(height: 14),
-          Text(label, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleLarge,
+    final streakHint = streak.studiedToday
+        ? l10n.homeStreakDone
+        : streak.current > 0
+        ? l10n.homeStreakKeep
+        : l10n.homeStreakStart;
+
+    Widget dayDot(int index) {
+      final date = DateTime(today.year, today.month, today.day - (6 - index));
+      final done = streak.week[index];
+      final isToday = index == 6;
+      final label = DateFormat.E(locale).format(date);
+      return Expanded(
+        child: Column(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: done ? colors.primary : null,
+                border: done
+                    ? null
+                    : Border.all(
+                        color: isToday ? colors.primary : colors.outline,
+                        width: isToday ? 1.5 : 1,
+                      ),
+              ),
+              child: done
+                  ? Icon(
+                      Symbols.check_rounded,
+                      size: 16,
+                      color: colors.onPrimary,
+                    )
+                  : null,
+            ),
+            const SizedBox(height: AppTokens.space4),
+            Text(
+              label.characters.first,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isToday ? colors.primary : colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final top = ranking.isEmpty ? 1 : math.max(1, ranking.first.memorizedCount);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.homeStudyRecord,
+                style: theme.textTheme.titleLarge,
+              ),
+            ),
+            AppButton.text(label: l10n.vocabTitle, onPressed: onOpen),
+          ],
+        ),
+        const SizedBox(height: AppTokens.space12),
+        if (empty)
+          Text(l10n.homeStudyEmpty, style: theme.textTheme.bodySmall)
+        else ...[
+          // 연속 일수: 가장 크게.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Icon(
+                Symbols.local_fire_department_rounded,
+                fill: 1,
+                color: streak.current > 0
+                    ? colors.primary
+                    : colors.onSurfaceVariant,
+              ),
+              const SizedBox(width: AppTokens.space4),
+              Text(
+                '${streak.current}',
+                style: theme.textTheme.displaySmall?.copyWith(
+                  color: colors.primary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(width: AppTokens.space8),
+              Text(l10n.homeStreakUnit, style: theme.textTheme.titleMedium),
+              const Spacer(),
+              if (streak.best > 0)
+                Text(
+                  l10n.homeStreakBest(streak.best),
+                  style: theme.textTheme.bodySmall,
+                ),
+            ],
           ),
-          if (busy) ...[
-            const SizedBox(height: 12),
-            const AppProgressBar(height: 5),
+          const SizedBox(height: AppTokens.space4),
+          Text(streakHint, style: theme.textTheme.bodySmall),
+          const SizedBox(height: AppTokens.space16),
+          Row(children: [for (var i = 0; i < 7; i++) dayDot(i)]),
+          const SizedBox(height: AppTokens.space24),
+          // 외운 단어.
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$memorized',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  color: colors.primary,
+                ),
+              ),
+              const SizedBox(width: AppTokens.space8),
+              Expanded(
+                child: Text(
+                  '${l10n.homeStatMemorized} · ${l10n.homeMemorizedOf(words)}',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTokens.space8),
+          _Bar(value: words == 0 ? 0 : memorized / words),
+          if (ranking.length > 1) ...[
+            const SizedBox(height: AppTokens.space24),
+            Text(l10n.homeRankTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: AppTokens.space8),
+            for (var i = 0; i < ranking.length; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      child: Text(
+                        '${i + 1}',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: i == 0
+                              ? colors.primary
+                              : colors.onSurfaceVariant,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 5,
+                      child: Text(
+                        ranking[i].name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(width: AppTokens.space12),
+                    Expanded(
+                      flex: 4,
+                      child: _Bar(value: ranking[i].memorizedCount / top),
+                    ),
+                    const SizedBox(width: AppTokens.space12),
+                    SizedBox(
+                      width: 40,
+                      child: Text(
+                        l10n.homeRankCount(ranking[i].memorizedCount),
+                        textAlign: TextAlign.end,
+                        style: theme.textTheme.labelLarge,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
-          if (footer != null) ...[
-            const SizedBox(height: 6),
-            Text(footer!, style: theme.textTheme.bodySmall),
-          ],
+        ],
+        const SizedBox(height: AppTokens.space24),
+        AppButton.secondary(
+          label: l10n.homeStudyStart,
+          height: 48,
+          onPressed: canStart ? onStart : null,
+        ),
+      ],
+    );
+  }
+}
+
+/// 가는 진행 막대 (0~1).
+class _Bar extends StatelessWidget {
+  const _Bar({required this.value});
+
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: Stack(
+        children: [
+          Container(height: 6, color: colors.outline.withValues(alpha: 0.5)),
+          FractionallySizedBox(
+            widthFactor: value.clamp(0.0, 1.0),
+            child: Container(height: 6, color: colors.primary),
+          ),
         ],
       ),
     );
@@ -420,10 +630,14 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
             ),
           )
         else
-          for (final entry in entries) ...[
-            HistoryCard(entry: entry),
-            const SizedBox(height: 12),
-          ],
+          Column(
+            children: [
+              for (final (i, entry) in entries.indexed) ...[
+                if (i > 0) const AppDivider(indent: 0),
+                HistoryCard(entry: entry, flat: true),
+              ],
+            ],
+          ),
       ],
     );
   }

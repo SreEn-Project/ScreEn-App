@@ -55,7 +55,7 @@ final class VocabularyRepositoryProvider
 }
 
 String _$vocabularyRepositoryHash() =>
-    r'ff948635ebc8e33a635841813e6e90773dfbb8f5';
+    r'c5888ba1da91f23360e6e7bf93cc451191df8f13';
 
 @ProviderFor(getWordbooks)
 final getWordbooksProvider = GetWordbooksProvider._();

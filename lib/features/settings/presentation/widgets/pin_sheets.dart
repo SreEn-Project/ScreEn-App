@@ -17,6 +17,7 @@ Future<String?> showPinSheet(
 }) {
   return showModalBottomSheet<String>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     builder: (_) => _PinSheet(title: title, body: body, validate: validate),

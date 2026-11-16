@@ -2743,6 +2743,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gemma is Google\'s open model. It is small, so quality can be lower than Gemini or Groq, and the first translation takes a few seconds while the model loads.'**
   String get gemmaFootnote;
+
+  /// No description provided for @navVocabulary.
+  ///
+  /// In en, this message translates to:
+  /// **'Words'**
+  String get navVocabulary;
+
+  /// No description provided for @navHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get navHistory;
+
+  /// No description provided for @homeSectionStudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Study'**
+  String get homeSectionStudy;
+
+  /// No description provided for @homeStudySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{books} wordbooks · {words} words'**
+  String homeStudySummary(int books, int words);
+
+  /// No description provided for @homeStudyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Save words from translations to study them here'**
+  String get homeStudyEmpty;
+
+  /// No description provided for @homeStudyStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start studying'**
+  String get homeStudyStart;
+
+  /// No description provided for @settingsSectionTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsSectionTheme;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// No description provided for @homeStudyRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Study record'**
+  String get homeStudyRecord;
+
+  /// No description provided for @homeStatMemorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Words memorized'**
+  String get homeStatMemorized;
+
+  /// No description provided for @homeStreakUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'day streak'**
+  String get homeStreakUnit;
+
+  /// No description provided for @homeStreakStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Study today to start your streak'**
+  String get homeStreakStart;
+
+  /// No description provided for @homeStreakKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Study today to keep your streak'**
+  String get homeStreakKeep;
+
+  /// No description provided for @homeStreakDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done for today!'**
+  String get homeStreakDone;
+
+  /// No description provided for @homeStreakBest.
+  ///
+  /// In en, this message translates to:
+  /// **'Best {days} days'**
+  String homeStreakBest(int days);
+
+  /// No description provided for @homeMemorizedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'of {words} words'**
+  String homeMemorizedOf(int words);
+
+  /// No description provided for @homeRankTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My wordbook ranking'**
+  String get homeRankTitle;
+
+  /// No description provided for @homeRankCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}'**
+  String homeRankCount(int count);
 }
 
 class _AppLocalizationsDelegate

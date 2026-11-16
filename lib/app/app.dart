@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_mode_provider.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -17,7 +18,7 @@ class App extends ConsumerWidget {
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       // 기기 언어가 한국어 · 영어가 아니면 한국어로 보인다 (기본은 알파벳순 첫 언어인 영어).

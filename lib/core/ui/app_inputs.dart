@@ -4,7 +4,7 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_tokens.dart';
 
-/// 검색 입력창: 흰 알약 + 옅은 그림자, 테두리 없음.
+/// 검색 입력창: 흰 둥근 창 + 1dp 테두리(포커스 시 primary).
 class AppSearchField extends StatelessWidget {
   const AppSearchField({
     super.key,
@@ -20,12 +20,14 @@ class AppSearchField extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusCard + 4),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
     return DecoratedBox(
-      decoration: ShapeDecoration(
-        shape: const StadiumBorder(),
-        color: colors.surface,
-        shadows: context.tokens.cardShadow,
-      ),
+      decoration: const BoxDecoration(),
       child: TextField(
         onChanged: onChanged,
         style: theme.textTheme.bodyLarge,
@@ -39,10 +41,11 @@ class AppSearchField extends StatelessWidget {
             Symbols.search_rounded,
             color: colors.onSurfaceVariant,
           ),
-          filled: false,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
+          filled: true,
+          fillColor: colors.surface,
+          border: border(colors.outline),
+          enabledBorder: border(colors.outline),
+          focusedBorder: border(colors.primary, 1.5),
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
@@ -249,12 +252,14 @@ class AppTextField extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radiusInput),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
     return DecoratedBox(
-      decoration: ShapeDecoration(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: colors.surface,
-        shadows: context.tokens.cardShadow,
-      ),
+      decoration: const BoxDecoration(),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
@@ -280,10 +285,12 @@ class AppTextField extends StatelessWidget {
           hintStyle: theme.textTheme.bodyLarge?.copyWith(
             color: colors.onSurfaceVariant,
           ),
-          filled: false,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
+          filled: true,
+          fillColor: colors.surface,
+          border: border(colors.outline),
+          enabledBorder: border(colors.outline),
+          disabledBorder: border(colors.outline),
+          focusedBorder: border(colors.primary, 1.5),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppTokens.rowPaddingH,
             vertical: 16,

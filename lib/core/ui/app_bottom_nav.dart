@@ -41,9 +41,10 @@ class AppBottomNav extends StatelessWidget {
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppTokens.radiusCard),
+            side: BorderSide(color: colors.outlineVariant),
           ),
           color: colors.surface,
-          shadows: context.tokens.cardShadow,
+          shadows: context.tokens.floatShadow,
         ),
         child: Row(
           children: [

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../app/theme/app_tokens.dart';
 import 'pressable.dart';
 
-/// 모서리 24dp 카드 + 옅고 넓은 그림자 (docs/design.md).
+/// 모서리 24dp 카드 + 1dp 옅은 테두리 (그림자는 기본 없음, docs/design.md).
+/// 반복 목록 행마다 감싸지 말고, 목록은 카드 하나 안에 행 + 구분선으로 묶는다.
 /// [gradient]를 주면 배경 대신 그라데이션을 쓴다 (홈 상단 카드 전용).
 class AppCard extends StatelessWidget {
   const AppCard({
@@ -14,8 +15,21 @@ class AppCard extends StatelessWidget {
     this.gradient,
     this.onTap,
     this.radius = AppTokens.radiusCard,
-    this.shadow = true,
+    this.shadow = false,
+    this.bordered = true,
   });
+
+  /// 테두리 · 그림자 · 배경 없는 평평한 구역. 카드 대신 구역을 선(구분선)과 큰 글자로 나눌 때 쓴다.
+  const AppCard.flat({
+    super.key,
+    required this.child,
+    this.padding = EdgeInsets.zero,
+    this.onTap,
+  }) : color = Colors.transparent,
+       gradient = null,
+       radius = AppTokens.radiusCard,
+       shadow = false,
+       bordered = false;
 
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -24,6 +38,12 @@ class AppCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double radius;
   final bool shadow;
+
+  /// 1dp 옅은 테두리. 그림자를 약하게 한 대신 표면 경계를 나눈다 (그라데이션 카드엔 안 그린다).
+  final bool bordered;
+
+  bool get isFlat =>
+      bordered == false && shadow == false && color == Colors.transparent;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +54,30 @@ class AppCard extends StatelessWidget {
             : null,
         gradient: gradient,
         borderRadius: BorderRadius.circular(radius),
+        border: bordered && gradient == null
+            ? Border.all(color: Theme.of(context).colorScheme.outlineVariant)
+            : null,
         boxShadow: shadow ? context.tokens.cardShadow : null,
       ),
       child: Padding(padding: padding, child: child),
     );
 
-    if (onTap == null) return card;
-    return Pressable(onTap: onTap, scale: 0.98, child: card);
+    final body = isFlat ? FlatScope(child: card) : card;
+    if (onTap == null) return body;
+    return Pressable(onTap: onTap, scale: 0.98, child: body);
   }
+}
+
+/// [AppCard.flat] 안임을 알린다: 안쪽 목록 행 · 구분선은 페이지 여백에 맞춰 좌우 패딩을 줄인다.
+class FlatScope extends InheritedWidget {
+  const FlatScope({super.key, required super.child});
+
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<FlatScope>() != null;
+
+  /// 평평한 구역 안 행의 좌우 패딩.
+  static const double rowPaddingH = AppTokens.space4;
+
+  @override
+  bool updateShouldNotify(FlatScope oldWidget) => false;
 }

@@ -157,8 +157,7 @@ class WordbookDetailScreen extends ConsumerWidget {
                         AppTokens.sectionGap,
                       ),
                       itemCount: words.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(height: AppTokens.space12),
+                      separatorBuilder: (_, _) => const AppDivider(indent: 0),
                       itemBuilder: (context, index) {
                         final word = words[index];
                         return WordCard(

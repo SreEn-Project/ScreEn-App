@@ -99,7 +99,7 @@ class WordbooksScreen extends ConsumerWidget {
                         AppTokens.pagePadding,
                         AppTokens.space8,
                         AppTokens.pagePadding,
-                        AppTokens.sectionGap,
+                        AppTokens.bottomNavSpace + AppTokens.space16,
                       ),
                       itemCount: books.length + 1,
                       separatorBuilder: (_, _) =>
@@ -170,6 +170,7 @@ class _StudyCard extends StatelessWidget {
       onTap: onTap,
       color: colors.primaryContainer,
       shadow: false,
+      bordered: false,
       padding: const EdgeInsets.symmetric(
         horizontal: AppTokens.pagePadding,
         vertical: AppTokens.space16,

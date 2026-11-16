@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_tokens.dart';
+import 'app_card.dart';
 import 'icon_badge.dart';
 import 'pressable.dart';
 
@@ -18,10 +19,8 @@ class AppListTile extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.enabled = true,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: AppTokens.rowPaddingH,
-      vertical: AppTokens.rowPaddingV,
-    ),
+    this.selected = false,
+    this.padding,
   });
 
   final String title;
@@ -33,7 +32,10 @@ class AppListTile extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
   final bool enabled;
-  final EdgeInsetsGeometry padding;
+
+  /// 고른 항목: 오른쪽에 체크 표시 ([trailing]이 없을 때).
+  final bool selected;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +44,9 @@ class AppListTile extends StatelessWidget {
 
     final end =
         trailing ??
-        (onTap != null
+        (selected
+            ? Icon(Symbols.check_rounded, color: colors.primary, size: 22)
+            : onTap != null
             ? Icon(
                 Symbols.chevron_right_rounded,
                 color: colors.onSurfaceVariant,
@@ -51,11 +55,18 @@ class AppListTile extends StatelessWidget {
             : null);
 
     final row = Padding(
-      padding: padding,
+      padding:
+          padding ??
+          EdgeInsets.symmetric(
+            horizontal: FlatScope.of(context)
+                ? FlatScope.rowPaddingH
+                : AppTokens.rowPaddingH,
+            vertical: AppTokens.rowPaddingV,
+          ),
       child: Row(
         children: [
           if (icon != null) ...[
-            IconBadge(icon: icon!, size: 40),
+            IconBadge(icon: icon!, size: 36),
             const SizedBox(width: AppTokens.space12),
           ],
           Expanded(
@@ -93,15 +104,22 @@ class AppListTile extends StatelessWidget {
 
 /// 카드 안 항목 사이 가는 구분선.
 class AppDivider extends StatelessWidget {
-  const AppDivider({super.key, this.indent = AppTokens.rowPaddingH});
+  const AppDivider({super.key, this.indent});
 
-  final double indent;
+  /// null이면 평평한 구역 안에서는 [FlatScope.rowPaddingH], 카드 안에서는 행 패딩에 맞춘다.
+  final double? indent;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 1,
-      margin: EdgeInsets.symmetric(horizontal: indent),
+      margin: EdgeInsets.symmetric(
+        horizontal:
+            indent ??
+            (FlatScope.of(context)
+                ? FlatScope.rowPaddingH
+                : AppTokens.rowPaddingH),
+      ),
       color: Theme.of(context).colorScheme.outline,
     );
   }

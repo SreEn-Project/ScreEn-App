@@ -5,7 +5,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../core/ui/ui.dart';
 import '../l10n/app_localizations.dart';
 
-/// 하단 탭(홈 · 언어 · 설정) 틀. 탭바는 본문 위에 떠 있다.
+/// 하단 탭(홈 · 단어장 · 기록 · 설정) 틀. 탭바는 본문 위에 떠 있다.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.shell});
 
@@ -29,9 +29,10 @@ class AppShell extends StatelessWidget {
             items: [
               AppNavItem(icon: Symbols.home_rounded, label: l10n.navHome),
               AppNavItem(
-                icon: Symbols.translate_rounded,
-                label: l10n.navLanguages,
+                icon: Symbols.menu_book_rounded,
+                label: l10n.navVocabulary,
               ),
+              AppNavItem(icon: Symbols.history_rounded, label: l10n.navHistory),
               AppNavItem(
                 icon: Symbols.settings_rounded,
                 label: l10n.navSettings,

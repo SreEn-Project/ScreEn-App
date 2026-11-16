@@ -160,10 +160,8 @@ class _AiOptionsSectionState extends ConsumerState<AiOptionsSection> {
         if (options.glossary.isEmpty)
           AppNotice(l10n.aiGlossaryEmpty)
         else
-          AppCard(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppTokens.cardListPaddingV,
-            ),
+          AppCard.flat(
+            padding: EdgeInsets.zero,
             child: Column(
               children: [
                 for (var i = 0; i < options.glossary.length; i++) ...[
