@@ -358,44 +358,62 @@ class _StudyCard extends StatelessWidget {
         ? l10n.homeStreakKeep
         : l10n.homeStreakStart;
 
-    Widget dayDot(int index) {
+    // 달력 칸: 요일 · 날짜. 학습한 날은 연한 초록 칸, 오늘은 테두리 + 불꽃.
+    Widget dayCell(int index) {
       final date = DateTime(today.year, today.month, today.day - (6 - index));
       final done = streak.week[index];
       final isToday = index == 6;
       final label = DateFormat.E(locale).format(date);
+      final fg = done ? colors.onPrimaryContainer : colors.onSurfaceVariant;
       return Expanded(
-        child: Column(
-          children: [
-            Container(
-              width: 28,
-              height: 28,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: done ? colors.primary : null,
-                border: done
-                    ? null
-                    : Border.all(
-                        color: isToday ? colors.primary : colors.outline,
-                        width: isToday ? 1.5 : 1,
-                      ),
-              ),
-              child: done
-                  ? Icon(
-                      Symbols.check_rounded,
-                      size: 16,
-                      color: colors.onPrimary,
-                    )
-                  : null,
-            ),
-            const SizedBox(height: AppTokens.space4),
-            Text(
-              label.characters.first,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isToday ? colors.primary : colors.onSurfaceVariant,
+        child: Padding(
+          padding: EdgeInsets.only(left: index == 0 ? 0 : AppTokens.space4),
+          child: Container(
+            height: 72,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppTokens.radiusS),
+              color: done ? colors.primaryContainer : null,
+              border: Border.all(
+                color: isToday
+                    ? colors.primary
+                    : done
+                    ? Colors.transparent
+                    : colors.outline,
+                width: isToday ? 1.5 : 1,
               ),
             ),
-          ],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(color: fg),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${date.day}',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: done ? colors.primary : colors.onSurface,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                if (isToday)
+                  Icon(
+                    Symbols.local_fire_department_rounded,
+                    size: 18,
+                    fill: done ? 1 : 0,
+                    color: done
+                        ? context.tokens.accent
+                        : colors.onSurfaceVariant,
+                  )
+                else if (done)
+                  Icon(Symbols.check_rounded, size: 16, color: colors.primary)
+                else
+                  const SizedBox(height: 16),
+              ],
+            ),
+          ),
         ),
       );
     }
@@ -453,7 +471,7 @@ class _StudyCard extends StatelessWidget {
           const SizedBox(height: AppTokens.space4),
           Text(streakHint, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppTokens.space16),
-          Row(children: [for (var i = 0; i < 7; i++) dayDot(i)]),
+          Row(children: [for (var i = 0; i < 7; i++) dayCell(i)]),
           const SizedBox(height: AppTokens.space24),
           // 외운 단어.
           Row(

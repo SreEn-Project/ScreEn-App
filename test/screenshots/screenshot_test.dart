@@ -20,6 +20,10 @@ import 'package:translation_poc_app/l10n/app_localizations.dart';
 
 import 'package:translation_poc_app/features/vocabulary/domain/entities/vocabulary.dart';
 
+import 'package:translation_poc_app/features/study_log/di.dart';
+import 'package:translation_poc_app/features/study_log/domain/entities/study_streak.dart';
+import 'package:translation_poc_app/features/study_log/domain/usecases/study_log_usecases.dart';
+
 import '../fakes.dart';
 
 const _outDir = 'build/screenshots';
@@ -57,13 +61,18 @@ Widget _route(
   ServiceStatus service = ServiceStatus.stopped,
   FakeSettingsRepository? settings,
   FakeVocabularyRepository? vocabulary,
+  StudyStreak? streak,
 }) => ProviderScope(
-  overrides: fakeNativeOverrides(
-    service: service,
-    settings: settings,
-    vocabulary: vocabulary,
-    permissionsGranted: location != AppRoutes.permission,
-  ),
+  overrides: [
+    ...fakeNativeOverrides(
+      service: service,
+      settings: settings,
+      vocabulary: vocabulary,
+      permissionsGranted: location != AppRoutes.permission,
+    ),
+    if (streak != null)
+      getStudyStreakProvider.overrideWithValue(_FakeStreak(streak)),
+  ],
   child: MaterialApp.router(
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
@@ -75,6 +84,13 @@ Widget _route(
     routerConfig: createRouter(initialLocation: location),
   ),
 );
+
+class _FakeStreak implements GetStudyStreak {
+  _FakeStreak(this.value);
+  final StudyStreak value;
+  @override
+  Future<StudyStreak> call() async => value;
+}
 
 Future<void> _shoot(WidgetTester tester, String name) async {
   await tester.pumpAndSettle(const Duration(milliseconds: 100));
@@ -246,6 +262,37 @@ void main() {
       _route(AppRoutes.wordPath(1), vocabulary: vocabulary),
     );
     await _shoot(tester, '15_word_detail');
+
+    // 홈 학습 기록 달력 칸 (오늘 학습 전 / 후)
+    await _setSize(tester, const Size(412, 900));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      _route(
+        AppRoutes.home,
+        vocabulary: vocabulary,
+        streak: const StudyStreak(
+          current: 3,
+          best: 7,
+          week: [false, true, true, false, true, true, true],
+          studiedToday: true,
+        ),
+      ),
+    );
+    await _shoot(tester, '16_home_study_done');
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      _route(
+        AppRoutes.home,
+        vocabulary: vocabulary,
+        streak: const StudyStreak(
+          current: 2,
+          best: 7,
+          week: [false, true, true, false, true, true, false],
+          studiedToday: false,
+        ),
+      ),
+    );
+    await _shoot(tester, '17_home_study_todo');
 
     debugDisableShadows = true;
   });
