@@ -359,15 +359,16 @@ class _StudyCard extends StatelessWidget {
         : l10n.homeStreakStart;
 
     // 달력 칸: 요일 · 날짜. 학습한 날은 연한 초록 칸, 오늘은 테두리 + 불꽃.
-    Widget dayCell(int index) {
-      final date = DateTime(today.year, today.month, today.day - (6 - index));
-      final done = streak.week[index];
-      final isToday = index == 6;
+    Widget dayCell(int back, double width) {
+      final date = DateTime(today.year, today.month, today.day - back);
+      final done = streak.studiedBack(back);
+      final isToday = back == 0;
       final label = DateFormat.E(locale).format(date);
       final fg = done ? colors.onPrimaryContainer : colors.onSurfaceVariant;
-      return Expanded(
+      return SizedBox(
+        width: width,
         child: Padding(
-          padding: EdgeInsets.only(left: index == 0 ? 0 : AppTokens.space4),
+          padding: const EdgeInsets.only(right: AppTokens.space4),
           child: Container(
             height: 72,
             decoration: BoxDecoration(
@@ -471,7 +472,22 @@ class _StudyCard extends StatelessWidget {
           const SizedBox(height: AppTokens.space4),
           Text(streakHint, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppTokens.space16),
-          Row(children: [for (var i = 0; i < 7; i++) dayCell(i)]),
+          // 7칸이 한 화면에 보이고, 왼쪽으로 밀면 이전 날짜(8주 전까지)가 나온다.
+          LayoutBuilder(
+            builder: (context, box) {
+              final cell = (box.maxWidth + AppTokens.space4) / 7;
+              return SizedBox(
+                height: 72,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  itemCount: 56,
+                  itemExtent: cell,
+                  itemBuilder: (_, back) => dayCell(back, cell),
+                ),
+              );
+            },
+          ),
           const SizedBox(height: AppTokens.space24),
           // 외운 단어.
           Row(

@@ -5,6 +5,7 @@ class StudyStreak {
     required this.best,
     required this.week,
     required this.studiedToday,
+    this.days = const {},
   });
 
   static const empty = StudyStreak(
@@ -24,6 +25,18 @@ class StudyStreak {
   final List<bool> week;
 
   final bool studiedToday;
+
+  /// 학습한 모든 날('yyyy-MM-dd'). 달력 칸을 옛날 쪽으로 넘겨 볼 때 쓴다.
+  final Set<String> days;
+
+  /// [back]일 전에 학습했는지. 최근 7일은 [week], 그 전은 [days].
+  bool studiedBack(int back) {
+    if (back < week.length) return week[week.length - 1 - back];
+    final now = DateTime.now();
+    return days.contains(
+      formatDay(DateTime(now.year, now.month, now.day - back)),
+    );
+  }
 
   /// [days]는 'yyyy-MM-dd' 형식의 학습한 날 모음.
   factory StudyStreak.fromDays(Iterable<String> days, DateTime today) {
@@ -60,6 +73,7 @@ class StudyStreak {
       best: best < current ? current : best,
       week: [for (var back = 6; back >= 0; back--) hasDay(back)],
       studiedToday: studiedToday,
+      days: set,
     );
   }
 

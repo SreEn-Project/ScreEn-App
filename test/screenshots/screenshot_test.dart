@@ -270,15 +270,34 @@ void main() {
       _route(
         AppRoutes.home,
         vocabulary: vocabulary,
-        streak: const StudyStreak(
+        streak: StudyStreak(
           current: 3,
           best: 7,
-          week: [false, true, true, false, true, true, true],
+          week: const [false, true, true, false, true, true, true],
           studiedToday: true,
+          days: {
+            for (final back in [8, 9, 10, 12, 15, 16])
+              StudyStreak.formatDay(
+                DateTime(
+                  DateTime.now().year,
+                  DateTime.now().month,
+                  DateTime.now().day - back,
+                ),
+              ),
+          },
         ),
       ),
     );
     await _shoot(tester, '16_home_study_done');
+    // 달력 칸을 오른쪽으로 밀어 이전 주를 본다.
+    await tester.drag(
+      find.byWidgetPredicate(
+        (w) => w is ListView && w.scrollDirection == Axis.horizontal,
+      ),
+      const Offset(300, 0),
+    );
+    await _shoot(tester, '18_home_study_scrolled');
+
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(
       _route(
