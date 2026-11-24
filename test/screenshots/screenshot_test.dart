@@ -264,7 +264,7 @@ void main() {
     await _shoot(tester, '15_word_detail');
 
     // 홈 학습 기록 달력 칸 (오늘 학습 전 / 후)
-    await _setSize(tester, const Size(412, 900));
+    await _setSize(tester, const Size(412, 2000));
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(
       _route(

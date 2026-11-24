@@ -147,7 +147,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const _SectionDivider(),
         SectionTitle(l10n.homeSectionSetup),
         const SizedBox(height: AppTokens.space8),
-        AppCard.flat(
+        AppCard.elevated(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppTokens.cardListPaddingV,
+          ),
           child: Column(
             children: [
               AppListTile(
@@ -654,7 +657,7 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
         ),
         const SizedBox(height: 14),
         if (entries.isEmpty)
-          AppCard(
+          AppCard.elevated(
             padding: EdgeInsets.zero,
             child: Center(
               child: AppEmptyState(
@@ -664,13 +667,19 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
             ),
           )
         else
-          Column(
-            children: [
-              for (final (i, entry) in entries.indexed) ...[
-                if (i > 0) const AppDivider(indent: 0),
-                HistoryCard(entry: entry, flat: true),
+          AppCard.elevated(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTokens.space12,
+              vertical: AppTokens.cardListPaddingV,
+            ),
+            child: Column(
+              children: [
+                for (final (i, entry) in entries.indexed) ...[
+                  if (i > 0) const AppDivider(indent: 0),
+                  HistoryCard(entry: entry, flat: true),
+                ],
               ],
-            ],
+            ),
           ),
       ],
     );

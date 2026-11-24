@@ -17,7 +17,21 @@ class AppCard extends StatelessWidget {
     this.radius = AppTokens.radiusCard,
     this.shadow = false,
     this.bordered = true,
+    this.elevated = false,
   });
+
+  /// 테두리 없이 떠 보이는 카드 (큰 그림자). 화면에 붙은 구역 아래에서 덩어리 하나만 띄울 때 쓴다.
+  const AppCard.elevated({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(AppTokens.pagePadding),
+    this.onTap,
+    this.radius = AppTokens.radiusCard,
+  }) : color = null,
+       gradient = null,
+       shadow = false,
+       bordered = false,
+       elevated = true;
 
   /// 테두리 · 그림자 · 배경 없는 평평한 구역. 카드 대신 구역을 선(구분선)과 큰 글자로 나눌 때 쓴다.
   const AppCard.flat({
@@ -29,7 +43,8 @@ class AppCard extends StatelessWidget {
        gradient = null,
        radius = AppTokens.radiusCard,
        shadow = false,
-       bordered = false;
+       bordered = false,
+       elevated = false;
 
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -38,6 +53,9 @@ class AppCard extends StatelessWidget {
   final VoidCallback? onTap;
   final double radius;
   final bool shadow;
+
+  /// true면 [AppTokens.floatShadow]로 화면 위에 떠 보인다.
+  final bool elevated;
 
   /// 1dp 옅은 테두리. 그림자를 약하게 한 대신 표면 경계를 나눈다 (그라데이션 카드엔 안 그린다).
   final bool bordered;
@@ -57,7 +75,11 @@ class AppCard extends StatelessWidget {
         border: bordered && gradient == null
             ? Border.all(color: Theme.of(context).colorScheme.outlineVariant)
             : null,
-        boxShadow: shadow ? context.tokens.cardShadow : null,
+        boxShadow: elevated
+            ? context.tokens.floatShadow
+            : shadow
+            ? context.tokens.cardShadow
+            : null,
       ),
       child: Padding(padding: padding, child: child),
     );
