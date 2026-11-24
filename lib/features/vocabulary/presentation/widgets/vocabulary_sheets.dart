@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -185,7 +185,7 @@ Future<int?> showWordbookPickerSheet(
               if (count != null) Text(count, style: theme.textTheme.bodySmall),
               if (selected) ...[
                 const SizedBox(width: AppTokens.space8),
-                Icon(LucideIcons.check, color: colors.primary, size: 22),
+                Icon(Symbols.check_rounded, color: colors.primary, size: 22),
               ],
             ],
           ),
@@ -219,7 +219,7 @@ Future<int?> showWordbookPickerSheet(
                     children: [
                       for (final book in others) ...[
                         row(
-                          icon: LucideIcons.bookOpen,
+                          icon: Symbols.menu_book_rounded,
                           name: book.name,
                           count: l10n.vocabWordCount(book.wordCount),
                           selected: book.id == selectedId,
@@ -229,7 +229,7 @@ Future<int?> showWordbookPickerSheet(
                       ],
                       if (allowCreate)
                         row(
-                          icon: LucideIcons.plus,
+                          icon: Symbols.add_rounded,
                           name: l10n.vocabNewBook,
                           selected: selectedId == pickNewWordbook,
                           onTap: () =>
@@ -327,7 +327,10 @@ class _WordbookMultiPickerState extends State<_WordbookMultiPicker> {
                       ),
                       child: Row(
                         children: [
-                          const IconBadge(icon: LucideIcons.bookOpen, size: 40),
+                          const IconBadge(
+                            icon: Symbols.menu_book_rounded,
+                            size: 40,
+                          ),
                           const SizedBox(width: AppTokens.space12),
                           Expanded(
                             child: Text(
@@ -344,7 +347,7 @@ class _WordbookMultiPickerState extends State<_WordbookMultiPicker> {
                           if (_picked.contains(book.id)) ...[
                             const SizedBox(width: AppTokens.space8),
                             Icon(
-                              LucideIcons.check,
+                              Symbols.check_rounded,
                               color: colors.primary,
                               size: 22,
                             ),
@@ -412,25 +415,25 @@ Future<WordAction?> showWordActionsSheet(BuildContext context) {
               mainAxisSize: MainAxisSize.min,
               children: [
                 AppListTile(
-                  icon: LucideIcons.pencil,
+                  icon: Symbols.edit_rounded,
                   title: l10n.vocabEditWord,
                   onTap: () => Navigator.of(sheetContext).pop(WordAction.edit),
                 ),
                 const AppDivider(),
                 AppListTile(
-                  icon: LucideIcons.folderInput,
+                  icon: Symbols.drive_file_move_rounded,
                   title: l10n.vocabMove,
                   onTap: () => Navigator.of(sheetContext).pop(WordAction.move),
                 ),
                 const AppDivider(),
                 AppListTile(
-                  icon: LucideIcons.libraryBig,
+                  icon: Symbols.library_add_rounded,
                   title: l10n.vocabAddTo,
                   onTap: () => Navigator.of(sheetContext).pop(WordAction.addTo),
                 ),
                 const AppDivider(),
                 AppListTile(
-                  icon: LucideIcons.trash2,
+                  icon: Symbols.delete_rounded,
                   title: l10n.vocabRemoveFromBook,
                   onTap: () =>
                       Navigator.of(sheetContext).pop(WordAction.delete),

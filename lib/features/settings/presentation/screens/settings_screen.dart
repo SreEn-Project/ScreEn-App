@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
@@ -40,7 +40,7 @@ class SettingsScreen extends StatelessWidget {
           child: AppCard.flat(
             padding: EdgeInsets.zero,
             child: AppListTile(
-              icon: LucideIcons.languages,
+              icon: Symbols.translate_rounded,
               title: l10n.languagesTitle,
               subtitle: l10n.modelsBody,
               onTap: () => context.push(AppRoutes.languages),
@@ -57,7 +57,7 @@ class SettingsScreen extends StatelessWidget {
           child: AppCard.flat(
             padding: EdgeInsets.zero,
             child: AppListTile(
-              icon: LucideIcons.info,
+              icon: Symbols.info_rounded,
               title: l10n.settingsAbout,
               onTap: () => context.push(AppRoutes.about),
             ),
@@ -354,7 +354,7 @@ class _QuickLanguagesSection extends ConsumerWidget {
       child: AppCard.flat(
         padding: EdgeInsets.zero,
         child: AppListTile(
-          icon: LucideIcons.languages,
+          icon: Symbols.translate_rounded,
           title: l10n.settingsQuickLanguagesDetail,
           subtitle: codes
               .map(
@@ -444,7 +444,7 @@ class _AutoTranslateSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppListTile(
-              icon: LucideIcons.refreshCw,
+              icon: Symbols.autorenew_rounded,
               title: l10n.settingsAutoTranslate,
               subtitle: settings.available
                   ? l10n.settingsAutoTranslateDetail

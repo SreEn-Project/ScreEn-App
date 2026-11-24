@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -54,7 +54,7 @@ class _LanguageListState extends State<LanguageList> {
           child: languages.isEmpty
               ? Center(
                   child: AppEmptyState(
-                    icon: LucideIcons.searchX,
+                    icon: Symbols.search_off_rounded,
                     title: l10n.languageEmpty,
                   ),
                 )
@@ -132,7 +132,7 @@ class _LanguageTile extends StatelessWidget {
             AnimatedOpacity(
               opacity: selected ? 1 : 0,
               duration: const Duration(milliseconds: 150),
-              child: Icon(LucideIcons.check, color: colors.primary),
+              child: Icon(Symbols.check_rounded, color: colors.primary),
             ),
           ],
         ),

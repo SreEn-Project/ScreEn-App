@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -59,14 +59,14 @@ class WordbookCard extends StatelessWidget {
             ),
           ),
           AppIconButton(
-            icon: LucideIcons.pencil,
+            icon: Symbols.edit_rounded,
             tooltip: l10n.vocabRename,
             plain: true,
             size: 40,
             onPressed: onRename,
           ),
           AppIconButton(
-            icon: LucideIcons.trash2,
+            icon: Symbols.delete_rounded,
             tooltip: l10n.vocabDelete,
             plain: true,
             size: 40,

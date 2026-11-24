@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -88,7 +88,7 @@ class WordDetailScreen extends ConsumerWidget {
       const SizedBox(height: AppTokens.space12),
       AppButton.secondary(
         label: l10n.vocabAddMeaning,
-        leading: const Icon(LucideIcons.plus, size: 20),
+        leading: const Icon(Symbols.add_rounded, size: 20),
         onPressed: () async {
           final added = await showWordEditSheet(
             context,
@@ -109,7 +109,7 @@ class WordDetailScreen extends ConsumerWidget {
       const SizedBox(height: AppTokens.sectionGap + AppTokens.space8),
       AppButton.secondary(
         label: l10n.vocabEditWord,
-        leading: const Icon(LucideIcons.pencil, size: 20),
+        leading: const Icon(Symbols.edit_rounded, size: 20),
         onPressed: () async {
           final edited = await showWordEditSheet(
             context,
@@ -123,7 +123,7 @@ class WordDetailScreen extends ConsumerWidget {
       const SizedBox(height: AppTokens.space8),
       AppButton.secondary(
         label: l10n.vocabAddTo,
-        leading: const Icon(LucideIcons.libraryBig, size: 20),
+        leading: const Icon(Symbols.library_add_rounded, size: 20),
         onPressed: () => _addTo(context, ref, w),
       ),
       const SizedBox(height: AppTokens.space8),
@@ -183,7 +183,7 @@ class WordDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   AppIconButton(
-                    icon: LucideIcons.pencil,
+                    icon: Symbols.edit_rounded,
                     tooltip: l10n.vocabEditWord,
                     plain: true,
                     size: 32,
@@ -207,7 +207,7 @@ class WordDetailScreen extends ConsumerWidget {
                   ),
                   if (meanings.length > 1)
                     AppIconButton(
-                      icon: LucideIcons.trash2,
+                      icon: Symbols.delete_rounded,
                       tooltip: l10n.vocabDeleteWord,
                       plain: true,
                       size: 32,

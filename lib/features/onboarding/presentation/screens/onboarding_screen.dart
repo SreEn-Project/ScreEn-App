@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
@@ -83,19 +83,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 onPageChanged: (page) => setState(() => _page = page),
                 children: [
                   _IntroPage(
-                    icon: LucideIcons.languages,
+                    icon: Symbols.translate_rounded,
                     title: l10n.onboardingIntro1Title,
                     highlight: l10n.onboardingIntro1Highlight,
                     body: l10n.onboardingIntro1Body,
                   ),
                   _IntroPage(
-                    icon: LucideIcons.pointer,
+                    icon: Symbols.touch_app_rounded,
                     title: l10n.onboardingIntro2Title,
                     highlight: l10n.onboardingIntro2Highlight,
                     body: l10n.onboardingIntro2Body,
                   ),
                   _IntroPage(
-                    icon: LucideIcons.shield,
+                    icon: Symbols.shield_lock_rounded,
                     title: l10n.onboardingIntro3Title,
                     highlight: l10n.onboardingIntro3Highlight,
                     body: l10n.onboardingIntro3Body,
@@ -125,7 +125,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     label: _isLanguagePage
                         ? l10n.onboardingStart
                         : l10n.commonNext,
-                    trailingIcon: LucideIcons.arrowRight,
+                    trailingIcon: Symbols.arrow_forward_rounded,
                     onPressed: _next,
                   ),
                 ],

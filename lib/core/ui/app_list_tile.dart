@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_tokens.dart';
 import 'app_card.dart';
@@ -45,10 +45,10 @@ class AppListTile extends StatelessWidget {
     final end =
         trailing ??
         (selected
-            ? Icon(LucideIcons.check, color: colors.primary, size: 22)
+            ? Icon(Symbols.check_rounded, color: colors.primary, size: 22)
             : onTap != null
             ? Icon(
-                LucideIcons.chevronRight,
+                Symbols.chevron_right_rounded,
                 color: colors.onSurfaceVariant,
                 size: 22,
               )

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../core/ui/ui.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -21,7 +21,9 @@ class AboutScreen extends ConsumerWidget {
       title: l10n.aboutTitle,
       children: [
         const SizedBox(height: 16),
-        const Center(child: IconBadge(icon: LucideIcons.languages, size: 88)),
+        const Center(
+          child: IconBadge(icon: Symbols.translate_rounded, size: 88),
+        ),
         const SizedBox(height: 16),
         Text(
           l10n.appTitle,
@@ -41,7 +43,7 @@ class AboutScreen extends ConsumerWidget {
           child: Column(
             children: [
               AppListTile(
-                icon: LucideIcons.shieldAlert,
+                icon: Symbols.policy_rounded,
                 title: l10n.aboutPrivacy,
                 subtitle: l10n.aboutPending,
                 enabled: false,
@@ -49,7 +51,7 @@ class AboutScreen extends ConsumerWidget {
               ),
               const AppDivider(),
               AppListTile(
-                icon: LucideIcons.fileText,
+                icon: Symbols.description_rounded,
                 title: l10n.aboutLicenses,
                 onTap: () => showLicensePage(
                   context: context,

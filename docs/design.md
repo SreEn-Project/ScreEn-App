@@ -67,7 +67,7 @@ Flutter 앱 화면과 네이티브 오버레이(Compose)가 같은 토큰을 쓴
 - 큰 제목 32 Bold, 화면 제목 24 Bold, 섹션 18 SemiBold, 본문 15 Regular, 보조 13 Regular.
 
 ## 아이콘
-- **Lucide** 선 아이콘(기본 두께). 패키지 `lucide_icons_flutter`, `LucideIcons.xxx` (#188: Material Symbols Rounded에서 교체). 오버레이(Compose)는 아직 Material Symbols Rounded 부분 글꼴(D-025) — 별도 작업.
+- Material Symbols **Rounded**, 선(채움 0) 아이콘. 패키지 `material_symbols_icons`, `Symbols.xxx_rounded`.
 - 아이콘 배경이 필요하면 primaryContainer 원 위에 onPrimaryContainer 아이콘.
 
 ## 컴포넌트 (D-015)

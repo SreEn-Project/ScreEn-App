@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/l10n/labels.dart';
@@ -34,11 +34,11 @@ class AiEngineOrderCard extends ConsumerWidget {
           vertical: AppTokens.cardListPaddingV,
         ),
         child: AppListTile(
-          icon: LucideIcons.arrowUpDown,
+          icon: Symbols.swap_vert_rounded,
           title: l10n.aiOrderTitle,
           subtitle: l10n.aiOrderDetail,
           trailing: AppPopupMenu<EngineType>(
-            icon: LucideIcons.hash,
+            icon: Symbols.looks_one_rounded,
             label: isAi ? l10n.engineBrand(current) : l10n.aiOrderNone,
             values: aiKeyEngines,
             selected: current,

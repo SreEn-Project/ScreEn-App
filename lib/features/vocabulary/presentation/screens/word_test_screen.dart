@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -83,7 +83,7 @@ class _Setup extends ConsumerWidget {
       ),
       children: [
         StudySetupHeader(
-          icon: LucideIcons.bookOpen,
+          icon: Symbols.menu_book_rounded,
           title: book?.name ?? '',
           subtitle: l10n.testQuestionCount(questionCount),
         ),
@@ -199,14 +199,14 @@ class _RunningState extends ConsumerState<_Running> {
                     AppBadge(label: l10n.testAnswerLabel),
                     const SizedBox(width: AppTokens.space8),
                     Icon(
-                      LucideIcons.circleCheck,
+                      Symbols.check_circle_rounded,
                       fill: 1,
                       color: colors.primary,
                       size: 22,
                     ),
                   ] else if (isPicked)
                     Icon(
-                      LucideIcons.circleX,
+                      Symbols.cancel_rounded,
                       fill: 1,
                       color: colors.error,
                       size: 22,

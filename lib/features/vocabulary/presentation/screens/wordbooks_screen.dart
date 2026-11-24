@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
@@ -41,14 +41,14 @@ class WordbooksScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   AppIconButton(
-                    icon: LucideIcons.list,
+                    icon: Symbols.format_list_bulleted_rounded,
                     tooltip: l10n.vocabAllWords,
                     plain: true,
                     size: 44,
                     onPressed: () => context.push(AppRoutes.allWords),
                   ),
                   AppIconButton(
-                    icon: LucideIcons.plus,
+                    icon: Symbols.add_rounded,
                     tooltip: l10n.vocabNewBook,
                     plain: true,
                     size: 44,
@@ -70,7 +70,7 @@ class WordbooksScreen extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const IconBadge(
-                              icon: LucideIcons.bookOpen,
+                              icon: Symbols.menu_book_rounded,
                               size: 48,
                             ),
                             const SizedBox(height: AppTokens.space12),
@@ -177,7 +177,7 @@ class _StudyCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(LucideIcons.squarePen, color: colors.onPrimaryContainer),
+          Icon(Symbols.quiz_rounded, color: colors.onPrimaryContainer),
           const SizedBox(width: AppTokens.space12),
           Expanded(
             child: Column(
@@ -199,7 +199,7 @@ class _StudyCard extends StatelessWidget {
               ],
             ),
           ),
-          Icon(LucideIcons.chevronRight, color: colors.onPrimaryContainer),
+          Icon(Symbols.chevron_right_rounded, color: colors.onPrimaryContainer),
         ],
       ),
     );

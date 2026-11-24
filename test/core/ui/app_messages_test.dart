@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:translation_poc_app/app/theme/app_theme.dart';
 import 'package:translation_poc_app/core/ui/ui.dart';
 
@@ -13,14 +13,14 @@ void main() {
   testWidgets('AppNotice는 메시지를 보여 준다', (tester) async {
     await tester.pumpWidget(_host(const AppNotice.error('실패했어요')));
     expect(find.text('실패했어요'), findsOneWidget);
-    expect(find.byIcon(LucideIcons.circleAlert), findsOneWidget);
+    expect(find.byIcon(Symbols.error_rounded), findsOneWidget);
   });
 
   testWidgets('AppEmptyState는 제목 · 설명 · 동작을 보여 준다', (tester) async {
     await tester.pumpWidget(
       _host(
         AppEmptyState(
-          icon: LucideIcons.history,
+          icon: Symbols.history_rounded,
           title: '비었어요',
           message: '설명',
           action: AppButton(label: '다시', onPressed: () {}),

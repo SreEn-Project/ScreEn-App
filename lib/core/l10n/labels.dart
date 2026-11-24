@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../features/settings/domain/entities/translator_settings.dart';
@@ -57,14 +57,14 @@ extension EnumLabels on AppLocalizations {
 }
 
 IconData engineIcon(EngineType engine) => switch (engine) {
-  EngineType.mlKit => LucideIcons.zap,
-  EngineType.gemini => LucideIcons.key,
-  EngineType.groq => LucideIcons.bolt,
-  EngineType.gemma => LucideIcons.cpu,
+  EngineType.mlKit => Symbols.offline_bolt_rounded,
+  EngineType.gemini => Symbols.key_rounded,
+  EngineType.groq => Symbols.bolt_rounded,
+  EngineType.gemma => Symbols.memory_rounded,
 };
 
 IconData captureModeIcon(CaptureMode mode) => switch (mode) {
-  CaptureMode.fullScreen => LucideIcons.maximize,
-  CaptureMode.dragRegion => LucideIcons.crop,
-  CaptureMode.fixedRegion => LucideIcons.pin,
+  CaptureMode.fullScreen => Symbols.fullscreen_rounded,
+  CaptureMode.dragRegion => Symbols.crop_rounded,
+  CaptureMode.fixedRegion => Symbols.push_pin_rounded,
 };

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_tokens.dart';
 
@@ -37,7 +37,10 @@ class AppSearchField extends StatelessWidget {
           hintStyle: theme.textTheme.bodyLarge?.copyWith(
             color: colors.onSurfaceVariant,
           ),
-          prefixIcon: Icon(LucideIcons.search, color: colors.onSurfaceVariant),
+          prefixIcon: Icon(
+            Symbols.search_rounded,
+            color: colors.onSurfaceVariant,
+          ),
           filled: true,
           fillColor: colors.surface,
           border: border(colors.outline),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -242,7 +242,9 @@ class StudyFeedback extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  correct ? LucideIcons.circleCheck : LucideIcons.circleX,
+                  correct
+                      ? Symbols.check_circle_rounded
+                      : Symbols.cancel_rounded,
                   fill: 1,
                   color: tone,
                   size: 22,
@@ -334,7 +336,7 @@ class _StudyResultHeroState extends State<StudyResultHero> {
                       Transform.scale(scale: t, child: child),
                   child: IconBadge(
                     key: _badge,
-                    icon: LucideIcons.trophy,
+                    icon: Symbols.emoji_events_rounded,
                     size: 56,
                   ),
                 ),

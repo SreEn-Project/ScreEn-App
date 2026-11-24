@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
@@ -133,7 +133,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           hint: permissionsMissing && !running
               ? AppButton.text(
                   label: l10n.homePermissionsNeeded,
-                  trailingIcon: LucideIcons.arrowRight,
+                  trailingIcon: Symbols.arrow_forward_rounded,
                   onPressed: () => context.push(AppRoutes.permission),
                 )
               : Text(
@@ -214,7 +214,7 @@ class _Header extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         AppIconButton(
-          icon: LucideIcons.bell,
+          icon: Symbols.notifications_rounded,
           tooltip: l10n.homeNotifications,
           onPressed: () {},
         ),
@@ -273,7 +273,7 @@ class _StatusCard extends StatelessWidget {
               active: state == ServiceStatus.running,
             ),
             const Spacer(),
-            Icon(LucideIcons.cpu, size: 16, color: colors.primary),
+            Icon(Symbols.memory_rounded, size: 16, color: colors.primary),
             const SizedBox(width: 6),
             Text(
               engine,
@@ -291,7 +291,7 @@ class _StatusCard extends StatelessWidget {
         const SizedBox(height: AppTokens.space4),
         Row(
           children: [
-            Icon(LucideIcons.arrowRight, color: colors.primary),
+            Icon(Symbols.arrow_forward_rounded, color: colors.primary),
             const SizedBox(width: AppTokens.space8),
             Flexible(
               child: Text(
@@ -381,7 +381,11 @@ class _StudyCard extends StatelessWidget {
                       ),
               ),
               child: done
-                  ? Icon(LucideIcons.check, size: 16, color: colors.onPrimary)
+                  ? Icon(
+                      Symbols.check_rounded,
+                      size: 16,
+                      color: colors.onPrimary,
+                    )
                   : null,
             ),
             const SizedBox(height: AppTokens.space4),
@@ -422,7 +426,7 @@ class _StudyCard extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Icon(
-                LucideIcons.flame,
+                Symbols.local_fire_department_rounded,
                 fill: 1,
                 color: streak.current > 0
                     ? colors.primary
@@ -620,7 +624,7 @@ class _RecentSectionState extends ConsumerState<_RecentSection>
             padding: EdgeInsets.zero,
             child: Center(
               child: AppEmptyState(
-                icon: LucideIcons.history,
+                icon: Symbols.history_rounded,
                 title: l10n.homeRecentEmpty,
               ),
             ),

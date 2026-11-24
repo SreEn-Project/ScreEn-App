@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -86,7 +86,7 @@ class _DeckState extends ConsumerState<_Deck> {
             padding: const EdgeInsets.only(top: AppTokens.sectionGap),
             child: Column(
               children: [
-                const IconBadge(icon: LucideIcons.layers2, size: 48),
+                const IconBadge(icon: Symbols.style_rounded, size: 48),
                 const SizedBox(height: AppTokens.space12),
                 Text(
                   l10n.learnTestNeedWords,
@@ -381,7 +381,7 @@ class _Result extends ConsumerWidget {
             width: double.infinity,
             child: Column(
               children: [
-                const IconBadge(icon: LucideIcons.trophy, size: 56),
+                const IconBadge(icon: Symbols.emoji_events_rounded, size: 56),
                 const SizedBox(height: AppTokens.space16),
                 Text(
                   unknown.isEmpty

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme/app_tokens.dart';
 
@@ -69,7 +69,7 @@ class AppPopupMenu<T> extends StatelessWidget {
                   ),
                 ),
                 if (v == selected)
-                  Icon(LucideIcons.check, size: 20, color: colors.primary),
+                  Icon(Symbols.check_rounded, size: 20, color: colors.primary),
               ],
             ),
           ),
@@ -102,7 +102,7 @@ class AppPopupMenu<T> extends StatelessWidget {
               ),
             ),
             Icon(
-              LucideIcons.chevronDown,
+              Symbols.arrow_drop_down_rounded,
               size: 20,
               color: active
                   ? colors.onPrimaryContainer

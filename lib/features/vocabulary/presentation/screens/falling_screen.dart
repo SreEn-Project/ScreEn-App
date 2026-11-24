@@ -3,7 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -59,7 +59,7 @@ class _Setup extends ConsumerWidget {
       ),
       children: [
         StudySetupHeader(
-          icon: LucideIcons.keyboard,
+          icon: Symbols.keyboard_rounded,
           title: state.book?.name ?? '',
           subtitle: l10n.fallRules,
         ),
@@ -274,7 +274,7 @@ class _PlayingState extends ConsumerState<_Playing>
                         curve: Curves.easeOutBack,
                         scale: i < game.lives ? 1 : 0.8,
                         child: Icon(
-                          LucideIcons.heart,
+                          Symbols.favorite_rounded,
                           fill: i < game.lives ? 1 : 0,
                           size: 22,
                           color: i < game.lives
@@ -379,7 +379,7 @@ class _PlayingState extends ConsumerState<_Playing>
                   ),
                   const SizedBox(width: AppTokens.space8),
                   AppIconButton(
-                    icon: LucideIcons.send,
+                    icon: Symbols.send_rounded,
                     tooltip: l10n.fallSend,
                     filled: true,
                     onPressed: () => _submit(_input.text, explicit: true),
