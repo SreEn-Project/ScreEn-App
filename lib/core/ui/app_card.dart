@@ -54,7 +54,7 @@ class AppCard extends StatelessWidget {
   final double radius;
   final bool shadow;
 
-  /// true면 [AppTokens.floatShadow]로 화면 위에 떠 보인다.
+  /// true면 짧고 진한 그림자로 화면 위에 확실히 떠 보인다.
   final bool elevated;
 
   /// 1dp 옅은 테두리. 그림자를 약하게 한 대신 표면 경계를 나눈다 (그라데이션 카드엔 안 그린다).
@@ -76,7 +76,7 @@ class AppCard extends StatelessWidget {
             ? Border.all(color: Theme.of(context).colorScheme.outlineVariant)
             : null,
         boxShadow: elevated
-            ? context.tokens.floatShadow
+            ? _elevatedShadow(Theme.of(context).colorScheme)
             : shadow
             ? context.tokens.cardShadow
             : null,
@@ -103,3 +103,17 @@ class FlatScope extends InheritedWidget {
   @override
   bool updateShouldNotify(FlatScope oldWidget) => false;
 }
+
+/// 떠 보이는 카드의 그림자: 번지지 않고 짧고 진하게(가까운 그림자 + 받침 그림자).
+List<BoxShadow> _elevatedShadow(ColorScheme colors) => [
+  BoxShadow(
+    color: colors.onSurface.withValues(alpha: 0.16),
+    blurRadius: 4,
+    offset: const Offset(0, 2),
+  ),
+  BoxShadow(
+    color: colors.onSurface.withValues(alpha: 0.14),
+    blurRadius: 12,
+    offset: const Offset(0, 6),
+  ),
+];
