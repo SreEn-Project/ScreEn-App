@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_tokens.dart';
@@ -133,7 +133,7 @@ class _GemmaScreenState extends ConsumerState<GemmaScreen> {
                             ),
                             if (status.isReady)
                               AppIconButton(
-                                icon: Symbols.delete_rounded,
+                                icon: LucideIcons.trash2,
                                 tooltip: l10n.modelsDelete,
                                 plain: true,
                                 size: 40,
@@ -172,7 +172,7 @@ class _GemmaScreenState extends ConsumerState<GemmaScreen> {
                     AppCard(
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       child: AppListTile(
-                        icon: Symbols.memory_rounded,
+                        icon: LucideIcons.cpu,
                         title: l10n.gemmaUse,
                         subtitle: l10n.gemmaUseDetail,
                         trailing: AppSwitch(

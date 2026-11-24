@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../core/ui/ui.dart';
 import '../../../language/domain/entities/supported_language.dart';
@@ -76,7 +76,7 @@ class HistoryCard extends StatelessWidget {
         ),
         if (onDelete != null)
           AppIconButton(
-            icon: Symbols.delete_rounded,
+            icon: LucideIcons.trash2,
             tooltip: deleteTooltip,
             plain: true,
             size: 40,

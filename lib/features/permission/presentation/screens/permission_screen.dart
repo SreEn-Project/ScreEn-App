@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/router.dart';
 import '../../../../core/ui/ui.dart';
@@ -79,7 +79,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         ),
         const SizedBox(height: 32),
         _PermissionCard(
-          icon: Symbols.layers_rounded,
+          icon: LucideIcons.layers,
           title: l10n.permissionOverlayTitle,
           body: l10n.permissionOverlayBody,
           allowed: permissions.overlay,
@@ -88,7 +88,7 @@ class _PermissionScreenState extends ConsumerState<PermissionScreen> {
         ),
         const SizedBox(height: 16),
         _PermissionCard(
-          icon: Symbols.notifications_rounded,
+          icon: LucideIcons.bell,
           title: l10n.permissionNotificationTitle,
           body: l10n.permissionNotificationBody,
           allowed: permissions.notification,
@@ -148,7 +148,7 @@ class _PermissionCard extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: AppButton.secondary(
                 label: actionLabel,
-                trailingIcon: Symbols.open_in_new_rounded,
+                trailingIcon: LucideIcons.externalLink,
                 expand: false,
                 height: 44,
                 onPressed: onAction,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -99,9 +99,7 @@ class _HistoryDetailSheetState extends State<HistoryDetailSheet> {
                     ? l10n.historyCopied
                     : l10n.historyCopy,
                 leading: Icon(
-                  _copied == target
-                      ? Symbols.check_rounded
-                      : Symbols.content_copy_rounded,
+                  _copied == target ? LucideIcons.check : LucideIcons.copy,
                   size: 18,
                 ),
                 onPressed: () => _copy(target, text),
@@ -154,7 +152,7 @@ class _HistoryDetailSheetState extends State<HistoryDetailSheet> {
             const SizedBox(height: AppTokens.sectionGap),
             AppButton.secondary(
               label: l10n.vocabAddToBook,
-              leading: const Icon(Symbols.menu_book_rounded, size: 20),
+              leading: const Icon(LucideIcons.bookOpen, size: 20),
               onPressed: _addWord,
             ),
           ],

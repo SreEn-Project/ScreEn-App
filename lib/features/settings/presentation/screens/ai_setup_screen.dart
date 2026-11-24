@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/theme/app_tokens.dart';
@@ -272,7 +272,7 @@ class _AiSetupScreenState extends ConsumerState<AiSetupScreen> {
                       child: Column(
                         children: [
                           AppListTile(
-                            icon: Symbols.lock_rounded,
+                            icon: LucideIcons.lock,
                             title: l10n.apiKeyPinTitle,
                             subtitle: l10n.apiKeyPinDetail,
                             trailing: AppSwitch(
@@ -319,7 +319,7 @@ class _LockedCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Symbols.lock_rounded, color: theme.colorScheme.primary),
+              Icon(LucideIcons.lock, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(

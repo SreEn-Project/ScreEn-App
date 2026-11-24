@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
@@ -73,7 +73,7 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
         padding: const EdgeInsets.only(top: AppTokens.sectionGap),
         child: Column(
           children: [
-            const IconBadge(icon: Symbols.menu_book_rounded, size: 48),
+            const IconBadge(icon: LucideIcons.bookOpen, size: 48),
             const SizedBox(height: AppTokens.space12),
             Text(l10n.learnNoBooks, style: theme.textTheme.titleMedium),
             const SizedBox(height: AppTokens.space4),
@@ -118,7 +118,7 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
           _ModeGrid(
             modes: [
               _Mode(
-                icon: Symbols.quiz_rounded,
+                icon: LucideIcons.squarePen,
                 title: l10n.learnTest,
                 hint: count == 0 ? l10n.learnTestNeedWords : l10n.learnTestHint,
                 onTap: count == 0 || selected == null
@@ -127,7 +127,7 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                           context.push(AppRoutes.wordTestPath(selection!.ids)),
               ),
               _Mode(
-                icon: Symbols.style_rounded,
+                icon: LucideIcons.layers2,
                 title: l10n.learnCards,
                 hint: count == 0
                     ? l10n.learnTestNeedWords
@@ -146,7 +146,7 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
           _ModeGrid(
             modes: [
               _Mode(
-                icon: Symbols.cable_rounded,
+                icon: LucideIcons.cable,
                 title: l10n.learnMatch,
                 hint: count == 0
                     ? l10n.learnTestNeedWords
@@ -157,7 +157,7 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                           context.push(AppRoutes.lineMatchPath(selection!.ids)),
               ),
               _Mode(
-                icon: Symbols.keyboard_rounded,
+                icon: LucideIcons.keyboard,
                 title: l10n.learnFall,
                 hint: count == 0 ? l10n.learnTestNeedWords : l10n.learnFallHint,
                 onTap: count == 0 || selected == null
@@ -165,7 +165,7 @@ class _LearningStartScreenState extends ConsumerState<LearningStartScreen> {
                     : () => context.push(AppRoutes.fallingPath(selection!.ids)),
               ),
               _Mode(
-                icon: Symbols.extension_rounded,
+                icon: LucideIcons.puzzle,
                 title: l10n.learnAssemble,
                 hint: count == 0
                     ? l10n.learnTestNeedWords

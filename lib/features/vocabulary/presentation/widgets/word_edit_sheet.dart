@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -365,7 +365,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                   ),
                 ),
                 AppIconButton(
-                  icon: Symbols.close_rounded,
+                  icon: LucideIcons.x,
                   tooltip: l10n.vocabOptRemove,
                   plain: true,
                   size: 32,
@@ -434,7 +434,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                     ),
                   ),
                   AppIconButton(
-                    icon: Symbols.close_rounded,
+                    icon: LucideIcons.x,
                     tooltip: l10n.vocabOptRemove,
                     plain: true,
                     size: 32,
@@ -481,7 +481,7 @@ class _WordEditSheetState extends ConsumerState<WordEditSheet> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const IconBadge(icon: Symbols.check_rounded, size: 56),
+                        const IconBadge(icon: LucideIcons.check, size: 56),
                         const SizedBox(height: AppTokens.space16),
                         Text(
                           _editing

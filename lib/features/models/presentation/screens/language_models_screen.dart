@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/router.dart';
 import '../../../../core/ui/ui.dart';
@@ -77,7 +77,7 @@ class LanguageModelsScreen extends ConsumerWidget {
           child: AppCard.flat(
             padding: EdgeInsets.zero,
             child: AppListTile(
-              icon: Symbols.translate_rounded,
+              icon: LucideIcons.languages,
               title: l10n.homeTargetLanguage,
               value: SupportedLanguage.byCode(target)
                   .displayName(locale.languageCode),
@@ -93,7 +93,7 @@ class LanguageModelsScreen extends ConsumerWidget {
               AppCard.flat(
                 padding: EdgeInsets.zero,
                 child: AppListTile(
-                  icon: Symbols.wifi_rounded,
+                  icon: LucideIcons.wifi,
                   title: l10n.modelsWifiOnly,
                   subtitle: l10n.modelsWifiOnlyDetail,
                   trailing: AppSwitch(
@@ -195,7 +195,7 @@ class _ModelRow extends StatelessWidget {
               ),
               if (installed)
                 AppIconButton(
-                  icon: Symbols.delete_rounded,
+                  icon: LucideIcons.trash2,
                   tooltip: l10n.modelsDelete,
                   plain: true,
                   size: 40,
@@ -203,7 +203,7 @@ class _ModelRow extends StatelessWidget {
                 )
               else if (!downloading)
                 AppIconButton(
-                  icon: Symbols.download_rounded,
+                  icon: LucideIcons.download,
                   tooltip: l10n.modelsDownload,
                   size: 40,
                   onPressed: onDownload,

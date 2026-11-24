@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/l10n/labels.dart';
@@ -21,7 +21,7 @@ class AiAgeCard extends ConsumerWidget {
     return AppCard(
       padding: const EdgeInsets.symmetric(vertical: AppTokens.cardListPaddingV),
       child: AppListTile(
-        icon: Symbols.verified_user_rounded,
+        icon: LucideIcons.shieldCheck,
         title: l10n.aiAgeTitle,
         subtitle: l10n.aiAgeDetail,
         trailing: AppSwitch(
@@ -50,7 +50,7 @@ class AiNoticeCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Symbols.info_rounded,
+            LucideIcons.info,
             size: 20,
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -236,7 +236,7 @@ class _GlossaryRow extends StatelessWidget {
             ),
           ),
           AppIconButton(
-            icon: Symbols.close_rounded,
+            icon: LucideIcons.x,
             tooltip: l10n.aiGlossaryRemove,
             plain: true,
             size: 40,

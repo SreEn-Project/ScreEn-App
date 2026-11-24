@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -96,8 +96,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           ? const SizedBox.shrink()
                           : AppEmptyState(
                               icon: state.filtered
-                                  ? Symbols.search_off_rounded
-                                  : Symbols.history_rounded,
+                                  ? LucideIcons.searchX
+                                  : LucideIcons.history,
                               title: state.filtered
                                   ? l10n.historyNoResult
                                   : l10n.homeRecentEmpty,

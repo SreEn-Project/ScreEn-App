@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -48,9 +48,9 @@ class WordOfTheDayCard extends ConsumerWidget {
             children: [
               Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
               if (state.answered && isAnswer)
-                Icon(Symbols.check_rounded, color: colors.primary, size: 20)
+                Icon(LucideIcons.check, color: colors.primary, size: 20)
               else if (isPicked)
-                Icon(Symbols.close_rounded, color: colors.error, size: 20),
+                Icon(LucideIcons.x, color: colors.error, size: 20),
             ],
           ),
         ),
@@ -65,7 +65,7 @@ class WordOfTheDayCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const IconBadge(icon: Symbols.wb_sunny_rounded, size: 36),
+                const IconBadge(icon: LucideIcons.sun, size: 36),
                 const SizedBox(width: AppTokens.space12),
                 Expanded(
                   child: Text(

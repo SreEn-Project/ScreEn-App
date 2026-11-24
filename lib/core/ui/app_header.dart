@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../app/theme/app_tokens.dart';
 import 'app_icon_button.dart';
@@ -36,7 +36,7 @@ class AppHeader extends StatelessWidget {
         leading ??
         (showBack && canPop
             ? AppIconButton(
-                icon: Symbols.arrow_back_rounded,
+                icon: LucideIcons.arrowLeft,
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
                 plain: true,
                 size: large ? 52 : 44,

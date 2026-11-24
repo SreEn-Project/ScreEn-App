@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_tokens.dart';
@@ -64,7 +64,7 @@ class WordbookDetailScreen extends ConsumerWidget {
               title: name ?? l10n.vocabTitle,
               large: true,
               trailing: AppIconButton(
-                icon: Symbols.add_rounded,
+                icon: LucideIcons.plus,
                 tooltip: l10n.vocabAddWord,
                 plain: true,
                 size: 52,
@@ -90,7 +90,7 @@ class WordbookDetailScreen extends ConsumerWidget {
               child: Row(
                 children: [
                   AppPopupMenu<WordSort>(
-                    icon: Symbols.swap_vert_rounded,
+                    icon: LucideIcons.arrowUpDown,
                     label: sorts[sort]!,
                     values: WordSort.values,
                     selected: sort,
@@ -99,7 +99,7 @@ class WordbookDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: AppTokens.space8),
                   AppPopupMenu<WordFilter>(
-                    icon: Symbols.filter_list_rounded,
+                    icon: LucideIcons.listFilter,
                     label: filter == WordFilter.all
                         ? l10n.vocabFilterLabel
                         : filters[filter]!,
@@ -136,7 +136,7 @@ class WordbookDetailScreen extends ConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const IconBadge(
-                                  icon: Symbols.menu_book_rounded,
+                                  icon: LucideIcons.bookOpen,
                                   size: 48,
                                 ),
                                 const SizedBox(height: AppTokens.space12),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -30,7 +30,7 @@ class WordbookSelector extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const IconBadge(icon: Symbols.menu_book_rounded, size: 36),
+          const IconBadge(icon: LucideIcons.bookOpen, size: 36),
           const SizedBox(width: AppTokens.space12),
           Expanded(
             child: Text(
@@ -44,7 +44,7 @@ class WordbookSelector extends StatelessWidget {
             Text(l10n.vocabWordCount(count!), style: theme.textTheme.bodySmall),
           const SizedBox(width: AppTokens.space4),
           Icon(
-            Symbols.unfold_more_rounded,
+            LucideIcons.chevronsUpDown,
             color: theme.colorScheme.onSurfaceVariant,
             size: 22,
           ),

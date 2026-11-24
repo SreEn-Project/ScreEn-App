@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../core/ui/ui.dart';
 import '../l10n/app_localizations.dart';
@@ -27,16 +27,10 @@ class AppShell extends StatelessWidget {
               initialLocation: index == shell.currentIndex,
             ),
             items: [
-              AppNavItem(icon: Symbols.home_rounded, label: l10n.navHome),
-              AppNavItem(
-                icon: Symbols.menu_book_rounded,
-                label: l10n.navVocabulary,
-              ),
-              AppNavItem(icon: Symbols.history_rounded, label: l10n.navHistory),
-              AppNavItem(
-                icon: Symbols.settings_rounded,
-                label: l10n.navSettings,
-              ),
+              AppNavItem(icon: LucideIcons.house, label: l10n.navHome),
+              AppNavItem(icon: LucideIcons.bookOpen, label: l10n.navVocabulary),
+              AppNavItem(icon: LucideIcons.history, label: l10n.navHistory),
+              AppNavItem(icon: LucideIcons.settings, label: l10n.navSettings),
             ],
           ),
         ),

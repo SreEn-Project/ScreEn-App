@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../app/theme/app_tokens.dart';
 
@@ -8,9 +8,9 @@ enum AppMessageKind { info, success, error }
 
 extension AppMessageKindStyle on AppMessageKind {
   IconData get icon => switch (this) {
-    AppMessageKind.info => Symbols.info_rounded,
-    AppMessageKind.success => Symbols.check_circle_rounded,
-    AppMessageKind.error => Symbols.error_rounded,
+    AppMessageKind.info => LucideIcons.info,
+    AppMessageKind.success => LucideIcons.circleCheck,
+    AppMessageKind.error => LucideIcons.circleAlert,
   };
 
   Color background(ColorScheme colors) => switch (this) {

@@ -585,3 +585,9 @@
 - 확인: `flutter analyze` 0, `flutter test` 전체 통과(뜻 추가 확인 · 단어장별 진도 · 중복 제거 테스트 추가). 이 환경에 Android SDK가 없어 Kotlin 컴파일 · Room 쿼리 검증 · 마이그레이션 실행 · `schemas/.../4.json`, `5.json` 생성은 못 했다.
 - 추가(사용자 요청): 단어를 처음 만들 때 뜻을 여러 개 입력(뜻마다 문맥 뜻 · 예문), "이 단어장에 이미 있는 단어예요" 안내 문구, **전체 단어 화면**(단어장 목록 위 오른쪽 아이콘 → `/vocabulary/words`: 모든 단어장의 단어를 한 단어씩 검색 · 정렬 · 필터, 든 단어장 표시, 여러 뜻이면 "외 n개", 정답률은 든 모든 단어장의 진도를 합침), 단어 상세에 전체 정답률. 전체 단어는 기존 단어장별 조회를 Dart에서 합쳐 만들어 네이티브 변경은 없다.
 - 남은 일: PC에서 빌드해 스키마 파일 커밋, 기존 데이터가 있는 기기에서 업데이트해 마이그레이션 확인, 단어장 상세 목록에서 뜻이 여러 개임을 표시.
+
+## 아이콘 Lucide 교체 (#188)
+- 앱 아이콘을 Material Symbols Rounded에서 **Lucide**로 교체: `lucide_icons_flutter ^4.0.3` 추가, `material_symbols_icons` 제거. `Symbols.xxx_rounded` 약 70종을 `LucideIcons.xxx`로 바꿈(38개 파일). design.md "아이콘" 갱신.
+- 테스트: `app_messages_test`, 스크린샷 테스트의 글꼴 로드를 Lucide로.
+- 확인: `flutter analyze` 0, `flutter test` 186 통과, `flutter build apk --debug` 통과, 스크린샷 테스트로 홈 확인.
+- 남은 일: 오버레이(Compose) 아이콘은 아직 Material Symbols Rounded 부분 글꼴(`OverlayTheme.kt`, `res/font/material_symbols_rounded.ttf`). Lucide 부분 글꼴로 바꾸는 작업 별도. 선택 상태용 채움 아이콘이 없어 하단 탭 선택은 아래 막대로 구분.

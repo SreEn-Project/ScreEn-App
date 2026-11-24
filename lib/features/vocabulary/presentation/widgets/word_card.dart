@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -66,7 +66,7 @@ class WordCard extends StatelessWidget {
                   ),
                 ),
                 AppIconButton(
-                  icon: Symbols.more_vert_rounded,
+                  icon: LucideIcons.ellipsisVertical,
                   tooltip: l10n.vocabMove,
                   plain: true,
                   size: 40,
@@ -94,8 +94,8 @@ class WordCard extends StatelessWidget {
                 const Spacer(),
                 AppIconButton(
                   icon: word.memorized
-                      ? Symbols.check_circle_rounded
-                      : Symbols.radio_button_unchecked_rounded,
+                      ? LucideIcons.circleCheck
+                      : LucideIcons.circle,
                   tooltip: l10n.vocabMemorizedLabel,
                   plain: true,
                   size: 40,

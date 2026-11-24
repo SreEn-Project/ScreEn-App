@@ -44,10 +44,10 @@ String _pubCacheIconFont() {
       cache
           .listSync()
           .whereType<Directory>()
-          .where((d) => d.path.contains('material_symbols_icons-'))
+          .where((d) => d.path.contains('lucide_icons_flutter-'))
           .toList()
         ..sort((a, b) => a.path.compareTo(b.path));
-  return '${dir.last.path}/lib/fonts/MaterialSymbolsRounded.ttf';
+  return '${dir.last.path}/assets/lucide.ttf';
 }
 
 /// 실제 라우터(하단 탭 포함)로 [location] 화면을 연다.
@@ -101,7 +101,7 @@ void main() {
     await _loadFont('Roboto', korean);
     // 글꼴을 지정하지 않은 스타일(버튼 · 칩)은 테스트 기본 글꼴로 그려지므로 같이 덮는다.
     await _loadFont('FlutterTest', korean);
-    await _loadFont('packages/material_symbols_icons/MaterialSymbolsRounded', [
+    await _loadFont('packages/lucide_icons_flutter/Lucide', [
       _pubCacheIconFont(),
     ]);
   });

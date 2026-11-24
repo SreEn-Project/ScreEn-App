@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'pressable.dart';
 
@@ -146,7 +146,7 @@ class AppAddChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Symbols.add_rounded, size: 16, color: colors.primary),
+            Icon(LucideIcons.plus, size: 16, color: colors.primary),
             const SizedBox(width: 4),
             Text(
               label,

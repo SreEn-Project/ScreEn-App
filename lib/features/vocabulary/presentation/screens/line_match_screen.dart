@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../app/theme/app_tokens.dart';
 import '../../../../core/ui/ui.dart';
@@ -455,7 +455,7 @@ class _Result extends ConsumerWidget {
             width: double.infinity,
             child: Column(
               children: [
-                const IconBadge(icon: Symbols.emoji_events_rounded, size: 56),
+                const IconBadge(icon: LucideIcons.trophy, size: 56),
                 const SizedBox(height: AppTokens.space16),
                 Text(
                   l10n.testScore(game.score, game.total),
