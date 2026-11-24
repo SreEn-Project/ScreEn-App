@@ -96,7 +96,11 @@ class _FakeStreak implements GetStudyStreak {
   Future<StudyStreak> call() async => value;
 }
 
-Future<void> _shoot(WidgetTester tester, String name) async {
+Future<void> _shoot(
+  WidgetTester tester,
+  String name, {
+  String dir = _outDir,
+}) async {
   await tester.pumpAndSettle(const Duration(milliseconds: 100));
   final boundary = tester.renderObject(
     find.byType(RepaintBoundary).first,
@@ -104,9 +108,22 @@ Future<void> _shoot(WidgetTester tester, String name) async {
   await tester.runAsync(() async {
     final image = await boundary.toImage(pixelRatio: 2);
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
-    final file = File('$_outDir/$name.png')..createSync(recursive: true);
+    final file = File('$dir/$name.png')..createSync(recursive: true);
     file.writeAsBytesSync(data!.buffer.asUint8List());
   });
+}
+
+/// 화면을 스크롤 전 / 스크롤 후(맨 아래) 두 장으로 찍는다. 스크롤할 게 없으면 한 장.
+Future<void> _pair(WidgetTester tester, String name) async {
+  const dir = '$_outDir/pairs';
+  await tester.pumpAndSettle(const Duration(milliseconds: 100));
+  await _shoot(tester, '${name}_a_top', dir: dir);
+  final scrollable = find.byType(Scrollable).first;
+  final state = tester.state<ScrollableState>(scrollable);
+  if (state.position.maxScrollExtent > 0) {
+    state.position.jumpTo(state.position.maxScrollExtent);
+    await _shoot(tester, '${name}_b_scrolled', dir: dir);
+  }
 }
 
 Future<void> _setSize(WidgetTester tester, Size size) async {
@@ -365,6 +382,56 @@ void main() {
     await _shoot(tester, '20_home_middle');
     await tester.drag(scrollable, const Offset(0, -3000));
     await _shoot(tester, '21_home_bottom');
+
+    // 화면별 스크롤 전 / 후
+    final pairNow = DateTime.now();
+    final pairHistory = FakeHistoryRepository([
+      for (final (i, t) in [
+        ('Please sign in to continue', '계속하려면 로그인해 주세요'),
+        ('Order summary', '주문 요약'),
+        ('Terms of service', '서비스 약관'),
+        ('Your session has expired', '세션이 만료되었어요'),
+        ('Add to cart', '장바구니에 담기'),
+        ('Free shipping over 50 dollars', '50달러 이상 무료 배송'),
+      ].indexed)
+        HistoryEntry(
+          id: i + 1,
+          original: t.$1,
+          translated: t.$2,
+          sourceLanguage: 'en',
+          targetLanguage: 'ko',
+          translatedAt: pairNow.subtract(Duration(hours: i * 3 + 1)),
+        ),
+    ]);
+    final pairStreak = StudyStreak(
+      current: 3,
+      best: 7,
+      week: const [false, true, true, false, true, true, true],
+      studiedToday: true,
+    );
+    await _setSize(tester, _phone);
+    for (final (name, route) in [
+      ('01_home', AppRoutes.home),
+      ('02_wordbooks', AppRoutes.vocabulary),
+      ('03_history', AppRoutes.history),
+      ('04_settings', AppRoutes.settings),
+      ('05_languages', AppRoutes.languages),
+    ]) {
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(
+        _route(
+          route,
+          vocabulary: vocabulary,
+          history: pairHistory,
+          streak: pairStreak,
+        ),
+      );
+      await _pair(tester, name);
+      if (route == AppRoutes.languages) {
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(seconds: 10));
+      }
+    }
 
     debugDisableShadows = true;
   });
