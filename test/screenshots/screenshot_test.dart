@@ -56,6 +56,20 @@ String _pubCacheIconFont() {
   return '${dir.last.path}/lib/fonts/MaterialSymbolsRounded.ttf';
 }
 
+String _pubCacheFont(String packagePrefix, String file) {
+  final cache = Directory(
+    '${Platform.environment['LOCALAPPDATA']}/Pub/Cache/hosted/pub.dev',
+  );
+  final dir =
+      cache
+          .listSync()
+          .whereType<Directory>()
+          .where((d) => d.path.contains(packagePrefix))
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
+  return '${dir.last.path}/$file';
+}
+
 /// 실제 라우터(하단 탭 포함)로 [location] 화면을 연다.
 Widget _route(
   String location, {
@@ -140,6 +154,9 @@ void main() {
     await _loadFont('FlutterTest', korean);
     await _loadFont('packages/material_symbols_icons/MaterialSymbolsRounded', [
       _pubCacheIconFont(),
+    ]);
+    await _loadFont('packages/lucide_icons_flutter/Lucide', [
+      _pubCacheFont('lucide_icons_flutter-', 'assets/lucide.ttf'),
     ]);
   });
 
