@@ -327,13 +327,8 @@ void main() {
       ),
     );
     await _shoot(tester, '16_home_study_done');
-    // 달력 칸을 오른쪽으로 밀어 이전 주를 본다.
-    await tester.drag(
-      find.byWidgetPredicate(
-        (w) => w is ListView && w.scrollDirection == Axis.horizontal,
-      ),
-      const Offset(300, 0),
-    );
+    // 달력 칸을 오른쪽으로 넘겨 이전 주를 본다(한 주씩 딱 멈춤).
+    await tester.drag(find.byType(PageView), const Offset(300, 0));
     await _shoot(tester, '18_home_study_scrolled');
 
     await tester.pumpWidget(const SizedBox());

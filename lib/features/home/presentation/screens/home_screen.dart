@@ -362,16 +362,15 @@ class _StudyCard extends StatelessWidget {
         : l10n.homeStreakStart;
 
     // 달력 칸: 요일 · 날짜. 학습한 날은 연한 초록 칸, 오늘은 테두리 + 불꽃.
-    Widget dayCell(int back, double width) {
+    Widget dayCell(int back) {
       final date = DateTime(today.year, today.month, today.day - back);
       final done = streak.studiedBack(back);
       final isToday = back == 0;
       final label = DateFormat.E(locale).format(date);
       final fg = done ? colors.onPrimaryContainer : colors.onSurfaceVariant;
-      return SizedBox(
-        width: width,
+      return Expanded(
         child: Padding(
-          padding: const EdgeInsets.only(right: AppTokens.space4),
+          padding: EdgeInsets.only(left: back % 7 == 6 ? 0 : AppTokens.space4),
           child: Container(
             height: 72,
             decoration: BoxDecoration(
@@ -475,30 +474,19 @@ class _StudyCard extends StatelessWidget {
           const SizedBox(height: AppTokens.space4),
           Text(streakHint, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppTokens.space16),
-          // 7칸이 한 화면에 보이고, 왼쪽으로 밀면 이전 날짜(8주 전까지)가 나온다.
-          // 목록은 화면 양끝까지 뻗어서, 밀 때 칸이 페이지 여백에서 잘려 보이지 않고 화면 끝에서 걸친다.
-          LayoutBuilder(
-            builder: (context, box) {
-              final cell = (box.maxWidth + AppTokens.space4) / 7;
-              final bleed = box.maxWidth + 2 * AppTokens.pagePadding;
-              return SizedBox(
-                height: 72,
-                child: OverflowBox(
-                  minWidth: bleed,
-                  maxWidth: bleed,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    reverse: true,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTokens.pagePadding,
-                    ),
-                    itemCount: 56,
-                    itemExtent: cell,
-                    itemBuilder: (_, back) => dayCell(back, cell),
-                  ),
-                ),
-              );
-            },
+          // 한 번에 한 주(7칸)가 통째로 보이고, 옆으로 넘기면 이전 주(8주 전까지)가 나온다.
+          // 칸이 반쯤 잘려 보이지 않게 주 단위로 딱 멈춘다.
+          SizedBox(
+            height: 72,
+            child: PageView.builder(
+              reverse: true,
+              itemCount: 8,
+              itemBuilder: (_, week) => Row(
+                children: [
+                  for (var i = 0; i < 7; i++) dayCell(week * 7 + (6 - i)),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: AppTokens.space24),
           // 외운 단어.
