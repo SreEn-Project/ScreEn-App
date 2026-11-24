@@ -476,17 +476,26 @@ class _StudyCard extends StatelessWidget {
           Text(streakHint, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppTokens.space16),
           // 7칸이 한 화면에 보이고, 왼쪽으로 밀면 이전 날짜(8주 전까지)가 나온다.
+          // 목록은 화면 양끝까지 뻗어서, 밀 때 칸이 페이지 여백에서 잘려 보이지 않고 화면 끝에서 걸친다.
           LayoutBuilder(
             builder: (context, box) {
               final cell = (box.maxWidth + AppTokens.space4) / 7;
+              final bleed = box.maxWidth + 2 * AppTokens.pagePadding;
               return SizedBox(
                 height: 72,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  reverse: true,
-                  itemCount: 56,
-                  itemExtent: cell,
-                  itemBuilder: (_, back) => dayCell(back, cell),
+                child: OverflowBox(
+                  minWidth: bleed,
+                  maxWidth: bleed,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    reverse: true,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTokens.pagePadding,
+                    ),
+                    itemCount: 56,
+                    itemExtent: cell,
+                    itemBuilder: (_, back) => dayCell(back, cell),
+                  ),
                 ),
               );
             },
