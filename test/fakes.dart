@@ -734,6 +734,7 @@ List<Override> fakeNativeOverrides({
   bool onboardingCompleted = false,
   FakeSettingsRepository? settings,
   FakeVocabularyRepository? vocabulary,
+  FakeHistoryRepository? history,
 }) => [
   serviceRepositoryProvider.overrideWithValue(FakeServiceRepository(service)),
   settingsRepositoryProvider.overrideWithValue(
@@ -744,7 +745,9 @@ List<Override> fakeNativeOverrides({
   ),
   appInfoRepositoryProvider.overrideWithValue(const FakeAppInfoRepository()),
   modelRepositoryProvider.overrideWithValue(FakeModelRepository()),
-  historyRepositoryProvider.overrideWithValue(FakeHistoryRepository()),
+  historyRepositoryProvider.overrideWithValue(
+    history ?? FakeHistoryRepository(),
+  ),
   vocabularyRepositoryProvider.overrideWithValue(
     vocabulary ?? FakeVocabularyRepository(),
   ),

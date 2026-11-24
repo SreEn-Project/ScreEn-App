@@ -24,6 +24,8 @@ import 'package:translation_poc_app/features/study_log/di.dart';
 import 'package:translation_poc_app/features/study_log/domain/entities/study_streak.dart';
 import 'package:translation_poc_app/features/study_log/domain/usecases/study_log_usecases.dart';
 
+import 'package:translation_poc_app/features/history/domain/entities/history_entry.dart';
+
 import '../fakes.dart';
 
 const _outDir = 'build/screenshots';
@@ -62,12 +64,14 @@ Widget _route(
   FakeSettingsRepository? settings,
   FakeVocabularyRepository? vocabulary,
   StudyStreak? streak,
+  FakeHistoryRepository? history,
 }) => ProviderScope(
   overrides: [
     ...fakeNativeOverrides(
       service: service,
       settings: settings,
       vocabulary: vocabulary,
+      history: history,
       permissionsGranted: location != AppRoutes.permission,
     ),
     if (streak != null)
@@ -312,6 +316,55 @@ void main() {
       ),
     );
     await _shoot(tester, '17_home_study_todo');
+
+    // 홈 전체(기록 있음): 맨 위 / 맨 아래까지 스크롤
+    await _setSize(tester, _phone);
+    await tester.pumpWidget(const SizedBox());
+    final now = DateTime.now();
+    await tester.pumpWidget(
+      _route(
+        AppRoutes.home,
+        vocabulary: vocabulary,
+        history: FakeHistoryRepository([
+          HistoryEntry(
+            id: 1,
+            original: 'Please sign in to continue',
+            translated: '계속하려면 로그인해 주세요',
+            sourceLanguage: 'en',
+            targetLanguage: 'ko',
+            translatedAt: now.subtract(const Duration(minutes: 20)),
+          ),
+          HistoryEntry(
+            id: 2,
+            original: 'Order summary',
+            translated: '주문 요약',
+            sourceLanguage: 'en',
+            targetLanguage: 'ko',
+            translatedAt: now.subtract(const Duration(hours: 3)),
+          ),
+          HistoryEntry(
+            id: 3,
+            original: 'Terms of service',
+            translated: '서비스 약관',
+            sourceLanguage: 'en',
+            targetLanguage: 'ko',
+            translatedAt: now.subtract(const Duration(hours: 5)),
+          ),
+        ]),
+        streak: StudyStreak(
+          current: 3,
+          best: 7,
+          week: const [false, true, true, false, true, true, true],
+          studiedToday: true,
+        ),
+      ),
+    );
+    await _shoot(tester, '19_home_top');
+    final scrollable = find.byType(Scrollable).first;
+    await tester.drag(scrollable, const Offset(0, -700));
+    await _shoot(tester, '20_home_middle');
+    await tester.drag(scrollable, const Offset(0, -3000));
+    await _shoot(tester, '21_home_bottom');
 
     debugDisableShadows = true;
   });
