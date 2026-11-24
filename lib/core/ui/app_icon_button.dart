@@ -4,7 +4,7 @@ import '../../app/theme/app_tokens.dart';
 import 'pressable.dart';
 
 /// 원형 아이콘 버튼.
-/// [filled] false(기본): 흰 원 + 옅은 그림자. true: primary 원 + 빛 (재생 버튼 같은 강조용).
+/// [filled] false(기본): 흰 원 + 1dp 테두리. true: primary 원 + 빛 (재생 버튼 같은 강조용).
 /// [plain] true: 배경 없이 아이콘만 (헤더의 닫기 · 뒤로가기).
 class AppIconButton extends StatelessWidget {
   const AppIconButton({
@@ -52,11 +52,8 @@ class AppIconButton extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: background,
-            boxShadow: plain
-                ? null
-                : filled
-                ? tokens.glowShadow
-                : tokens.cardShadow,
+            border: plain || filled ? null : Border.all(color: colors.outline),
+            boxShadow: filled ? tokens.glowShadow : null,
           ),
           child: Icon(icon, size: size * 0.46, color: foreground),
         ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../core/ui/ui.dart';
 import '../l10n/app_localizations.dart';
 
-/// 하단 탭(홈 · 언어 · 설정) 틀. 탭바는 본문 위에 떠 있다.
+/// 하단 탭(홈 · 단어장 · 기록 · 설정) 틀. 탭바는 본문 위에 떠 있다.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.shell});
 
@@ -27,15 +27,10 @@ class AppShell extends StatelessWidget {
               initialLocation: index == shell.currentIndex,
             ),
             items: [
-              AppNavItem(icon: Symbols.home_rounded, label: l10n.navHome),
-              AppNavItem(
-                icon: Symbols.translate_rounded,
-                label: l10n.navLanguages,
-              ),
-              AppNavItem(
-                icon: Symbols.settings_rounded,
-                label: l10n.navSettings,
-              ),
+              AppNavItem(icon: LucideIcons.house, label: l10n.navHome),
+              AppNavItem(icon: LucideIcons.bookOpen, label: l10n.navVocabulary),
+              AppNavItem(icon: LucideIcons.history, label: l10n.navHistory),
+              AppNavItem(icon: LucideIcons.settings, label: l10n.navSettings),
             ],
           ),
         ),

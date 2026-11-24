@@ -59,7 +59,7 @@ class WordOfTheDayCard extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTokens.space12),
-      child: AppCard(
+      child: AppCard.elevated(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

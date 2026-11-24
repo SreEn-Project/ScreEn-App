@@ -27,81 +27,84 @@ class WordCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return AppCard(
+    return Pressable(
       onTap: onTap,
-      padding: const EdgeInsets.fromLTRB(
-        AppTokens.pagePadding,
-        AppTokens.space12,
-        AppTokens.space8,
-        AppTokens.space12,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      word.word,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppTokens.space4),
-                    Text(
-                      word.meaning,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colors.onSurfaceVariant,
+      scale: 0.99,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppTokens.space4,
+          AppTokens.space12,
+          AppTokens.space4,
+          AppTokens.space12,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        word.word,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              AppIconButton(
-                icon: Symbols.more_vert_rounded,
-                tooltip: l10n.vocabMove,
-                plain: true,
-                size: 40,
-                onPressed: onMore,
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              if (word.accuracy case final accuracy?) ...[
-                AppBadge(label: l10n.vocabAccuracy((accuracy * 100).round())),
-                const SizedBox(width: AppTokens.space8),
-                Flexible(
-                  child: Text(
-                    l10n.vocabAccuracyDetail(
-                      word.correctCount,
-                      word.attemptCount,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall,
+                      const SizedBox(height: AppTokens.space4),
+                      Text(
+                        word.meaning,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                AppIconButton(
+                  icon: Symbols.more_vert_rounded,
+                  tooltip: l10n.vocabMove,
+                  plain: true,
+                  size: 40,
+                  onPressed: onMore,
+                ),
               ],
-              const Spacer(),
-              AppIconButton(
-                icon: word.memorized
-                    ? Symbols.check_circle_rounded
-                    : Symbols.radio_button_unchecked_rounded,
-                tooltip: l10n.vocabMemorizedLabel,
-                plain: true,
-                size: 40,
-                onPressed: onToggleMemorized,
-              ),
-            ],
-          ),
-        ],
+            ),
+            Row(
+              children: [
+                if (word.accuracy case final accuracy?) ...[
+                  AppBadge(label: l10n.vocabAccuracy((accuracy * 100).round())),
+                  const SizedBox(width: AppTokens.space8),
+                  Flexible(
+                    child: Text(
+                      l10n.vocabAccuracyDetail(
+                        word.correctCount,
+                        word.attemptCount,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ),
+                ],
+                const Spacer(),
+                AppIconButton(
+                  icon: word.memorized
+                      ? Symbols.check_circle_rounded
+                      : Symbols.radio_button_unchecked_rounded,
+                  tooltip: l10n.vocabMemorizedLabel,
+                  plain: true,
+                  size: 40,
+                  onPressed: onToggleMemorized,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

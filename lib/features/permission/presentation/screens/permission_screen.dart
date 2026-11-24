@@ -125,7 +125,7 @@ class _PermissionCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    return AppCard(
+    return AppCard.flat(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

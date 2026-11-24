@@ -14,6 +14,7 @@ Future<bool> showAppConfirm(
 }) async {
   final confirmed = await showModalBottomSheet<bool>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     builder: (sheetContext) {

@@ -33,19 +33,19 @@ abstract final class AppRoutes {
   static const onboarding = '/onboarding';
   static const permission = '/permission';
 
-  // 하단 탭 (AppShell)
+  // 하단 탭 (AppShell): 홈 · 단어장 · 기록 · 설정
   static const home = '/';
-  static const languages = '/languages';
+  static const vocabulary = '/vocabulary';
+  static const history = '/history';
   static const settings = '/settings';
 
   // 탭 위로 덮는 화면
+  static const languages = '/languages';
   static const targetLanguage = '/target-language';
   static const quickLanguages = '/quick-languages';
   static const aiSetup = '/ai-setup';
   static const gemma = '/gemma';
   static const about = '/about';
-  static const history = '/history';
-  static const vocabulary = '/vocabulary';
 
   static const allWords = '/vocabulary/words';
   static String wordbookPath(int id) => '/vocabulary/book/$id';
@@ -88,7 +88,9 @@ GoRouter router(Ref ref) => createRouter(
 
 /// 앱 라우터. 테스트 · 스크린샷에서 원하는 화면부터 열 때 [initialLocation]을 준다.
 GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
+  final rootKey = GlobalKey<NavigatorState>();
   return GoRouter(
+    navigatorKey: rootKey,
     initialLocation: initialLocation,
     routes: [
       GoRoute(
@@ -103,9 +105,43 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
           _tab(AppRoutes.home, const HomeScreen()),
-          _tab(AppRoutes.languages, const LanguageModelsScreen()),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.vocabulary,
+                builder: (context, state) => const WordbooksScreen(),
+                routes: [
+                  // 단어장 안쪽 화면은 탭바 없이 전체 화면으로 덮는다.
+                  GoRoute(
+                    path: 'book/:id',
+                    parentNavigatorKey: rootKey,
+                    builder: (context, state) => WordbookDetailScreen(
+                      wordbookId: int.parse(state.pathParameters['id']!),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'words',
+                    parentNavigatorKey: rootKey,
+                    builder: (context, state) => const AllWordsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'word/:id',
+                    parentNavigatorKey: rootKey,
+                    builder: (context, state) => WordDetailScreen(
+                      wordId: int.parse(state.pathParameters['id']!),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          _tab(AppRoutes.history, const HistoryScreen()),
           _tab(AppRoutes.settings, const SettingsScreen()),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.languages,
+        builder: (context, state) => const LanguageModelsScreen(),
       ),
       GoRoute(
         path: AppRoutes.targetLanguage,
@@ -122,32 +158,6 @@ GoRouter createRouter({String initialLocation = AppRoutes.onboarding}) {
       GoRoute(
         path: AppRoutes.gemma,
         builder: (context, state) => const GemmaScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.history,
-        builder: (context, state) => const HistoryScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.vocabulary,
-        builder: (context, state) => const WordbooksScreen(),
-        routes: [
-          GoRoute(
-            path: 'book/:id',
-            builder: (context, state) => WordbookDetailScreen(
-              wordbookId: int.parse(state.pathParameters['id']!),
-            ),
-          ),
-          GoRoute(
-            path: 'words',
-            builder: (context, state) => const AllWordsScreen(),
-          ),
-          GoRoute(
-            path: 'word/:id',
-            builder: (context, state) => WordDetailScreen(
-              wordId: int.parse(state.pathParameters['id']!),
-            ),
-          ),
-        ],
       ),
       GoRoute(
         path: AppRoutes.learning,

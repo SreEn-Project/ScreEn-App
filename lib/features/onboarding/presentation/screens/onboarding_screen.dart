@@ -120,7 +120,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   _PageDots(count: _pageCount, current: _page),
                   const SizedBox(height: 20),
-                  AppButton.secondary(
+                  AppButton(
+                    height: AppTokens.largeButtonHeight,
                     label: _isLanguagePage
                         ? l10n.onboardingStart
                         : l10n.commonNext,

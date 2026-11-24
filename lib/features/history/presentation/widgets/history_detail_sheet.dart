@@ -20,6 +20,7 @@ class HistoryDetailSheet extends StatefulWidget {
   static Future<void> show(BuildContext context, HistoryEntry entry) {
     return showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       builder: (_) => HistoryDetailSheet(entry: entry),

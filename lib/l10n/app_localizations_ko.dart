@@ -1436,4 +1436,72 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get gemmaFootnote =>
       'Gemma는 Google의 오픈 모델이에요. 작은 모델이라 번역 품질은 Gemini · Groq보다 낮을 수 있고, 처음 번역할 때 모델을 불러오느라 몇 초 걸려요.';
+
+  @override
+  String get navVocabulary => '단어장';
+
+  @override
+  String get navHistory => '기록';
+
+  @override
+  String get homeSectionStudy => '학습';
+
+  @override
+  String homeStudySummary(int books, int words) {
+    return '단어장 $books권 · 단어 $words개';
+  }
+
+  @override
+  String get homeStudyEmpty => '번역에서 단어를 저장하면 여기서 학습할 수 있어요';
+
+  @override
+  String get homeStudyStart => '학습 시작';
+
+  @override
+  String get settingsSectionTheme => '테마';
+
+  @override
+  String get themeLight => '라이트';
+
+  @override
+  String get themeDark => '다크';
+
+  @override
+  String get themeSystem => '시스템';
+
+  @override
+  String get homeStudyRecord => '학습 기록';
+
+  @override
+  String get homeStatMemorized => '외운 단어';
+
+  @override
+  String get homeStreakUnit => '일 연속';
+
+  @override
+  String get homeStreakStart => '오늘 공부하면 연속 기록이 시작돼요';
+
+  @override
+  String get homeStreakKeep => '오늘 학습하면 연속이 이어져요';
+
+  @override
+  String get homeStreakDone => '오늘 학습 완료!';
+
+  @override
+  String homeStreakBest(int days) {
+    return '최고 $days일';
+  }
+
+  @override
+  String homeMemorizedOf(int words) {
+    return '전체 $words개 중';
+  }
+
+  @override
+  String get homeRankTitle => '내 단어장 순위';
+
+  @override
+  String homeRankCount(int count) {
+    return '$count개';
+  }
 }

@@ -11,6 +11,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     required this.accent,
     required this.heroGradient,
     required this.cardShadow,
+    required this.floatShadow,
     required this.glowShadow,
   });
 
@@ -26,12 +27,21 @@ class AppTokens extends ThemeExtension<AppTokens> {
   /// 카드 · 흰 버튼 · 탭바의 옅고 넓은 그림자 (primary로 물듦).
   final List<BoxShadow> cardShadow;
 
+  /// 떠 있는 요소(팝업 · 탭바 · 토스트)의 그림자. 카드보다 한 단계 진하다.
+  final List<BoxShadow> floatShadow;
+
   /// primary 버튼 아래 번지는 빛.
   final List<BoxShadow> glowShadow;
 
+  /// 모서리 스케일: XS 8(작은 배지) · S 12(입력 · 작은 버튼) · M 16(보조 버튼 · 작은 패널)
+  /// · L 20(주요 패널) · XL 24(대표 패널). 알약은 칩 · 상태 배지 · 큰 시작 버튼에만.
+  static const double radiusXs = 8;
+  static const double radiusS = 12;
+  static const double radiusM = 16;
+  static const double radiusL = 20;
   static const double radiusCard = 24;
   static const double radiusSheet = 28;
-  static const double radiusInput = 18;
+  static const double radiusInput = 16;
   static const double pagePadding = 20;
 
   /// 간격 토큰 (8 배수 기준, 4 보조). margin · gap · padding은 이 값만 쓴다.
@@ -71,6 +81,13 @@ class AppTokens extends ThemeExtension<AppTokens> {
         blurRadius: 24,
       ),
     ],
+    floatShadow: [
+      BoxShadow(
+        color: AppColors.lightFloatShadow,
+        offset: Offset(0, 8),
+        blurRadius: 24,
+      ),
+    ],
     glowShadow: [
       BoxShadow(
         color: AppColors.lightGlow,
@@ -96,6 +113,13 @@ class AppTokens extends ThemeExtension<AppTokens> {
         blurRadius: 24,
       ),
     ],
+    floatShadow: [
+      BoxShadow(
+        color: AppColors.darkFloatShadow,
+        offset: Offset(0, 8),
+        blurRadius: 24,
+      ),
+    ],
     glowShadow: [
       BoxShadow(
         color: AppColors.darkGlow,
@@ -112,6 +136,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
     Color? accent,
     Gradient? heroGradient,
     List<BoxShadow>? cardShadow,
+    List<BoxShadow>? floatShadow,
     List<BoxShadow>? glowShadow,
   }) {
     return AppTokens(
@@ -119,6 +144,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accent: accent ?? this.accent,
       heroGradient: heroGradient ?? this.heroGradient,
       cardShadow: cardShadow ?? this.cardShadow,
+      floatShadow: floatShadow ?? this.floatShadow,
       glowShadow: glowShadow ?? this.glowShadow,
     );
   }
@@ -131,6 +157,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
       accent: Color.lerp(accent, other.accent, t)!,
       heroGradient: Gradient.lerp(heroGradient, other.heroGradient, t)!,
       cardShadow: BoxShadow.lerpList(cardShadow, other.cardShadow, t)!,
+      floatShadow: BoxShadow.lerpList(floatShadow, other.floatShadow, t)!,
       glowShadow: BoxShadow.lerpList(glowShadow, other.glowShadow, t)!,
     );
   }
@@ -139,3 +166,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
 extension AppTokensContext on BuildContext {
   AppTokens get tokens => Theme.of(this).extension<AppTokens>()!;
 }
+
+/// 헤더 · 하단 탭바와 본문을 나누는 선 색 (구분선보다 한 단계 진하다).
+Color barLineColor(ColorScheme colors) =>
+    Color.alphaBlend(colors.onSurface.withValues(alpha: 0.14), colors.surface);

@@ -472,7 +472,7 @@ class _Result extends ConsumerWidget {
           const SizedBox(height: AppTokens.sectionGap),
           SectionTitle(l10n.fallMissedWords),
           const SizedBox(height: AppTokens.sectionTitleGap),
-          AppCard(
+          AppCard.flat(
             padding: const EdgeInsets.symmetric(
               vertical: AppTokens.cardListPaddingV,
             ),
