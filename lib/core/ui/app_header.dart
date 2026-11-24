@@ -44,33 +44,39 @@ class AppHeader extends StatelessWidget {
               )
             : null);
 
-    return SizedBox(
-      height: AppTokens.headerHeight,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        // 제목은 항상 가운데. 양옆 동작은 내용 너비만큼 자라서 글자 버튼도 잘리지 않는다.
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: large ? _sideSlot + 8 : _sideSlot,
+    return DecoratedBox(
+      // 본문과 구분되는 아래 가는 선.
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: theme.colorScheme.outline)),
+      ),
+      child: SizedBox(
+        height: AppTokens.headerHeight,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          // 제목은 항상 가운데. 양옆 동작은 내용 너비만큼 자라서 글자 버튼도 잘리지 않는다.
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: large ? _sideSlot + 8 : _sideSlot,
+                ),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: large
+                      ? theme.textTheme.headlineSmall
+                      : theme.textTheme.titleLarge,
+                ),
               ),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: large
-                    ? theme.textTheme.headlineSmall
-                    : theme.textTheme.titleLarge,
-              ),
-            ),
-            if (start != null)
-              Align(alignment: Alignment.centerLeft, child: start),
-            if (trailing != null)
-              Align(alignment: Alignment.centerRight, child: trailing),
-          ],
+              if (start != null)
+                Align(alignment: Alignment.centerLeft, child: start),
+              if (trailing != null)
+                Align(alignment: Alignment.centerRight, child: trailing),
+            ],
+          ),
         ),
       ),
     );
