@@ -47,7 +47,9 @@ class AppHeader extends StatelessWidget {
     return DecoratedBox(
       // 본문과 구분되는 아래 가는 선.
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: theme.colorScheme.outline)),
+        border: Border(
+          bottom: BorderSide(color: barLineColor(theme.colorScheme)),
+        ),
       ),
       child: SizedBox(
         height: AppTokens.headerHeight,

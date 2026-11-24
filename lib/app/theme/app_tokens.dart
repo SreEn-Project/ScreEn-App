@@ -166,3 +166,7 @@ class AppTokens extends ThemeExtension<AppTokens> {
 extension AppTokensContext on BuildContext {
   AppTokens get tokens => Theme.of(this).extension<AppTokens>()!;
 }
+
+/// 헤더 · 하단 탭바와 본문을 나누는 선 색 (구분선보다 한 단계 진하다).
+Color barLineColor(ColorScheme colors) =>
+    Color.alphaBlend(colors.onSurface.withValues(alpha: 0.14), colors.surface);
